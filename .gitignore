@@ -13,6 +13,7 @@
 
 # next.js
 /.next/
+/.next-build/
 /out/
 
 # production
@@ -30,6 +31,7 @@ pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
