@@ -7,6 +7,18 @@
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
+    /* Tokens propios de la Línea Auxiliar (ver docs/especificacion.md §4 y §10) */
+    --color-signal: var(--signal);
+    --color-signal-foreground: var(--signal-foreground);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-success-muted: var(--success-muted);
+    --color-warning: var(--warning);
+    --color-warning-muted: var(--warning-muted);
+    --color-whatsapp: var(--whatsapp);
+    --color-whatsapp-foreground: var(--whatsapp-foreground);
+    --color-header: var(--header);
+    --color-header-foreground: var(--header-foreground);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -47,73 +59,99 @@
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* Identidad: azul marino (serio, confiable) + amarillo de señalización de transporte (llamativo).
+   Contraste AA verificado: blanco/azul marino ~11:1 · muted/blanco ~6.7:1 · texto/amarillo ~10:1.
+   Regla: nunca texto blanco sobre amarillo (usar --signal-foreground). */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
-    --primary: oklch(0.52 0.105 223.128);
-    --primary-foreground: oklch(0.984 0.019 200.873);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.52 0.105 223.128);
-    --accent-foreground: oklch(0.984 0.019 200.873);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067);
-    --chart-1: oklch(0.905 0.182 98.111);
-    --chart-2: oklch(0.795 0.184 86.047);
-    --chart-3: oklch(0.681 0.162 75.834);
-    --chart-4: oklch(0.554 0.135 66.442);
-    --chart-5: oklch(0.476 0.114 61.907);
-    --radius: 0.875rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.141 0.005 285.823);
-    --sidebar-primary: oklch(0.609 0.126 221.723);
-    --sidebar-primary-foreground: oklch(0.984 0.019 200.873);
-    --sidebar-accent: oklch(0.967 0.001 286.375);
-    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-    --sidebar-border: oklch(0.92 0.004 286.32);
-    --sidebar-ring: oklch(0.705 0.015 286.067);
+    --background: #f2f5fa;
+    --foreground: #0f1b2d;
+    --card: #ffffff;
+    --card-foreground: #0f1b2d;
+    --popover: #ffffff;
+    --popover-foreground: #0f1b2d;
+    --primary: #0b3b66;
+    --primary-foreground: #ffffff;
+    --secondary: #e4edf7;
+    --secondary-foreground: #0b3b66;
+    --muted: #eaf0f7;
+    --muted-foreground: #4f5d73;
+    --accent: #e4edf7;               /* fondo suave para hover/selección en menús (convención shadcn) */
+    --accent-foreground: #0b3b66;
+    --destructive: #c62828;
+    --border: #d9e0ea;
+    --input: #b9c5d6;                /* bordes de campos más marcados que las tarjetas */
+    --ring: #f5b400;                 /* foco amarillo, visible sobre claro y oscuro */
+    --signal: #f5b400;               /* acción principal de cada pantalla */
+    --signal-foreground: #1b1400;
+    --success: #12784a;
+    --success-foreground: #ffffff;
+    --success-muted: #e0f3e9;
+    --warning: #8a5600;
+    --warning-muted: #fff3d6;
+    --whatsapp: #15803d;             /* más oscuro que el verde de WhatsApp para pasar AA con texto blanco */
+    --whatsapp-foreground: #ffffff;
+    --header: #0b3b66;               /* barra superior: azul marino con franja amarilla */
+    --header-foreground: #ffffff;
+    --chart-1: #0b3b66;
+    --chart-2: #f5b400;
+    --chart-3: #12784a;
+    --chart-4: #3b82c4;
+    --chart-5: #8a5600;
+    --radius: 1rem;
+    --sidebar: #ffffff;
+    --sidebar-foreground: #0f1b2d;
+    --sidebar-primary: #0b3b66;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #e4edf7;
+    --sidebar-accent-foreground: #0b3b66;
+    --sidebar-border: #d9e0ea;
+    --sidebar-ring: #f5b400;
 }
 
+/* Modo oscuro: solo si la persona lo elige (claro por defecto) */
 .dark {
-    --background: oklch(0.141 0.005 285.823);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.21 0.006 285.885);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.45 0.085 224.283);
-    --primary-foreground: oklch(0.984 0.019 200.873);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
-    --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.45 0.085 224.283);
-    --accent-foreground: oklch(0.984 0.019 200.873);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.552 0.016 285.938);
-    --chart-1: oklch(0.905 0.182 98.111);
-    --chart-2: oklch(0.795 0.184 86.047);
-    --chart-3: oklch(0.681 0.162 75.834);
-    --chart-4: oklch(0.554 0.135 66.442);
-    --chart-5: oklch(0.476 0.114 61.907);
-    --sidebar: oklch(0.21 0.006 285.885);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.715 0.143 215.221);
-    --sidebar-primary-foreground: oklch(0.302 0.056 229.695);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.552 0.016 285.938);
+    --background: #0a1220;
+    --foreground: #edf2f9;
+    --card: #131d2e;
+    --card-foreground: #edf2f9;
+    --popover: #131d2e;
+    --popover-foreground: #edf2f9;
+    --primary: #2f6fae;              /* más claro que el azul marino para destacar sobre fondo oscuro; blanco ~5.2:1 */
+    --primary-foreground: #ffffff;
+    --secondary: #1c2b44;
+    --secondary-foreground: #edf2f9;
+    --muted: #1a2740;
+    --muted-foreground: #a3b1c6;
+    --accent: #1c2b44;
+    --accent-foreground: #edf2f9;
+    --destructive: #ef5350;
+    --border: #26344b;
+    --input: #3a4c68;
+    --ring: #ffc21a;
+    --signal: #ffc21a;
+    --signal-foreground: #1b1400;
+    --success: #4cc38a;              /* verde claro: legible como texto sobre fondo oscuro */
+    --success-foreground: #0a1220;
+    --success-muted: #143326;
+    --warning: #f0b040;
+    --warning-muted: #3a2c14;
+    --whatsapp: #15803d;
+    --whatsapp-foreground: #ffffff;
+    --header: #0c2a47;
+    --header-foreground: #ffffff;
+    --chart-1: #5b9be0;
+    --chart-2: #ffc21a;
+    --chart-3: #4cc38a;
+    --chart-4: #a3b1c6;
+    --chart-5: #f0b040;
+    --sidebar: #131d2e;
+    --sidebar-foreground: #edf2f9;
+    --sidebar-primary: #2f6fae;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1c2b44;
+    --sidebar-accent-foreground: #edf2f9;
+    --sidebar-border: #26344b;
+    --sidebar-ring: #ffc21a;
 }
 
 @layer base {
@@ -122,6 +160,9 @@
     }
   body {
     @apply bg-background text-foreground;
+    /* Texto base 17 px (docs/especificacion.md §10). Se usa px para no agrandar todo el espaciado rem. */
+    font-size: 17px;
+    line-height: 1.45;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
     cursor: pointer;

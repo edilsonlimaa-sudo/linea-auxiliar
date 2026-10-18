@@ -47,7 +47,8 @@ function ThemeHotkey() {
         return
       }
 
-      if (event.key.toLowerCase() !== "d") {
+      // event.key puede venir vacío (p. ej. cuando Chrome autocompleta un campo)
+      if (event.key?.toLowerCase() !== "d") {
         return
       }
 
