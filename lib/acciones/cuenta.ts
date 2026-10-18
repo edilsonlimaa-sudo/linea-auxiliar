@@ -1,0 +1,135 @@
+"use server"
+
+import { redirect } from "next/navigation"
+import { z } from "zod"
+
+import { URBANISMOS } from "@/lib/constantes"
+import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
+import { correoDeTelefono, normalizarTelefono, telefonoValido } from "@/lib/telefono"
+
+export type EstadoFormulario = {
+  error?: string
+  errores?: Record<string, string>
+  valores?: Record<string, string>
+  intento?: number
+}
+
+const telefono = z
+  .string()
+  .trim()
+  .refine(telefonoValido, "Escribe tu número de celular, por ejemplo 0414-1234567")
+const pin = z.string().regex(/^\d{6}$/, "El PIN debe tener 6 números")
+
+// Registro (R1): nombre, teléfono, PIN y rol; el chofer además la placa (obligatoria) y datos del carro
+const registroBase = z.object({
+  nombre: z.string().trim().min(2, "Escribe tu nombre y apellido").max(60, "El nombre es muy largo"),
+  telefono,
+  pin,
+  pinConfirmado: z.string(),
+  cedula: z.string().trim().max(20, "La cédula es muy larga").optional(),
+})
+
+const registroPasajero = registroBase.extend({
+  rol: z.literal("pasajero"),
+  urbanismo: z.enum(URBANISMOS, "Escoge dónde vives"),
+})
+
+const registroChofer = registroBase.extend({
+  rol: z.literal("chofer"),
+  placa: z
+    .string()
+    .transform((p) => p.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+    .refine((p) => /^[A-Z0-9]{5,8}$/.test(p), "Escribe la placa, por ejemplo AB123CD"),
+  unidad: z.string().trim().max(10, "Número de unidad muy largo").optional(),
+  modelo: z.string().trim().max(40, "Modelo muy largo").optional(),
+  color: z.string().trim().max(30, "Color muy largo").optional(),
+})
+
+const registro = z
+  .discriminatedUnion("rol", [registroPasajero, registroChofer])
+  .refine((d) => d.pin === d.pinConfirmado, { path: ["pinConfirmado"], message: "Los dos PIN no coinciden" })
+
+const entrada = z.object({ telefono, pin })
+
+// Campos que se devuelven para volver a llenar el formulario si hay error (nunca el PIN)
+const camposVisibles = ["nombre", "telefono", "cedula", "urbanismo", "placa", "unidad", "modelo", "color"]
+
+function valoresVisibles(formData: FormData) {
+  return Object.fromEntries(camposVisibles.map((c) => [c, String(formData.get(c) ?? "")]))
+}
+
+function erroresDe(error: z.ZodError) {
+  const errores: Record<string, string> = {}
+  for (const issue of error.issues) {
+    const campo = String(issue.path[0] ?? "general")
+    errores[campo] ??= issue.message
+  }
+  return errores
+}
+
+export async function registrarse(anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const intento = (anterior.intento ?? 0) + 1
+  const valores = valoresVisibles(formData)
+  const datos = Object.fromEntries(formData)
+  const resultado = registro.safeParse(datos)
+  if (!resultado.success) return { errores: erroresDe(resultado.error), valores, intento }
+
+  const d = resultado.data
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.auth.signUp({
+    email: correoDeTelefono(d.telefono),
+    password: d.pin,
+    options: {
+      // El trigger crear_perfil_nuevo crea perfil, datos privados y vehículo con estos datos
+      data: {
+        rol: d.rol,
+        nombre: d.nombre,
+        telefono: normalizarTelefono(d.telefono),
+        cedula: d.cedula || undefined,
+        ...(d.rol === "pasajero"
+          ? { urbanismo: d.urbanismo }
+          : { placa: d.placa, unidad: d.unidad || undefined, modelo: d.modelo || undefined, color: d.color || undefined }),
+      },
+    },
+  })
+
+  if (error) {
+    if (error.code === "user_already_exists") {
+      return { errores: { telefono: "Ese teléfono ya tiene cuenta. Entra con tu PIN." }, valores, intento }
+    }
+    if (/duplicate key.*placa|vehiculos_placa_key/i.test(error.message)) {
+      return { errores: { placa: "Esa placa ya está registrada" }, valores, intento }
+    }
+    return { error: "No pudimos crear tu cuenta. Revisa tu conexión e intenta de nuevo.", valores, intento }
+  }
+
+  // La cuenta nueva queda pendiente (R2): /inicio la lleva a "En revisión"
+  redirect("/inicio")
+}
+
+export async function entrar(anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const intento = (anterior.intento ?? 0) + 1
+  const valores = { telefono: String(formData.get("telefono") ?? "") }
+  const resultado = entrada.safeParse(Object.fromEntries(formData))
+  if (!resultado.success) return { errores: erroresDe(resultado.error), valores, intento }
+
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.auth.signInWithPassword({
+    email: correoDeTelefono(resultado.data.telefono),
+    password: resultado.data.pin,
+  })
+
+  if (error) {
+    if (error.code === "invalid_credentials") {
+      return { error: "El teléfono o el PIN no son correctos.", valores, intento }
+    }
+    return { error: "No pudimos entrar. Revisa tu conexión e intenta de nuevo.", valores, intento }
+  }
+  redirect("/inicio")
+}
+
+export async function salir() {
+  const supabase = await crearClienteServidor()
+  await supabase.auth.signOut()
+  redirect("/")
+}
