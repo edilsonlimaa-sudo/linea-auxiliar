@@ -324,7 +324,23 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Aviso del día · Pendientes · Choferes · Pasajeros (+ ficha, restablecer PIN) |
+| Admin | **Resumen** · **Choferes** · **Pasajeros** (cada uno con Pendientes / Aprobados / Rechazados) · Aviso del día y restablecer PIN (más adelante) |
+
+**Panel del admin.** El admin entra de vez en cuando (no vigila la pantalla: R2 le llega por WhatsApp), así que
+lo primero es *qué necesita de mí* y después *cómo va la línea*. Tres pestañas fijas arriba: **Resumen ·
+Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobación.
+
+- **Resumen**, en orden:
+  1. **Por revisar:** cuántas cuentas esperan, separadas en choferes y pasajeros, cada una lleva a su lista.
+     Sin pendientes: "Todo al día".
+  2. **La línea ahora:** choferes conectados (con nombre), viajes en curso y pasajeros esperando (últimas 2 h).
+  3. **Hoy** (hora de Caracas): viajes terminados, pasajeros llevados y calificación promedio de los últimos 7 días.
+  4. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
+- **Choferes:** la tarjeta destaca el carro (foto, placa, unidad, aire) y su actividad: conectado ahora, viajes
+  terminados, ★ promedio y último viaje.
+- **Pasajeros:** la tarjeta destaca la foto y dónde vive, y su actividad: viajes hechos y último viaje.
+- Cada lista tiene sus pestañas Pendientes / Aprobados / Rechazados y las acciones de R2 (aprobar, rechazar,
+  eliminar), WhatsApp y Llamar.
 
 **Mi viaje del pasajero (página aparte).** Apartar puesto es pasar de *escoger* a *acompañar* el viaje, así
 que tiene su propia página (también es adonde llevan los avisos de §7):

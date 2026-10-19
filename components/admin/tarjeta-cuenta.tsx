@@ -1,23 +1,21 @@
-import { MessageCircleIcon, PhoneIcon, TriangleAlertIcon } from "lucide-react"
+import { MessageCircleIcon, PhoneIcon, StarIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BotonDecision } from "@/components/admin/boton-decision"
 import { BotonEliminar } from "@/components/admin/boton-eliminar"
+import { promedioTexto } from "@/components/estrellas"
 import { Avatar } from "@/components/foto/avatar"
-import type { Database } from "@/lib/database.types"
+import type { Actividad, CuentaConActividad } from "@/lib/datos/admin"
 import { fechaHora, hace } from "@/lib/fechas"
 import { formatearTelefono } from "@/lib/telefono"
 
-export type Cuenta = Database["public"]["Functions"]["admin_cuentas"]["Returns"][number]
-
-const ROL = { pasajero: "🙋 Pasajero", chofer: "🚐 Chofer", admin: "Administración" } as const
-
-// Tarjeta de una cuenta en el panel: datos para verificar identidad (R2, R5) y acciones
+// Tarjeta de una cuenta en el panel: datos para verificar identidad (R2, R5), su actividad y acciones.
+// Chofer: el carro va arriba (es lo que hay que verificar); pasajero: la foto y dónde vive (§8).
 export function TarjetaCuenta({
   cuenta: c,
   fotoUrl,
   fotoCarroUrl,
 }: {
-  cuenta: Cuenta
+  cuenta: CuentaConActividad
   fotoUrl: string | null
   fotoCarroUrl: string | null
 }) {
@@ -31,13 +29,14 @@ export function TarjetaCuenta({
         {/* Foto grande: es lo que el admin compara para verificar a la persona (R54) */}
         <Avatar url={fotoUrl} nombre={c.nombre} className="size-20 text-2xl" />
         <div className="min-w-0">
-          <p className="text-sm font-bold text-muted-foreground">{ROL[c.rol]}</p>
           <h3 className="text-xl leading-tight font-bold">{c.nombre}</h3>
           <p className="text-[15px] text-muted-foreground" title={fechaHora(c.creado_en)}>
             Se registró {hace(c.creado_en)}
           </p>
         </div>
       </header>
+
+      {c.estado === "aprobado" && c.actividad && <LineaActividad actividad={c.actividad} chofer={chofer} />}
 
       {chofer && fotoCarroUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
@@ -104,5 +103,29 @@ export function TarjetaCuenta({
         {c.estado === "rechazado" && <BotonEliminar id={c.id} nombre={c.nombre} />}
       </div>
     </article>
+  )
+}
+
+function LineaActividad({ actividad: a, chofer }: { actividad: Actividad; chofer: boolean }) {
+  const viajes = a.viajes === 1 ? "1 viaje" : `${a.viajes} viajes`
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-muted px-3 py-2 text-[15px]">
+      {chofer && a.conectado && (
+        <span className="inline-flex items-center gap-1.5 font-bold text-success">
+          <span aria-hidden className="size-2.5 rounded-full bg-success" /> Conectado ahora
+        </span>
+      )}
+      <span className="font-bold">{viajes}</span>
+      {chofer && a.estrellas !== null && (
+        <span className="inline-flex items-center gap-1">
+          <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
+          <span className="font-bold">{promedioTexto(Number(a.estrellas))}</span>
+          <span className="text-muted-foreground">({a.calificaciones})</span>
+        </span>
+      )}
+      <span className="text-muted-foreground">
+        {a.ultimo_viaje ? `último ${hace(a.ultimo_viaje)}` : "todavía sin viajes"}
+      </span>
+    </p>
   )
 }

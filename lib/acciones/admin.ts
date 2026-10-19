@@ -82,7 +82,7 @@ export async function decidirCuenta(formData: FormData) {
   const supabase = await crearClienteServidor()
   const { error } = await supabase.rpc("aprobar_cuenta", { p_usuario: id, p_aprobar: aprobar })
   if (error) throw new Error(error.message)
-  revalidatePath("/admin")
+  revalidatePath("/admin", "layout")
 }
 
 export type Historial = { viajes: number; reservas: number; calificaciones: number }
@@ -106,7 +106,7 @@ export async function eliminarCuenta(id: string, conHistorial = false): Promise<
   const { data: archivos } = await supabase.storage.from("fotos").list(id)
   if (archivos?.length) await supabase.storage.from("fotos").remove(archivos.map((a) => `${id}/${a.name}`))
 
-  revalidatePath("/admin")
+  revalidatePath("/admin", "layout")
   return {}
 }
 

@@ -670,6 +670,17 @@ export type Database = {
         Args: { p_lat: number; p_lng: number; p_lugar: string }
         Returns: undefined
       }
+      admin_actividad: {
+        Args: never
+        Returns: {
+          calificaciones: number
+          conectado: boolean
+          estrellas: number
+          id: string
+          ultimo_viaje: string
+          viajes: number
+        }[]
+      }
       admin_cuentas: {
         Args: { p_estado?: Database["public"]["Enums"]["estado_cuenta"] }
         Returns: {
@@ -704,6 +715,18 @@ export type Database = {
           calificaciones: number
           reservas: number
           viajes: number
+        }[]
+      }
+      admin_resumen: {
+        Args: never
+        Returns: {
+          calificaciones_7d: number
+          estrellas_7d: number
+          pasajeros_esperando: number
+          pasajeros_hoy: number
+          registros_7d: number
+          viajes_en_curso: number
+          viajes_hoy: number
         }[]
       }
       apoyar_alerta: { Args: { p_alerta: string }; Returns: undefined }

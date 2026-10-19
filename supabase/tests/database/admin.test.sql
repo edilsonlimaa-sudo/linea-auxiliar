@@ -3,7 +3,7 @@
 -- (…02) y su propia pasajera dentro de la transacción, que se deshace al final.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(20);
+select plan(23);
 
 -- ---------- Creación del admin (como superusuario, igual que el registro de Supabase Auth) ----------
 select public.crear_admin('prueba', 'admin123', '00000000-0000-4000-a000-000000000002');
@@ -114,6 +114,15 @@ select ok(
     and exists (select 1 from public.viajes where id = '00000000-0000-4000-b000-00000000000b'),
   'Se van sus viajes y calificaciones; los viajes de otros choferes quedan');
 set local role authenticated;
+
+-- ---------- Resumen del panel (§8) ----------
+select lives_ok($$ select * from public.admin_resumen() $$, 'El admin ve el resumen de la línea');
+select is((select viajes from public.admin_actividad() where id = '00000000-0000-4000-a000-000000000033'), 1,
+  'La actividad cuenta los viajes terminados de cada chofer');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
+select throws_ok($$ select * from public.admin_actividad() $$, 'P0001', 'Solo para administración',
+  'Un chofer no ve la actividad de las cuentas');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
 
 select public.clave_cambiada();
 select is((select debe_cambiar_clave from public.perfiles where id = '00000000-0000-4000-a000-000000000002'), false,
