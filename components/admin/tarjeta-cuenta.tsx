@@ -4,6 +4,7 @@ import { BotonDecision } from "@/components/admin/boton-decision"
 import { BotonEliminar } from "@/components/admin/boton-eliminar"
 import { promedioTexto } from "@/components/estrellas"
 import { Avatar } from "@/components/foto/avatar"
+import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import type { Actividad, CuentaConActividad } from "@/lib/datos/admin"
 import { fechaHora, hace } from "@/lib/fechas"
 import { formatearTelefono } from "@/lib/telefono"
@@ -37,6 +38,7 @@ export function TarjetaCuenta({
       </header>
 
       {c.estado === "aprobado" && c.actividad && <LineaActividad actividad={c.actividad} chofer={chofer} />}
+      {chofer && c.estado === "aprobado" && c.actividad?.conectado && <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin />}
 
       {chofer && fotoCarroUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)

@@ -350,6 +350,8 @@ Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobaci
   1. **Por revisar:** cuántas cuentas esperan, separadas en choferes y pasajeros, cada una lleva a su lista.
      Sin pendientes: "Todo al día".
   2. **La línea ahora:** choferes conectados (con nombre), viajes en curso y pasajeros esperando (últimas 2 h).
+     Cada chofer conectado tiene **Ver en el mapa**: el mismo mapa en vivo de R41 (seguir al carro, rumbo), con
+     "Dónde está X". También en su tarjeta de Choferes mientras está conectado.
   3. **Hoy** (hora de Caracas): viajes terminados, pasajeros llevados y calificación promedio de los últimos 7 días.
   4. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
 - **Choferes:** la tarjeta destaca el carro (foto, placa, unidad, aire) y su actividad: conectado ahora, viajes

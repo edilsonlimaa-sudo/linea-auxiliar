@@ -217,7 +217,19 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
  * "Ver en el mapa" (R41): por dónde viene el carro y, si compartió GPS, dónde está el pasajero y a qué distancia.
  * Solo mientras la hoja está abierta: lee la posición y después la recibe por Realtime cada vez que el chofer la envía.
  */
-export function VerEnMapa({ choferId, chofer, yo }: { choferId: string; chofer: string; yo: Punto | null }) {
+export function VerEnMapa({
+  choferId,
+  chofer,
+  yo,
+  admin = false,
+  className = "w-full",
+}: {
+  choferId: string
+  chofer: string
+  yo: Punto | null
+  admin?: boolean // el panel del admin sigue a cualquier chofer conectado (§8): sin "viene" ni "comparte tu GPS"
+  className?: string
+}) {
   const [abierta, setAbierta] = useState(false)
   const [carro, setCarro] = useState<PosicionChofer | undefined>(undefined) // undefined = cargando
 
@@ -257,13 +269,13 @@ export function VerEnMapa({ choferId, chofer, yo }: { choferId: string; chofer: 
 
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), !v && setCarro(undefined))}>
-      <SheetTrigger render={<Button variant="outline" className="w-full" />}>
+      <SheetTrigger render={<Button variant="outline" className={className} />}>
         <MapIcon aria-hidden />
         Ver en el mapa
       </SheetTrigger>
       <SheetContent side="bottom" className="mx-auto max-w-2xl">
         <SheetHeader>
-          <SheetTitle>Por dónde viene {nombre}</SheetTitle>
+          <SheetTitle>{admin ? `Dónde está ${nombre}` : `Por dónde viene ${nombre}`}</SheetTitle>
           <SheetDescription className="text-base" aria-live="polite">
             {carro === undefined
               ? "Buscando el carro…"
@@ -271,7 +283,9 @@ export function VerEnMapa({ choferId, chofer, yo }: { choferId: string; chofer: 
                 ? `${nombre} no está compartiendo su ubicación ahora.`
                 : distancia
                   ? `El carro está a ${distancia} de ti · actualizado ${hace(carro.actualizadaEn)}.`
-                  : `Actualizado ${hace(carro.actualizadaEn)}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
+                  : admin
+                    ? `Actualizado ${hace(carro.actualizadaEn)}.`
+                    : `Actualizado ${hace(carro.actualizadaEn)}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-3 px-5 pb-6">

@@ -2,6 +2,7 @@ import { CheckCircle2Icon, ChevronRightIcon, StarIcon } from "lucide-react"
 import Link from "next/link"
 
 import { promedioTexto } from "@/components/estrellas"
+import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import type { CuentaConActividad, Resumen as DatosResumen, RolCuenta } from "@/lib/datos/admin"
 import { cn } from "@/lib/utils"
 
@@ -72,10 +73,19 @@ export function Resumen({
           <Dato valor={resumen?.pasajeros_esperando ?? 0} texto={resumen?.pasajeros_esperando === 1 ? "pasajero esperando" : "pasajeros esperando"} />
         </div>
         {conectados.length > 0 ? (
-          <p className="text-[15px]">
-            <span className="text-muted-foreground">Trabajando: </span>
-            <span className="font-bold">{conectados.map((c) => c.nombre).join(", ")}</span>
-          </p>
+          <ul className="flex flex-col gap-2">
+            {conectados.map((c) => (
+              <li key={c.id} className="flex items-center gap-3 rounded-2xl bg-muted px-3 py-2">
+                <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-success" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-bold">{c.nombre}</span>
+                  {c.placa && <span className="block font-mono text-sm font-bold tracking-wider text-muted-foreground">{c.placa}</span>}
+                </span>
+                {/* El mapa sigue al chofer mientras comparte su ubicación (§8, R41) */}
+                <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin className="shrink-0" />
+              </li>
+            ))}
+          </ul>
         ) : (
           <p className="text-[15px] text-muted-foreground">Ningún chofer trabajando en este momento.</p>
         )}
