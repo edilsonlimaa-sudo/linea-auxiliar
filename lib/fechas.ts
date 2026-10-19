@@ -46,3 +46,9 @@ export function diaYHora(fechaIso: string): string {
 export function fechaLarga(fechaIso: string): string {
   return new Intl.DateTimeFormat("es-VE", { dateStyle: "long", timeZone: ZONA }).format(new Date(fechaIso))
 }
+
+/** "Buenos días" (5–11 h), "Buenas tardes" (12–18 h) o "Buenas noches", en hora de Caracas */
+export function saludo(ahora = new Date()): string {
+  const h = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: ZONA }).format(ahora))
+  return h >= 5 && h < 12 ? "Buenos días" : h >= 12 && h < 19 ? "Buenas tardes" : "Buenas noches"
+}

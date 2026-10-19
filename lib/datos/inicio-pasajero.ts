@@ -39,6 +39,8 @@ export type DatosInicioPasajero = {
   miReserva: MiReserva | null
   miEspera: Espera | null
   lugaresRecientes: string[] // R25
+  // "Lo de siempre" (§8): su último pedido, para repetirlo de un toque. conGps: lo pidió con GPS (se vuelve a leer)
+  ultimoPedido: { sentido: Viaje["sentido"]; lugar: string | null; conGps: boolean } | null
   aviso: { texto: string; creado_en: string } | null
   unidadesEnServicio: number
 }
@@ -149,10 +151,23 @@ export async function cargarAvisoDeCierre(pasajeroId: string): Promise<AvisoDeCi
   return { reservaId: data.id, motivo, chofer: data.viaje.chofer?.nombre ?? "El chofer" }
 }
 
+type Pedido = { lugar: string | null; lat: number | null; creado_en: string }
+function ultimoPedido(
+  espera: (Pedido & { sentido: Viaje["sentido"] }) | null,
+  reserva: (Pedido & { viaje: { sentido: Viaje["sentido"] } }) | null
+): DatosInicioPasajero["ultimoPedido"] {
+  const candidatos = [
+    espera && { sentido: espera.sentido, lugar: espera.lugar, conGps: espera.lat !== null, creado: espera.creado_en },
+    reserva && { sentido: reserva.viaje.sentido, lugar: reserva.lugar, conGps: reserva.lat !== null, creado: reserva.creado_en },
+  ].filter((c) => c !== null && (c.lugar !== null || c.conGps))
+  const ultimo = candidatos.sort((a, b) => (b?.creado ?? "").localeCompare(a?.creado ?? ""))[0]
+  return ultimo ? { sentido: ultimo.sentido, lugar: ultimo.lugar, conGps: ultimo.conGps } : null
+}
+
 export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosInicioPasajero> {
   const supabase = await crearClienteServidor()
 
-  const [viajesRes, reservaRes, esperaRes, recientesRes, avisoRes, enServicioRes] = await Promise.all([
+  const [viajesRes, reservaRes, esperaRes, recientesRes, avisoRes, enServicioRes, ultEsperaRes, ultReservaRes] = await Promise.all([
     supabase
       .from("viajes")
       .select("*, chofer:perfiles!viajes_chofer_id_fkey(id, nombre, foto_path, vehiculo:vehiculos(unidad, placa, modelo, color, foto_path, aire_acondicionado))")
@@ -178,6 +193,15 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       .select("id", { count: "exact", head: true })
       .eq("rol", "chofer")
       .not("conectado_en", "is", null),
+    // Último pedido: la espera o la reserva más reciente (cualquier estado), para "Lo de siempre"
+    supabase.from("esperas").select("sentido, lugar, lat, creado_en").eq("pasajero_id", pasajeroId).order("creado_en", { ascending: false }).limit(1).maybeSingle(),
+    supabase
+      .from("reservas")
+      .select("lugar, lat, creado_en, viaje:viajes!inner(sentido)")
+      .eq("pasajero_id", pasajeroId)
+      .order("creado_en", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ])
 
   // Reputación de los choferes que aparecen (R46)
@@ -249,5 +273,6 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
     lugaresRecientes: (recientesRes.data ?? []).map((f) => f.lugar),
     aviso: avisoRes.data ?? null,
     unidadesEnServicio: enServicioRes.count ?? 0,
+    ultimoPedido: ultimoPedido(ultEsperaRes.data, ultReservaRes.data),
   }
 }

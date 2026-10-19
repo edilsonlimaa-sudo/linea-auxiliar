@@ -6,8 +6,10 @@ import { redirect } from "next/navigation"
 import { EnVivo } from "@/components/en-vivo"
 import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
-import { EstadoEspera, FormularioEspera } from "@/components/pasajero/esperando"
+import { EstadoDeLaLinea, type ResumenSentido } from "@/components/pasajero/estado-de-la-linea"
+import { EstadoEspera } from "@/components/pasajero/esperando"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
+import { Atajos, NecesitoTransporte } from "@/components/pasajero/puerta-de-entrada"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import {
@@ -19,9 +21,9 @@ import {
   type MiReserva,
   type ViajeConChofer,
 } from "@/lib/datos/inicio-pasajero"
+import { saludo } from "@/lib/fechas"
 import { exigirCuentaAprobada, type Perfil } from "@/lib/sesion"
 import type { Punto } from "@/lib/mapa"
-import { cn } from "@/lib/utils"
 import {
   aceptaReservas,
   haciaEnFrase,
@@ -66,66 +68,61 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
  * 3. Esperando: las unidades de ese sentido, cada una con Apartar de un toque (R27).
  */
 function InicioPasajero({ perfil, datos, cierre }: { perfil: Perfil; datos: DatosInicioPasajero; cierre: AvisoDeCierre | null }) {
-  const { viajes, porId, miEspera, lugaresRecientes, aviso, unidadesEnServicio } = datos
+  const { viajes, porId, miEspera, lugaresRecientes, aviso, unidadesEnServicio, ultimoPedido } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
 
-  // Una línea por sentido, para quien solo quiere saber si vale la pena salir
-  const resumenes = Object.fromEntries(
+  // Por sentido: cuántas unidades y cuándo recoge la próxima ("recoge en Valle Grande en ~5 min")
+  const porSentido = Object.fromEntries(
     (Object.keys(SENTIDOS) as Sentido[]).map((s) => {
       const lista = disponibles.filter((v) => v.sentido === s)
-      if (lista.length === 0) return [s, `Ahora no hay unidades ${haciaEnFrase(s)}.`]
-      const proxima = llegada(lista[0], porId).principal
-      const cuantas = lista.length === 1 ? "1 unidad va" : `${lista.length} unidades van`
-      return [s, `${cuantas} ${haciaEnFrase(s)} · la próxima ${proxima[0].toLowerCase()}${proxima.slice(1)}.`]
+      const principal = lista[0] ? llegada(lista[0], porId).principal : null
+      return [s, { cuantas: lista.length, proxima: principal ? principal[0].toLowerCase() + principal.slice(1) : null }]
+    })
+  ) as Record<Sentido, ResumenSentido>
+  // La misma información en una frase, debajo del sentido escogido en el formulario
+  const resumenes = Object.fromEntries(
+    (Object.keys(SENTIDOS) as Sentido[]).map((s) => {
+      const { cuantas, proxima } = porSentido[s]
+      if (cuantas === 0) return [s, `Ahora no hay unidades ${haciaEnFrase(s)}.`]
+      return [s, `${cuantas === 1 ? "1 unidad va" : `${cuantas} unidades van`} ${haciaEnFrase(s)} · la próxima ${proxima}.`]
     })
   ) as Record<Sentido, string>
 
+  // Esperando: ya dijo que quiere viajar → las unidades de su sentido
+  if (miEspera) {
+    return (
+      <div className="flex flex-col gap-6">
+        <EnVivo />
+        {cierre && <AvisoCierre aviso={cierre} />}
+        {aviso && <EstadoLinea aviso={aviso} />}
+        <EstadoEspera sentido={miEspera.sentido} lugar={miEspera.lugar} desde={miEspera.creado_en} recientes={lugaresRecientes} resumenes={resumenes} />
+        <UnidadesDelSentido
+          sentido={miEspera.sentido}
+          viajes={disponibles.filter((v) => v.sentido === miEspera.sentido)}
+          porId={porId}
+          yo={miEspera.lat !== null && miEspera.lng !== null ? { lat: miEspera.lat, lng: miEspera.lng } : null}
+        />
+      </div>
+    )
+  }
+
+  // Puerta de entrada (docs/especificacion.md §8): primero informa, después pregunta
   return (
     <div className="flex flex-col gap-6">
       <EnVivo />
       {cierre && <AvisoCierre aviso={cierre} />}
-
-      {/* 1. ¿Hay choferes trabajando? */}
-      <section aria-label="Choferes trabajando" className="flex flex-col gap-3">
-        <p className="text-muted-foreground">Hola, {perfil.nombre.split(" ")[0]}</p>
-        <p className="flex items-center gap-3 text-2xl leading-tight font-bold">
-          <span aria-hidden className={cn("size-4 shrink-0 rounded-full", unidadesEnServicio > 0 ? "bg-success" : "bg-muted-foreground")} />
-          {unidadesEnServicio === 0
-            ? "Ningún chofer trabajando ahora"
-            : unidadesEnServicio === 1
-              ? "1 chofer trabajando ahora"
-              : `${unidadesEnServicio} choferes trabajando ahora`}
-        </p>
-        {unidadesEnServicio === 0 && !miEspera && (
-          <p className="text-muted-foreground">Igual puedes avisar que estás esperando: los choferes ven cuánta gente quiere ir.</p>
-        )}
-        <EstadoLinea aviso={aviso} />
-      </section>
-
-      {miEspera ? (
-        <>
-          {/* 3. Esperando: las unidades de su sentido */}
-          <EstadoEspera
-            sentido={miEspera.sentido}
-            lugar={miEspera.lugar}
-            desde={miEspera.creado_en}
-            recientes={lugaresRecientes}
-            resumenes={resumenes}
-          />
-          <UnidadesDelSentido
-            sentido={miEspera.sentido}
-            viajes={disponibles.filter((v) => v.sentido === miEspera.sentido)}
-            porId={porId}
-            yo={miEspera.lat !== null && miEspera.lng !== null ? { lat: miEspera.lat, lng: miEspera.lng } : null}
-          />
-        </>
-      ) : (
-        <>
-          {/* 2. ¿Hacia dónde vas? y ¿Dónde estás? */}
-          <h1 className="sr-only">Avisar que estás esperando</h1>
-          <FormularioEspera recientes={lugaresRecientes} sentidoInicial={sentidoSugerido(perfil.urbanismo)} resumenes={resumenes} />
-        </>
-      )}
+      <h1 className="text-[26px] leading-tight font-bold">
+        {saludo()}, {perfil.nombre.split(" ")[0]}
+      </h1>
+      <EstadoDeLaLinea choferes={unidadesEnServicio} porSentido={porSentido} aviso={aviso} />
+      <NecesitoTransporte
+        recientes={lugaresRecientes}
+        sentidoSugerido={sentidoSugerido(perfil.urbanismo)}
+        resumenes={resumenes}
+        ultimo={ultimoPedido}
+        hayChoferes={unidadesEnServicio > 0}
+      />
+      <Atajos />
     </div>
   )
 }
