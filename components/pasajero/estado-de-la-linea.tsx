@@ -1,53 +1,63 @@
-import { BusIcon } from "lucide-react"
+import { SnowflakeIcon, StarIcon } from "lucide-react"
 
+import { promedioTexto } from "@/components/estrellas"
+import { Avatar } from "@/components/foto/avatar"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
+import type { ChoferEnServicio } from "@/lib/datos/inicio-pasajero"
 import { cn } from "@/lib/utils"
-import { SENTIDOS, type Sentido } from "@/lib/viajes"
-
-export type ResumenSentido = { cuantas: number; proxima: string | null } // proxima: "recoge en Valle Grande en ~5 min"
 
 /**
- * "¿Cómo está la línea?" (§8): lo que todos quieren saber al abrir, sin comprometerse a nada. Choferes trabajando,
- * una línea por sentido y el aviso del día.
+ * "¿Cómo está la línea?" (docs/especificacion.md §8, R7): quién está trabajando ahora y qué hace cada uno.
+ * No se separa por sentido: los choferes dan vueltas (van al Centro y vuelven); importa que haya alguien en la
+ * ruta y saber quién es. El sentido se escoge recién al pedir.
  */
-export function EstadoDeLaLinea({
-  choferes,
-  porSentido,
-  aviso,
-}: {
-  choferes: number
-  porSentido: Record<Sentido, ResumenSentido>
-  aviso: { texto: string } | null
-}) {
+export function EstadoDeLaLinea({ choferes, aviso }: { choferes: ChoferEnServicio[]; aviso: { texto: string } | null }) {
+  const n = choferes.length
   return (
     <section aria-labelledby="titulo-linea" className="flex flex-col gap-3 rounded-3xl border-2 bg-card p-4">
       <h2 id="titulo-linea" className="text-lg font-bold">
         ¿Cómo está la línea?
       </h2>
       <p className="flex items-center gap-2.5 text-lg font-bold">
-        <span aria-hidden className={cn("size-3 shrink-0 rounded-full", choferes > 0 ? "bg-success" : "bg-muted-foreground")} />
-        {choferes === 0 ? "Ningún chofer trabajando ahora" : choferes === 1 ? "1 chofer trabajando ahora" : `${choferes} choferes trabajando ahora`}
+        <span aria-hidden className={cn("size-3 shrink-0 rounded-full", n > 0 ? "bg-success" : "bg-muted-foreground")} />
+        {n === 0 ? "Ningún chofer trabajando ahora" : n === 1 ? "1 chofer trabajando ahora" : `${n} choferes trabajando ahora`}
       </p>
-      <ul className="flex flex-col gap-2">
-        {(Object.keys(SENTIDOS) as Sentido[]).map((s) => {
-          const { cuantas, proxima } = porSentido[s]
-          return (
-            <li key={s} className="flex items-start gap-3 rounded-2xl bg-muted px-3 py-2.5">
-              <BusIcon aria-hidden className={cn("mt-0.5 size-5 shrink-0", cuantas > 0 ? "text-primary" : "text-muted-foreground")} />
-              <span className="min-w-0">
-                <span className="block font-bold">
-                  {SENTIDOS[s].corto}
-                  <span className="font-normal text-muted-foreground">
-                    {" · "}
-                    {cuantas === 0 ? "sin unidades ahora" : cuantas === 1 ? "1 unidad" : `${cuantas} unidades`}
-                  </span>
-                </span>
-                {proxima && <span className="block text-[15px] text-muted-foreground">La próxima {proxima}</span>}
-              </span>
+
+      {n > 0 && (
+        <ul className="flex flex-col gap-2">
+          {choferes.map((c) => (
+            <li key={c.id} className="flex items-center gap-3 rounded-2xl bg-muted px-3 py-2.5">
+              <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-12 text-base" />
+              <div className="min-w-0 flex-1">
+                <p className="flex flex-wrap items-center gap-x-2 font-bold">
+                  <span className="truncate">{c.nombre}</span>
+                  {c.estrellas !== null && (
+                    <span className="inline-flex items-center gap-0.5 text-[15px]">
+                      <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
+                      {promedioTexto(c.estrellas)}
+                      <span className="sr-only"> estrellas</span>
+                    </span>
+                  )}
+                </p>
+                <p className={cn("text-[15px]", c.actividad === "Disponible" ? "text-muted-foreground" : "font-bold text-primary")}>
+                  {c.actividad}
+                </p>
+                <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+                  {c.placa && <span className="font-mono font-bold tracking-wider text-foreground">{c.placa}</span>}
+                  {c.unidad && <span>Unidad {c.unidad}</span>}
+                  {c.aire && (
+                    <span className="inline-flex items-center gap-1">
+                      <SnowflakeIcon aria-hidden className="size-3.5" />
+                      Con aire
+                    </span>
+                  )}
+                </p>
+              </div>
             </li>
-          )
-        })}
-      </ul>
+          ))}
+        </ul>
+      )}
+
       {aviso && <EstadoLinea aviso={aviso} />}
     </section>
   )

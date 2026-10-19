@@ -3,7 +3,7 @@ import "server-only"
 import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
-import { ACTIVOS, type Viaje } from "@/lib/viajes"
+import { ACTIVOS, actividadDeChofer, type Viaje } from "@/lib/viajes"
 
 type Tablas = Database["public"]["Tables"]
 export type Reserva = Tablas["reservas"]["Row"]
@@ -33,6 +33,17 @@ export type MiReserva = {
   telefonoChofer: string | null
 }
 
+export type ChoferEnServicio = {
+  id: string
+  nombre: string
+  fotoUrl: string | null
+  unidad: string | null
+  placa: string | null
+  aire: boolean
+  estrellas: number | null
+  actividad: string // "Recogiendo en Valle Grande", "En ruta hacia el Centro", "Disponible"
+}
+
 export type DatosInicioPasajero = {
   viajes: ViajeConChofer[]
   porId: Map<string, Viaje>
@@ -43,6 +54,7 @@ export type DatosInicioPasajero = {
   ultimoPedido: { sentido: Viaje["sentido"]; lugar: string | null; conGps: boolean } | null
   aviso: { texto: string; creado_en: string } | null
   unidadesEnServicio: number
+  enServicio: ChoferEnServicio[] // quién trabaja ahora y qué hace (R7)
 }
 
 // Inicio del día en America/Caracas (UTC-4, sin horario de verano) para el aviso del día (R47)
@@ -188,10 +200,12 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       .order("creado_en", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // Choferes trabajando ahora (R7): quiénes son, no solo cuántos
     supabase
       .from("perfiles")
-      .select("id", { count: "exact", head: true })
+      .select("id, nombre, foto_path, vehiculo:vehiculos(unidad, placa, aire_acondicionado)")
       .eq("rol", "chofer")
+      .eq("estado", "aprobado")
       .not("conectado_en", "is", null),
     // Último pedido: la espera o la reserva más reciente (cualquier estado), para "Lo de siempre"
     supabase.from("esperas").select("sentido, lugar, lat, creado_en").eq("pasajero_id", pasajeroId).order("creado_en", { ascending: false }).limit(1).maybeSingle(),
@@ -206,7 +220,8 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
 
   // Reputación de los choferes que aparecen (R46)
   const filas = viajesRes.data ?? []
-  const idsChoferes = [...new Set(filas.map((v) => v.chofer_id))]
+  const conectados = enServicioRes.data ?? []
+  const idsChoferes = [...new Set([...filas.map((v) => v.chofer_id), ...conectados.map((c) => c.id)])]
   const { data: califs } = idsChoferes.length
     ? await supabase.from("calificaciones").select("chofer_id, estrellas").in("chofer_id", idsChoferes)
     : { data: [] as { chofer_id: string; estrellas: number }[] }
@@ -219,7 +234,7 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
   // vehiculos tiene chofer_id único: puede venir como objeto o como lista de uno
   const vehiculoDe = (c: (typeof filas)[number]["chofer"]) => (Array.isArray(c?.vehiculo) ? (c.vehiculo[0] ?? null) : (c?.vehiculo ?? null))
   // Fotos del chofer y del carro (R54): enlaces firmados en una sola llamada
-  const fotos = await firmarFotos(filas.flatMap((v) => [v.chofer?.foto_path, vehiculoDe(v.chofer)?.foto_path]))
+  const fotos = await firmarFotos([...filas.flatMap((v) => [v.chofer?.foto_path, vehiculoDe(v.chofer)?.foto_path]), ...conectados.map((c) => c.foto_path)])
 
   const viajes: ViajeConChofer[] = filas.map(({ chofer, ...v }) => {
     const r = reputacion.get(v.chofer_id)
@@ -272,7 +287,24 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
     miEspera: esperaRes.data ?? null,
     lugaresRecientes: (recientesRes.data ?? []).map((f) => f.lugar),
     aviso: avisoRes.data ?? null,
-    unidadesEnServicio: enServicioRes.count ?? 0,
+    unidadesEnServicio: conectados.length,
+    enServicio: conectados
+      .map((c) => {
+        const carro = Array.isArray(c.vehiculo) ? (c.vehiculo[0] ?? null) : c.vehiculo
+        const r = reputacion.get(c.id)
+        return {
+          id: c.id,
+          nombre: c.nombre,
+          fotoUrl: c.foto_path ? (fotos.get(c.foto_path) ?? null) : null,
+          unidad: carro?.unidad ?? null,
+          placa: carro?.placa ?? null,
+          aire: carro?.aire_acondicionado ?? false,
+          estrellas: r ? r.suma / r.n : null,
+          actividad: actividadDeChofer(viajes.filter((v) => v.chofer_id === c.id)),
+        }
+      })
+      // Los que tienen algo en marcha primero; los disponibles al final
+      .sort((a, b) => Number(a.actividad === "Disponible") - Number(b.actividad === "Disponible") || a.nombre.localeCompare(b.nombre, "es")),
     ultimoPedido: ultimoPedido(ultEsperaRes.data, ultReservaRes.data),
   }
 }

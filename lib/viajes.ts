@@ -124,6 +124,20 @@ export function estadoParaChofer(v: Viaje, porId: Map<string, Viaje>, ahora = Da
   }
 }
 
+/**
+ * Qué hace ahora un chofer conectado (R7), con sus viajes abiertos: lo que se ve en "¿Cómo está la línea?".
+ * Lo más actual primero: en ruta, después la recogida en curso; sin viajes, "Disponible".
+ */
+export function actividadDeChofer(viajes: Viaje[]): string {
+  const enRuta = viajes.find((v) => v.estado === "en_ruta")
+  if (enRuta) return `En ruta ${SENTIDOS[enRuta.sentido].hacia}`
+  const recogiendo = viajes.find((v) => v.estado === "en_parada")
+  if (recogiendo) return `Recogiendo ${SENTIDOS[recogiendo.sentido].enRecogida}`
+  const viene = viajes.find((v) => v.estado === "en_camino" || v.estado === "llegando")
+  if (viene) return `Va a recoger ${SENTIDOS[viene.sentido].enRecogida}`
+  return "Disponible"
+}
+
 export const ETIQUETA_ESTADO: Record<EstadoViaje, string> = {
   programado: "Próximo viaje",
   en_camino: "En camino",

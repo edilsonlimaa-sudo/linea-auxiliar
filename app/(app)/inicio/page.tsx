@@ -6,7 +6,7 @@ import { redirect } from "next/navigation"
 import { EnVivo } from "@/components/en-vivo"
 import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
-import { EstadoDeLaLinea, type ResumenSentido } from "@/components/pasajero/estado-de-la-linea"
+import { EstadoDeLaLinea } from "@/components/pasajero/estado-de-la-linea"
 import { EstadoEspera } from "@/components/pasajero/esperando"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { Atajos, NecesitoTransporte } from "@/components/pasajero/puerta-de-entrada"
@@ -68,23 +68,17 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
  * 3. Esperando: las unidades de ese sentido, cada una con Apartar de un toque (R27).
  */
 function InicioPasajero({ perfil, datos, cierre }: { perfil: Perfil; datos: DatosInicioPasajero; cierre: AvisoDeCierre | null }) {
-  const { viajes, porId, miEspera, lugaresRecientes, aviso, unidadesEnServicio, ultimoPedido } = datos
+  const { viajes, porId, miEspera, lugaresRecientes, aviso, unidadesEnServicio, enServicio, ultimoPedido } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
 
-  // Por sentido: cuántas unidades y cuándo recoge la próxima ("recoge en Valle Grande en ~5 min")
-  const porSentido = Object.fromEntries(
-    (Object.keys(SENTIDOS) as Sentido[]).map((s) => {
-      const lista = disponibles.filter((v) => v.sentido === s)
-      const principal = lista[0] ? llegada(lista[0], porId).principal : null
-      return [s, { cuantas: lista.length, proxima: principal ? principal[0].toLowerCase() + principal.slice(1) : null }]
-    })
-  ) as Record<Sentido, ResumenSentido>
-  // La misma información en una frase, debajo del sentido escogido en el formulario
+  // Al escoger el sentido en el formulario: cuántas unidades van y cuándo recoge la próxima
   const resumenes = Object.fromEntries(
     (Object.keys(SENTIDOS) as Sentido[]).map((s) => {
-      const { cuantas, proxima } = porSentido[s]
-      if (cuantas === 0) return [s, `Ahora no hay unidades ${haciaEnFrase(s)}.`]
-      return [s, `${cuantas === 1 ? "1 unidad va" : `${cuantas} unidades van`} ${haciaEnFrase(s)} · la próxima ${proxima}.`]
+      const lista = disponibles.filter((v) => v.sentido === s)
+      if (lista.length === 0) return [s, `Ahora no hay unidades ${haciaEnFrase(s)}.`]
+      const principal = llegada(lista[0], porId).principal
+      const cuantas = lista.length === 1 ? "1 unidad va" : `${lista.length} unidades van`
+      return [s, `${cuantas} ${haciaEnFrase(s)} · la próxima ${principal[0].toLowerCase()}${principal.slice(1)}.`]
     })
   ) as Record<Sentido, string>
 
@@ -114,7 +108,7 @@ function InicioPasajero({ perfil, datos, cierre }: { perfil: Perfil; datos: Dato
       <h1 className="text-[26px] leading-tight font-bold">
         {saludo()}, {perfil.nombre.split(" ")[0]}
       </h1>
-      <EstadoDeLaLinea choferes={unidadesEnServicio} porSentido={porSentido} aviso={aviso} />
+      <EstadoDeLaLinea choferes={enServicio} aviso={aviso} />
       <NecesitoTransporte
         recientes={lugaresRecientes}
         sentidoSugerido={sentidoSugerido(perfil.urbanismo)}
