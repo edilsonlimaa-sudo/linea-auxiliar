@@ -65,19 +65,23 @@ export function PublicarViaje({
   modo,
   esperando,
   ultimo,
+  sentidoInicial,
   enHoja = false,
   onPublicado,
 }: {
   modo: ModoPublicar
   esperando: Record<Sentido, number>
   ultimo: { sentido: Sentido; puestos: number } | null
+  sentidoInicial?: Sentido | null // p. ej. el de más demanda sin atender (§8); si no, el contrario al último viaje
   enHoja?: boolean // dentro de "Agregar otro viaje": el botón no se pega abajo de la página
   onPublicado?: () => void
 }) {
   const idOtro = useId()
   const idHora = useId()
   const tiempos = TIEMPOS[modo]
-  const [sentido, setSentido] = useState<Sentido>(ultimo ? (ultimo.sentido === "vg_a_centro" ? "centro_a_vg" : "vg_a_centro") : "vg_a_centro")
+  const [sentido, setSentido] = useState<Sentido>(
+    sentidoInicial ?? (ultimo ? (ultimo.sentido === "vg_a_centro" ? "centro_a_vg" : "vg_a_centro") : "vg_a_centro")
+  )
   const [puestos, setPuestos] = useState(ultimo?.puestos ?? 4)
   const [cuando, setCuando] = useState<number | "otro" | "hora">(tiempos.inicial)
   const [otro, setOtro] = useState("")

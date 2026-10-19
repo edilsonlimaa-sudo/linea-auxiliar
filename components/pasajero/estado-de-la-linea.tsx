@@ -11,16 +11,26 @@ import { cn } from "@/lib/utils"
  * No se separa por sentido: los choferes dan vueltas (van al Centro y vuelven); importa que haya alguien en la
  * ruta y saber quién es. El sentido se escoge recién al pedir.
  */
-export function EstadoDeLaLinea({ choferes, aviso }: { choferes: ChoferEnServicio[]; aviso: { texto: string } | null }) {
+export function EstadoDeLaLinea({
+  choferes,
+  aviso,
+  titulo = "¿Cómo está la línea?",
+  cantidad = (n) => (n === 0 ? "Ningún chofer trabajando ahora" : n === 1 ? "1 chofer trabajando ahora" : `${n} choferes trabajando ahora`),
+}: {
+  choferes: ChoferEnServicio[]
+  aviso: { texto: string } | null
+  titulo?: string // el chofer lo ve como "Compañeros en la ruta" (§8)
+  cantidad?: (n: number) => string
+}) {
   const n = choferes.length
   return (
     <section aria-labelledby="titulo-linea" className="flex flex-col gap-3 rounded-3xl border-2 bg-card p-4">
       <h2 id="titulo-linea" className="text-lg font-bold">
-        ¿Cómo está la línea?
+        {titulo}
       </h2>
       <p className="flex items-center gap-2.5 text-lg font-bold">
         <span aria-hidden className={cn("size-3 shrink-0 rounded-full", n > 0 ? "bg-success" : "bg-muted-foreground")} />
-        {n === 0 ? "Ningún chofer trabajando ahora" : n === 1 ? "1 chofer trabajando ahora" : `${n} choferes trabajando ahora`}
+        {cantidad(n)}
       </p>
 
       {n > 0 && (

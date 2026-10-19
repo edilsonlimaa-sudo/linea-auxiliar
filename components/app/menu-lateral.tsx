@@ -48,7 +48,7 @@ const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },
   ],
   chofer: [
-    { href: "/inicio", titulo: "Mi viaje", icono: HouseIcon },
+    { href: "/inicio", titulo: "Inicio", icono: HouseIcon },
     { href: "/mis-viajes", titulo: "Mis viajes", icono: HistoryIcon },
     { href: "/calificaciones", titulo: "Mis calificaciones", icono: StarIcon },
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },

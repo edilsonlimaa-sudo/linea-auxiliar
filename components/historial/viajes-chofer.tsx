@@ -22,7 +22,7 @@ export function ViajesChofer({ viajes }: { viajes: ViajeTerminado[] }) {
         <p className="text-lg font-bold">Todavía no terminaste ningún viaje</p>
         <p className="text-muted-foreground">Cuando termines uno, aquí vas a ver a quién llevaste y cómo te calificaron.</p>
         <Link href="/inicio" className={buttonVariants({ className: "mt-2" })}>
-          Ir a Mi viaje
+          Ir a Inicio
         </Link>
       </div>
     )

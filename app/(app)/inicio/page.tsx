@@ -41,7 +41,7 @@ export const metadata: Metadata = { title: "Inicio · Línea Auxiliar" }
 export default async function PaginaInicio({ searchParams }: PageProps<"/inicio">) {
   const perfil = await exigirCuentaAprobada()
 
-  // El Inicio del chofer es su "Mi viaje" (docs/especificacion.md §8)
+  // Inicio del chofer: demanda y publicar; con viaje abierto, su gestión (docs/especificacion.md §8)
   if (perfil.rol === "chofer") {
     const datos = await cargarInicioChofer(perfil.id, perfil.conectado_en !== null)
     return <InicioChofer nombre={perfil.nombre} datos={datos} />
