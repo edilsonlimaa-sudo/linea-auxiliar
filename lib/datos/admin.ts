@@ -2,7 +2,7 @@
 import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
-import { aceptaReservas, ACTIVOS, libres, type Sentido } from "@/lib/viajes"
+import { aceptaReservas, ACTIVOS, libres, type Sentido, type Viaje } from "@/lib/viajes"
 
 type Funciones = Database["public"]["Functions"]
 export type Cuenta = Funciones["admin_cuentas"]["Returns"][number]
@@ -77,4 +77,109 @@ export async function cargarDemanda(): Promise<{
     hoy: hoyRes.data?.[0] ?? null,
     error: esperandoRes.error?.message ?? null,
   }
+}
+
+/** Una persona en un viaje en curso, como la ve el admin (nombre completo, dónde y teléfono, §6) */
+export type PersonaEnViaje = {
+  id: string
+  posicion: number // orden en la lista (R17)
+  confirmado: boolean // tiene puesto
+  nombre: string
+  conApp: boolean
+  estado: "activa" | "subio" | string
+  lugar: string | null
+  lat: number | null
+  lng: number | null
+  listo: boolean
+  pendiente: boolean // pedido en el camino sin responder
+  telefono: string | null
+  fotoUrl: string | null
+}
+export type ViajeEnCurso = Viaje & { personas: PersonaEnViaje[] }
+export type ChoferEnCurso = {
+  id: string
+  nombre: string
+  fotoUrl: string | null
+  telefono: string | null
+  conectado: boolean
+  placa: string | null
+  unidad: string | null
+  carro: string | null
+  viajes: ViajeEnCurso[] // en ruta, después la recogida, después los próximos
+}
+
+// Orden dentro de cada chofer y entre choferes: lo que está pasando primero
+const PRIORIDAD: Record<string, number> = { en_ruta: 0, en_parada: 1, llegando: 2, en_camino: 3, programado: 4 }
+
+/** Viajes en curso del panel (§8): por chofer, con la gente de cada viaje */
+export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]; error: string | null }> {
+  const supabase = await crearClienteServidor()
+  const { data: viajes, error } = await supabase
+    .from("viajes")
+    .select("*, chofer:perfiles(id, nombre, foto_path, conectado_en, vehiculo:vehiculos(placa, unidad, modelo, color))")
+    .in("estado", ACTIVOS)
+    .order("creado_en")
+  if (error) return { choferes: [], error: error.message }
+  const lista = viajes ?? []
+
+  const ids = lista.map((v) => v.id)
+  const { data: reservas } = ids.length
+    ? await supabase
+        .from("reservas")
+        .select("*, pasajero:perfiles!reservas_pasajero_id_fkey(nombre, foto_path)")
+        .in("viaje_id", ids)
+        .in("estado", ["activa", "subio"])
+        .order("creado_en")
+        .order("id")
+    : { data: [] }
+  const filas = reservas ?? []
+
+  const idsPersonas = [
+    ...new Set([...filas.map((r) => r.pasajero_id), ...lista.map((v) => v.chofer_id)].filter((id): id is string => id !== null)),
+  ]
+  const [{ data: telefonos }, fotos] = await Promise.all([
+    idsPersonas.length ? supabase.from("perfiles_privados").select("id, telefono").in("id", idsPersonas) : Promise.resolve({ data: [] }),
+    firmarFotos([...filas.map((r) => r.pasajero?.foto_path), ...lista.map((v) => v.chofer?.foto_path)]),
+  ])
+  const telefonoDe = new Map((telefonos ?? []).map((t) => [t.id, t.telefono]))
+  const foto = (ruta: string | null | undefined) => (ruta ? (fotos.get(ruta) ?? null) : null)
+
+  const porChofer = new Map<string, ChoferEnCurso>()
+  for (const { chofer, ...v } of lista) {
+    const personas = filas
+      .filter((r) => r.viaje_id === v.id)
+      .map((r, i) => ({
+        id: r.id,
+        posicion: i + 1,
+        confirmado: i + 1 <= v.puestos,
+        nombre: r.pasajero?.nombre ?? r.nombre ?? "Pasajero sin app",
+        conApp: r.pasajero_id !== null,
+        estado: r.estado,
+        lugar: r.lugar,
+        lat: r.lat,
+        lng: r.lng,
+        listo: r.listo,
+        pendiente: r.pendiente,
+        telefono: r.pasajero_id ? (telefonoDe.get(r.pasajero_id) ?? null) : null,
+        fotoUrl: foto(r.pasajero?.foto_path),
+      }))
+    const c = porChofer.get(v.chofer_id) ?? {
+      id: v.chofer_id,
+      nombre: chofer?.nombre ?? "Chofer",
+      fotoUrl: foto(chofer?.foto_path),
+      telefono: telefonoDe.get(v.chofer_id) ?? null,
+      conectado: Boolean(chofer?.conectado_en),
+      placa: chofer?.vehiculo?.placa ?? null,
+      unidad: chofer?.vehiculo?.unidad ?? null,
+      carro: [chofer?.vehiculo?.modelo, chofer?.vehiculo?.color].filter(Boolean).join(" · ") || null,
+      viajes: [],
+    }
+    c.viajes.push({ ...v, personas })
+    porChofer.set(v.chofer_id, c)
+  }
+
+  const choferes = [...porChofer.values()]
+  for (const c of choferes) c.viajes.sort((a, b) => PRIORIDAD[a.estado] - PRIORIDAD[b.estado])
+  choferes.sort((a, b) => PRIORIDAD[a.viajes[0].estado] - PRIORIDAD[b.viajes[0].estado])
+  return { choferes, error: null }
 }

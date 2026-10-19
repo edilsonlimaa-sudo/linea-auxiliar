@@ -360,6 +360,12 @@ Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobaci
      "Dónde está X". También en su tarjeta de Choferes mientras está conectado.
   3. **Hoy** (hora de Caracas): viajes terminados, pasajeros llevados y calificación promedio de los últimos 7 días.
   4. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
+- **Viajes en curso** (se abre tocando "viajes en curso" del Resumen; se actualiza sola): un bloque por chofer
+  con viajes abiertos, primero quien va en ruta. Arriba el chofer (foto, nombre, placa, unidad, conectado) y
+  **Ver en el mapa** (R41). Por cada viaje: sentido, estado ("En ruta hacia el Centro, salió a las 7:40" /
+  "Recoge en Valle Grande en ~5 min" / "Próximo viaje"), puestos ocupados de cuántos, y la gente separada en
+  **A bordo**, **Por recoger** (con dónde y "✋ ya está en el sitio"), **Pedidos en el camino** y **Lista de espera**.
+  Cada persona con nombre completo, dónde la recogen, WhatsApp y Llamar. Solo lectura: el admin no cambia listas.
 - **Demanda** (para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
   1. **Por sentido** (Al Centro / A Valle Grande): cuántos esperan, cuántas unidades aceptan pasajeros con cuántos
      puestos libres, y si **falta transporte** (esperan más que los puestos libres) o está cubierto.
