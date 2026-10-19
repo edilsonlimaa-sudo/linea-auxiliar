@@ -239,9 +239,19 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 
 ### 5.15 Historial
 
-- **R50.** Chofer: **Viajes terminados** (últimos 20): salida, llegada, duración, puestos ocupados, a quién
-  llevó (cómo entró cada uno), quién no vino y calificaciones recibidas.
-- **R51.** Pasajero: **Mis viajes**: sentido, fecha, chofer, unidad, **placa** y su calificación.
+- **R50.** Chofer: **Mis viajes** (los últimos 20 terminados). Cada uno, plegado: sentido, fecha, salida →
+  llegada, duración, cuántos llevó y ★ del viaje. Al abrirlo: a quién llevó y **cómo entró** cada uno (con la app,
+  anotado a mano, recogido en el camino), quién se bajó antes, quién **no vino** y las calificaciones de ese viaje.
+- **R51.** Pasajero: **Mis viajes** (los últimos 30 que viajó de verdad: subió o se bajó). Cada uno: sentido,
+  fecha, chofer, unidad, **placa** y su calificación. Si no lo calificó ("Ahora no", R45), botón **Calificar**
+  ahí mismo.
+- **R52.** Chofer: **Mis calificaciones**, su propio espacio (no va en el carnet): ★ promedio y cantidad,
+  cuántas de cada estrella, las etiquetas que más le dan y los comentarios recientes. **Sin el nombre** de quien
+  calificó (solo fecha y sentido), para que el pasajero califique con libertad.
+- **R53.** **Mi carnet** (pasajero y chofer): la credencial de la línea para mostrar si se la piden. Nombre,
+  rol, **✓ Verificado** con la fecha de aprobación, teléfono y cédula (si la dio). Pasajero: urbanismo. Chofer:
+  unidad, **placa** en grande, modelo y color, y su ★ (enlace a Mis calificaciones). Por ahora solo lectura: para
+  corregir un dato se le pide al administrador. La foto vendrá con la subida de fotos (R1).
 
 ## 6. Privacidad: quién ve qué [servidor]
 
@@ -279,8 +289,8 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Rol | Secciones |
 |---|---|
 | Sin sesión | Portada (¿Cómo vas a usar la app? → Soy pasajero / Soy chofer) · Registro · Entrar |
-| Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** · **Mi carnet** |
-| Chofer | **Mi viaje** (conexión, GPS, recogida actual, próximos viajes, agregar viaje, viajes terminados) · **Auxilio** · **Carnet** |
+| Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
+| Chofer | **Mi viaje** (conexión, GPS, recogida actual, próximos viajes, agregar viaje) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
 | Admin | Aviso del día · Pendientes · Choferes · Pasajeros (+ ficha, restablecer PIN) |
 
 **Mi viaje del pasajero (página aparte).** Apartar puesto es pasar de *escoger* a *acompañar* el viaje, así
