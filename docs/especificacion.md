@@ -310,7 +310,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 |---|---|
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
-| Chofer | **Mi viaje** (conexión, GPS, recogida actual, próximos viajes, agregar viaje) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
+| Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
 | Admin | Aviso del día · Pendientes · Choferes · Pasajeros (+ ficha, restablecer PIN) |
 
 **Mi viaje del pasajero (página aparte).** Apartar puesto es pasar de *escoger* a *acompañar* el viaje, así
@@ -352,13 +352,27 @@ Después de avisar que espera, Inicio pasa a **Esperando**: "Estás esperando pa
 **Cambiar** y **Ya no estoy esperando**, y debajo **las unidades de ese sentido**, cada una con **Apartar puesto** de
 un toque (R27) y **Ver en el mapa** (R41). Sin unidades: "Te avisamos cuando venga una" (R32). Al apartar → Mi viaje.
 
-**Mi viaje del chofer (su Inicio).** El chofer usa la app **parado en la recogida o en un semáforo, con prisa y
-a veces con una mano**. Por eso:
+**Inicio del chofer.** Antes de salir, el chofer se pregunta **"¿hay gente esperando? ¿ya hay alguien
+atendiendo?"**. Inicio responde eso primero y publicar es una opción, no la pantalla entera:
+
+1. **Saludo** y su **conexión** (Conectado / Desconectado).
+2. **¿Hay gente esperando?** (R31) Por sentido, con números grandes: cuántos esperan y cuánta oferta hay ya
+   (unidades de otros choferes que aceptan reservas y sus puestos libres). Si esperan más que los puestos libres:
+   **"Falta transporte"** en destaque. Aquí sí importa el sentido: es la decisión del chofer.
+3. **Publicar un viaje** (la acción principal): abre el formulario en una hoja, con el sentido **de más demanda
+   sin atender** ya escogido (si no hay demanda, el contrario al último viaje).
+4. **Compañeros en la ruta:** quién más trabaja y qué hace (R7), para no ir todos al mismo lado.
+5. **Atajos** a Mis viajes y Mis calificaciones.
+
+**Con un viaje abierto**, Inicio es la gestión de ese viaje (lo que sigue) y arriba queda una línea con la demanda
+("Esperando: 3 al Centro · nadie a Valle Grande"). El chofer usa la app **parado en la recogida o en un semáforo,
+con prisa y a veces con una mano**. Por eso:
 
 - **Una sola acción principal a la vez**, grande y fija abajo (zona del pulgar), que cambia con el estado:
-  sin viaje → **Publicar viaje** · en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando →
+  en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando →
   **Ya llegué** · recogiendo → **Salir con N pasajeros** · en ruta → **Terminar viaje**.
-- **Casi nada que escribir.** Publicar es tocar: sentido (dos botones; se sugiere el contrario al último viaje),
+- **Casi nada que escribir.** Publicar es tocar: sentido (dos botones; se sugiere el de más demanda sin atender o,
+  si no hay, el contrario al último viaje),
   puestos (− / +, empieza con los del último viaje) y cuándo llega ("Ya estoy aquí", 5, 10, 15, 20 min u
   "Otro"). Encima de cada sentido se ve cuánta gente espera (R10).
 - **La lista es el centro de la pantalla**, en el orden justo (R17). Cada fila: número de puesto en grande,
