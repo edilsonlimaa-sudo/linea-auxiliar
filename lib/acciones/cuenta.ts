@@ -3,7 +3,6 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
-import { URBANISMOS } from "@/lib/constantes"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { correoDeTelefono, normalizarTelefono, telefonoValido } from "@/lib/telefono"
 
@@ -31,7 +30,8 @@ const registroBase = z.object({
 
 const registroPasajero = registroBase.extend({
   rol: z.literal("pasajero"),
-  urbanismo: z.enum(URBANISMOS, "Escoge dónde vives"),
+  // Escrito a mano y opcional (R1): todavía no hay lista de urbanismos con los nombres reales
+  urbanismo: z.string().trim().max(60, "Escríbelo más corto (máximo 60 letras)").optional(),
 })
 
 const registroChofer = registroBase.extend({
@@ -89,7 +89,7 @@ export async function registrarse(anterior: EstadoFormulario, formData: FormData
         telefono: normalizarTelefono(d.telefono),
         cedula: d.cedula || undefined,
         ...(d.rol === "pasajero"
-          ? { urbanismo: d.urbanismo }
+          ? { urbanismo: d.urbanismo || undefined }
           : {
               placa: d.placa,
               unidad: d.unidad || undefined,

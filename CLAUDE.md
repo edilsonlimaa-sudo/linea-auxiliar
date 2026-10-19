@@ -66,7 +66,7 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 | `proxy.ts` | Renueva la sesión en cada petición y protege rutas. Públicas: `/`, `/entrar`, `/registro/*` (con sesión redirigen a `/inicio`) y `/admin/entrar`. Sin sesión, `/admin/*` va a `/admin/entrar` |
 | `lib/supabase/cliente-servidor.ts` · `cliente-navegador.ts` | Clientes tipados con `lib/database.types.ts` |
 | `lib/sesion.ts` | `obtenerPerfil()`, `exigirCuentaAprobada()` y `exigirAdmin()`. **Toda página de pasajero/chofer empieza con `exigirCuentaAprobada()`** (pendiente → `/en-revision`, admin → `/admin`); **toda página del panel, con `exigirAdmin()`** (no admin → `/inicio`; contraseña inicial → `/admin/clave`) |
-| `lib/acciones/*.ts` | Server Actions (`"use server"`: solo se exportan funciones async; constantes en `lib/constantes.ts`) |
+| `lib/acciones/*.ts` | Server Actions (`"use server"`: solo se exportan funciones async; las constantes van en otro archivo de `lib/`) |
 | `lib/telefono.ts` | Normalizar/validar teléfonos y el correo interno (igual que las funciones SQL) |
 | `components/formulario/campos.tsx` | `CampoTexto`, `CampoPin`, `CampoSeleccion` y `useEnfocarError`: usarlos en todo formulario |
 | `app/(publico)/` · `app/(app)/` · `app/admin/` | Grupos de rutas: portada y acceso (cabecera simple) · app de pasajero/chofer (menú lateral `components/app/menu-lateral.tsx` con shadcn Sidebar; en el celular es un drawer que abre el botón "Menú") · panel |

@@ -184,7 +184,8 @@ export const tienePuesto = (posicion: number, v: Viaje) => posicion > 0 && posic
 export function sentidoSugerido(urbanismo: string | null, ahora = new Date()): Sentido {
   const hora = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: ZONA_HORARIA }).format(ahora))
   const manana = hora < 12
-  const viveEnCentro = urbanismo === "Centro de Maturín"
+  // Dónde vive se escribe a mano (R1): basta que mencione el Centro
+  const viveEnCentro = /centro/i.test(urbanismo ?? "")
   if (viveEnCentro) return manana ? "centro_a_vg" : "vg_a_centro"
   return manana ? "vg_a_centro" : "centro_a_vg"
 }

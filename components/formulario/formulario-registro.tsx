@@ -3,12 +3,11 @@
 import { AlertCircleIcon } from "lucide-react"
 import { useActionState } from "react"
 
-import { CampoPin, CampoSeleccion, CampoTexto, useEnfocarError } from "@/components/formulario/campos"
+import { CampoPin, CampoTexto, useEnfocarError } from "@/components/formulario/campos"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field"
 import { registrarse, type EstadoFormulario } from "@/lib/acciones/cuenta"
-import { URBANISMOS } from "@/lib/constantes"
 
 const inicial: EstadoFormulario = {}
 
@@ -53,12 +52,15 @@ export function FormularioRegistro({ rol }: { rol: "pasajero" | "chofer" }) {
           required
         />
         {rol === "pasajero" && (
-          <CampoSeleccion
-            etiqueta="¿Dónde vives?"
+          <CampoTexto
+            etiqueta="¿Dónde vives? (opcional)"
             name="urbanismo"
-            opciones={URBANISMOS}
+            placeholder="Ej.: Valle Grande Country"
+            maxLength={60}
+            autoComplete="off"
             defaultValue={v.urbanismo}
             error={e.urbanismo}
+            ayuda="El nombre del urbanismo o sector."
           />
         )}
       </FieldGroup>

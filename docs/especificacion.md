@@ -70,7 +70,9 @@ puede ocultar botones, pero nunca es la única barrera.
 
 ### 5.1 Cuentas y acceso
 
-- **R1. Registro.** Nombre, teléfono (WhatsApp), PIN de 6 dígitos y rol. Pasajero: urbanismo. Chofer: placa
+- **R1. Registro.** Nombre, teléfono (WhatsApp), PIN de 6 dígitos y rol. Pasajero: dónde vive, **escrito a mano y opcional**
+  (máx. 60 letras; no hay lista de urbanismos hasta tener los nombres reales, para no trabar el registro ni guardar
+  datos falsos). Chofer: placa
   (obligatoria), unidad, modelo, color y si tiene **aire acondicionado** (R55). Foto de perfil y foto del carro
   **opcionales** (R54; el admin ve "Falta foto"). Cédula **opcional**.
 - **R2. Aprobación [servidor].** Toda cuenta nueva queda `pendiente`. Puede iniciar sesión y ver la app, pero
