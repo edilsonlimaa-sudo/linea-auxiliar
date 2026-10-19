@@ -16,6 +16,7 @@
     "db:demo": "docker exec -i supabase_db_linea-auxiliar psql -U postgres -v ON_ERROR_STOP=1 -q -f - < supabase/demo.sql",
     "db:test": "supabase test db",
     "db:types": "supabase gen types typescript --local > lib/database.types.ts",
+    "db:nube": "node --env-file-if-exists=.env.local scripts/migrar-nube.mjs",
     "admin:crear": "node --env-file-if-exists=.env.local scripts/crear-admin.mjs"
   },
   "dependencies": {
