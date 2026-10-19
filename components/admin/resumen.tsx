@@ -70,7 +70,11 @@ export function Resumen({
         <div className="grid grid-cols-3 gap-2">
           <Dato valor={conectados.length} texto={conectados.length === 1 ? "chofer conectado" : "choferes conectados"} destacado={conectados.length > 0} />
           <Dato valor={resumen?.viajes_en_curso ?? 0} texto={resumen?.viajes_en_curso === 1 ? "viaje en curso" : "viajes en curso"} />
-          <Dato valor={resumen?.pasajeros_esperando ?? 0} texto={resumen?.pasajeros_esperando === 1 ? "pasajero esperando" : "pasajeros esperando"} />
+          <Dato
+            valor={resumen?.pasajeros_esperando ?? 0}
+            texto={resumen?.pasajeros_esperando === 1 ? "pasajero esperando" : "pasajeros esperando"}
+            href="/admin/demanda"
+          />
         </div>
         {conectados.length > 0 ? (
           <ul className="flex flex-col gap-2">

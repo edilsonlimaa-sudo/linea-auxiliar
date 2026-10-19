@@ -3,7 +3,7 @@
 -- (…02) y su propia pasajera dentro de la transacción, que se deshace al final.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(23);
+select plan(26);
 
 -- ---------- Creación del admin (como superusuario, igual que el registro de Supabase Auth) ----------
 select public.crear_admin('prueba', 'admin123', '00000000-0000-4000-a000-000000000002');
@@ -58,6 +58,10 @@ insert into public.reservas (viaje_id, pasajero_id, estado, lugar) values
 insert into public.calificaciones (viaje_id, chofer_id, pasajero_id, estrellas) values
   ('00000000-0000-4000-b000-00000000000a', '00000000-0000-4000-a000-000000000031', '00000000-0000-4000-a000-000000000032', 5);
 
+-- María espera para ir al Centro (para la Demanda del panel)
+insert into public.esperas (pasajero_id, sentido, lugar)
+values ('00000000-0000-4000-a000-000000000021', 'vg_a_centro', 'Portón VGC');
+
 -- ---------- Panel ----------
 set local role authenticated;
 
@@ -76,6 +80,18 @@ select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000
 select ok(
   exists (select 1 from public.admin_cuentas('pendiente') where nombre = 'María González' and telefono = '+584140000021'),
   'El admin ve las cuentas pendientes con sus datos (un registro nuevo queda pendiente, R2)');
+
+-- ---------- Demanda (§8) ----------
+select ok(
+  exists (select 1 from public.admin_demanda()
+           where nombre = 'María González' and telefono = '+584140000021' and lugar = 'Portón VGC' and sentido = 'vg_a_centro'),
+  'El admin ve quién espera, hacia dónde, dónde y su teléfono');
+select is((select pedidos >= 1 from public.admin_demanda_hoy()), true, 'El admin ve los pedidos de hoy');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000021", "role": "authenticated"}', true);
+select throws_ok(
+  'select * from public.admin_demanda()', 'P0001', 'Solo para administración',
+  'Un pasajero no ve quién más espera (R31, §6)');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
 
 -- ---------- Eliminar una cuenta rechazada (R2) ----------
 select throws_ok($$ select public.eliminar_cuenta('00000000-0000-4000-a000-000000000021') $$, 'P0001',

@@ -1,22 +1,23 @@
-import { CarFrontIcon, LayoutDashboardIcon, UsersIcon } from "lucide-react"
+import { CarFrontIcon, HandIcon, LayoutDashboardIcon, UsersIcon } from "lucide-react"
 import Link from "next/link"
 
 import type { RolCuenta } from "@/lib/datos/admin"
 import { cn } from "@/lib/utils"
 
-type Seccion = "resumen" | "choferes" | "pasajeros"
+type Seccion = "resumen" | "demanda" | "choferes" | "pasajeros"
 
 const SECCIONES = [
   { id: "resumen", titulo: "Resumen", href: "/admin", icono: LayoutDashboardIcon },
+  { id: "demanda", titulo: "Demanda", href: "/admin/demanda", icono: HandIcon },
   { id: "choferes", titulo: "Choferes", href: "/admin/choferes", icono: CarFrontIcon },
   { id: "pasajeros", titulo: "Pasajeros", href: "/admin/pasajeros", icono: UsersIcon },
 ] as const
 
-// Pestañas fijas del panel (§8): Resumen · Choferes · Pasajeros, con cuántos esperan aprobación
+// Pestañas fijas del panel (§8): Resumen · Demanda · Choferes · Pasajeros, con cuántos esperan aprobación
 export function NavAdmin({ activa, pendientes }: { activa: Seccion; pendientes: Record<RolCuenta, number> }) {
-  const aviso = { resumen: 0, choferes: pendientes.chofer, pasajeros: pendientes.pasajero }
+  const aviso = { resumen: 0, demanda: 0, choferes: pendientes.chofer, pasajeros: pendientes.pasajero }
   return (
-    <nav aria-label="Secciones del panel" className="grid grid-cols-3 gap-1 rounded-2xl border-2 bg-card p-1">
+    <nav aria-label="Secciones del panel" className="grid grid-cols-4 gap-1 rounded-2xl border-2 bg-card p-1">
       {SECCIONES.map(({ id, titulo, href, icono: Icono }) => {
         const esta = id === activa
         const n = aviso[id]
@@ -26,7 +27,7 @@ export function NavAdmin({ activa, pendientes }: { activa: Seccion; pendientes: 
             href={href}
             aria-current={esta ? "page" : undefined}
             className={cn(
-              "relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[15px] leading-tight font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
+              "relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-sm leading-tight font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
               esta ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"
             )}
           >

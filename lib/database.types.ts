@@ -709,6 +709,31 @@ export type Database = {
           telefono: string
         }[]
       }
+      admin_demanda: {
+        Args: never
+        Returns: {
+          creado_en: string
+          foto_path: string
+          id: string
+          lat: number
+          lng: number
+          lugar: string
+          nombre: string
+          pasajero_id: string
+          sentido: Database["public"]["Enums"]["sentido"]
+          telefono: string
+        }[]
+      }
+      admin_demanda_hoy: {
+        Args: never
+        Returns: {
+          cancelaron: number
+          consiguieron: number
+          espera_promedio_min: number
+          pedidos: number
+          sin_transporte: number
+        }[]
+      }
       admin_historial: {
         Args: { p_usuario: string }
         Returns: {

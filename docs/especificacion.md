@@ -338,7 +338,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | **Resumen** · **Choferes** · **Pasajeros** (cada uno con Pendientes / Aprobados / Rechazados) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | **Resumen** · **Demanda** · **Choferes** · **Pasajeros** (cada uno con Pendientes / Aprobados / Rechazados) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
@@ -349,7 +349,7 @@ solo para no confundir (la protección es la contraseña y el servidor). Dos cam
   abre el login del admin. Sirve en un aparato nuevo o después de borrar los datos del navegador.
 
 **Panel del admin.** El admin entra de vez en cuando (no vigila la pantalla: R2 le llega por WhatsApp), así que
-lo primero es *qué necesita de mí* y después *cómo va la línea*. Tres pestañas fijas arriba: **Resumen ·
+lo primero es *qué necesita de mí* y después *cómo va la línea*. Cuatro pestañas fijas arriba: **Resumen · Demanda ·
 Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobación.
 
 - **Resumen**, en orden:
@@ -360,6 +360,14 @@ Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobaci
      "Dónde está X". También en su tarjeta de Choferes mientras está conectado.
   3. **Hoy** (hora de Caracas): viajes terminados, pasajeros llevados y calificación promedio de los últimos 7 días.
   4. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
+- **Demanda** (para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
+  1. **Por sentido** (Al Centro / A Valle Grande): cuántos esperan, cuántas unidades aceptan pasajeros con cuántos
+     puestos libres, y si **falta transporte** (esperan más que los puestos libres) o está cubierto.
+  2. **Quién espera**, por sentido y primero quien lleva más tiempo: foto, nombre, "espera hace N min" (en
+     amarillo desde 20 min), dónde (texto) y **Ver ubicación** si compartió GPS (abre el mapa del teléfono),
+     WhatsApp y Llamar. Solo esperas activas de las últimas 2 h (R35).
+  3. **Hoy** (hora de Caracas): pedidos, cuántos consiguieron puesto, cuántos se fueron sin transporte (la
+     espera venció), cuántos cancelaron y la espera promedio hasta conseguir puesto.
 - **Choferes:** la tarjeta destaca el carro (foto, placa, unidad, aire) y su actividad: conectado ahora, viajes
   terminados, ★ promedio y último viaje.
 - **Pasajeros:** la tarjeta destaca la foto y dónde vive, y su actividad: viajes hechos y último viaje.
