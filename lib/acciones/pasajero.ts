@@ -111,8 +111,9 @@ export async function calificarViaje(anterior: Resultado, fd: FormData): Promise
   })
   if (error) return { error: "No se pudo guardar tu calificación. Intenta de nuevo.", intento }
   actualizarApp()
-  // Desde Mis viajes (calificar después, R51) se vuelve ahí; al terminar el viaje, a Inicio
-  redirect(fd.get("volver") === "mis-viajes" ? "/mis-viajes" : "/inicio")
+  // Calificando después (Mis viajes R51, Choferes R46) se vuelve ahí; al terminar el viaje, a Inicio
+  const volver = fd.get("volver")
+  redirect(volver === "mis-viajes" ? "/mis-viajes" : volver === "choferes" ? "/choferes" : "/inicio")
 }
 
 /** "Ahora no": se puede calificar después desde Choferes o Mis viajes (R45) */

@@ -5,9 +5,8 @@ import Link from "next/link"
 import { useState } from "react"
 
 import { Estrellas } from "@/components/estrellas"
-import { CalificarViaje } from "@/components/pasajero/calificar-viaje"
+import { HojaCalificar } from "@/components/historial/hoja-calificar"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import type { ViajePasajero } from "@/lib/datos/historial"
 import { diaYHora } from "@/lib/fechas"
 import { SENTIDOS } from "@/lib/viajes"
@@ -68,29 +67,7 @@ export function ViajesPasajero({ viajes }: { viajes: ViajePasajero[] }) {
         ))}
       </ol>
 
-      <Sheet open={calificando !== null} onOpenChange={(abierta) => !abierta && setCalificando(null)}>
-        <SheetContent side="bottom" className="mx-auto max-w-2xl">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Calificar el viaje</SheetTitle>
-            <SheetDescription>Cuenta cómo te fue con el chofer.</SheetDescription>
-          </SheetHeader>
-          <div className="px-5 pt-6 pb-6">
-            {calificando && (
-              <CalificarViaje
-                key={calificando.reservaId}
-                desdeHistorial
-                pendiente={{
-                  reservaId: calificando.reservaId,
-                  viajeId: calificando.viajeId,
-                  choferId: calificando.choferId,
-                  chofer: calificando.chofer,
-                  sentido: calificando.sentido,
-                }}
-              />
-            )}
-          </div>
-        </SheetContent>
-      </Sheet>
+      <HojaCalificar viaje={calificando} onCerrar={() => setCalificando(null)} />
     </>
   )
 }

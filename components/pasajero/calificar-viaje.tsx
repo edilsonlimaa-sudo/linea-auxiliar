@@ -19,9 +19,11 @@ const SIGNIFICADO = ["", "Muy mal", "Mal", "Regular", "Bien", "Excelente"]
 export function CalificarViaje({
   pendiente,
   desdeHistorial = false,
+  volver = "mis-viajes",
 }: {
   pendiente: CalificacionPendiente
-  desdeHistorial?: boolean // dentro de Mis viajes (R51): sin "Ahora no" y vuelve ahí al enviar
+  desdeHistorial?: boolean // calificar un viaje pasado (R51, R46): sin "Ahora no" y vuelve a `volver` al enviar
+  volver?: "mis-viajes" | "choferes"
 }) {
   const idComentario = useId()
   const [estrellas, setEstrellas] = useState(0)
@@ -48,7 +50,7 @@ export function CalificarViaje({
       <form action={enviar} className="flex flex-col gap-5">
         <input type="hidden" name="viaje" value={pendiente.viajeId} />
         <input type="hidden" name="chofer" value={pendiente.choferId} />
-        {desdeHistorial && <input type="hidden" name="volver" value="mis-viajes" />}
+        {desdeHistorial && <input type="hidden" name="volver" value={volver} />}
         <input type="hidden" name="estrellas" value={estrellas || ""} />
         {etiquetas.map((e) => (
           <input key={e} type="hidden" name="etiquetas" value={e} />
