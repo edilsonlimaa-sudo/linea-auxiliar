@@ -81,6 +81,10 @@ puede ocultar botones, pero nunca es la única barrera.
   Como nadie vigila la lista de pendientes todo el día, la pantalla de revisión tiene un botón principal
   **"Avisar al administrador por WhatsApp"** que abre el chat del admin (0412-9801484) con un mensaje listo:
   nombre, rol y el pedido de aprobación. Si la cuenta fue rechazada, el mismo botón sirve para preguntar qué falta.
+  **Eliminar [servidor]:** el admin puede borrar para siempre una cuenta **rechazada** (con confirmación): se van
+  sus datos, sus fotos y su acceso, y el teléfono queda libre para registrarse de nuevo. Solo se puede si la cuenta
+  no tiene viajes, reservas ni calificaciones en el historial (pasa si estuvo aprobada antes); en ese caso queda
+  rechazada y el panel lo explica. Las cuentas pendientes o aprobadas no se borran: primero se rechazan.
 - **R3. Teléfono único [servidor].** Un teléfono = una cuenta. Se normaliza a formato internacional
   (`0414-1234567` → `+584141234567`).
 - **R4. PIN olvidado.** No hay recuperación automática: el admin genera un PIN temporal y se lo pasa por

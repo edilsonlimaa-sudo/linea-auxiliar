@@ -750,6 +750,7 @@ export type Database = {
       }
       desconectar: { Args: never; Returns: undefined }
       desconectar_inactivos: { Args: never; Returns: undefined }
+      eliminar_cuenta: { Args: { p_usuario: string }; Returns: undefined }
       es_admin: { Args: never; Returns: boolean }
       es_aprobado: { Args: never; Returns: boolean }
       es_chofer: { Args: never; Returns: boolean }

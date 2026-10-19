@@ -3,7 +3,7 @@
 -- (…02) y su propia pasajera dentro de la transacción, que se deshace al final.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(9);
+select plan(14);
 
 -- ---------- Creación del admin (como superusuario, igual que el registro de Supabase Auth) ----------
 select public.crear_admin('prueba', 'admin123', '00000000-0000-4000-a000-000000000002');
@@ -45,11 +45,29 @@ select throws_ok($$ select * from public.admin_cuentas() $$, 'P0001', 'Solo para
   'Un pasajero no puede ver el panel de cuentas');
 select throws_ok($$ select public.clave_cambiada() $$, 'P0001', 'Solo para administración',
   'Un pasajero no puede usar las funciones de administración');
+select throws_ok($$ select public.eliminar_cuenta('00000000-0000-4000-a000-000000000021') $$, 'P0001',
+  'Solo el administrador puede eliminar cuentas', 'Un pasajero no puede eliminar cuentas');
 
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
 select ok(
   exists (select 1 from public.admin_cuentas('pendiente') where nombre = 'María González' and telefono = '+584140000021'),
   'El admin ve las cuentas pendientes con sus datos (un registro nuevo queda pendiente, R2)');
+
+-- ---------- Eliminar una cuenta rechazada (R2) ----------
+select throws_ok($$ select public.eliminar_cuenta('00000000-0000-4000-a000-000000000021') $$, 'P0001',
+  'Solo se eliminan cuentas rechazadas', 'Una cuenta pendiente no se elimina: primero se rechaza');
+select throws_ok($$ select public.eliminar_cuenta('00000000-0000-4000-a000-000000000002') $$, 'P0001',
+  'Las cuentas de administración no se eliminan', 'El admin no se elimina a sí mismo');
+
+select public.aprobar_cuenta('00000000-0000-4000-a000-000000000021', false);
+select lives_ok($$ select public.eliminar_cuenta('00000000-0000-4000-a000-000000000021') $$,
+  'El admin elimina una cuenta rechazada sin historial');
+reset role;
+select ok(
+  not exists (select 1 from auth.users where id = '00000000-0000-4000-a000-000000000021')
+    and not exists (select 1 from public.perfiles_privados where telefono = '+584140000021'),
+  'Se borran el acceso y los datos: el teléfono queda libre para registrarse de nuevo');
+set local role authenticated;
 
 select public.clave_cambiada();
 select is((select debe_cambiar_clave from public.perfiles where id = '00000000-0000-4000-a000-000000000002'), false,

@@ -1,6 +1,7 @@
 import { MessageCircleIcon, PhoneIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BotonDecision } from "@/components/admin/boton-decision"
+import { BotonEliminar } from "@/components/admin/boton-eliminar"
 import { Avatar } from "@/components/foto/avatar"
 import type { Database } from "@/lib/database.types"
 import { fechaHora, hace } from "@/lib/fechas"
@@ -100,6 +101,7 @@ export function TarjetaCuenta({
       <div className="flex gap-2 border-t-2 pt-4">
         {c.estado !== "aprobado" && <BotonDecision id={c.id} nombre={c.nombre} aprobar />}
         {c.estado !== "rechazado" && <BotonDecision id={c.id} nombre={c.nombre} aprobar={false} />}
+        {c.estado === "rechazado" && <BotonEliminar id={c.id} nombre={c.nombre} />}
       </div>
     </article>
   )
