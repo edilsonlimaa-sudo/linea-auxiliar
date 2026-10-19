@@ -698,6 +698,14 @@ export type Database = {
           telefono: string
         }[]
       }
+      admin_historial: {
+        Args: { p_usuario: string }
+        Returns: {
+          calificaciones: number
+          reservas: number
+          viajes: number
+        }[]
+      }
       apoyar_alerta: { Args: { p_alerta: string }; Returns: undefined }
       aprobar_cuenta: {
         Args: { p_aprobar: boolean; p_usuario: string }
@@ -750,7 +758,10 @@ export type Database = {
       }
       desconectar: { Args: never; Returns: undefined }
       desconectar_inactivos: { Args: never; Returns: undefined }
-      eliminar_cuenta: { Args: { p_usuario: string }; Returns: undefined }
+      eliminar_cuenta: {
+        Args: { p_con_historial?: boolean; p_usuario: string }
+        Returns: undefined
+      }
       es_admin: { Args: never; Returns: boolean }
       es_aprobado: { Args: never; Returns: boolean }
       es_chofer: { Args: never; Returns: boolean }

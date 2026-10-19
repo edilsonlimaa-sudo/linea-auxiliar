@@ -85,6 +85,10 @@ puede ocultar botones, pero nunca es la única barrera.
   sus datos, sus fotos y su acceso, y el teléfono queda libre para registrarse de nuevo. Solo se puede si la cuenta
   no tiene viajes, reservas ni calificaciones en el historial (pasa si estuvo aprobada antes); en ese caso queda
   rechazada y el panel lo explica. Las cuentas pendientes o aprobadas no se borran: primero se rechazan.
+  **Eliminar con historial:** si tiene historial, el panel muestra qué tiene (viajes, reservas, calificaciones) y
+  ofrece un segundo paso, con su propia confirmación, para borrarlo también: se borran sus viajes como chofer (con
+  sus reservas y calificaciones) y las calificaciones que dio o recibió. Sus reservas en viajes de otros choferes no
+  se borran: quedan como "Cuenta eliminada", para que el historial de esos choferes siga contando bien.
 - **R3. Teléfono único [servidor].** Un teléfono = una cuenta. Se normaliza a formato internacional
   (`0414-1234567` → `+584141234567`).
 - **R4. PIN olvidado.** No hay recuperación automática: el admin genera un PIN temporal y se lo pasa por

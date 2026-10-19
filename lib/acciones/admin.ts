@@ -85,13 +85,19 @@ export async function decidirCuenta(formData: FormData) {
   revalidatePath("/admin")
 }
 
-/** Eliminar para siempre una cuenta rechazada, con sus fotos (R2). Devuelve el error para mostrarlo en el panel. */
-export async function eliminarCuenta(id: string): Promise<{ error?: string }> {
+export type Historial = { viajes: number; reservas: number; calificaciones: number }
+
+/**
+ * Eliminar para siempre una cuenta rechazada, con sus fotos (R2). Si tiene historial y no se pidió borrarlo
+ * también, devuelve qué historial tiene para que el panel ofrezca el segundo paso.
+ */
+export async function eliminarCuenta(id: string, conHistorial = false): Promise<{ error?: string; historial?: Historial }> {
   const supabase = await crearClienteServidor()
-  const { error } = await supabase.rpc("eliminar_cuenta", { p_usuario: id })
+  const { error } = await supabase.rpc("eliminar_cuenta", { p_usuario: id, p_con_historial: conHistorial })
   if (error) {
     if (error.message.includes("historial")) {
-      return { error: "No se puede eliminar: esta cuenta tiene viajes en el historial. Queda rechazada y no puede usar la app." }
+      const { data } = await supabase.rpc("admin_historial", { p_usuario: id })
+      return { historial: data?.[0] ?? { viajes: 0, reservas: 0, calificaciones: 0 } }
     }
     return { error: "No pudimos eliminar la cuenta. Intenta de nuevo." }
   }
