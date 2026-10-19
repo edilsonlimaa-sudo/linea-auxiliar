@@ -84,9 +84,10 @@ Formularios: Server Action + `useActionState`, validación con zod y mensajes en
 `errores` por campo, `valores` para volver a llenar (nunca el PIN) e `intento` (se usa como `key` del form y para
 llevar el foco al primer error).
 
-Pasajero (especificación §8 "Inicio del pasajero"): **Inicio** responde en orden: ¿hay choferes trabajando? →
-"¿Hacia dónde vas?" + "¿Dónde estás?" → **Avisar que estoy esperando** (la espera es el primer paso de todos, R31) →
-esperando: las unidades de ese sentido. Apartar es **un toque**: la acción `apartarPuesto(viajeId)` lee el lugar de la
+Pasajero (especificación §8 "Inicio del pasajero"): **Inicio** es una puerta de entrada, no un formulario: saludo →
+"¿Cómo está la línea?" (`EstadoDeLaLinea`) → **Necesito un transporte** (hoja con sentido + lugar → avisar que espera,
+R31) y **Lo de siempre** (repite el último pedido de un toque) → atajos (`puerta-de-entrada.tsx`). Esperando: las
+unidades de ese sentido. Apartar es **un toque**: la acción `apartarPuesto(viajeId)` lee el lugar de la
 espera (o de la reserva, al cambiarse de unidad, R27). Al apartar, la acción redirige a **`/mi-viaje`** (puesto o
 turno → cuándo llega → dónde → avance → chofer → acciones). Con reserva activa, `/inicio` redirige a `/mi-viaje`
 (salvo `/inicio?cambiar=1`: otras unidades con puesto, R22) y el menú muestra "Mi viaje" de primero; "Ya no voy"

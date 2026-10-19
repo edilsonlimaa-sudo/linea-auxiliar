@@ -332,20 +332,23 @@ que tiene su propia página (también es adonde llevan los avisos de §7):
   min, se puede cerrar): salió lleno (R14), el chofer canceló (R24), no puede pasar por ti (R29) o marcó que no
   llegaste (R21). Siempre con "Escoge otra unidad". Si lo cerró él mismo ("Ya no voy"), no hace falta aviso.
 
-**Inicio del pasajero: preguntas en orden.** Al entrar, el pasajero quiere saber cosas en un orden; la pantalla
-responde una por vez en lugar de mostrar todo junto:
+**Inicio del pasajero: una puerta de entrada, no un formulario.** No todos abren la app para viajar ya: unos
+quieren saber si la línea está trabajando antes de salir de casa, ver el aviso, mirar un chofer o un viaje pasado.
+Por eso Inicio **primero informa y después pregunta**, con una sola acción principal:
 
-1. **¿Hay choferes trabajando?** Arriba y en grande: "3 choferes trabajando ahora" o "Ningún chofer trabajando
-   ahora". Sin choferes igual puede avisar que espera: es la señal que hace salir a alguien (R31).
-2. **¿Hacia dónde vas? y ¿Dónde estás?** En la misma pantalla, sin hojas: los dos sentidos, sus lugares
-   recientes o escribir otro, GPS opcional, y el botón **Avisar que estoy esperando**. Encima del botón, un
-   resumen del sentido escogido ("2 unidades van al Centro · la próxima recoge en ~5 min") para quien solo quiere
-   saber si vale la pena salir.
-3. **Esperando.** "Estás esperando para ir al Centro · en Calle 3…", con **Cambiar** (sentido o lugar) y **Ya no
-   estoy esperando**. Debajo, **las unidades de ese sentido**; cada una con **Apartar puesto** de un toque
-   (R27). Sin unidades: "Todavía no hay unidades hacia el Centro. Te avisamos cuando venga una" (R32).
-   Después: **Ver en el mapa** en cada unidad, por dónde viene el carro (R41).
-4. **Apartó** → Mi viaje.
+1. **Saludo** según la hora ("Buenos días, María").
+2. **¿Cómo está la línea?** Sin compromiso: choferes trabajando ahora y una línea por sentido ("Al Centro · 2
+   unidades · la próxima recoge en ~5 min" / "A Valle Grande · sin unidades ahora"), más el aviso del día.
+3. **Necesito un transporte** (la acción principal, grande). Recién ahí se pregunta **¿hacia dónde vas? y ¿dónde
+   estás?** en una hoja: sentidos, lugares recientes o escribir otro, GPS opcional → **Avisar que estoy esperando**
+   (R31). Sin choferes trabajando igual se puede: es la señal que hace salir a alguien.
+4. **Lo de siempre:** si ya viajó, un atajo de un toque que repite su último pedido ("Al Centro · desde Calle 3…").
+   La mayoría hace el mismo viaje casi todos los días.
+5. **Atajos** a Choferes y Mis viajes, para quien entró a mirar.
+
+Después de avisar que espera, Inicio pasa a **Esperando**: "Estás esperando para ir al Centro · en Calle 3…", con
+**Cambiar** y **Ya no estoy esperando**, y debajo **las unidades de ese sentido**, cada una con **Apartar puesto** de
+un toque (R27) y **Ver en el mapa** (R41). Sin unidades: "Te avisamos cuando venga una" (R32). Al apartar → Mi viaje.
 
 **Mi viaje del chofer (su Inicio).** El chofer usa la app **parado en la recogida o en un semáforo, con prisa y
 a veces con una mano**. Por eso:
