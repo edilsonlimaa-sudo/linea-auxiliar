@@ -73,9 +73,10 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 | `lib/viajes.ts` | Reglas de presentación puras: cuándo llega (`llegada`), puestos libres, orden para el pasajero |
 | `lib/datos/*.ts` | Cargas de datos de cada pantalla (server-only), p. ej. `cargarInicioPasajero` |
 | `components/chofer/` | Inicio del chofer (§8 "Mi viaje del chofer"): `PublicarViaje` (modos primero / cadena / desde_ruta, R10–R11) y `AgregarViaje`, `ViajeChofer` (lista + `FilaPasajero`; `plegado` para próximos viajes), `BarraAccion` (la acción principal pegada abajo), `OcuparPuesto`, `MasOpciones`, `Conexion`. Datos: `lib/datos/inicio-chofer.ts`; acciones: `lib/acciones/chofer.ts` |
-| `components/en-vivo.tsx` | **Tiempo real** (§4): el navegador se suscribe directo a Supabase Realtime con su sesión (RLS) y hace `router.refresh()` al haber cambios. Toda página que muestra viajes lo incluye. Es lo **único** que usa `cliente-navegador.ts` (además del mapa): datos y acciones van siempre por el servidor |
+| `components/en-vivo.tsx` | **Tiempo real** (§4): el navegador se suscribe directo a Supabase Realtime con su sesión (RLS) y hace `router.refresh()` al haber cambios. Toda página que muestra viajes lo incluye. El navegador usa `cliente-navegador.ts` solo para Realtime (esto y el mapa) y para subir fotos; datos y acciones van siempre por el servidor |
 | `components/chofer/compartir-ubicacion.tsx` · `components/pasajero/ver-en-mapa.tsx` | Posición del chofer (R40: watchPosition, cada 15 s o 30 m, Wake Lock) y mapa del pasajero (R41: Leaflet + OSM; con la hoja abierta recibe la posición por Realtime). Cálculos en `lib/mapa.ts` |
 | `lib/datos/historial.ts` · `components/historial/` · `components/carnet.tsx` | Mis viajes (pasajero R51 con "Calificar" después; chofer R50), Mis calificaciones del chofer (R52, sin nombres) y Mi carnet (R53, ambos) |
+| `lib/fotos.ts` · `components/foto/` | Fotos (R54): `firmarFotos(rutas)` da enlaces firmados de 1 h (bucket privado); `<SubirFoto>` achica en el teléfono (1080 px, JPEG), sube **directo a Storage** a la carpeta propia y la acción `guardarFoto` la registra; `<Avatar>` cae a iniciales; `<InterruptorAire>` (R55) |
 | `components/confirmar.tsx` | Confirmación propia (hoja inferior en el celular). **Nunca `window.confirm`**. Botones que dicen qué pasa ("Sí, ya no voy" / "No, sigo en el viaje"); el foco empieza en la opción segura |
 | `components/pasajero/` | Inicio del pasajero: `FormularioEspera` / `EstadoEspera` (pasos 2 y 3), `ElegirLugar` (lugares recientes + texto libre + GPS), `TarjetaUnidad` con `BotonApartar` (un toque), `MiReservaTarjeta` |
 
@@ -93,7 +94,7 @@ vuelve a Inicio. "En curso" = reserva activa **o a bordo** (`subio` en viaje en 
 marca "Se bajó" (R38), Mi viaje muestra la calificación pendiente (12 h, `CalificarViaje`). Si otro cierra la reserva, Inicio explica por qué (`AvisoCierre`, 30 min). Las acciones que cambian la reserva revalidan todo el layout (el menú depende de ella). Se refresca
 en vivo (`EnVivo`, respaldo cada 60 s).
 
-Rutas actuales: `/` portada · `/registro/[pasajero|chofer]` · `/entrar` · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (provisoria) · `/admin/entrar` · `/admin` · `/admin/clave`.
+Rutas actuales: `/` portada · `/registro/[pasajero|chofer]` · `/entrar` · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin` · `/admin/clave`.
 
 ### Administración
 

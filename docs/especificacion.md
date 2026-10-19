@@ -71,8 +71,8 @@ puede ocultar botones, pero nunca es la única barrera.
 ### 5.1 Cuentas y acceso
 
 - **R1. Registro.** Nombre, teléfono (WhatsApp), PIN de 6 dígitos y rol. Pasajero: urbanismo. Chofer: placa
-  (obligatoria), unidad, modelo, color. Foto de perfil y foto del carro **opcionales** (el admin ve "Falta
-  foto"). Cédula **opcional**.
+  (obligatoria), unidad, modelo, color y si tiene **aire acondicionado** (R55). Foto de perfil y foto del carro
+  **opcionales** (R54; el admin ve "Falta foto"). Cédula **opcional**.
 - **R2. Aprobación [servidor].** Toda cuenta nueva queda `pendiente`. Puede iniciar sesión y ver la app, pero
   **no puede apartar, publicar ni agregar a nadie** hasta que el admin la apruebe. Ve el aviso "Tu cuenta
   está en revisión". El admin puede `aprobar` o `rechazar`; rechazado no puede operar.
@@ -227,7 +227,11 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R45.** Al terminar su viaje (el chofer terminó el viaje **o marcó que se bajó**, R38) aparece "¿Cómo te fue con…?" (1 toque en las estrellas; etiquetas y comentario
   opcionales: Puntual, Seguro, Amable, Respetó el orden, Carro limpio). "Ahora no" la pospone: se puede
   calificar después desde **Choferes** o **Mis viajes**.
-- **R46.** Las tarjetas de chofer muestran ★ promedio, cantidad y los dos comentarios más recientes.
+- **R46. Choferes** (pasajero): todos los choferes verificados de la línea, para conocerlos y escoger con
+  confianza. Primero los que **trabajan ahora**; después, por ★. Cada tarjeta: foto (R54), nombre, ✓ Verificado,
+  el carro (placa, modelo, color, unidad, ❄️ con aire, R55), ★ promedio y cantidad, y **los dos comentarios más
+  recientes** (sin el nombre de quien opinó, R52). Si el pasajero tiene un viaje sin calificar con ese chofer,
+  la tarjeta ofrece **Calificar** (R45). Sin teléfono: solo lo ve quien tiene reserva con él (§6).
 
 ### 5.14 Transparencia y avisos
 
@@ -251,7 +255,23 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R53.** **Mi carnet** (pasajero y chofer): la credencial de la línea para mostrar si se la piden. Nombre,
   rol, **✓ Verificado** con la fecha de aprobación, teléfono y cédula (si la dio). Pasajero: urbanismo. Chofer:
   unidad, **placa** en grande, modelo y color, y su ★ (enlace a Mis calificaciones). Por ahora solo lectura: para
-  corregir un dato se le pide al administrador. La foto vendrá con la subida de fotos (R1).
+  corregir un dato se le pide al administrador, salvo las fotos (R54) y el aire acondicionado (R55), que se
+  cambian ahí mismo.
+
+### 5.16 Fotos y comodidades
+
+- **R54. Fotos.** Foto de perfil (pasajero y chofer) y foto del carro (chofer). Opcionales, pero ayudan a
+  reconocerse en la calle y a que el admin verifique (R1, "Falta foto").
+  - **Dónde se ponen:** mientras la cuenta está en revisión (la pantalla lo pide: ayuda a que la aprueben) y
+    siempre en **Mi carnet** ("Cambiar foto"). Con la cámara o de la galería.
+  - **Livianas:** la app la achica en el teléfono antes de subirla (máx. 1080 px, JPEG): datos móviles caros (§10).
+  - **Dónde se ven:** la del chofer en las unidades y en Mi viaje; **la del carro en Mi viaje**, para reconocerlo
+    al llegar; la de cada pasajero en la lista del chofer; ambas en el panel del admin y en el carnet. Sin foto,
+    las iniciales.
+  - **[servidor]** Bucket privado: cada uno sube solo a su carpeta; las ven solo usuarios con sesión, con
+    enlaces firmados que vencen en 1 h.
+- **R55. Aire acondicionado.** El chofer indica si su carro tiene aire (al registrarse y en Mi carnet). Los
+  pasajeros lo ven en cada unidad y en Mi viaje ("❄️ Con aire").
 
 ## 6. Privacidad: quién ve qué [servidor]
 
