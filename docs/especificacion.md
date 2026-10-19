@@ -229,6 +229,9 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   - Si la persona mueve o acerca el mapa con el dedo, el mapa **deja de seguir** (respeta su zoom) y aparece
     **"Seguir al carro"** para volver a centrarlo.
   - El 🚐 se desliza a la posición nueva en vez de saltar.
+  - **Hacia dónde va:** con dos posiciones a más de 15 m, el mapa calcula el rumbo. Una flecha alrededor del 🚐
+    apunta en esa dirección y el 🚐 mira a la izquierda o a la derecha según el rumbo (nunca se gira de cabeza).
+    Parado o con movimientos menores a 15 m, se queda el último rumbo; sin rumbo todavía, no hay flecha.
 - **R42.** Una posición con más de 10 min se considera vieja y no se muestra.
 
 ### 5.12 Auxilio vial (solo choferes)

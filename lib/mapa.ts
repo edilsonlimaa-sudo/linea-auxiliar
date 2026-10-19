@@ -20,3 +20,15 @@ export function distanciaTexto(metros: number): string {
 
 /** Una posición con más de 10 min se considera vieja y no se muestra (R42) */
 export const POSICION_VIEJA_MS = 10 * 60_000
+
+/** Rumbo de a hacia b en grados (0 = norte, 90 = este, 180 = sur, 270 = oeste) */
+export function rumbo(a: Punto, b: Punto): number {
+  const rad = (g: number) => (g * Math.PI) / 180
+  const dLng = rad(b.lng - a.lng)
+  const y = Math.sin(dLng) * Math.cos(rad(b.lat))
+  const x = Math.cos(rad(a.lat)) * Math.sin(rad(b.lat)) - Math.sin(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.cos(dLng)
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360
+}
+
+/** Por debajo de esto, el movimiento puede ser ruido del GPS: no cambia el rumbo */
+export const MOVIMIENTO_MINIMO_M = 15

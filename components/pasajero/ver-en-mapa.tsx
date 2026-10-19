@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { posicionDeChofer, type PosicionChofer } from "@/lib/acciones/pasajero"
 import { hace } from "@/lib/fechas"
-import { distanciaMetros, distanciaTexto, POSICION_VIEJA_MS, type Punto } from "@/lib/mapa"
+import { distanciaMetros, distanciaTexto, MOVIMIENTO_MINIMO_M, POSICION_VIEJA_MS, rumbo, type Punto } from "@/lib/mapa"
 import { crearClienteNavegador } from "@/lib/supabase/cliente-navegador"
 
 // Con el mapa abierto la posición llega por Realtime; cada 60 s se vuelve a leer para descartar la vieja (R42)
@@ -25,6 +25,44 @@ const icono = (L: typeof import("leaflet"), emoji: string, etiqueta: string) =>
     iconSize: [36, 36],
     iconAnchor: [18, 30],
   })
+
+/**
+ * Marcador del carro: el 🚐 en pie (mira a la izquierda o a la derecha) y una flecha alrededor que apunta hacia
+ * dónde va (R41). La flecha empieza escondida hasta que hay rumbo.
+ */
+const iconoCarro = (L: typeof import("leaflet")) =>
+  L.divIcon({
+    className: "",
+    html: `<div role="img" aria-label="El carro" style="position:relative;width:56px;height:56px">
+      <div data-flecha style="position:absolute;inset:0;display:none;transition:transform .6s ease-out">
+        <div style="position:absolute;left:50%;top:-2px;transform:translateX(-50%);width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:15px solid var(--primary);filter:drop-shadow(0 0 1.5px var(--background)) drop-shadow(0 0 1.5px var(--background))"></div>
+      </div>
+      <div data-emoji style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:1;transition:transform .3s;filter:drop-shadow(0 1px 2px rgb(0 0 0 / .45))">🚐</div>
+    </div>`,
+    iconSize: [56, 56],
+    iconAnchor: [28, 28],
+  })
+
+/**
+ * Apunta la flecha al rumbo. `giro` acumula el ángulo para que la flecha gire por el lado corto (de 350° a 10°
+ * avanza 20°, no retrocede 340°). El 🚐 de los emojis mira a la izquierda: hacia el este se refleja.
+ */
+function apuntar(marcador: Marker, grados: number, giro: { current: number | null }) {
+  const el = marcador.getElement()
+  const flecha = el?.querySelector<HTMLElement>("[data-flecha]")
+  const emoji = el?.querySelector<HTMLElement>("[data-emoji]")
+  if (!flecha || !emoji) return
+  if (giro.current === null) giro.current = grados
+  else {
+    const actual = ((giro.current % 360) + 360) % 360
+    giro.current += ((grados - actual + 540) % 360) - 180
+  }
+  flecha.style.display = "block"
+  flecha.style.transform = `rotate(${giro.current}deg)`
+  // Casi norte o casi sur: se deja como estaba (no se voltea a cada rato)
+  const esteOeste = Math.sin((grados * Math.PI) / 180)
+  if (Math.abs(esteOeste) > 0.2) emoji.style.transform = esteOeste > 0 ? "scaleX(-1)" : "none"
+}
 
 // Zoom de calle: se distinguen las cuadras y el nombre de las calles
 const ZOOM_CALLE = 17
@@ -55,6 +93,8 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
   const automatico = useRef(false) // el movimiento lo hace el código, no la persona
   const siguiendoRef = useRef(true)
   const [siguiendo, setSiguiendo] = useState(true)
+  const anterior = useRef<Punto | null>(null) // última posición usada para calcular el rumbo
+  const giro = useRef<number | null>(null) // ángulo acumulado de la flecha
 
   /**
    * Movimientos del código: no cuentan como "la persona movió el mapa". La animación de Leaflet empieza en el
@@ -126,7 +166,18 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
     }
 
     if (mk.carro) deslizar(mk.carro, carro)
-    else mk.carro = L.marker(carro, { icon: icono(L, "🚐", "El carro"), zIndexOffset: 1000 }).addTo(m)
+    else {
+      mk.carro = L.marker(carro, { icon: iconoCarro(L), zIndexOffset: 1000 }).addTo(m)
+      // Marcador nuevo (p. ej. volvió a compartir): retoma el último rumbo conocido
+      if (giro.current !== null) apuntar(mk.carro, ((giro.current % 360) + 360) % 360, { current: null })
+    }
+
+    // Hacia dónde va: solo con un movimiento real (los saltitos del GPS no cambian el rumbo)
+    if (!anterior.current) anterior.current = carro
+    else if (distanciaMetros(anterior.current, carro) >= MOVIMIENTO_MINIMO_M) {
+      apuntar(mk.carro, rumbo(anterior.current, carro), giro)
+      anterior.current = carro
+    }
 
     if (!encuadrado.current) {
       // Primera posición: nivel de calle; con el pasajero, los dos a la vista
