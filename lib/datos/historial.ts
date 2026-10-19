@@ -93,36 +93,61 @@ export type ViajeTerminado = {
   puestos: number
   llevo: PersonaDelViaje[]
   noVinieron: string[]
-  calificaciones: { estrellas: number; comentario: string | null }[]
+  calificaciones: { estrellas: number; comentario: string | null; autor?: string }[]
+  chofer?: { nombre: string; placa: string | null } // solo en el panel del admin
 }
 
 /** Los últimos 20 viajes terminados del chofer, con quién llevó y cómo le fue */
 export async function cargarViajesChofer(choferId: string): Promise<ViajeTerminado[]> {
+  return cargarTerminados({ choferId, limite: 20, admin: false })
+}
+
+/** Viajes terminados de toda la línea desde una fecha, para el panel (§8): nombres completos y quién calificó */
+export async function cargarViajesTerminadosAdmin(desde: Date): Promise<ViajeTerminado[]> {
+  return cargarTerminados({ desde, limite: 100, admin: true })
+}
+
+async function cargarTerminados({
+  choferId,
+  desde,
+  limite,
+  admin,
+}: {
+  choferId?: string
+  desde?: Date
+  limite: number
+  admin: boolean
+}): Promise<ViajeTerminado[]> {
   const supabase = await crearClienteServidor()
-  const { data: viajes } = await supabase
+  let consulta = supabase
     .from("viajes")
-    .select("id, sentido, puestos, salida_en, llegada_en")
-    .eq("chofer_id", choferId)
+    .select("id, sentido, puestos, salida_en, llegada_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa))")
     .eq("estado", "finalizado")
-    .order("llegada_en", { ascending: false })
-    .limit(20)
+  if (choferId) consulta = consulta.eq("chofer_id", choferId)
+  if (desde) consulta = consulta.gte("llegada_en", desde.toISOString())
+  const { data: viajes } = await consulta.order("llegada_en", { ascending: false }).limit(limite)
   const ids = (viajes ?? []).map((v) => v.id)
   if (ids.length === 0) return []
 
   const [reservasRes, califsRes] = await Promise.all([
-    // El chofer lee las reservas de sus viajes (RLS)
+    // El chofer lee las reservas de sus viajes; el admin, todas (RLS)
     supabase
       .from("reservas")
       .select("viaje_id, estado, nombre, en_camino, pasajero:perfiles!reservas_pasajero_id_fkey(nombre)")
       .in("viaje_id", ids)
       .in("estado", ["subio", "bajo", "no_llego"])
       .order("creado_en"),
-    supabase.from("calificaciones").select("viaje_id, estrellas, comentario").in("viaje_id", ids),
+    supabase
+      .from("calificaciones")
+      .select("viaje_id, estrellas, comentario, pasajero:perfiles!calificaciones_pasajero_id_fkey(nombre)")
+      .in("viaje_id", ids),
   ])
 
   return (viajes ?? []).map((v) => {
     const deEste = (reservasRes.data ?? []).filter((r) => r.viaje_id === v.id)
-    const nombre = (r: (typeof deEste)[number]) => (r.pasajero ? nombreCorto(r.pasajero.nombre) : (r.nombre ?? "Pasajero sin app"))
+    // El chofer ve el nombre corto; el admin, el completo
+    const nombre = (r: (typeof deEste)[number]) =>
+      r.pasajero ? (admin ? r.pasajero.nombre : nombreCorto(r.pasajero.nombre)) : (r.nombre ?? "Pasajero sin app")
     return {
       id: v.id,
       sentido: v.sentido,
@@ -138,8 +163,11 @@ export async function cargarViajesChofer(choferId: string): Promise<ViajeTermina
           seBajoAntes: r.estado === "bajo",
         })),
       noVinieron: deEste.filter((r) => r.estado === "no_llego").map(nombre),
-      // Sin quién calificó (R52)
-      calificaciones: (califsRes.data ?? []).filter((c) => c.viaje_id === v.id).map((c) => ({ estrellas: c.estrellas, comentario: c.comentario })),
+      // El chofer no sabe quién lo calificó (R52); el admin sí
+      calificaciones: (califsRes.data ?? [])
+        .filter((c) => c.viaje_id === v.id)
+        .map((c) => ({ estrellas: c.estrellas, comentario: c.comentario, ...(admin && c.pasajero ? { autor: c.pasajero.nombre } : {}) })),
+      ...(admin && v.chofer ? { chofer: { nombre: v.chofer.nombre, placa: unoSolo(v.chofer.vehiculo)?.placa ?? null } } : {}),
     }
   })
 }

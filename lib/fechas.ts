@@ -52,3 +52,8 @@ export function saludo(ahora = new Date()): string {
   const h = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: ZONA }).format(ahora))
   return h >= 5 && h < 12 ? "Buenos días" : h >= 12 && h < 19 ? "Buenas tardes" : "Buenas noches"
 }
+
+/** Medianoche de hoy en Caracas (UTC-4, sin horario de verano), menos `dias` días */
+export function inicioDelDia(dias = 0, ahora = new Date()): Date {
+  return new Date(new Date(`${diaCaracas(ahora)}T00:00:00-04:00`).getTime() - dias * 86_400_000)
+}

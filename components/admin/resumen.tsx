@@ -102,7 +102,11 @@ export function Resumen({
       {/* 3. Hoy */}
       <Seccion titulo="Hoy">
         <div className="grid grid-cols-3 gap-2">
-          <Dato valor={resumen?.viajes_hoy ?? 0} texto={resumen?.viajes_hoy === 1 ? "viaje terminado" : "viajes terminados"} />
+          <Dato
+            valor={resumen?.viajes_hoy ?? 0}
+            texto={resumen?.viajes_hoy === 1 ? "viaje terminado" : "viajes terminados"}
+            href="/admin/viajes/terminados?periodo=hoy"
+          />
           <Dato valor={resumen?.pasajeros_hoy ?? 0} texto={resumen?.pasajeros_hoy === 1 ? "pasajero llevado" : "pasajeros llevados"} />
           <Dato
             valor={

@@ -366,6 +366,11 @@ Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobaci
   "Recoge en Valle Grande en ~5 min" / "Próximo viaje"), puestos ocupados de cuántos, y la gente separada en
   **A bordo**, **Por recoger** (con dónde y "✋ ya está en el sitio"), **Pedidos en el camino** y **Lista de espera**.
   Cada persona con nombre completo, dónde la recogen, WhatsApp y Llamar. Solo lectura: el admin no cambia listas.
+- **Viajes terminados** (enlace desde Viajes en curso y desde "viajes terminados" de Hoy en el Resumen): los
+  viajes finalizados de toda la línea, del más reciente al más viejo, con filtro **Hoy · 7 días · 30 días**
+  (máx. 100). Arriba, el total del período: viajes, pasajeros llevados y ★ promedio. Cada viaje, plegado como en
+  Mis viajes del chofer (R50): chofer y placa, sentido, salida y llegada, duración, a quién llevó (nombre completo y
+  cómo entró), quién no vino y sus calificaciones. A diferencia del chofer (R52), el admin sí ve quién calificó.
 - **Demanda** (para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
   1. **Por sentido** (Al Centro / A Valle Grande): cuántos esperan, cuántas unidades aceptan pasajeros con cuántos
      puestos libres, y si **falta transporte** (esperan más que los puestos libres) o está cubierto.

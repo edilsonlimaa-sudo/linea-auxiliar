@@ -29,6 +29,9 @@ export default async function PaginaViajes() {
         </Link>
         <h1 className="text-[26px] leading-tight font-bold">Viajes en curso</h1>
         <p className="text-muted-foreground">Quién va en cada carro y por dónde va. Se actualiza sola.</p>
+        <Link href="/admin/viajes/terminados" className="mt-1 w-fit font-bold text-primary underline underline-offset-4">
+          Ver viajes terminados
+        </Link>
       </header>
       {error ? (
         <Alert variant="destructive">

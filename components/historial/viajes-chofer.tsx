@@ -13,8 +13,19 @@ const ENTRADA: Record<PersonaDelViaje["entrada"], string> = {
   en_el_camino: "Recogido en el camino",
 }
 
-/** Mis viajes del chofer (R50): los últimos 20 terminados, plegados; al abrir, a quién llevó y cómo le fue */
-export function ViajesChofer({ viajes }: { viajes: ViajeTerminado[] }) {
+/**
+ * Mis viajes del chofer (R50): los últimos 20 terminados, plegados; al abrir, a quién llevó y cómo le fue.
+ * Con `admin` es la lista de Viajes terminados del panel (§8): dice qué chofer y quién calificó.
+ */
+export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado[]; admin?: boolean }) {
+  if (viajes.length === 0 && admin) {
+    return (
+      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+        <BusIcon aria-hidden className="size-10 text-muted-foreground" />
+        <p className="text-lg font-bold">No hay viajes terminados en este período</p>
+      </div>
+    )
+  }
   if (viajes.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
@@ -32,12 +43,19 @@ export function ViajesChofer({ viajes }: { viajes: ViajeTerminado[] }) {
     <ol className="flex flex-col gap-3">
       {viajes.map((v) => {
         const promedio = v.calificaciones.length ? v.calificaciones.reduce((s, c) => s + c.estrellas, 0) / v.calificaciones.length : null
-        const comentarios = v.calificaciones.filter((c) => c.comentario)
+        // El admin ve todas con quién calificó; el chofer, solo los comentarios sin nombre (R52)
+        const comentarios = admin ? v.calificaciones : v.calificaciones.filter((c) => c.comentario)
         return (
           <li key={v.id}>
             <details className="group rounded-2xl border-2 bg-card">
               <summary className="flex cursor-pointer list-none items-start gap-3 rounded-2xl p-4 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
                 <span className="min-w-0 flex-1">
+                  {v.chofer && (
+                    <span className="block font-bold text-primary">
+                      {v.chofer.nombre}
+                      {v.chofer.placa && <span className="ml-2 font-mono text-sm tracking-wider text-muted-foreground">{v.chofer.placa}</span>}
+                    </span>
+                  )}
                   <span className="block text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[v.sentido].largo}</span>
                   <span className="block text-lg leading-tight font-bold">{v.salida ? diaYHora(v.salida) : "Sin hora de salida"}</span>
                   <span className="block text-[15px] text-muted-foreground">
@@ -58,7 +76,7 @@ export function ViajesChofer({ viajes }: { viajes: ViajeTerminado[] }) {
 
                 <section className="flex flex-col gap-2">
                   <h3 className="font-bold">
-                    Llevaste <span className="font-normal text-muted-foreground">({v.llevo.length} de {v.puestos} puestos)</span>
+                    {admin ? "Llevó" : "Llevaste"} <span className="font-normal text-muted-foreground">({v.llevo.length} de {v.puestos} puestos)</span>
                   </h3>
                   {v.llevo.length === 0 ? (
                     <p className="text-muted-foreground">Nadie en este viaje.</p>
@@ -101,7 +119,12 @@ export function ViajesChofer({ viajes }: { viajes: ViajeTerminado[] }) {
                       </p>
                       {comentarios.map((c, i) => (
                         <blockquote key={i} className="rounded-xl border-l-4 border-signal bg-muted px-3 py-2">
-                          “{c.comentario}”
+                          {c.autor && (
+                            <span className="mb-0.5 flex items-center gap-2 text-sm font-bold">
+                              {c.autor} <Estrellas valor={c.estrellas} tamano="size-4" />
+                            </span>
+                          )}
+                          {c.comentario ? `“${c.comentario}”` : <span className="text-muted-foreground">Sin comentario</span>}
                         </blockquote>
                       ))}
                     </>
