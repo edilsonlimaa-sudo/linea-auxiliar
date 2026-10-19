@@ -308,7 +308,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 
 | Rol | Secciones |
 |---|---|
-| Sin sesión | Portada (¿Cómo vas a usar la app? → Soy pasajero / Soy chofer) · Registro · Entrar |
+| Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Mi viaje** (conexión, GPS, recogida actual, próximos viajes, agregar viaje) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
 | Admin | Aviso del día · Pendientes · Choferes · Pasajeros (+ ficha, restablecer PIN) |
@@ -337,8 +337,10 @@ quieren saber si la línea está trabajando antes de salir de casa, ver el aviso
 Por eso Inicio **primero informa y después pregunta**, con una sola acción principal:
 
 1. **Saludo** según la hora ("Buenos días, María").
-2. **¿Cómo está la línea?** Sin compromiso: choferes trabajando ahora y una línea por sentido ("Al Centro · 2
-   unidades · la próxima recoge en ~5 min" / "A Valle Grande · sin unidades ahora"), más el aviso del día.
+2. **¿Cómo está la línea?** Sin compromiso: **quién está trabajando ahora** (R7). Los choferes dan vueltas (van al
+   Centro y vuelven), así que no se separa por sentido: importa saber que hay alguien en la ruta y quién es. Por
+   cada uno: foto, nombre, ★, placa y unidad, ❄️ si tiene aire y qué hace ahora ("Recogiendo en Valle Grande",
+   "En ruta hacia el Centro", "Disponible"). Más el aviso del día. El sentido se escoge recién al pedir (paso 3).
 3. **Necesito un transporte** (la acción principal, grande). Recién ahí se pregunta **¿hacia dónde vas? y ¿dónde
    estás?** en una hoja: sentidos, lugares recientes o escribir otro, GPS opcional → **Avisar que estoy esperando**
    (R31). Sin choferes trabajando igual se puede: es la señal que hace salir a alguien.

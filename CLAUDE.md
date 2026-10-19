@@ -95,7 +95,8 @@ vuelve a Inicio. "En curso" = reserva activa **o a bordo** (`subio` en viaje en 
 marca "Se bajó" (R38), Mi viaje muestra la calificación pendiente (12 h, `CalificarViaje`). Si otro cierra la reserva, Inicio explica por qué (`AvisoCierre`, 30 min). Las acciones que cambian la reserva revalidan todo el layout (el menú depende de ella). Se refresca
 en vivo (`EnVivo`, respaldo cada 60 s).
 
-Rutas actuales: `/` portada · `/registro/[pasajero|chofer]` · `/entrar` · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin` · `/admin/clave`.
+Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pasajero o chofer?) → `/registro/[pasajero|chofer]` ·
+`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin` · `/admin/clave`.
 
 ### Administración
 
