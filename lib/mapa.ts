@@ -32,3 +32,6 @@ export function rumbo(a: Punto, b: Punto): number {
 
 /** Por debajo de esto, el movimiento puede ser ruido del GPS: no cambia el rumbo */
 export const MOVIMIENTO_MINIMO_M = 15
+
+/** El chofer envía cada 15 s: sin nada en 1 min, el mapa avisa "Sin señal" (R42) */
+export const EN_VIVO_MS = 60_000

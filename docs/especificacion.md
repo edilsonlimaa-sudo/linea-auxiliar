@@ -233,6 +233,12 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
     apunta en esa dirección y el 🚐 mira a la izquierda o a la derecha según el rumbo (nunca se gira de cabeza).
     Parado o con movimientos menores a 15 m, se queda el último rumbo; sin rumbo todavía, no hay flecha.
 - **R42.** Una posición con más de 10 min se considera vieja y no se muestra.
+  - **¿Está en vivo?** El chofer envía cada 15 s mientras tiene la app abierta. El mapa lo dice siempre, con la
+    hora contando sola:
+    - Última posición hace menos de 1 min: **"● En vivo"** (verde).
+    - Entre 1 y 10 min: **"Sin señal · última hace N min"** (amarillo). El 🚐 se ve gris y semitransparente en la
+      última posición conocida, con la explicación: "Puede que haya cerrado la app o perdido la señal".
+    - Más de 10 min: desaparece (como antes): "no está compartiendo su ubicación ahora".
 
 ### 5.12 Auxilio vial (solo choferes)
 

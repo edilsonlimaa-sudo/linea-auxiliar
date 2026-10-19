@@ -4,13 +4,14 @@ import "leaflet/dist/leaflet.css"
 
 import type { Map as MapaLeaflet, Marker } from "leaflet"
 import { Loader2Icon, LocateFixedIcon, MapIcon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { posicionDeChofer, type PosicionChofer } from "@/lib/acciones/pasajero"
 import { hace } from "@/lib/fechas"
-import { distanciaMetros, distanciaTexto, MOVIMIENTO_MINIMO_M, POSICION_VIEJA_MS, rumbo, type Punto } from "@/lib/mapa"
+import { distanciaMetros, distanciaTexto, EN_VIVO_MS, MOVIMIENTO_MINIMO_M, POSICION_VIEJA_MS, rumbo, type Punto } from "@/lib/mapa"
+import { cn } from "@/lib/utils"
 import { crearClienteNavegador } from "@/lib/supabase/cliente-navegador"
 
 // Con el mapa abierto la posición llega por Realtime; cada 60 s se vuelve a leer para descartar la vieja (R42)
@@ -84,7 +85,7 @@ function deslizar(marcador: Marker, destino: Punto) {
  * Mapa en vivo (R41). Al abrir encuadra a nivel de calle; después sigue al carro sin tocar el zoom (solo se desliza
  * cuando el carro se acerca al borde). Si la persona mueve o acerca el mapa, deja de seguir y aparece "Seguir al carro".
  */
-function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
+function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; senal: { enVivo: boolean; texto: string } | null }) {
   const contenedor = useRef<HTMLDivElement>(null)
   const mapa = useRef<MapaLeaflet | null>(null)
   const marcadores = useRef<{ L: typeof import("leaflet"); carro?: Marker; yo?: Marker } | null>(null)
@@ -191,6 +192,13 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
     }
   }, [carro, yo, listo])
 
+  // Sin señal: el 🚐 queda gris y semitransparente en la última posición conocida (R42)
+  const enVivo = senal?.enVivo ?? true
+  useEffect(() => {
+    const el = marcadores.current?.carro?.getElement()
+    if (el) el.style.filter = enVivo ? "" : "grayscale(1) opacity(.5)"
+  }, [enVivo, carro, listo])
+
   const seguirAlCarro = () => {
     const m = mapa.current
     if (!m || !carro) return
@@ -202,6 +210,18 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
   return (
     <div className="relative">
       <div ref={contenedor} className="h-[55svh] w-full overflow-hidden rounded-2xl border-2 bg-muted" />
+      {senal && (
+        // Arriba a la derecha (el zoom está a la izquierda), encima de los controles de Leaflet
+        <p
+          className={cn(
+            "absolute top-3 right-3 z-[1001] flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-sm font-bold shadow-md",
+            senal.enVivo ? "border-success bg-success text-success-foreground" : "border-warning bg-warning-muted text-warning"
+          )}
+        >
+          {senal.enVivo && <span aria-hidden className="size-2 animate-pulse rounded-full bg-success-foreground" />}
+          {senal.texto}
+        </p>
+      )}
       {!siguiendo && carro && (
         // Encima de los controles de Leaflet (z-index hasta 1000)
         <Button size="sm" onClick={seguirAlCarro} className="absolute bottom-4 left-1/2 z-[1001] -translate-x-1/2 shadow-lg">
@@ -264,8 +284,22 @@ export function VerEnMapa({
     }
   }, [abierta, choferId])
 
+  // Reloj que solo corre con el mapa abierto: "hace N min" y "Sin señal" se actualizan solos (R42)
+  const suscribir = useCallback(
+    (avisar: () => void) => {
+      if (!abierta) return () => {}
+      const id = setInterval(avisar, 10_000)
+      return () => clearInterval(id)
+    },
+    [abierta]
+  )
+  const ahora = useSyncExternalStore(suscribir, () => Math.floor(Date.now() / 10_000) * 10_000, () => 0)
+
   const nombre = chofer.split(" ")[0]
   const distancia = carro && yo ? distanciaTexto(distanciaMetros(carro, yo)) : null
+  const enVivo = carro ? ahora - new Date(carro.actualizadaEn).getTime() < EN_VIVO_MS : false
+  const cuando = carro ? hace(carro.actualizadaEn) : ""
+  const senal = carro ? { enVivo, texto: enVivo ? "En vivo" : `Sin señal · última ${cuando}` } : null
 
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), !v && setCarro(undefined))}>
@@ -281,11 +315,13 @@ export function VerEnMapa({
               ? "Buscando el carro…"
               : carro === null
                 ? `${nombre} no está compartiendo su ubicación ahora.`
-                : distancia
-                  ? `El carro está a ${distancia} de ti · actualizado ${hace(carro.actualizadaEn)}.`
-                  : admin
-                    ? `Actualizado ${hace(carro.actualizadaEn)}.`
-                    : `Actualizado ${hace(carro.actualizadaEn)}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
+                : !enVivo
+                  ? `Sin señal: la última ubicación es de ${cuando}. Puede que ${nombre} haya cerrado la app o perdido la señal.`
+                  : distancia
+                    ? `El carro está a ${distancia} de ti · actualizado ${cuando}.`
+                    : admin
+                      ? `En vivo · actualizado ${cuando}.`
+                      : `Actualizado ${cuando}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-3 px-5 pb-6">
@@ -294,7 +330,7 @@ export function VerEnMapa({
               <Loader2Icon aria-hidden className="size-5 animate-spin" /> Cargando…
             </p>
           )}
-          {abierta && <Mapa carro={carro ?? null} yo={yo} />}
+          {abierta && <Mapa carro={carro ?? null} yo={yo} senal={senal} />}
           <p className="text-sm text-muted-foreground">🚐 el carro{yo ? " · 📍 tú" : ""}. Se mueve solo cuando el chofer envía su ubicación.</p>
         </div>
       </SheetContent>
