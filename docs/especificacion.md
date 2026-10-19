@@ -78,6 +78,9 @@ puede ocultar botones, pero nunca es la única barrera.
 - **R2. Aprobación [servidor].** Toda cuenta nueva queda `pendiente`. Puede iniciar sesión y ver la app, pero
   **no puede apartar, publicar ni agregar a nadie** hasta que el admin la apruebe. Ve el aviso "Tu cuenta
   está en revisión". El admin puede `aprobar` o `rechazar`; rechazado no puede operar.
+  Como nadie vigila la lista de pendientes todo el día, la pantalla de revisión tiene un botón principal
+  **"Avisar al administrador por WhatsApp"** que abre el chat del admin (0412-9801484) con un mensaje listo:
+  nombre, rol y el pedido de aprobación. Si la cuenta fue rechazada, el mismo botón sirve para preguntar qué falta.
 - **R3. Teléfono único [servidor].** Un teléfono = una cuenta. Se normaliza a formato internacional
   (`0414-1234567` → `+584141234567`).
 - **R4. PIN olvidado.** No hay recuperación automática: el admin genera un PIN temporal y se lo pasa por

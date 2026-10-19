@@ -1,4 +1,4 @@
-import { ClockIcon, XCircleIcon } from "lucide-react"
+import { ClockIcon, MessageCircleIcon, XCircleIcon } from "lucide-react"
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
@@ -6,7 +6,8 @@ import { BotonSalir } from "@/components/boton-salir"
 import { Avatar } from "@/components/foto/avatar"
 import { SubirFoto } from "@/components/foto/subir-foto"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { enlaceWhatsappAdmin, WHATSAPP_ADMIN_VISIBLE } from "@/lib/contacto"
 import { firmarFotos } from "@/lib/fotos"
 import { obtenerPerfil } from "@/lib/sesion"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
@@ -33,6 +34,12 @@ export default async function PaginaEnRevision() {
   const fotoCarroUrl = carro?.foto_path ? (fotos.get(carro.foto_path) ?? null) : null
   const faltan = !fotoUrl || (esChofer && !fotoCarroUrl)
 
+  // Nadie vigila la lista de pendientes todo el día: el aviso por WhatsApp acelera la aprobación (R2)
+  const comoQue = esChofer ? "chofer" : "pasajero"
+  const mensaje = rechazada
+    ? `Hola, soy ${perfil.nombre}. Mi cuenta de ${comoQue} en la app Línea Auxiliar no fue aprobada. ¿Qué me falta?`
+    : `Hola, soy ${perfil.nombre}. Me acabo de registrar como ${comoQue} en la app Línea Auxiliar. ¿Me puedes aprobar la cuenta?`
+
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-[26px] leading-tight font-bold">Hola, {nombre}</h1>
@@ -42,7 +49,7 @@ export default async function PaginaEnRevision() {
           <XCircleIcon aria-hidden />
           <AlertTitle>Tu cuenta no fue aprobada</AlertTitle>
           <AlertDescription>
-            Comunícate con la administración de la línea para saber qué falta.
+            Pregúntale al administrador qué falta.
           </AlertDescription>
         </Alert>
       ) : (
@@ -51,11 +58,26 @@ export default async function PaginaEnRevision() {
           <AlertTitle>Tu cuenta está en revisión</AlertTitle>
           <AlertDescription>
             El administrador de la línea va a revisar tus datos. Cuando te apruebe podrás{" "}
-            {perfil.rol === "chofer" ? "publicar tus viajes" : "apartar puesto en las unidades"}. Puede tomar
-            unas horas.
+            {perfil.rol === "chofer" ? "publicar tus viajes" : "apartar puesto en las unidades"}. Avísale por
+            WhatsApp para que lo vea antes.
           </AlertDescription>
         </Alert>
       )}
+
+      <div className="flex flex-col gap-2">
+        <a
+          href={enlaceWhatsappAdmin(mensaje)}
+          target="_blank"
+          rel="noreferrer"
+          className={buttonVariants({ variant: "whatsapp", size: "lg", className: "w-full" })}
+        >
+          <MessageCircleIcon aria-hidden />
+          {rechazada ? "Preguntar al administrador" : "Avisar al administrador"}
+        </a>
+        <p className="text-center text-[15px] text-muted-foreground">
+          Por WhatsApp, al {WHATSAPP_ADMIN_VISIBLE}
+        </p>
+      </div>
 
       {!rechazada && (
         <section aria-labelledby="titulo-fotos" className="flex flex-col gap-3 rounded-lg border-2 bg-card p-4">
@@ -84,10 +106,7 @@ export default async function PaginaEnRevision() {
       {!rechazada && (
         <section className="rounded-lg border-2 bg-card p-4">
           <h2 className="text-lg font-bold">Mientras tanto</h2>
-          <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-5">
-            <li>Guarda bien tu PIN: lo necesitas para entrar.</li>
-            <li>Si conoces al administrador, avísale por WhatsApp que ya te registraste.</li>
-          </ul>
+          <p className="mt-2">Guarda bien tu PIN: lo necesitas para entrar.</p>
         </section>
       )}
 
