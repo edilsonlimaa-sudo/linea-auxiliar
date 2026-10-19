@@ -224,6 +224,11 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R41.** **Ver en el mapa** en cada unidad (Inicio, esperando) y en Mi viaje abre un mapa con 🚐 el carro,
   📍 el pasajero (si compartió GPS) y "está a 744 m de ti". Mientras está abierto, la posición llega por
   Realtime cada vez que el chofer la envía. Sin posición reciente: "Este chofer no está compartiendo su ubicación ahora".
+  - **Encuadre:** al abrir, nivel de calle (zoom 17; con 📍, los dos a la vista, hasta zoom 17). Después el mapa
+    **sigue al carro** sin cambiar el zoom: solo se desliza cuando el carro se acerca al borde.
+  - Si la persona mueve o acerca el mapa con el dedo, el mapa **deja de seguir** (respeta su zoom) y aparece
+    **"Seguir al carro"** para volver a centrarlo.
+  - El 🚐 se desliza a la posición nueva en vez de saltar.
 - **R42.** Una posición con más de 10 min se considera vieja y no se muestra.
 
 ### 5.12 Auxilio vial (solo choferes)

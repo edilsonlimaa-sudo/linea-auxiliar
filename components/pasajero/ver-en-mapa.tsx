@@ -3,7 +3,7 @@
 import "leaflet/dist/leaflet.css"
 
 import type { Map as MapaLeaflet, Marker } from "leaflet"
-import { Loader2Icon, MapIcon } from "lucide-react"
+import { Loader2Icon, LocateFixedIcon, MapIcon } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
@@ -26,11 +26,52 @@ const icono = (L: typeof import("leaflet"), emoji: string, etiqueta: string) =>
     iconAnchor: [18, 30],
   })
 
+// Zoom de calle: se distinguen las cuadras y el nombre de las calles
+const ZOOM_CALLE = 17
+
+/** Desliza el marcador hasta la posición nueva (1 s) en vez de saltar */
+function deslizar(marcador: Marker, destino: Punto) {
+  const desde = marcador.getLatLng()
+  const inicio = performance.now()
+  const paso = (ahora: number) => {
+    const t = Math.min(1, (ahora - inicio) / 1000)
+    const suave = 1 - (1 - t) ** 3
+    marcador.setLatLng({ lat: desde.lat + (destino.lat - desde.lat) * suave, lng: desde.lng + (destino.lng - desde.lng) * suave })
+    if (t < 1) requestAnimationFrame(paso)
+  }
+  requestAnimationFrame(paso)
+}
+
+/**
+ * Mapa en vivo (R41). Al abrir encuadra a nivel de calle; después sigue al carro sin tocar el zoom (solo se desliza
+ * cuando el carro se acerca al borde). Si la persona mueve o acerca el mapa, deja de seguir y aparece "Seguir al carro".
+ */
 function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
   const contenedor = useRef<HTMLDivElement>(null)
   const mapa = useRef<MapaLeaflet | null>(null)
   const marcadores = useRef<{ L: typeof import("leaflet"); carro?: Marker; yo?: Marker } | null>(null)
   const [listo, setListo] = useState(false)
+  const encuadrado = useRef(false) // ya se hizo el encuadre inicial con el carro
+  const automatico = useRef(false) // el movimiento lo hace el código, no la persona
+  const siguiendoRef = useRef(true)
+  const [siguiendo, setSiguiendo] = useState(true)
+
+  /**
+   * Movimientos del código: no cuentan como "la persona movió el mapa". La animación de Leaflet empieza en el
+   * cuadro siguiente, así que la marca dura hasta que termina (moveend), con un respaldo por si no hay movimiento.
+   */
+  const mover = (accion: () => void) => {
+    const m = mapa.current
+    if (!m) return
+    automatico.current = true
+    const soltar = () => {
+      automatico.current = false
+      clearTimeout(respaldo)
+    }
+    const respaldo = setTimeout(() => (m.off("moveend", soltar), soltar()), 1500)
+    m.once("moveend", soltar)
+    accion()
+  }
 
   // Crear el mapa una vez (Leaflet usa window: se carga solo en el navegador)
   useEffect(() => {
@@ -43,6 +84,14 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(m)
       m.setView(CENTRO_INICIAL, 13)
+      // Arrastrar o hacer zoom con el dedo (o los botones +/−) deja de seguir al carro
+      const dejarDeSeguir = () => {
+        if (automatico.current || !encuadrado.current) return
+        siguiendoRef.current = false
+        setSiguiendo(false)
+      }
+      m.on("dragstart", dejarDeSeguir)
+      m.on("zoomstart", dejarDeSeguir)
       mapa.current = m
       marcadores.current = { L }
       // La hoja termina de abrirse después: Leaflet necesita recalcular su tamaño
@@ -54,30 +103,63 @@ function Mapa({ carro, yo }: { carro: PosicionChofer; yo: Punto | null }) {
       mapa.current?.remove()
       mapa.current = null
       marcadores.current = null
+      encuadrado.current = false
     }
   }, [])
 
-  // Mover los marcadores cuando llega una posición nueva
+  // Posición nueva: mover los marcadores y, si está siguiendo, mantener el carro a la vista
   useEffect(() => {
     const m = mapa.current
     const mk = marcadores.current
     if (!listo || !m || !mk) return
     const { L } = mk
-    const puntos: Punto[] = []
-    if (carro) {
-      mk.carro ??= L.marker(carro, { icon: icono(L, "🚐", "El carro") }).addTo(m)
-      mk.carro.setLatLng(carro)
-      puntos.push(carro)
-    }
+
     if (yo) {
       mk.yo ??= L.marker(yo, { icon: icono(L, "📍", "Tú") }).addTo(m)
-      puntos.push(yo)
+      mk.yo.setLatLng(yo)
     }
-    if (puntos.length === 2) m.fitBounds(L.latLngBounds(puntos), { padding: [48, 48], maxZoom: 16 })
-    else if (puntos.length === 1) m.setView(puntos[0], 15)
+    if (!carro) {
+      mk.carro?.remove()
+      mk.carro = undefined
+      if (yo && !encuadrado.current) mover(() => m.setView(yo, ZOOM_CALLE - 1))
+      return
+    }
+
+    if (mk.carro) deslizar(mk.carro, carro)
+    else mk.carro = L.marker(carro, { icon: icono(L, "🚐", "El carro"), zIndexOffset: 1000 }).addTo(m)
+
+    if (!encuadrado.current) {
+      // Primera posición: nivel de calle; con el pasajero, los dos a la vista
+      mover(() =>
+        yo ? m.fitBounds(L.latLngBounds([carro, yo]), { padding: [56, 56], maxZoom: ZOOM_CALLE }) : m.setView(carro, ZOOM_CALLE)
+      )
+      encuadrado.current = true
+    } else if (siguiendoRef.current && !m.getBounds().pad(-0.2).contains(carro)) {
+      // Se acerca al borde: deslizar el mapa sin cambiar el zoom que haya escogido
+      mover(() => m.panTo(carro))
+    }
   }, [carro, yo, listo])
 
-  return <div ref={contenedor} className="h-[55svh] w-full overflow-hidden rounded-2xl border-2 bg-muted" />
+  const seguirAlCarro = () => {
+    const m = mapa.current
+    if (!m || !carro) return
+    siguiendoRef.current = true
+    setSiguiendo(true)
+    mover(() => m.setView(carro, Math.max(m.getZoom(), ZOOM_CALLE - 1)))
+  }
+
+  return (
+    <div className="relative">
+      <div ref={contenedor} className="h-[55svh] w-full overflow-hidden rounded-2xl border-2 bg-muted" />
+      {!siguiendo && carro && (
+        // Encima de los controles de Leaflet (z-index hasta 1000)
+        <Button size="sm" onClick={seguirAlCarro} className="absolute bottom-4 left-1/2 z-[1001] -translate-x-1/2 shadow-lg">
+          <LocateFixedIcon aria-hidden />
+          Seguir al carro
+        </Button>
+      )}
+    </div>
+  )
 }
 
 /**
