@@ -3,9 +3,13 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 
 import { BotonSalir } from "@/components/boton-salir"
+import { Avatar } from "@/components/foto/avatar"
+import { SubirFoto } from "@/components/foto/subir-foto"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { firmarFotos } from "@/lib/fotos"
 import { obtenerPerfil } from "@/lib/sesion"
+import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 
 export const metadata: Metadata = { title: "Cuenta en revisión · Línea Auxiliar" }
 
@@ -17,6 +21,17 @@ export default async function PaginaEnRevision() {
 
   const nombre = perfil.nombre.split(" ")[0]
   const rechazada = perfil.estado === "rechazado"
+  const esChofer = perfil.rol === "chofer"
+
+  // Fotos (R54): mientras espera, ponerlas ayuda a que el admin lo verifique
+  const supabase = await crearClienteServidor()
+  const { data: carro } = esChofer
+    ? await supabase.from("vehiculos").select("foto_path").eq("chofer_id", perfil.id).maybeSingle()
+    : { data: null }
+  const fotos = await firmarFotos([perfil.foto_path, carro?.foto_path])
+  const fotoUrl = perfil.foto_path ? (fotos.get(perfil.foto_path) ?? null) : null
+  const fotoCarroUrl = carro?.foto_path ? (fotos.get(carro.foto_path) ?? null) : null
+  const faltan = !fotoUrl || (esChofer && !fotoCarroUrl)
 
   return (
     <div className="flex flex-col gap-6">
@@ -40,6 +55,30 @@ export default async function PaginaEnRevision() {
             unas horas.
           </AlertDescription>
         </Alert>
+      )}
+
+      {!rechazada && (
+        <section aria-labelledby="titulo-fotos" className="flex flex-col gap-3 rounded-lg border-2 bg-card p-4">
+          <h2 id="titulo-fotos" className="text-lg font-bold">
+            {faltan ? (esChofer ? "Agrega tu foto y la de tu carro" : "Agrega tu foto") : "¡Listo! Tus fotos ya están"}
+          </h2>
+          <p className="text-[15px] text-muted-foreground">
+            Ayudan a que el administrador te verifique más rápido y a que {esChofer ? "los pasajeros te reconozcan" : "el chofer te reconozca"}.
+          </p>
+          <div className="flex items-center gap-4">
+            <Avatar url={fotoUrl} nombre={perfil.nombre} className="size-20 text-2xl" />
+            <SubirFoto tipo="perfil" tieneFoto={Boolean(fotoUrl)} className="flex-1" />
+          </div>
+          {esChofer && (
+            <>
+              {fotoCarroUrl && (
+                // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
+                <img src={fotoCarroUrl} alt="Foto de tu carro" className="aspect-video w-full rounded-xl object-cover" />
+              )}
+              <SubirFoto tipo="carro" tieneFoto={Boolean(fotoCarroUrl)} />
+            </>
+          )}
+        </section>
       )}
 
       {!rechazada && (

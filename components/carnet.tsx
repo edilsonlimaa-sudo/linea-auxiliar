@@ -2,10 +2,13 @@ import { BadgeCheckIcon, ChevronRightIcon } from "lucide-react"
 import Link from "next/link"
 
 import { Estrellas, promedioTexto } from "@/components/estrellas"
+import { Avatar } from "@/components/foto/avatar"
+import { InterruptorAire } from "@/components/foto/interruptor-aire"
+import { SubirFoto } from "@/components/foto/subir-foto"
+import { ChipAire } from "@/components/pasajero/chofer-resumen"
 import type { Carnet } from "@/lib/datos/historial"
 import { fechaLarga } from "@/lib/fechas"
 import { formatearTelefono } from "@/lib/telefono"
-import { iniciales } from "@/lib/viajes"
 
 function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactNode }) {
   return (
@@ -21,7 +24,7 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactN
  * (franja de la línea, nombre grande, verificado) y para el chofer destaca la placa.
  */
 export function CarnetVista({ carnet }: { carnet: Carnet }) {
-  const { perfil, telefono, cedula, vehiculo, estrellas } = carnet
+  const { perfil, telefono, cedula, vehiculo, estrellas, fotoUrl, fotoCarroUrl } = carnet
   const esChofer = perfil.rol === "chofer"
 
   return (
@@ -37,9 +40,7 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
 
         <div className="flex flex-col gap-5 p-5">
           <div className="flex items-center gap-4">
-            <span aria-hidden className="grid size-20 shrink-0 place-items-center rounded-2xl bg-secondary text-3xl font-bold text-secondary-foreground">
-              {iniciales(perfil.nombre)}
-            </span>
+            <Avatar url={fotoUrl} nombre={perfil.nombre} className="size-24 text-3xl" />
             <div className="min-w-0">
               <h1 className="text-2xl leading-tight font-bold">{perfil.nombre}</h1>
               <p className="mt-1 flex items-center gap-1.5 font-bold text-success">
@@ -51,7 +52,11 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
           </div>
 
           {esChofer && vehiculo && (
-            <div className="flex flex-col items-center gap-1 rounded-2xl bg-muted px-4 py-4 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-2xl bg-muted px-4 py-4 text-center">
+              {fotoCarroUrl && (
+                // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
+                <img src={fotoCarroUrl} alt="Foto de tu carro" className="aspect-video w-full rounded-xl object-cover" />
+              )}
               <span className="rounded-lg border-[3px] border-foreground bg-card px-4 py-1 font-mono text-3xl font-bold tracking-[0.2em]">
                 {vehiculo.placa}
               </span>
@@ -59,6 +64,7 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
                 {[vehiculo.modelo, vehiculo.color].filter(Boolean).join(" · ")}
                 {vehiculo.unidad && <strong> · Unidad {vehiculo.unidad}</strong>}
               </span>
+              {vehiculo.aire_acondicionado && <ChipAire />}
             </div>
           )}
 
@@ -69,6 +75,25 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
           </dl>
         </div>
       </article>
+
+      {/* Lo que cada uno puede cambiar solo (R53–R55) */}
+      <section aria-labelledby="titulo-editar" className="flex flex-col gap-3">
+        <h2 id="titulo-editar" className="text-lg font-bold">
+          {esChofer ? "Tus fotos y tu carro" : "Tu foto"}
+        </h2>
+        {!fotoUrl && (
+          <p className="-mt-1 text-[15px] text-muted-foreground">
+            {esChofer ? "Con tu foto, los pasajeros te reconocen al llegar." : "Con tu foto, el chofer te reconoce al recogerte."}
+          </p>
+        )}
+        <SubirFoto tipo="perfil" tieneFoto={Boolean(fotoUrl)} />
+        {esChofer && (
+          <>
+            <SubirFoto tipo="carro" tieneFoto={Boolean(fotoCarroUrl)} />
+            <InterruptorAire tiene={Boolean(vehiculo?.aire_acondicionado)} />
+          </>
+        )}
+      </section>
 
       {esChofer && (
         <Link
@@ -91,7 +116,7 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
       )}
 
       <p className="text-[15px] text-muted-foreground">
-        Muéstralo si te lo piden. Para corregir un dato, pídeselo al administrador de la línea.
+        Muéstralo si te lo piden. Para corregir otro dato, pídeselo al administrador de la línea.
       </p>
     </div>
   )

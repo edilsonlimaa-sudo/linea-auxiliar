@@ -1,7 +1,7 @@
 import { ChevronDownIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucide-react"
 
 import { BotonYaLlegue, BotonYaNoVoy } from "@/components/pasajero/acciones-reserva"
-import { ChoferResumen } from "@/components/pasajero/chofer-resumen"
+import { ChoferResumen, FotoCarro } from "@/components/pasajero/chofer-resumen"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { buttonVariants } from "@/components/ui/button"
 import type { MiReserva } from "@/lib/datos/inicio-pasajero"
@@ -128,6 +128,8 @@ export function MiReservaTarjeta({
       {confirmado && !reserva.pendiente && viaje.estado !== "en_ruta" && <BotonYaLlegue reservaId={reserva.id} listo={reserva.listo} />}
 
       <ChoferResumen chofer={viaje.chofer} />
+      {/* Mientras viene: la foto del carro ayuda a reconocerlo (R54) */}
+      {!aBordo && <FotoCarro chofer={viaje.chofer} />}
 
       {telefono && (
         <div className="grid grid-cols-2 gap-2.5">

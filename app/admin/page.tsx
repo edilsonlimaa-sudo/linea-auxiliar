@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { TarjetaCuenta } from "@/components/admin/tarjeta-cuenta"
+import { firmarFotos } from "@/lib/fotos"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { salirAdmin } from "@/lib/acciones/admin"
@@ -42,6 +43,8 @@ export default async function PanelAdmin({
   const todas = cuentas ?? []
   const lista = todas.filter((c) => c.estado === estado)
   const cuantas = (e: EstadoCuenta) => todas.filter((c) => c.estado === e).length
+  // Fotos de perfil y del carro para verificar a la persona (R54)
+  const fotos = await firmarFotos(lista.flatMap((c) => [c.foto_path, c.foto_carro_path]))
 
   return (
     <div className="flex flex-col gap-5">
@@ -86,7 +89,12 @@ export default async function PanelAdmin({
       ) : (
         <div className="flex flex-col gap-4">
           {lista.map((c) => (
-            <TarjetaCuenta key={c.id} cuenta={c} />
+            <TarjetaCuenta
+              key={c.id}
+              cuenta={c}
+              fotoUrl={c.foto_path ? (fotos.get(c.foto_path) ?? null) : null}
+              fotoCarroUrl={c.foto_carro_path ? (fotos.get(c.foto_carro_path) ?? null) : null}
+            />
           ))}
         </div>
       )}

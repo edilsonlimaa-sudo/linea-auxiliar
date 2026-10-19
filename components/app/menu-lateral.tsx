@@ -57,7 +57,17 @@ const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
 
 const suscribirse = () => () => {}
 
-export function MenuLateral({ nombre, rol, conViaje = false }: { nombre: string; rol: "pasajero" | "chofer"; conViaje?: boolean }) {
+export function MenuLateral({
+  nombre,
+  rol,
+  conViaje = false,
+  fotoUrl = null,
+}: {
+  nombre: string
+  rol: "pasajero" | "chofer"
+  conViaje?: boolean
+  fotoUrl?: string | null // foto de perfil (R54)
+}) {
   const ruta = usePathname()
   const { setOpenMobile } = useSidebar()
   const { resolvedTheme, setTheme } = useTheme()
@@ -70,9 +80,14 @@ export function MenuLateral({ nombre, rol, conViaje = false }: { nombre: string;
     <Sidebar>
       <SidebarHeader className="gap-3 border-b-4 border-signal bg-header p-4 text-header-foreground">
         <div className="flex items-center gap-3">
-          <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-header-foreground/15 text-xl font-bold">
-            {iniciales(nombre)}
-          </span>
+          {fotoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
+            <img src={fotoUrl} alt="" className="size-14 shrink-0 rounded-full object-cover ring-2 ring-header-foreground/30" />
+          ) : (
+            <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-header-foreground/15 text-xl font-bold">
+              {iniciales(nombre)}
+            </span>
+          )}
           <div className="min-w-0">
             <p className="truncate text-lg leading-tight font-bold">{nombre}</p>
             <p className="flex items-center gap-1 text-[15px] opacity-90">

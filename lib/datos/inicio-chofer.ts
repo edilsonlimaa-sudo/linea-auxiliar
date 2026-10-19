@@ -1,6 +1,7 @@
 import "server-only"
 
 import type { Database } from "@/lib/database.types"
+import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { ACTIVOS, nombreCorto, type Sentido, type Viaje } from "@/lib/viajes"
 
@@ -21,6 +22,7 @@ export type FilaChofer = {
   pendiente: boolean // pedido en el camino sin responder (R29)
   aceptada: boolean
   telefono: string | null
+  fotoUrl: string | null // foto de perfil del pasajero (R54): ayuda a reconocerlo
 }
 
 export type ViajeChofer = Viaje & { lista: FilaChofer[] }
@@ -51,7 +53,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
   const { data: reservas } = ids.length
     ? await supabase
         .from("reservas")
-        .select("*, pasajero:perfiles!reservas_pasajero_id_fkey(nombre)")
+        .select("*, pasajero:perfiles!reservas_pasajero_id_fkey(nombre, foto_path)")
         .in("viaje_id", ids)
         .in("estado", ["activa", "subio"])
         .order("creado_en")
@@ -63,6 +65,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
   const { data: telefonos } = idsPasajeros.length
     ? await supabase.from("perfiles_privados").select("id, telefono").in("id", idsPasajeros)
     : { data: [] }
+  const fotos = await firmarFotos(filas.map((r) => r.pasajero?.foto_path))
   const telefonoDe = new Map((telefonos ?? []).map((t) => [t.id, t.telefono]))
 
   const conLista = (v: Viaje): ViajeChofer => {
@@ -83,6 +86,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
         pendiente: r.pendiente,
         aceptada: r.aceptada_en !== null,
         telefono: r.pasajero_id ? (telefonoDe.get(r.pasajero_id) ?? null) : null,
+        fotoUrl: r.pasajero?.foto_path ? (fotos.get(r.pasajero.foto_path) ?? null) : null,
       })),
     }
   }

@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
 import { Confirmar } from "@/components/confirmar"
+import { Avatar } from "@/components/foto/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { marcarNoVino, marcarSeBajo, marcarSubio, quitarAnotado, responderPedido } from "@/lib/acciones/chofer"
 import type { FilaChofer } from "@/lib/datos/inicio-chofer"
@@ -58,6 +59,8 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
         >
           {fila.posicion}
         </span>
+        {/* La foto ayuda a reconocer a quien espera en la calle (R54); sin foto basta el nombre */}
+        {fila.fotoUrl && <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-11" />}
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-lg font-bold">{fila.nombre}</span>

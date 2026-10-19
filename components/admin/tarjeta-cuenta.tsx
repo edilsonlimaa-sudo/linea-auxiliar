@@ -1,6 +1,7 @@
 import { MessageCircleIcon, PhoneIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BotonDecision } from "@/components/admin/boton-decision"
+import { Avatar } from "@/components/foto/avatar"
 import type { Database } from "@/lib/database.types"
 import { fechaHora, hace } from "@/lib/fechas"
 import { formatearTelefono } from "@/lib/telefono"
@@ -10,20 +11,37 @@ export type Cuenta = Database["public"]["Functions"]["admin_cuentas"]["Returns"]
 const ROL = { pasajero: "🙋 Pasajero", chofer: "🚐 Chofer", admin: "Administración" } as const
 
 // Tarjeta de una cuenta en el panel: datos para verificar identidad (R2, R5) y acciones
-export function TarjetaCuenta({ cuenta: c }: { cuenta: Cuenta }) {
+export function TarjetaCuenta({
+  cuenta: c,
+  fotoUrl,
+  fotoCarroUrl,
+}: {
+  cuenta: Cuenta
+  fotoUrl: string | null
+  fotoCarroUrl: string | null
+}) {
   const chofer = c.rol === "chofer"
   const faltan = [!c.foto_path && "foto de perfil", chofer && !c.foto_carro_path && "foto del carro"].filter(Boolean)
   const digitos = c.telefono?.replace(/\D/g, "")
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl border-2 bg-card p-4">
-      <header>
-        <p className="text-sm font-bold text-muted-foreground">{ROL[c.rol]}</p>
-        <h3 className="text-xl leading-tight font-bold">{c.nombre}</h3>
-        <p className="text-[15px] text-muted-foreground" title={fechaHora(c.creado_en)}>
-          Se registró {hace(c.creado_en)}
-        </p>
+      <header className="flex items-center gap-4">
+        {/* Foto grande: es lo que el admin compara para verificar a la persona (R54) */}
+        <Avatar url={fotoUrl} nombre={c.nombre} className="size-20 text-2xl" />
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-muted-foreground">{ROL[c.rol]}</p>
+          <h3 className="text-xl leading-tight font-bold">{c.nombre}</h3>
+          <p className="text-[15px] text-muted-foreground" title={fechaHora(c.creado_en)}>
+            Se registró {hace(c.creado_en)}
+          </p>
+        </div>
       </header>
+
+      {chofer && fotoCarroUrl && (
+        // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
+        <img src={fotoCarroUrl} alt={`Carro de ${c.nombre}`} className="aspect-video w-full rounded-xl object-cover" />
+      )}
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
         <dt className="text-muted-foreground">Teléfono</dt>
@@ -48,6 +66,8 @@ export function TarjetaCuenta({ cuenta: c }: { cuenta: Cuenta }) {
             <dd className="font-bold">{c.unidad ?? "—"}</dd>
             <dt className="text-muted-foreground">Carro</dt>
             <dd className="font-bold">{[c.modelo, c.color].filter(Boolean).join(" · ") || "—"}</dd>
+            <dt className="text-muted-foreground">Aire</dt>
+            <dd className="font-bold">{c.aire_acondicionado ? "Sí" : "No"}</dd>
           </>
         )}
       </dl>

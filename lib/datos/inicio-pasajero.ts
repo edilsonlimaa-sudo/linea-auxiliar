@@ -1,19 +1,23 @@
 import "server-only"
 
 import type { Database } from "@/lib/database.types"
+import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { ACTIVOS, type Viaje } from "@/lib/viajes"
 
 type Tablas = Database["public"]["Tables"]
 export type Reserva = Tablas["reservas"]["Row"]
 export type Espera = Tablas["esperas"]["Row"]
-export type Vehiculo = Pick<Tablas["vehiculos"]["Row"], "unidad" | "placa" | "modelo" | "color" | "foto_path">
+export type Vehiculo = Pick<Tablas["vehiculos"]["Row"], "unidad" | "placa" | "modelo" | "color" | "foto_path" | "aire_acondicionado"> & {
+  fotoUrl: string | null // enlace firmado de la foto del carro (R54)
+}
 export type FilaLista = Database["public"]["Functions"]["lista_viaje"]["Returns"][number]
 
 export type Chofer = {
   id: string
   nombre: string
   foto_path: string | null
+  fotoUrl: string | null // enlace firmado de la foto de perfil (R54)
   vehiculo: Vehiculo | null
   estrellas: number | null // promedio
   calificaciones: number
@@ -151,7 +155,7 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
   const [viajesRes, reservaRes, esperaRes, recientesRes, avisoRes, enServicioRes] = await Promise.all([
     supabase
       .from("viajes")
-      .select("*, chofer:perfiles!viajes_chofer_id_fkey(id, nombre, foto_path, vehiculo:vehiculos(unidad, placa, modelo, color, foto_path))")
+      .select("*, chofer:perfiles!viajes_chofer_id_fkey(id, nombre, foto_path, vehiculo:vehiculos(unidad, placa, modelo, color, foto_path, aire_acondicionado))")
       .in("estado", ACTIVOS),
     consultarReservaEnCurso(supabase, pasajeroId),
     supabase
@@ -188,16 +192,22 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
     reputacion.set(c.chofer_id, { suma: r.suma + c.estrellas, n: r.n + 1 })
   }
 
+  // vehiculos tiene chofer_id único: puede venir como objeto o como lista de uno
+  const vehiculoDe = (c: (typeof filas)[number]["chofer"]) => (Array.isArray(c?.vehiculo) ? (c.vehiculo[0] ?? null) : (c?.vehiculo ?? null))
+  // Fotos del chofer y del carro (R54): enlaces firmados en una sola llamada
+  const fotos = await firmarFotos(filas.flatMap((v) => [v.chofer?.foto_path, vehiculoDe(v.chofer)?.foto_path]))
+
   const viajes: ViajeConChofer[] = filas.map(({ chofer, ...v }) => {
     const r = reputacion.get(v.chofer_id)
-    // vehiculos tiene chofer_id único: puede venir como objeto o como lista de uno
-    const vehiculo = Array.isArray(chofer?.vehiculo) ? (chofer.vehiculo[0] ?? null) : (chofer?.vehiculo ?? null)
+    const datosCarro = vehiculoDe(chofer)
+    const vehiculo = datosCarro ? { ...datosCarro, fotoUrl: datosCarro.foto_path ? (fotos.get(datosCarro.foto_path) ?? null) : null } : null
     return {
       ...v,
       chofer: {
         id: v.chofer_id,
         nombre: chofer?.nombre ?? "Chofer",
         foto_path: chofer?.foto_path ?? null,
+        fotoUrl: chofer?.foto_path ? (fotos.get(chofer.foto_path) ?? null) : null,
         vehiculo,
         estrellas: r ? r.suma / r.n : null,
         calificaciones: r?.n ?? 0,
