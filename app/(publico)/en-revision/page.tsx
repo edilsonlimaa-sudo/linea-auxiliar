@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "Cuenta en revisión · Línea Auxili
 // Cuenta pendiente o rechazada (R2): puede entrar, pero aún no usar la app
 export default async function PaginaEnRevision() {
   const perfil = await obtenerPerfil()
-  if (!perfil) redirect("/entrar")
+  if (!perfil) redirect("/")
   if (perfil.estado === "aprobado") redirect("/inicio")
 
   const nombre = perfil.nombre.split(" ")[0]

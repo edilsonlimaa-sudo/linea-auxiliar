@@ -20,7 +20,7 @@ export default function PaginaEntrarAdmin() {
       <FormularioEntrarAdmin />
       <p className="text-center text-muted-foreground">
         ¿Eres chofer o pasajero?{" "}
-        <Link href="/entrar" className="font-bold text-primary underline underline-offset-4 dark:text-foreground">
+        <Link href="/" className="font-bold text-primary underline underline-offset-4 dark:text-foreground">
           Entra aquí
         </Link>
       </p>

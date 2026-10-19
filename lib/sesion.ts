@@ -24,7 +24,7 @@ async function obtenerSesion(): Promise<{ conSesion: boolean; perfil: Perfil | n
 /** Sin sesión va a la entrada; con sesión pero sin cuenta, se cierra esa sesión (si no, proxy.ts la devuelve aquí) */
 function sacar(conSesion: boolean, admin = false): never {
   if (conSesion) redirect(admin ? "/salir?a=admin" : "/salir")
-  redirect(admin ? "/admin/entrar" : "/entrar")
+  redirect(admin ? "/admin/entrar" : "/")
 }
 
 /** Para las pantallas de pasajeros y choferes: exige sesión y cuenta aprobada (R2). El admin va a su panel. */

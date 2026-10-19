@@ -21,7 +21,7 @@ export default async function PaginaRegistro({ params }: { params: Promise<{ rol
 
   return (
     <div className="flex flex-col gap-5">
-      <Link href="/" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-lg font-bold text-primary dark:text-foreground">
+      <Link href="/registro" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-lg font-bold text-primary dark:text-foreground">
         <ChevronLeftIcon aria-hidden className="size-6" /> Atrás
       </Link>
       <header>
@@ -34,7 +34,7 @@ export default async function PaginaRegistro({ params }: { params: Promise<{ rol
       <FormularioRegistro rol={r} />
       <p className="text-center">
         ¿Ya tienes cuenta?{" "}
-        <Link href="/entrar" className="font-bold text-primary underline underline-offset-4 dark:text-foreground">
+        <Link href="/" className="font-bold text-primary underline underline-offset-4 dark:text-foreground">
           Entrar
         </Link>
       </p>

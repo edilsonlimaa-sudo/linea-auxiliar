@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest) {
 
   if (!conSesion && !coincide(ruta, RUTAS_PUBLICAS)) {
     // El panel tiene su propia entrada (usuario + contraseña), separada de la de teléfono + PIN
-    return redirigir(request, respuesta, esAdmin ? "/admin/entrar" : "/entrar")
+    return redirigir(request, respuesta, esAdmin ? "/admin/entrar" : "/")
   }
   if (conSesion && coincide(ruta, RUTAS_SOLO_SIN_SESION)) {
     return redirigir(request, respuesta, "/inicio")
