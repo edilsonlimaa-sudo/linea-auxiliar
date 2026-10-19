@@ -1,11 +1,12 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import type { EstadoFormulario } from "@/lib/acciones/cuenta"
-import { correoDeAdmin } from "@/lib/admin"
+import { APARATO_ADMIN, correoDeAdmin } from "@/lib/admin"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 
 const entradaAdmin = z.object({
@@ -55,6 +56,8 @@ export async function entrarAdmin(anterior: EstadoFormulario, formData: FormData
     await supabase.auth.signOut()
     return { error: "Esta cuenta no tiene acceso de administración.", valores, intento }
   }
+  // Marca el aparato: la portada le muestra el enlace "Entrar como administrador" (§8)
+  ;(await cookies()).set(APARATO_ADMIN, "1", { maxAge: 60 * 60 * 24 * 365, httpOnly: true, sameSite: "lax", path: "/" })
   redirect("/admin")
 }
 

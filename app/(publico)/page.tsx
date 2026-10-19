@@ -1,13 +1,18 @@
-import { UserPlusIcon } from "lucide-react"
+import { ShieldIcon, UserPlusIcon } from "lucide-react"
+import { cookies } from "next/headers"
 import Link from "next/link"
 
 import { FormularioEntrar } from "@/components/formulario/formulario-entrar"
 import { buttonVariants } from "@/components/ui/button"
+import { APARATO_ADMIN } from "@/lib/admin"
 
 // Portada (sin sesión) = Entrar (docs/especificacion.md §8): casi siempre la abre alguien que ya tiene cuenta.
 // Crear una cuenta es el camino secundario, y recién ahí se pregunta si es pasajero o chofer.
 // Con sesión, el proxy manda directo a /inicio.
-export default function Portada() {
+export default async function Portada() {
+  // Solo en aparatos donde el admin ya entró (§8); en los demás, la entrada queda escondida (5 toques al logo)
+  const aparatoAdmin = (await cookies()).has(APARATO_ADMIN)
+
   return (
     <div className="flex flex-col gap-6">
       {/* La barra de arriba ya dice el nombre: aquí solo qué es y por dónde va, en poco espacio (entrar va primero) */}
@@ -38,6 +43,16 @@ export default function Portada() {
           Crear una cuenta
         </Link>
       </section>
+
+      {aparatoAdmin && (
+        <Link
+          href="/admin/entrar"
+          className="mx-auto inline-flex min-h-11 items-center gap-1.5 rounded-md px-3 text-[15px] text-muted-foreground underline underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          <ShieldIcon aria-hidden className="size-4" />
+          Entrar como administrador
+        </Link>
+      )}
     </div>
   )
 }

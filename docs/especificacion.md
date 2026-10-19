@@ -326,6 +326,14 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
 | Admin | **Resumen** · **Choferes** · **Pasajeros** (cada uno con Pendientes / Aprobados / Rechazados) · Aviso del día y restablecer PIN (más adelante) |
 
+**Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
+solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
+
+- **Aparato conocido:** al entrar al panel, el aparato queda marcado (cookie de 1 año). En ese aparato la portada
+  muestra abajo un enlace discreto "Entrar como administrador".
+- **Toque secreto:** en la portada, tocar **5 veces seguidas** (en menos de 3 s) el logo de la barra de arriba
+  abre el login del admin. Sirve en un aparato nuevo o después de borrar los datos del navegador.
+
 **Panel del admin.** El admin entra de vez en cuando (no vigila la pantalla: R2 le llega por WhatsApp), así que
 lo primero es *qué necesita de mí* y después *cómo va la línea*. Tres pestañas fijas arriba: **Resumen ·
 Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobación.
