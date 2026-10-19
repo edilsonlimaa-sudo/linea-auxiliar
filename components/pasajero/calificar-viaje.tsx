@@ -16,27 +16,39 @@ const SIGNIFICADO = ["", "Muy mal", "Mal", "Regular", "Bien", "Excelente"]
  * "¿Cómo te fue con…?" al terminar el viaje (R45): un toque en las estrellas basta.
  * Etiquetas y comentario son opcionales; "Ahora no" lo deja para después.
  */
-export function CalificarViaje({ pendiente }: { pendiente: CalificacionPendiente }) {
+export function CalificarViaje({
+  pendiente,
+  desdeHistorial = false,
+}: {
+  pendiente: CalificacionPendiente
+  desdeHistorial?: boolean // dentro de Mis viajes (R51): sin "Ahora no" y vuelve ahí al enviar
+}) {
   const idComentario = useId()
   const [estrellas, setEstrellas] = useState(0)
   const [etiquetas, setEtiquetas] = useState<string[]>([])
   const [estado, enviar, enviando] = useActionState<Resultado, FormData>(calificarViaje, {})
   const [omitiendo, omitir] = useTransition()
   const nombre = pendiente.chofer.split(" ")[0]
+  // En la página es el título principal; dentro de la hoja de Mis viajes, uno secundario
+  const Titulo = desdeHistorial ? "h2" : "h1"
 
   return (
-    <section aria-labelledby="titulo-calificar" className="flex flex-col gap-5 rounded-3xl border-2 border-primary bg-card p-5 text-card-foreground shadow-sm">
+    <section
+      aria-labelledby="titulo-calificar"
+      className={cn("flex flex-col gap-5", !desdeHistorial && "rounded-3xl border-2 border-primary bg-card p-5 text-card-foreground shadow-sm")}
+    >
       <div className="flex flex-col gap-1">
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[pendiente.sentido].largo} · Viaje terminado</p>
-        <h1 id="titulo-calificar" className="text-2xl leading-tight font-bold">
+        <Titulo id="titulo-calificar" className="text-2xl leading-tight font-bold">
           ¿Cómo te fue con {nombre}?
-        </h1>
+        </Titulo>
         <p className="text-muted-foreground">Tu calificación ayuda a todos a escoger con confianza.</p>
       </div>
 
       <form action={enviar} className="flex flex-col gap-5">
         <input type="hidden" name="viaje" value={pendiente.viajeId} />
         <input type="hidden" name="chofer" value={pendiente.choferId} />
+        {desdeHistorial && <input type="hidden" name="volver" value="mis-viajes" />}
         <input type="hidden" name="estrellas" value={estrellas || ""} />
         {etiquetas.map((e) => (
           <input key={e} type="hidden" name="etiquetas" value={e} />
@@ -116,16 +128,18 @@ export function CalificarViaje({ pendiente }: { pendiente: CalificacionPendiente
             {enviando && <Loader2Icon aria-hidden className="animate-spin" />}
             {estrellas === 0 ? "Toca las estrellas" : "Enviar calificación"}
           </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            className="w-full"
-            disabled={enviando || omitiendo}
-            onClick={() => omitir(async () => void (await omitirCalificacion(pendiente.reservaId)))}
-          >
-            {omitiendo && <Loader2Icon aria-hidden className="animate-spin" />}
-            Ahora no
-          </Button>
+          {!desdeHistorial && (
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full"
+              disabled={enviando || omitiendo}
+              onClick={() => omitir(async () => void (await omitirCalificacion(pendiente.reservaId)))}
+            >
+              {omitiendo && <Loader2Icon aria-hidden className="animate-spin" />}
+              Ahora no
+            </Button>
+          )}
         </div>
       </form>
     </section>

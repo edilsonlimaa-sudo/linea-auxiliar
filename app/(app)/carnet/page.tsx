@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
 
-import { Proximamente } from "@/components/app/proximamente"
+import { CarnetVista } from "@/components/carnet"
+import { cargarCarnet } from "@/lib/datos/historial"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 
 export const metadata: Metadata = { title: "Mi carnet · Línea Auxiliar" }
 
+// Mi carnet (docs/especificacion.md R53): pasajero y chofer
 export default async function PaginaCarnet() {
-  await exigirCuentaAprobada()
-  return <Proximamente titulo="Mi carnet" contenido="Aquí vas a ver tu carnet de la línea con tus datos y tu foto." />
+  const perfil = await exigirCuentaAprobada()
+  return <CarnetVista carnet={await cargarCarnet(perfil)} />
 }

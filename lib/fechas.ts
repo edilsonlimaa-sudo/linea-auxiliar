@@ -19,3 +19,30 @@ export function fechaHora(fechaIso: string): string {
     new Date(fechaIso)
   )
 }
+
+const diaCaracas = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(d) // AAAA-MM-DD
+
+/** "2:15 p. m." */
+export function hora(fechaIso: string): string {
+  return new Intl.DateTimeFormat("es-VE", { hour: "numeric", minute: "2-digit", timeZone: ZONA }).format(new Date(fechaIso))
+}
+
+/** "Hoy, 2:15 p. m." · "Ayer, 7:40 a. m." · "jue 16 oct, 2:15 p. m." (para el historial) */
+export function diaYHora(fechaIso: string): string {
+  const d = new Date(fechaIso)
+  const dia = diaCaracas(d)
+  const hoy = diaCaracas(new Date())
+  const ayer = diaCaracas(new Date(Date.now() - 86_400_000))
+  const cuando =
+    dia === hoy
+      ? "Hoy"
+      : dia === ayer
+        ? "Ayer"
+        : new Intl.DateTimeFormat("es-VE", { weekday: "short", day: "numeric", month: "short", timeZone: ZONA }).format(d)
+  return `${cuando}, ${hora(fechaIso)}`
+}
+
+/** "16 de octubre de 2026" */
+export function fechaLarga(fechaIso: string): string {
+  return new Intl.DateTimeFormat("es-VE", { dateStyle: "long", timeZone: ZONA }).format(new Date(fechaIso))
+}

@@ -7,6 +7,7 @@ import {
   IdCardIcon,
   LogOutIcon,
   MoonIcon,
+  StarIcon,
   SunIcon,
   TicketIcon,
   UsersIcon,
@@ -38,7 +39,7 @@ type Destino = { href: string; titulo: string; icono: LucideIcon; destacado?: bo
 // Solo con reserva activa: va de primero porque es lo que la persona está haciendo ahora (docs/especificacion.md §8)
 const MI_VIAJE: Destino = { href: "/mi-viaje", titulo: "Mi viaje", icono: TicketIcon, destacado: true }
 
-// Destinos por rol. El del chofer se completa cuando se construyan sus pantallas.
+// Destinos por rol (docs/especificacion.md §8)
 const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
   pasajero: [
     { href: "/inicio", titulo: "Inicio", icono: HouseIcon },
@@ -48,6 +49,8 @@ const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
   ],
   chofer: [
     { href: "/inicio", titulo: "Mi viaje", icono: HouseIcon },
+    { href: "/mis-viajes", titulo: "Mis viajes", icono: HistoryIcon },
+    { href: "/calificaciones", titulo: "Mis calificaciones", icono: StarIcon },
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },
   ],
 }
