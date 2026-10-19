@@ -43,6 +43,8 @@ const registroChofer = registroBase.extend({
   unidad: z.string().trim().max(10, "Número de unidad muy largo").optional(),
   modelo: z.string().trim().max(40, "Modelo muy largo").optional(),
   color: z.string().trim().max(30, "Color muy largo").optional(),
+  // Casilla "Mi carro tiene aire acondicionado" (R55): marcada envía "si"
+  aire: z.preprocess((v) => v === "si", z.boolean()),
 })
 
 const registro = z
@@ -52,7 +54,7 @@ const registro = z
 const entrada = z.object({ telefono, pin })
 
 // Campos que se devuelven para volver a llenar el formulario si hay error (nunca el PIN)
-const camposVisibles = ["nombre", "telefono", "cedula", "urbanismo", "placa", "unidad", "modelo", "color"]
+const camposVisibles = ["nombre", "telefono", "cedula", "urbanismo", "placa", "unidad", "modelo", "color", "aire"]
 
 function valoresVisibles(formData: FormData) {
   return Object.fromEntries(camposVisibles.map((c) => [c, String(formData.get(c) ?? "")]))
@@ -88,7 +90,13 @@ export async function registrarse(anterior: EstadoFormulario, formData: FormData
         cedula: d.cedula || undefined,
         ...(d.rol === "pasajero"
           ? { urbanismo: d.urbanismo }
-          : { placa: d.placa, unidad: d.unidad || undefined, modelo: d.modelo || undefined, color: d.color || undefined }),
+          : {
+              placa: d.placa,
+              unidad: d.unidad || undefined,
+              modelo: d.modelo || undefined,
+              color: d.color || undefined,
+              aire: d.aire ? "true" : "false",
+            }),
       },
     },
   })

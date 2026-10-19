@@ -425,6 +425,7 @@ export type Database = {
       }
       vehiculos: {
         Row: {
+          aire_acondicionado: boolean
           chofer_id: string
           color: string | null
           foto_path: string | null
@@ -434,6 +435,7 @@ export type Database = {
           unidad: string | null
         }
         Insert: {
+          aire_acondicionado?: boolean
           chofer_id: string
           color?: string | null
           foto_path?: string | null
@@ -443,6 +445,7 @@ export type Database = {
           unidad?: string | null
         }
         Update: {
+          aire_acondicionado?: boolean
           chofer_id?: string
           color?: string | null
           foto_path?: string | null
@@ -670,6 +673,7 @@ export type Database = {
       admin_cuentas: {
         Args: { p_estado?: Database["public"]["Enums"]["estado_cuenta"] }
         Returns: {
+          aire_acondicionado: boolean
           aprobado_en: string
           cedula: string
           color: string

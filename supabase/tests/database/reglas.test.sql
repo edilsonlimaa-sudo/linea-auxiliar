@@ -5,7 +5,7 @@
 --   pasajeros: María ...21, José ...22, Carmen ...23, Ana (pendiente) ...24, Luis ...25, Daniela ...26
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(39);
+select plan(41);
 
 -- Crea una cuenta como lo haría el registro: auth.users + identidad; el trigger crea el perfil.
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
@@ -20,7 +20,7 @@ begin
 end;
 $$;
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000011', '0414-0000011', '{"rol": "chofer", "nombre": "Carlos Pérez", "placa": "AB123CD"}');
-select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000012', '0414-0000012', '{"rol": "chofer", "nombre": "Yelitza Marín", "placa": "AF321JK"}');
+select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000012', '0414-0000012', '{"rol": "chofer", "nombre": "Yelitza Marín", "placa": "AF321JK", "aire": "true"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000021', '0414-0000021', '{"rol": "pasajero", "nombre": "María González", "urbanismo": "Valle Grande Country"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000022', '0414-0000022', '{"rol": "pasajero", "nombre": "José Rodríguez", "urbanismo": "Eje Valle Grande"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000023', '0414-0000023', '{"rol": "pasajero", "nombre": "Carmen Rivas", "urbanismo": "Valle Grande Country"}');
@@ -181,6 +181,15 @@ select is((select count(*)::int from public.esperas), 0,
   'R31: el chofer no ve las esperas (lugar ni GPS) de los pasajeros');
 select is((select count(*)::int from public.perfiles_privados where id = '00000000-0000-4000-a000-000000000021'), 0,
   '§6: esperar no expone el teléfono del pasajero a los choferes');
+
+-- ---------- Aire acondicionado (R55) ----------
+select is((select string_agg(aire_acondicionado::text, '/' order by placa) from public.vehiculos where placa in ('AB123CD', 'AF321JK')),
+  'false/true', 'R55: al registrarse, el chofer dice si su carro tiene aire');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000011", "role": "authenticated"}', true);
+update public.vehiculos set aire_acondicionado = true where chofer_id = '00000000-0000-4000-a000-000000000011';
+update public.vehiculos set aire_acondicionado = false where chofer_id = '00000000-0000-4000-a000-000000000012';
+select is((select string_agg(aire_acondicionado::text, '/' order by placa) from public.vehiculos where placa in ('AB123CD', 'AF321JK')),
+  'true/true', 'R55: el chofer cambia el aire de su carro, pero no el de otro');
 
 -- ---------- Aprobación (R2) ----------
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000022", "role": "authenticated"}', true);

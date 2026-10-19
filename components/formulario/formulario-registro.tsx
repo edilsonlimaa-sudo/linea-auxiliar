@@ -82,6 +82,11 @@ export function FormularioRegistro({ rol }: { rol: "pasajero" | "chofer" }) {
               <CampoTexto etiqueta="Color" name="color" placeholder="Gris" defaultValue={v.color} error={e.color} />
             </div>
             <CampoTexto etiqueta="Modelo" name="modelo" placeholder="Chevrolet Aveo" defaultValue={v.modelo} error={e.modelo} />
+            {/* R55: los pasajeros lo ven en cada unidad */}
+            <label className="flex min-h-13 cursor-pointer items-center gap-3 rounded-lg border-2 bg-card px-4 py-3 has-focus-visible:ring-[3px] has-focus-visible:ring-ring">
+              <input type="checkbox" name="aire" value="si" defaultChecked={v.aire === "si"} className="size-6 shrink-0 accent-primary" />
+              <span className="font-bold">Mi carro tiene aire acondicionado</span>
+            </label>
           </FieldGroup>
         </FieldSet>
       )}
