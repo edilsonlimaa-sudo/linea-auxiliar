@@ -6,7 +6,6 @@ import {
   HouseIcon,
   IdCardIcon,
   LogOutIcon,
-  MapIcon,
   MoonIcon,
   StarIcon,
   SunIcon,
@@ -44,7 +43,6 @@ const MI_VIAJE: Destino = { href: "/mi-viaje", titulo: "Mi viaje", icono: Ticket
 const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
   pasajero: [
     { href: "/inicio", titulo: "Inicio", icono: HouseIcon },
-    { href: "/linea", titulo: "La línea", icono: MapIcon },
     { href: "/choferes", titulo: "Choferes", icono: UsersIcon },
     { href: "/mis-viajes", titulo: "Mis viajes", icono: HistoryIcon },
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },

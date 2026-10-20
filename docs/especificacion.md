@@ -512,7 +512,7 @@ dice dónde está la persona en el proceso y todo lo demás cuelga de eso.
    ese número. Así se sabe que no se espera solo y que la demanda se nota.
 Al apartar → Mi viaje. La espera vence sola a las 2 h (R35): vuelve a Inicio.
 
-**La línea = "¿cómo está la línea?"** (en el menú y desde la línea de Inicio; se actualiza sola):
+**La línea = "¿cómo está la línea?"** (página `/linea`; ya no está en el menú: la situación de la línea se ve en la hoja "La línea ahora" de Inicio; se actualiza sola):
 - **Un mapa con todos los choferes** que comparten su ubicación: cada 🚐 con su nombre, la flecha de hacia dónde va
   y gris si está sin señal (R41–R42). Al abrir encuadra a todos.
 - Debajo, **quién está trabajando**: foto, nombre, ★, placa y unidad, ❄️, qué hace ahora ("En ruta hacia el Centro",
