@@ -32,7 +32,7 @@ export function BotonApartar({
   recientes?: string[]
   lugarInicial?: string | null // el de su espera, si estaba esperando
   personas?: number // cuántos van, si ya lo dijo (su espera); la hoja lo pregunta de nuevo (R57)
-  maxPersonas?: number // hasta cuántos ofrece la hoja: los puestos libres (lista de espera: de a uno)
+  maxPersonas?: number // hasta cuántos ofrece la hoja: los puestos libres (máx. 4)
   className?: string
 }) {
   const [pendiente, iniciar] = useTransition()
@@ -49,7 +49,7 @@ export function BotonApartar({
 
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      {/* El texto puede ser largo ("Anotarme en la lista de espera"): baja de línea en vez de empujar el mapa fuera */}
+      {/* Si el texto es largo, baja de línea en vez de empujar el mapa fuera de la tarjeta */}
       <Button variant={variante} className="h-auto min-h-13 w-full py-2 text-center whitespace-normal" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : setHoja(true))}>
         {pendiente && <Loader2Icon aria-hidden className="animate-spin" />}
         {pendiente ? "Apartando…" : texto}
@@ -86,9 +86,7 @@ export function BotonApartar({
             max: maxPersonas,
             inicial: personas,
             nota:
-              maxPersonas === 1 && texto.includes("lista de espera")
-                ? "La lista de espera es de a uno. Si van más, busquen una unidad con puestos o pidan que les avisemos."
-                : maxPersonas < 4
+              maxPersonas < 4
                   ? `Este carro tiene ${maxPersonas === 1 ? "1 puesto libre" : `${maxPersonas} puestos libres`}.`
                   : undefined,
           }}

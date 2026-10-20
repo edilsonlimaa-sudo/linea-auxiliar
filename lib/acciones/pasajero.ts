@@ -80,30 +80,6 @@ export async function avisarQueLlegue(reservaId: string, listo: boolean): Promis
   return { ok: true }
 }
 
-/** "Avísame cuando haya una": sentido + lugar (R31). Repetirlo cambia la espera (p. ej. "Cambiar dónde estoy"). */
-export async function avisarQueEspero(fd: FormData): Promise<Resultado> {
-  const sentido = texto(fd, "sentido")
-  const lugar = texto(fd, "lugar")
-  const lat = numero(fd, "lat")
-  const lng = numero(fd, "lng")
-  const personas = numero(fd, "personas") ?? 1
-  if (sentido !== "vg_a_centro" && sentido !== "centro_a_vg") return { error: "Escoge hacia dónde vas." }
-  if (!lugar && lat === undefined) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
-  const supabase = await crearClienteServidor()
-  const { error } = await supabase.rpc("marcar_espera", { p_sentido: sentido, p_lugar: lugar, p_lat: lat, p_lng: lng, p_personas: personas })
-  if (error) return { error: error.message }
-  // Inicio, Esperando y el menú ("Esperando" de primero) dependen de la espera
-  actualizarApp()
-  return { ok: true }
-}
-
-export async function dejarDeEsperar(): Promise<Resultado> {
-  const supabase = await crearClienteServidor()
-  const { error } = await supabase.rpc("cancelar_espera")
-  if (error) return { error: error.message }
-  actualizarApp()
-  redirect("/inicio")
-}
 
 const ETIQUETAS = ["Puntual", "Seguro", "Amable", "Respetó el orden", "Carro limpio"]
 

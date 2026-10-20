@@ -5,7 +5,7 @@
 --   pasajeros: María ...21, José ...22, Carmen ...23, Ana (pendiente) ...24, Luis ...25, Daniela ...26
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(42);
+select plan(44);
 
 -- Crea una cuenta como lo haría el registro: auth.users + identidad; el trigger crea el perfil.
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
@@ -49,25 +49,28 @@ select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000
 select throws_ok($$ select public.reservar(current_setting('t.v1')::uuid, 'Portón VGC') $$,
   'P0001', 'Solo los pasajeros pueden apartar puesto', 'Un chofer no puede apartar puesto');
 
--- ---------- Lista justa (R17, R20) ----------
+-- ---------- Lista justa (R17, R20) y sin lista de espera (R59) ----------
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000021", "role": "authenticated"}', true);
 select set_config('t.r_maria', public.reservar(current_setting('t.v1')::uuid, 'Portón VGC')::text, true);
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000022", "role": "authenticated"}', true);
 select set_config('t.r_jose', public.reservar(current_setting('t.v1')::uuid, 'Eje VG')::text, true);
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000023", "role": "authenticated"}', true);
-select set_config('t.r_carmen', public.reservar(current_setting('t.v1')::uuid, 'Las Cayenas')::text, true);
+select throws_ok($$ select public.reservar(current_setting('t.v1')::uuid, 'Las Cayenas') $$,
+  'P0001', 'Ese carro ya va lleno', 'R59: con el carro lleno no se aparta (no hay lista de espera)');
 
 select results_eq(
   $$ select posicion, nombre_corto, confirmado from public.lista_viaje(current_setting('t.v1')::uuid) $$,
-  $$ values (1, 'María G.'::text, true), (2, 'José R.'::text, true), (3, 'Carmen R.'::text, false) $$,
-  'R17: orden por hora de reserva; con 2 puestos, la tercera queda en lista de espera');
+  $$ values (1, 'María G.'::text, true), (2, 'José R.'::text, true) $$,
+  'R17: orden por hora de reserva');
 
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000021", "role": "authenticated"}', true);
 select lives_ok($$ select public.cancelar_reserva(current_setting('t.r_maria')::uuid) $$, 'R20: María libera su puesto');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000023", "role": "authenticated"}', true);
+select set_config('t.r_carmen', public.reservar(current_setting('t.v1')::uuid, 'Las Cayenas')::text, true);
 select results_eq(
   $$ select posicion, nombre_corto, confirmado from public.lista_viaje(current_setting('t.v1')::uuid) $$,
   $$ values (1, 'José R.'::text, true), (2, 'Carmen R.'::text, true) $$,
-  'R20: al liberar un puesto, la siguiente sube sola');
+  'R20: el puesto liberado lo puede apartar otra persona');
 
 -- ---------- Privacidad (§6) ----------
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000022", "role": "authenticated"}', true);
@@ -86,21 +89,21 @@ select is((select telefono from public.perfiles_privados where id = '00000000-00
 
 -- ---------- Salir (R14) ----------
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000026", "role": "authenticated"}', true);
-select set_config('t.r_dani', public.reservar(current_setting('t.v1')::uuid, 'Portón VGC')::text, true);
+select throws_ok($$ select public.reservar(current_setting('t.v1')::uuid, 'Portón VGC') $$,
+  'P0001', 'Ese carro ya va lleno', 'R59: Daniela no se anota con el carro lleno');
 
-select is((select pendiente from public.reservas where id = current_setting('t.r_dani')::uuid), true,
-  'R58: apartar es una solicitud: queda pendiente hasta que el chofer confirme');
-
--- El chofer confirma las solicitudes (R58)
+-- El chofer ve la solicitud pendiente y la confirma (R58)
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000011", "role": "authenticated"}', true);
+select is((select pendiente from public.reservas where id = current_setting('t.r_carmen')::uuid), true,
+  'R58: apartar es una solicitud: queda pendiente hasta que el chofer confirme');
 select public.responder_pedido(id, true) from public.reservas
  where viaje_id = current_setting('t.v1')::uuid and estado = 'activa' and pendiente;
 select lives_ok($$ select public.avanzar_viaje(current_setting('t.v1')::uuid, 'en_parada') $$, 'Llegué');
 select lives_ok($$ select public.avanzar_viaje(current_setting('t.v1')::uuid, 'en_ruta') $$, 'Salir');
 select is((select estado::text from public.reservas where id = current_setting('t.r_jose')::uuid), 'subio',
   'R14: los confirmados suben al salir');
-select is((select estado::text from public.reservas where id = current_setting('t.r_dani')::uuid), 'sin_puesto',
-  'R14: la lista de espera queda sin puesto (no se asigna a otro carro)');
+select is((select estado::text from public.reservas where id = current_setting('t.r_carmen')::uuid), 'subio',
+  'R14: todos los que tienen puesto suben');
 
 -- ---------- Pedido en el camino (R28–R29) y puestos manuales (R37–R38) ----------
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000025", "role": "authenticated"}', true);

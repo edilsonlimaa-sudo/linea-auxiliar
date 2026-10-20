@@ -44,7 +44,7 @@ export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: s
                   <PlusIcon aria-hidden />
                 </Button>
               </div>
-              <p className="text-[15px] text-muted-foreground">Al cambiar los puestos, la lista se reordena sola: entran o salen los de la lista de espera.</p>
+              <p className="text-[15px] text-muted-foreground">No puedes bajar de los puestos que ya tienen reserva.</p>
               <Button
                 disabled={nuevos === puestos || puestosAccion.pendiente}
                 onClick={() => puestosAccion.ejecutar(() => cambiarPuestos(viajeId, nuevos), () => setAbierta(false))}

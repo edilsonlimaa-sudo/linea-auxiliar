@@ -239,11 +239,11 @@ export function ViajeChofer({
         )}
 
         <div className="flex flex-col gap-2">
-          {!(enRuta && libres(viaje) === 0) && (
+          {/* Sin lista de espera (R59): con el carro lleno no se anota a nadie */}
+          {libres(viaje) > 0 && (
             <OcuparPuesto
               viajeId={viaje.id}
               enRuta={enRuta}
-              lleno={libres(viaje) === 0}
             />
           )}
           <MasOpciones

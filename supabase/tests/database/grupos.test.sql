@@ -1,6 +1,6 @@
 -- Pruebas de viajar acompañado (docs/especificacion.md R57). Se ejecutan con:  npx supabase test db
 -- Crean sus propias cuentas dentro de la transacción, que se deshace al final.
---   chofer: Carlos ...41 · pasajeros: María ...51, José ...52, Carmen ...53, Ana ...54
+--   chofer: Carlos ...41 · pasajeros: María ...51, José ...52, Carmen ...53, Ana ...54 (sin lista de espera, R59)
 begin;
 create extension if not exists pgtap with schema extensions;
 select plan(16);
@@ -47,46 +47,44 @@ select throws_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Eje VG
   'P0001', 'Solo queda 1 puesto para 2 personas', 'R57: el grupo viaja junto: no se aparta para 2 con 1 puesto libre');
 select lives_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Eje VG') $$, 'Solo, José sí cabe');
 
--- Carmen sola, con el carro lleno: lista de espera. Ana con un acompañante: no se anota
+-- Carmen sola, con el carro lleno: no se anota (no hay lista de espera, R59). Ana con un acompañante, tampoco
 select pg_temp.como('00000000-0000-4000-a000-000000000053');
-select lives_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Las Cayenas') $$, 'Sola, con el carro lleno, va a la lista de espera');
+select throws_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Las Cayenas') $$,
+  'P0001', 'Ese carro ya va lleno', 'R59: con el carro lleno no se aparta, ni de a uno');
 select pg_temp.como('00000000-0000-4000-a000-000000000054');
 select throws_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Calle 3', null, null, 2) $$,
-  'P0001', 'Ese carro ya va lleno', 'R57: un grupo no se anota en la lista de espera');
+  'P0001', 'Ese carro ya va lleno', 'R59: ni en grupo');
 select throws_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Calle 3', null, null, 5) $$,
   'P0001', 'Pueden viajar de 1 a 4 personas por reserva', 'R57: de 1 a 4 personas por reserva');
 
 select results_eq(
   $$ select nombre_corto, personas, desde, hasta, confirmado from public.lista_viaje(current_setting('t.v')::uuid) $$,
-  $$ values ('María G.'::text, 3, 1, 3, true), ('José R.'::text, 1, 4, 4, true), ('Carmen R.'::text, 1, 5, 5, false) $$,
+  $$ values ('María G.'::text, 3, 1, 3, true), ('José R.'::text, 1, 4, 4, true) $$,
   'R57: la lista dice cuántos van y qué puestos ocupa cada uno, en orden de llegada');
 
--- Carlos baja a 3 puestos: María cabe entera; José pasa a la lista de espera
+-- Carlos no puede bajar a 3 puestos: hay 4 personas con puesto (R59)
 select pg_temp.como('00000000-0000-4000-a000-000000000041');
-select public.cambiar_puestos(current_setting('t.v')::uuid, 3);
-select results_eq(
-  $$ select nombre_corto, confirmado from public.lista_viaje(current_setting('t.v')::uuid) $$,
-  $$ values ('María G.'::text, true), ('José R.'::text, false), ('Carmen R.'::text, false) $$,
-  'R17 + R57: al bajar los puestos, quien ya no cabe pasa a la lista de espera');
+select throws_ok($$ select public.cambiar_puestos(current_setting('t.v')::uuid, 3) $$,
+  'P0001', 'Tienes 4 pasajeros con puesto: no puedes bajar a 3 puestos', 'R59: no se bajan los puestos por debajo de los reservados');
 
--- El chofer confirma a María y a José (R58); a Carmen no le responde
+-- El chofer confirma a María (R58); a José no le responde
 select public.responder_pedido(id, true) from public.reservas
- where viaje_id = current_setting('t.v')::uuid and pasajero_id in ('00000000-0000-4000-a000-000000000051', '00000000-0000-4000-a000-000000000052');
+ where viaje_id = current_setting('t.v')::uuid and pasajero_id = '00000000-0000-4000-a000-000000000051';
 select is((select count(*)::int from public.reservas where viaje_id = current_setting('t.v')::uuid and pendiente), 1,
   'R58: la solicitud sin responder sigue pendiente (y guardando su puesto)');
 
--- Sale: suben los que tienen puesto (María y sus dos acompañantes); lo no respondido se rechaza
+-- Sale: sube María con sus dos acompañantes; lo no respondido se rechaza
 select public.avanzar_viaje(current_setting('t.v')::uuid, 'en_parada');
 select public.avanzar_viaje(current_setting('t.v')::uuid, 'en_ruta');
 select results_eq(
   $$ select personas, estado::text from public.reservas where viaje_id = current_setting('t.v')::uuid order by creado_en $$,
-  $$ values (3, 'subio'), (1, 'sin_puesto'), (1, 'rechazada') $$,
-  'R14 + R57 + R58: sube el grupo entero; la lista de espera queda sin puesto; lo no respondido se rechaza');
+  $$ values (3, 'subio'), (1, 'rechazada') $$,
+  'R14 + R57 + R58: sube el grupo entero; lo no respondido se rechaza');
 
 -- En el camino, sin puestos para el grupo: no se puede pedir
 select pg_temp.como('00000000-0000-4000-a000-000000000054');
 select throws_ok($$ select public.reservar(current_setting('t.v')::uuid, 'Calle 3', null, null, 2) $$,
-  'P0001', 'Ese carro ya va lleno', 'R28 + R57: pedir en el camino también exige puestos para todos');
+  'P0001', 'Solo queda 1 puesto para 2 personas', 'R28 + R57: pedir en el camino también exige puestos para todos');
 
 -- Sin respuesta en 5 minutos, la solicitud se rechaza sola (R58)
 select pg_temp.como('00000000-0000-4000-a000-000000000041');

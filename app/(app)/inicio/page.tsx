@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, BusIcon, ChevronRightIcon } from "lucide-react"
+import { ArrowLeftIcon, BusIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
@@ -7,9 +7,10 @@ import { EnVivo } from "@/components/en-vivo"
 import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
-import { AvisameCuandoHaya } from "@/components/pasajero/esperando"
-import { SelectorSentido, sentidoDeHacia } from "@/components/pasajero/selector-sentido"
+import { CabeceraInicio, sentidoDeHacia } from "@/components/pasajero/cabecera-inicio"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
+import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import {
   cargarAvisoDeCierre,
@@ -55,15 +56,13 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
   // Viaje terminado sin calificar: primero "¿Cómo te fue?" (R45)
   const [pendiente, cierre] = await Promise.all([cargarCalificacionPendiente(perfil.id), cargarAvisoDeCierre(perfil.id)])
   if (pendiente) redirect("/mi-viaje")
-  // Esperando es un estado aparte, con el sentido fijo (§8)
-  if (datos.miEspera) redirect("/esperando")
   return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} />
 }
 
 /**
- * Sin reserva (docs/especificacion.md §8): Inicio es "quiero viajar". Una línea con cuántos choferes trabajan (lleva a
- * La línea) → ¿Hacia dónde vas? → las unidades de ese sentido. El lugar se pregunta recién al apartar (R27).
- * Sin unidad con puesto: "Avísame cuando haya una" (R31). Ver la línea y el menú cubren lo demás.
+ * Sin reserva (docs/especificacion.md §8): Inicio es "quiero viajar". Una pregunta, una respuesta, una acción:
+ * el bloque principal pregunta "¿Hacia dónde vas?" (con quiénes trabajan abajo) → las unidades de ese sentido, la que
+ * recoge primero destacada → Apartar. Sin unidad con puesto, lo dice (sin "Avísame" por ahora, R31 suspendida).
  */
 function InicioPasajero({
   perfil,
@@ -84,52 +83,46 @@ function InicioPasajero({
   const cuantas = Object.fromEntries(
     (Object.keys(SENTIDOS) as Sentido[]).map((s) => [s, disponibles.filter((v) => v.sentido === s).length])
   ) as Record<Sentido, number>
-  // ¿Cuántos van? se pregunta al apartar (R57)
+  // ¿Cuántos van? se pregunta al apartar (R57). La primera con puesto (ya vienen ordenadas, R16) se destaca
+  const primeraConPuesto = unidades.find((v) => libres(v) > 0 && v.estado !== "en_ruta")
   const conPuesto = unidades.some((v) => libres(v) > 0)
 
   return (
     <div className="flex flex-col gap-6">
       <EnVivo />
       {cierre && <AvisoCierre aviso={cierre} />}
-      <header className="flex flex-col gap-2">
-        <h1 className="text-[26px] leading-tight font-bold">
-          {saludo()}, {perfil.nombre.split(" ")[0]}
-        </h1>
-        {/* "¿Cómo está la línea?" en una línea; el detalle y el mapa de todos están en La línea */}
-        <Link
-          href="/linea"
-          className="flex min-h-12 items-center gap-2.5 self-start rounded-full border-2 bg-card px-4 py-2 font-bold hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
-        >
-          <span aria-hidden className={enServicio.length > 0 ? "size-2.5 rounded-full bg-success" : "size-2.5 rounded-full bg-muted-foreground"} />
-          {enServicio.length === 0
-            ? "Ningún chofer trabajando ahora"
-            : enServicio.length === 1
-              ? "1 chofer trabajando"
-              : `${enServicio.length} choferes trabajando`}
-          <span className="text-primary">· Ver la línea</span>
-          <ChevronRightIcon aria-hidden className="size-5 text-primary" />
-        </Link>
-      </header>
+      <CabeceraInicio
+        saludo={`${saludo()}, ${perfil.nombre.split(" ")[0]}`}
+        sentido={sentido}
+        unidades={cuantas}
+        choferes={enServicio}
+        viajes={viajes}
+      />
       {aviso && <EstadoLinea aviso={aviso} />}
 
-      <SelectorSentido actual={sentido} unidades={cuantas} />
-
       <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
-        <h2 id="titulo-unidades" className="text-xl font-bold">
-          Unidades {SENTIDOS[sentido].hacia}
-        </h2>
+        <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+          <h2 id="titulo-unidades" className="flex items-center gap-2 text-xl font-bold">
+            Unidades {SENTIDOS[sentido].hacia}
+            {unidades.length > 0 && <Badge variant="secondary">{unidades.length}</Badge>}
+          </h2>
+          {unidades.length > 1 && <p className="text-[15px] text-muted-foreground">La que recoge primero, arriba</p>}
+        </header>
+
         {unidades.map((v) => (
-          <TarjetaUnidad key={v.id} viaje={v} porId={porId} recientes={lugaresRecientes} />
+          <TarjetaUnidad key={v.id} viaje={v} porId={porId} recientes={lugaresRecientes} destacada={v.id === primeraConPuesto?.id} />
         ))}
+
         {!conPuesto && (
-          <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-7 text-center">
-            <BusIcon aria-hidden className="size-10 text-muted-foreground" />
+          <Card className="items-center gap-3 rounded-3xl border-2 border-dashed px-5 text-center shadow-none ring-0">
+            <span aria-hidden className="grid size-14 place-items-center rounded-full bg-muted">
+              <BusIcon className="size-7 text-muted-foreground" />
+            </span>
             <p className="text-lg font-bold">
               {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
             </p>
-            <p className="text-muted-foreground">Déjanos tu lugar y te avisamos. Los choferes ven que alguien espera.</p>
-            <AvisameCuandoHaya sentido={sentido} recientes={lugaresRecientes} />
-          </div>
+            <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
+          </Card>
         )}
       </section>
     </div>

@@ -10,7 +10,7 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import { ocuparPuesto } from "@/lib/acciones/chofer"
 
 /** "➕ Ocupar puesto" para quien sube sin la app (R36–R37). El nombre es opcional: un toque basta. */
-export function OcuparPuesto({ viajeId, enRuta, lleno }: { viajeId: string; enRuta: boolean; lleno: boolean }) {
+export function OcuparPuesto({ viajeId, enRuta }: { viajeId: string; enRuta: boolean }) {
   const id = useId()
   const [abierta, setAbierta] = useState(false)
   const [nombre, setNombre] = useState("")
@@ -41,9 +41,7 @@ export function OcuparPuesto({ viajeId, enRuta, lleno }: { viajeId: string; enRu
             <SheetDescription className="text-base">
               {enRuta
                 ? "Para alguien que no usa la app y se montó en el camino."
-                : lleno
-                  ? "Vas lleno: queda de último en la lista de espera, sin quitarle el puesto a nadie."
-                  : "Para alguien que no usa la app. Toma el siguiente puesto libre."}
+                : "Para alguien que no usa la app. Toma el siguiente puesto libre."}
             </SheetDescription>
           </SheetHeader>
           <div className="flex flex-col gap-1.5 px-5 pb-2">
