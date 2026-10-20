@@ -28,6 +28,9 @@
     --color-sidebar-foreground: var(--sidebar-foreground);
     --color-sidebar: var(--sidebar);
     --color-chart-5: var(--chart-5);
+    --color-uso-app: var(--uso-app);
+    --color-uso-camino: var(--uso-camino);
+    --color-uso-mano: var(--uso-mano);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);
     --color-chart-2: var(--chart-2);
@@ -97,6 +100,10 @@
     --chart-3: #12784a;
     --chart-4: #3b82c4;
     --chart-5: #8a5600;
+    /* Uso de la app (panel): cómo entró cada pasajero. Validadas para daltonismo (dataviz) */
+    --uso-app: #2a78d6;
+    --uso-camino: #1baf7a;
+    --uso-mano: #eda100;
     --radius: 1rem;
     --sidebar: #ffffff;
     --sidebar-foreground: #0f1b2d;
@@ -144,6 +151,9 @@
     --chart-3: #4cc38a;
     --chart-4: #a3b1c6;
     --chart-5: #f0b040;
+    --uso-app: #3987e5;
+    --uso-camino: #199e70;
+    --uso-mano: #c98500;
     --sidebar: #131d2e;
     --sidebar-foreground: #edf2f9;
     --sidebar-primary: #2f6fae;

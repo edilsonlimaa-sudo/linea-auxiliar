@@ -2,8 +2,9 @@ import { CheckCircle2Icon, ChevronRightIcon, StarIcon } from "lucide-react"
 import Link from "next/link"
 
 import { promedioTexto } from "@/components/estrellas"
+import { UsoNumeros } from "@/components/admin/uso"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
-import type { CuentaConActividad, Resumen as DatosResumen, RolCuenta } from "@/lib/datos/admin"
+import type { CuentaConActividad, Resumen as DatosResumen, RolCuenta, Uso } from "@/lib/datos/admin"
 import { cn } from "@/lib/utils"
 
 const ROL: Record<RolCuenta, { icono: string; uno: string; varios: string; href: string }> = {
@@ -19,10 +20,12 @@ export function Resumen({
   cuentas,
   resumen,
   pendientes,
+  uso,
 }: {
   cuentas: CuentaConActividad[]
   resumen: DatosResumen | null
   pendientes: Record<RolCuenta, number>
+  uso: Uso
 }) {
   const conectados = cuentas.filter((c) => c.rol === "chofer" && c.estado === "aprobado" && c.actividad?.conectado)
   const aprobados = (rol: RolCuenta) => cuentas.filter((c) => c.rol === rol && c.estado === "aprobado").length
@@ -135,6 +138,11 @@ export function Resumen({
           <Dato valor={aprobados("pasajero")} texto="pasajeros aprobados" href="/admin/pasajeros?estado=aprobado" />
           <Dato valor={resumen?.registros_7d ?? 0} texto={resumen?.registros_7d === 1 ? "registro en 7 días" : "registros en 7 días"} />
         </div>
+      </Seccion>
+
+      {/* 5. Uso de la app */}
+      <Seccion titulo="Uso de la app · 7 días">
+        <UsoNumeros uso={uso} enlace="/admin/uso" />
       </Seccion>
     </div>
   )

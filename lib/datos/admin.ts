@@ -198,3 +198,42 @@ export async function cargarEventos(ids: string[]): Promise<Map<string, EventoVi
   }
   return porViaje
 }
+
+export type UsoPorChofer = Funciones["admin_uso_por_chofer"]["Returns"][number]
+export type PasajeroQueUsa = Omit<Funciones["admin_uso_pasajeros"]["Returns"][number], "foto_path"> & { fotoUrl: string | null; nuevo: boolean }
+export type Uso = {
+  porChofer: UsoPorChofer[]
+  total: { app: number; enCamino: number; aMano: number; llevados: number; porcentajeApp: number | null }
+  pasajeros: PasajeroQueUsa[]
+  repiten: number // 2 o más viajes en el período
+  nuevos: number // su primer viaje fue en el período
+}
+
+/** Uso de la app desde una fecha (§8, Resumen punto 5): cómo entraron al carro y quiénes viajan con su cuenta */
+export async function cargarUso(desde: Date, { conFotos = false } = {}): Promise<Uso> {
+  const supabase = await crearClienteServidor()
+  const [choferesRes, pasajerosRes] = await Promise.all([
+    supabase.rpc("admin_uso_por_chofer", { p_desde: desde.toISOString() }),
+    supabase.rpc("admin_uso_pasajeros", { p_desde: desde.toISOString() }),
+  ])
+  const porChofer = choferesRes.data ?? []
+  const filas = pasajerosRes.data ?? []
+  const fotos = conFotos ? await firmarFotos(filas.map((p) => p.foto_path)) : new Map<string, string>()
+
+  const app = porChofer.reduce((n, c) => n + c.app, 0)
+  const enCamino = porChofer.reduce((n, c) => n + c.en_camino, 0)
+  const aMano = porChofer.reduce((n, c) => n + c.a_mano, 0)
+  const llevados = app + enCamino + aMano
+  const pasajeros = filas.map(({ foto_path, ...p }) => ({
+    ...p,
+    fotoUrl: foto_path ? (fotos.get(foto_path) ?? null) : null,
+    nuevo: new Date(p.primer_viaje) >= desde,
+  }))
+  return {
+    porChofer,
+    total: { app, enCamino, aMano, llevados, porcentajeApp: llevados ? Math.round(((app + enCamino) / llevados) * 100) : null },
+    pasajeros,
+    repiten: pasajeros.filter((p) => p.viajes >= 2).length,
+    nuevos: pasajeros.filter((p) => p.nuevo).length,
+  }
+}

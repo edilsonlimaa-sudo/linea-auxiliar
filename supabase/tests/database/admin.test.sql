@@ -3,7 +3,7 @@
 -- (…02) y su propia pasajera dentro de la transacción, que se deshace al final.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(29);
+select plan(32);
 
 -- ---------- Creación del admin (como superusuario, igual que el registro de Supabase Auth) ----------
 select public.crear_admin('prueba', 'admin123', '00000000-0000-4000-a000-000000000002');
@@ -44,7 +44,8 @@ select '00000000-0000-0000-0000-000000000000', id::uuid, 'authenticated', 'authe
   from (values
     ('00000000-0000-4000-a000-000000000031', '0414-0000031', '{"rol": "chofer", "nombre": "Pedro Guzmán", "placa": "AA111AA"}'),
     ('00000000-0000-4000-a000-000000000032', '0414-0000032', '{"rol": "pasajero", "nombre": "José Rodríguez"}'),
-    ('00000000-0000-4000-a000-000000000033', '0414-0000033', '{"rol": "chofer", "nombre": "Yelitza Marín", "placa": "BB222BB"}')
+    ('00000000-0000-4000-a000-000000000033', '0414-0000033', '{"rol": "chofer", "nombre": "Yelitza Marín", "placa": "BB222BB"}'),
+    ('00000000-0000-4000-a000-000000000034', '0414-0000034', '{"rol": "pasajero", "nombre": "Ana Salazar"}')
   ) as c (id, tel, datos);
 update public.perfiles set estado = 'rechazado'
  where id in ('00000000-0000-4000-a000-000000000031', '00000000-0000-4000-a000-000000000032');
@@ -64,6 +65,16 @@ insert into public.viajes (id, chofer_id, sentido, puestos, estado, eta_min) val
 update public.viajes set estado = 'en_parada' where id = '00000000-0000-4000-b000-00000000000c';
 update public.viajes set puestos = 3 where id = '00000000-0000-4000-b000-00000000000c'; -- sin cambio de estado: no cuenta
 update public.viajes set estado = 'en_ruta' where id = '00000000-0000-4000-b000-00000000000c';
+
+-- Uso de la app: viajes D y E de Yelitza terminados hoy. Ana aparta en D y pide en el camino en E;
+-- en D además va una señora anotada a mano (R36)
+insert into public.viajes (id, chofer_id, sentido, puestos, estado, llegada_en) values
+  ('00000000-0000-4000-b000-00000000000d', '00000000-0000-4000-a000-000000000033', 'vg_a_centro', 4, 'finalizado', now()),
+  ('00000000-0000-4000-b000-00000000000e', '00000000-0000-4000-a000-000000000033', 'centro_a_vg', 4, 'finalizado', now());
+insert into public.reservas (viaje_id, pasajero_id, nombre, estado, en_camino, lugar) values
+  ('00000000-0000-4000-b000-00000000000d', '00000000-0000-4000-a000-000000000034', null, 'subio', false, 'Portón VGC'),
+  ('00000000-0000-4000-b000-00000000000d', null, 'Señora Carmen', 'subio', false, null),
+  ('00000000-0000-4000-b000-00000000000e', '00000000-0000-4000-a000-000000000034', null, 'bajo', true, 'Plaza Bolívar');
 
 -- María espera para ir al Centro (para la Demanda del panel)
 insert into public.esperas (pasajero_id, sentido, lugar)
@@ -98,6 +109,22 @@ select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000
 select is((select count(*)::int from public.viaje_eventos), 0, 'R56: un chofer no lee el cronómetro, ni el de sus viajes');
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
 select ok((select count(*) from public.viaje_eventos) >= 3, 'R56: el admin lee el cronómetro');
+
+-- ---------- Uso de la app (§8, Resumen punto 5) ----------
+select results_eq(
+  $$ select app, en_camino, a_mano from public.admin_uso_por_chofer(now() - interval '7 days')
+      where chofer_id = '00000000-0000-4000-a000-000000000033' $$,
+  $$ values (1, 1, 1) $$,
+  'Uso: por chofer, cuántos entraron por la app, por la app en el camino y anotados a mano');
+select results_eq(
+  $$ select nombre, viajes from public.admin_uso_pasajeros(now() - interval '7 days')
+      where pasajero_id in ('00000000-0000-4000-a000-000000000034', '00000000-0000-4000-a000-000000000032') $$,
+  $$ values ('Ana Salazar'::text, 2) $$,
+  'Uso: pasajeros identificados que viajaron y cuántas veces (los anotados a mano no cuentan)');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
+select throws_ok($$ select * from public.admin_uso_pasajeros(now()) $$, 'P0001', 'Solo para administración',
+  'Un chofer no ve el uso de la app');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
 
 -- ---------- Demanda (§8) ----------
 select ok(
@@ -151,7 +178,7 @@ set local role authenticated;
 
 -- ---------- Resumen del panel (§8) ----------
 select lives_ok($$ select * from public.admin_resumen() $$, 'El admin ve el resumen de la línea');
-select is((select viajes from public.admin_actividad() where id = '00000000-0000-4000-a000-000000000033'), 1,
+select is((select viajes from public.admin_actividad() where id = '00000000-0000-4000-a000-000000000033'), 3,
   'La actividad cuenta los viajes terminados de cada chofer');
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
 select throws_ok($$ select * from public.admin_actividad() $$, 'P0001', 'Solo para administración',

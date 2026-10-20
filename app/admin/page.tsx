@@ -7,7 +7,8 @@ import { Resumen } from "@/components/admin/resumen"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { salirAdmin } from "@/lib/acciones/admin"
-import { cargarCuentas, cargarResumen, pendientesPorRol } from "@/lib/datos/admin"
+import { cargarCuentas, cargarResumen, cargarUso, pendientesPorRol } from "@/lib/datos/admin"
+import { inicioDelDia } from "@/lib/fechas"
 import { exigirAdmin } from "@/lib/sesion"
 
 export const metadata: Metadata = { title: "Administración · Línea Auxiliar" }
@@ -16,7 +17,7 @@ export const metadata: Metadata = { title: "Administración · Línea Auxiliar" 
 export default async function PanelAdmin({ searchParams }: PageProps<"/admin">) {
   await exigirAdmin()
   const { clave } = await searchParams
-  const [{ cuentas }, resumen] = await Promise.all([cargarCuentas(), cargarResumen()])
+  const [{ cuentas }, resumen, uso] = await Promise.all([cargarCuentas(), cargarResumen(), cargarUso(inicioDelDia(6))])
   const pendientes = pendientesPorRol(cuentas)
 
   return (
@@ -31,7 +32,7 @@ export default async function PanelAdmin({ searchParams }: PageProps<"/admin">) 
         </Alert>
       )}
 
-      <Resumen cuentas={cuentas} resumen={resumen} pendientes={pendientes} />
+      <Resumen cuentas={cuentas} resumen={resumen} pendientes={pendientes} uso={uso} />
 
       <div className="mt-4 flex flex-col gap-3 border-t-2 pt-5">
         <Button render={<Link href="/admin/clave" />} nativeButton={false} variant="outline">

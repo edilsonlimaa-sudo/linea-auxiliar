@@ -370,6 +370,15 @@ Choferes · Pasajeros**; Choferes y Pasajeros muestran cuántos esperan aprobaci
      "Dónde está X". También en su tarjeta de Choferes mientras está conectado.
   3. **Hoy** (hora de Caracas): viajes terminados, pasajeros llevados y calificación promedio de los últimos 7 días.
   4. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
+  5. **Uso de la app (últimos 7 días)**, de los pasajeros llevados en viajes terminados (subió o se bajó antes):
+     - **Cómo entraron al carro:** por la app (apartó puesto), por la app en el camino (R28) o **anotados a mano**
+       por el chofer (R36), con el % que usó la app y una barra.
+     - **Pasajeros identificados:** cuántas personas distintas viajaron con su cuenta, cuántas **repiten** (2 o más
+       viajes en el período) y cuántas viajaron **por primera vez**.
+     - Enlace **Ver detalle** → página **Uso de la app**: filtro 7 · 30 · 90 días, los mismos números, la
+       comparación **por chofer** (app / en el camino / a mano, para ver quién todavía anota mucho a mano) y la
+       **lista de pasajeros identificados**: foto, nombre, viajes en el período, último viaje y "Nuevo" si su primer
+       viaje fue en el período. Primero quien más viaja.
 - **Viajes en curso** (se abre tocando "viajes en curso" del Resumen; se actualiza sola): un bloque por chofer
   con viajes abiertos, primero quien va en ruta. Arriba el chofer (foto, nombre, placa, unidad, conectado) y
   **Ver en el mapa** (R41). Por cada viaje: sentido, estado ("En ruta hacia el Centro, salió a las 7:40" /

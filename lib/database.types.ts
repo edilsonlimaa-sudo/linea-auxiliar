@@ -786,6 +786,27 @@ export type Database = {
           viajes_hoy: number
         }[]
       }
+      admin_uso_pasajeros: {
+        Args: { p_desde: string }
+        Returns: {
+          foto_path: string
+          nombre: string
+          pasajero_id: string
+          primer_viaje: string
+          ultimo_viaje: string
+          viajes: number
+        }[]
+      }
+      admin_uso_por_chofer: {
+        Args: { p_desde: string }
+        Returns: {
+          a_mano: number
+          app: number
+          chofer_id: string
+          en_camino: number
+          nombre: string
+        }[]
+      }
       apoyar_alerta: { Args: { p_alerta: string }; Returns: undefined }
       aprobar_cuenta: {
         Args: { p_aprobar: boolean; p_usuario: string }
