@@ -96,10 +96,11 @@ marca "Se bajó" (R38), Mi viaje muestra la calificación pendiente (12 h, `Cali
 en vivo (`EnVivo`, respaldo cada 60 s).
 
 Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pasajero o chofer?) → `/registro/[pasajero|chofer]` ·
-`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin` · `/admin/clave`.
+`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin/clave` · panel: `/admin` (Resumen), `/admin/viajes`, `/admin/viajes/terminados`, `/admin/demanda`, `/admin/choferes`, `/admin/pasajeros`, `/admin/uso`.
 
 ### Administración
 
+- Rutas: `app/admin/(acceso)/` (entrar y clave: angostas, sin menú) y `app/admin/(panel)/` (menú lateral `components/admin/menu-admin.tsx`, fijo en la computadora y cajón con "Menú" en el celular; contadores cargados en su layout). Datos: `lib/datos/admin.ts`.
 - Cuenta separada: entra en `/admin/entrar` con **usuario + contraseña** (correo interno
   `usuario@admin.lineaauxiliar.app`, `lib/admin.ts`). Pasajeros y choferes no pueden entrar ahí, y el admin no
   tiene teléfono, así que no entra por `/entrar`.

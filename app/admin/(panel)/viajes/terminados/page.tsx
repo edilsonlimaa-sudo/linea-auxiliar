@@ -1,11 +1,9 @@
-import { ChevronLeftIcon, StarIcon } from "lucide-react"
+import { StarIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 
-import { NavAdmin } from "@/components/admin/nav-admin"
 import { promedioTexto } from "@/components/estrellas"
 import { ViajesChofer } from "@/components/historial/viajes-chofer"
-import { cargarCuentas, pendientesPorRol } from "@/lib/datos/admin"
 import { cargarViajesTerminadosAdmin } from "@/lib/datos/historial"
 import { inicioDelDia } from "@/lib/fechas"
 import { exigirAdmin } from "@/lib/sesion"
@@ -24,7 +22,7 @@ export default async function PaginaTerminados({ searchParams }: PageProps<"/adm
   await exigirAdmin()
   const { periodo: param } = await searchParams
   const periodo = PERIODOS.find((p) => p.id === param) ?? PERIODOS[1]
-  const [{ cuentas }, viajes] = await Promise.all([cargarCuentas(), cargarViajesTerminadosAdmin(inicioDelDia(periodo.dias))])
+  const viajes = await cargarViajesTerminadosAdmin(inicioDelDia(periodo.dias))
 
   const pasajeros = viajes.reduce((n, v) => n + v.llevo.length, 0)
   const califs = viajes.flatMap((v) => v.calificaciones)
@@ -32,14 +30,7 @@ export default async function PaginaTerminados({ searchParams }: PageProps<"/adm
 
   return (
     <div className="flex flex-col gap-5">
-      <NavAdmin activa="resumen" pendientes={pendientesPorRol(cuentas)} />
       <header className="flex flex-col gap-1">
-        <Link
-          href="/admin/viajes"
-          className="-ml-1 inline-flex min-h-11 w-fit items-center gap-1 rounded-md font-bold text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          <ChevronLeftIcon aria-hidden className="size-5" /> Viajes en curso
-        </Link>
         <h1 className="text-[26px] leading-tight font-bold">Viajes terminados</h1>
       </header>
 

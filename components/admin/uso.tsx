@@ -130,7 +130,7 @@ export function UsoPorChoferLista({ choferes }: { choferes: UsoPorChofer[] }) {
 export function PasajerosQueUsan({ pasajeros }: { pasajeros: PasajeroQueUsa[] }) {
   if (pasajeros.length === 0) return <p className="text-muted-foreground">Nadie viajó con su cuenta en este período.</p>
   return (
-    <ol className="flex flex-col gap-2">
+    <ol className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
       {pasajeros.map((p) => (
         <li key={p.pasajero_id} className="flex items-center gap-3 rounded-2xl border-2 bg-card px-3 py-2.5">
           <Avatar url={p.fotoUrl} nombre={p.nombre} className="size-11" />

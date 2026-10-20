@@ -13,7 +13,7 @@ export default async function PaginaClaveAdmin() {
   const obligatoria = perfil.debe_cambiar_clave
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
       {!obligatoria && (
         <Link href="/admin" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-lg font-bold text-primary dark:text-foreground">
           <ChevronLeftIcon aria-hidden className="size-6" /> Volver al panel

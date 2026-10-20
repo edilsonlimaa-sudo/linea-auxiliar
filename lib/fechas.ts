@@ -57,3 +57,8 @@ export function saludo(ahora = new Date()): string {
 export function inicioDelDia(dias = 0, ahora = new Date()): Date {
   return new Date(new Date(`${diaCaracas(ahora)}T00:00:00-04:00`).getTime() - dias * 86_400_000)
 }
+
+/** "martes, 20 de octubre": la fecha de hoy en Caracas, para encabezados */
+export function hoyEnPalabras(ahora = new Date()): string {
+  return new Intl.DateTimeFormat("es-VE", { weekday: "long", day: "numeric", month: "long", timeZone: ZONA }).format(ahora)
+}

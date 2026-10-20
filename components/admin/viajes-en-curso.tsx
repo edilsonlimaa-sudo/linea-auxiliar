@@ -24,7 +24,7 @@ export function ViajesEnCurso({ choferes }: { choferes: ChoferEnCurso[] }) {
     )
   }
   return (
-    <div className="flex flex-col gap-5">
+    <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
       {choferes.map((c) => (
         <BloqueChofer key={c.id} chofer={c} />
       ))}

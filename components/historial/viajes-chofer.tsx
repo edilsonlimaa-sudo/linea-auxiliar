@@ -41,7 +41,8 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
   }
 
   return (
-    <ol className="flex flex-col gap-3">
+    // En el panel, con pantalla grande, en dos columnas
+    <ol className={admin ? "grid gap-3 lg:grid-cols-2 lg:items-start" : "flex flex-col gap-3"}>
       {viajes.map((v) => {
         const promedio = v.calificaciones.length ? v.calificaciones.reduce((s, c) => s + c.estrellas, 0) / v.calificaciones.length : null
         // El admin ve todas con quién calificó; el chofer, solo los comentarios sin nombre (R52)

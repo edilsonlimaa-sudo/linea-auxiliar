@@ -78,7 +78,7 @@ export async function ListaCuentas({
       ) : lista.length === 0 ? (
         <p className="rounded-2xl border-2 border-dashed p-8 text-center text-muted-foreground">{VACIO[rol][estado]}</p>
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
           {lista.map((c) => (
             <TarjetaCuenta
               key={c.id}
