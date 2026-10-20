@@ -6,18 +6,22 @@
 // Uso:  npm run db:nube           → aplica las pendientes
 //       npm run db:nube -- --ver  → solo muestra cuáles faltan
 // Necesita en .env.local (o en el entorno):
-//   NEXT_PUBLIC_SUPABASE_URL  (https://<ref>.supabase.co)
 //   SUPABASE_ACCESS_TOKEN     (token personal: supabase.com/dashboard/account/tokens; nunca con NEXT_PUBLIC_)
+// El proyecto de la nube sale, en este orden, de SUPABASE_PROJECT_REF, del proyecto vinculado por la CLI
+// (supabase/.temp/project-ref) o de NEXT_PUBLIC_SUPABASE_URL si apunta a la nube. El app local usa el Supabase del
+// Docker, así que NEXT_PUBLIC_SUPABASE_URL normalmente NO sirve aquí.
 import { readdir, readFile } from "node:fs/promises"
 import path from "node:path"
 
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""
 const token = process.env.SUPABASE_ACCESS_TOKEN
-const ref = /^https:\/\/([a-z0-9]+)\.supabase\.co/.exec(url)?.[1]
 const soloVer = process.argv.includes("--ver")
 
-if (!ref) {
-  console.error("NEXT_PUBLIC_SUPABASE_URL debe ser la URL del proyecto en la nube (https://<ref>.supabase.co).")
+const vinculado = await readFile(path.join("supabase", ".temp", "project-ref"), "utf8").then((t) => t.trim(), () => "")
+const desdeUrl = /^https:\/\/([a-z0-9]+)\.supabase\.co/.exec(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "")?.[1] ?? ""
+const ref = process.env.SUPABASE_PROJECT_REF || vinculado || desdeUrl
+
+if (!/^[a-z0-9]{20}$/.test(ref)) {
+  console.error("No sé cuál es el proyecto de la nube: pon SUPABASE_PROJECT_REF en .env.local (el <ref> de https://<ref>.supabase.co).")
   process.exit(1)
 }
 if (!token) {

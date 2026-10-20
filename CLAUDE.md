@@ -144,7 +144,7 @@ Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pas
   `127.0.0.1:54321`); producción (Vercel) usa Supabase Cloud. Migraciones: **local con la CLI**
   (`npx supabase migration up --local`, luego `npm run db:test` y `npm run db:types`); **nube con `npm run db:nube`**
   (Management API; con VPN la CLI no llega). El `SUPABASE_ACCESS_TOKEN` del `.env.local` es de la nube y solo sirve para
-  eso. Las migraciones ya aplicadas en la nube no se editan: los cambios van en una migración nueva.
+  eso; el proyecto sale de `SUPABASE_PROJECT_REF` o del vínculo de la CLI (`supabase/.temp/project-ref`). Las migraciones ya aplicadas en la nube no se editan: los cambios van en una migración nueva.
 
 ## Comandos
 
