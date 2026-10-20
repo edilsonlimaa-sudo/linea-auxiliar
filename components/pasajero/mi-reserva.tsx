@@ -1,6 +1,7 @@
 import { ChevronDownIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucide-react"
 
 import { BotonYaLlegue, BotonYaNoVoy } from "@/components/pasajero/acciones-reserva"
+import { CambiarLugar } from "@/components/pasajero/cambiar-lugar"
 import { ChoferResumen, FotoCarro } from "@/components/pasajero/chofer-resumen"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { buttonVariants } from "@/components/ui/button"
@@ -56,9 +57,11 @@ export function MiReservaTarjeta({
   datos,
   porId,
   cambiarme,
+  recientes = [],
 }: {
   datos: MiReserva
   porId: Map<string, Viaje>
+  recientes?: string[] // para "Cambiar dónde me recogen" (R27)
   cambiarme?: React.ReactNode // en lista de espera: botón para cambiarse de unidad (R22), justo bajo el estado
 }) {
   const { reserva, viaje, posicion, lista, telefonoChofer } = datos
@@ -110,6 +113,11 @@ export function MiReservaTarjeta({
                 Te recoge en <strong>{lugar}</strong>
               </span>
             </p>
+            {reserva.estado === "activa" && (
+              <div className="mt-2">
+                <CambiarLugar reservaId={reserva.id} recientes={recientes} lugarActual={reserva.lugar} />
+              </div>
+            )}
           </>
         )}
       </div>

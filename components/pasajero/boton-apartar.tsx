@@ -4,28 +4,36 @@ import { Loader2Icon } from "lucide-react"
 import { useState, useTransition } from "react"
 
 import { Confirmar } from "@/components/confirmar"
+import { HojaLugar } from "@/components/pasajero/hoja-lugar"
 import { Button } from "@/components/ui/button"
 import { apartarPuesto } from "@/lib/acciones/pasajero"
 
 /**
- * Apartar de un toque (R27): el lugar ya lo dio al avisar que espera. Si sale bien, la acción abre Mi viaje.
- * Al cambiarse de unidad (R22) pide confirmación, porque se cancela la reserva anterior (R18).
+ * Apartar puesto (R27): sube la hoja "¿Dónde te recogemos?" y confirma. Si sale bien, la acción abre Mi viaje.
+ * Al cambiarse de unidad (R22) no pregunta el lugar (usa el de su reserva) y pide confirmación, porque se cancela
+ * la reserva anterior (R18).
  */
 export function BotonApartar({
   viajeId,
   texto,
   variante = "default",
   reservaAnterior,
+  recientes = [],
+  lugarInicial,
 }: {
   viajeId: string
   texto: string
   variante?: "default" | "outline"
   reservaAnterior?: string | null
+  recientes?: string[]
+  lugarInicial?: string | null // el de su espera, si estaba esperando
 }) {
   const [pendiente, iniciar] = useTransition()
   const [error, setError] = useState<string>()
   const [confirmar, setConfirmar] = useState(false)
-  const apartar = () =>
+  const [hoja, setHoja] = useState(false)
+
+  const cambiarse = () =>
     iniciar(async () => {
       setError(undefined)
       const r = await apartarPuesto(viajeId)
@@ -34,7 +42,7 @@ export function BotonApartar({
 
   return (
     <div className="flex flex-col gap-2">
-      <Button variant={variante} className="w-full" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : apartar())}>
+      <Button variant={variante} className="w-full" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : setHoja(true))}>
         {pendiente && <Loader2Icon aria-hidden className="animate-spin" />}
         {pendiente ? "Apartando…" : texto}
       </Button>
@@ -43,7 +51,8 @@ export function BotonApartar({
           {error}
         </p>
       )}
-      {reservaAnterior && (
+
+      {reservaAnterior ? (
         <Confirmar
           abierto={confirmar}
           onCambiar={setConfirmar}
@@ -54,7 +63,18 @@ export function BotonApartar({
           variante="signal"
           ocupado={pendiente}
           error={error}
-          onConfirmar={apartar}
+          onConfirmar={cambiarse}
+        />
+      ) : (
+        <HojaLugar
+          abierta={hoja}
+          onCambiar={setHoja}
+          titulo="¿Dónde te recogemos?"
+          descripcion="El chofer lo ve en grande al llegar."
+          recientes={recientes}
+          lugarInicial={lugarInicial}
+          textoBoton={texto}
+          onEnviar={(datos) => apartarPuesto(viajeId, datos)}
         />
       )}
     </div>

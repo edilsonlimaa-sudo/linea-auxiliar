@@ -78,17 +78,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 | `lib/datos/historial.ts` · `components/historial/` · `components/carnet.tsx` | Mis viajes (pasajero R51 con "Calificar" después; chofer R50), Mis calificaciones del chofer (R52, sin nombres) y Mi carnet (R53, ambos) |
 | `lib/fotos.ts` · `components/foto/` | Fotos (R54): `firmarFotos(rutas)` da enlaces firmados de 1 h (bucket privado); `<SubirFoto>` achica en el teléfono (1080 px, JPEG), sube **directo a Storage** a la carpeta propia y la acción `guardarFoto` la registra; `<Avatar>` cae a iniciales; `<InterruptorAire>` (R55) |
 | `components/confirmar.tsx` | Confirmación propia (hoja inferior en el celular). **Nunca `window.confirm`**. Botones que dicen qué pasa ("Sí, ya no voy" / "No, sigo en el viaje"); el foco empieza en la opción segura |
-| `components/pasajero/` | Inicio del pasajero: `FormularioEspera` / `EstadoEspera` (pasos 2 y 3), `ElegirLugar` (lugares recientes + texto libre + GPS), `TarjetaUnidad` con `BotonApartar` (un toque), `MiReservaTarjeta` |
+| `components/pasajero/` | Inicio del pasajero: `SelectorSentido` y `Atajos` (`puerta-de-entrada.tsx`), `TarjetaUnidad` con `BotonApartar`, `HojaLugar` (sobre `ElegirLugar` + `CasillaGps`), `AvisameCuandoHaya` / `EstadoEspera`, `MiReservaTarjeta` con `CambiarLugar` |
 
 Formularios: Server Action + `useActionState`, validación con zod y mensajes en español; el estado devuelve
 `errores` por campo, `valores` para volver a llenar (nunca el PIN) e `intento` (se usa como `key` del form y para
 llevar el foco al primer error).
 
-Pasajero (especificación §8 "Inicio del pasajero"): **Inicio** es una puerta de entrada, no un formulario: saludo →
-"¿Cómo está la línea?" (`EstadoDeLaLinea`) → **Necesito un transporte** (hoja con sentido + lugar → avisar que espera,
-R31) y **Lo de siempre** (repite el último pedido de un toque) → atajos (`puerta-de-entrada.tsx`). Esperando: las
-unidades de ese sentido. Apartar es **un toque**: la acción `apartarPuesto(viajeId)` lee el lugar de la
-espera (o de la reserva, al cambiarse de unidad, R27). Al apartar, la acción redirige a **`/mi-viaje`** (puesto o
+Pasajero (especificación §8 "Inicio del pasajero"): **mirar primero, comprometerse después**. Inicio: saludo →
+"¿Cómo está la línea?" (`EstadoDeLaLinea conMapa`: cada chofer con "Ver en el mapa") → **¿Hacia dónde vas?**
+(`SelectorSentido`, el sentido va en `?hacia=centro|valle`) → las unidades de ese sentido (`TarjetaUnidad`) → atajos.
+El lugar se pregunta **recién al apartar**: `BotonApartar` abre `HojaLugar` ("¿Dónde te recogemos?", recientes + texto +
+GPS) y llama `apartarPuesto(viajeId, datos)`; al cambiarse de unidad (R22) no pregunta y usa el lugar de la reserva.
+Sin unidad con puesto: **Avísame cuando haya una** (`AvisameCuandoHaya`, registra la espera, R31). En Mi viaje,
+`CambiarLugar` usa la misma hoja. Al apartar, la acción redirige a **`/mi-viaje`** (puesto o
 turno → cuándo llega → dónde → avance → chofer → acciones). Con reserva activa, `/inicio` redirige a `/mi-viaje`
 (salvo `/inicio?cambiar=1`: otras unidades con puesto, R22) y el menú muestra "Mi viaje" de primero; "Ya no voy"
 vuelve a Inicio. "En curso" = reserva activa **o a bordo** (`subio` en viaje en ruta); al terminar el viaje o cuando el chofer

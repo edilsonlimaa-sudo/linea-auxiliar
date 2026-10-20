@@ -22,7 +22,7 @@ export default async function PaginaMiViaje() {
   const perfil = await exigirCuentaAprobada()
   if (perfil.rol !== "pasajero") redirect("/inicio")
 
-  const { miReserva, viajes, porId, aviso } = await cargarInicioPasajero(perfil.id)
+  const { miReserva, viajes, porId, aviso, lugaresRecientes } = await cargarInicioPasajero(perfil.id)
   if (!miReserva) {
     const pendiente = await cargarCalificacionPendiente(perfil.id)
     if (!pendiente) redirect("/inicio")
@@ -43,6 +43,7 @@ export default async function PaginaMiViaje() {
       <MiReservaTarjeta
         datos={miReserva}
         porId={porId}
+        recientes={lugaresRecientes}
         cambiarme={
           otras.length > 0 && (
             <Link href="/inicio?cambiar=1" className={buttonVariants({ className: "w-full" })}>

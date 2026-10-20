@@ -171,20 +171,22 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 
 ### 5.6 Dónde recoger al pasajero
 
-- **R25.** Al **avisar que espera** (R31), el pasajero **escribe dónde está** (texto libre, máx. 60 caracteres,
+- **R25.** Al **apartar puesto** (o al pedir "Avísame cuando haya una", R31), el pasajero **escribe dónde está** (texto libre, máx. 60 caracteres,
   ej. "Entrada de Las Cayenas"). Eso es lo principal y lo que el chofer ve en grande. Para no escribir cada vez, la app
   ofrece sus **3 lugares más recientes** (de sus reservas y esperas anteriores) como opciones de un toque, con
   el último ya escogido.
 - **R26 [servidor].** El **GPS es opcional**: casilla "📍 Agregar también mi GPS" (se recuerda la elección). Si
   lo agrega, el chofer tiene **Cómo llegar** (Google Maps) y **Waze**. Quien no sabe explicar dónde está
   puede mandar **solo su GPS**. Hace falta al menos uno: lugar escrito o GPS.
-- **R27.** **Apartar es un toque:** se usa el lugar de la espera, sin volver a preguntar. Se puede cambiar
-  ("Cambiar" en la espera, o después en Mi viaje). Al cambiarse de unidad (R22) se usa el lugar de la reserva.
+- **R27.** **Dónde estás se pregunta al apartar**, no antes: primero se miran las unidades sin compromiso. Al tocar
+  **Apartar puesto** sube una hoja corta **"¿Dónde te recogemos?"** (lugares recientes, otro escrito, GPS) con el
+  último lugar ya escogido, y **Apartar** confirma. Si estaba esperando (R31), empieza con el lugar de la espera. Se
+  puede cambiar después en Mi viaje. Al cambiarse de unidad (R22) se usa el lugar de la reserva, sin preguntar.
 
 ### 5.7 Pedidos en el camino
 
-- **R28.** Un carro `en_ruta` con puestos libres muestra **🙋 Pedir que me recoja en el camino**, con el lugar
-  de la espera (R27). La app no valida si el lugar queda por delante: lo decide el chofer (R29).
+- **R28.** Un carro `en_ruta` con puestos libres muestra **🙋 Pedir que me recoja en el camino**, con la misma hoja
+  de lugar (R27). La app no valida si el lugar queda por delante: lo decide el chofer (R29).
 - **R29 [servidor].** El pedido **ocupa el puesto al instante** y queda `pendiente`. Al chofer le aparece con
   aviso en rojo: **✓ Voy** (al pasajero: "va por ti") o **✕ Sigo** (se libera el puesto; al pasajero: "no
   puede pasar esta vez, escoge otra unidad"). Después marca **Subió** o **No vino**.
@@ -195,12 +197,13 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 La espera es solo una **señal de demanda** y un **aviso al pasajero**. No hay pantalla "Esperando" para el
 chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la única forma de entrar a un carro.
 
-- **R31.** **Avisar que espera es el primer paso de todo pasajero** (§8): el **sentido** al que va y su
-  **lugar** (escrito y/o GPS, R25–R26). Recién entonces ve las unidades y aparta. Así todo pasajero cuenta como
-  demanda y el lugar se escribe una sola vez. Los choferes ven **solo cuántos esperan por sentido**: al
-  publicar (R10) y en su Inicio cuando no tienen viaje ("3 personas esperan para ir al Centro").
-- **R32.** Al aparecer un viaje de ese sentido que acepta reservas, el pasajero recibe **"🚐 ¡Ya hay una
-  unidad para ti!"** y botón **Apartar** (usa el lugar de la espera, R27).
+- **R31.** **Esperar es opcional:** el pasajero ve las unidades sin dar nada. Si no hay unidad de su sentido o
+  todas van llenas, **Avísame cuando haya una** registra la espera: el **sentido** y su **lugar** (escrito y/o GPS,
+  R25–R26). Los choferes ven **solo cuántos esperan por sentido**: al publicar (R10) y en su Inicio cuando no tienen
+  viaje ("3 personas esperan para ir al Centro"). *Decisión (oct. 2026):* antes avisar era el primer paso de todos;
+  se pierde la demanda de quien mira y se va sin avisar, a cambio de que nadie tenga que dar su lugar para mirar.
+- **R32.** Al aparecer un viaje de ese sentido que acepta reservas, el pasajero que espera la ve aparecer arriba
+  de su lista con **Apartar** (la hoja de lugar empieza con el de la espera, R27).
 - **R33.** *(Eliminada.)* El chofer ya no agrega a su viaje a quien espera: duplicaba la reserva y saltaba el
   orden justo. Si encuentra a alguien en la calle, usa **Ocupar puesto** (R36).
 - **R34.** *(Eliminada.)* "Recogido" desde la espera; lo cubre Ocupar puesto (R36).
@@ -346,7 +349,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Rol | Secciones |
 |---|---|
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
-| Pasajero | **Inicio** (¿hay choferes? → "¿Hacia dónde vas?" + "¿Dónde estás?" → esperando: unidades de ese sentido) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
+| Pasajero | **Inicio** (¿hay choferes?, con mapa → "¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
 | Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Demanda** · **Viajes terminados**) · Personas (**Choferes** · **Pasajeros**, cada uno con Pendientes / Aprobados / Rechazados) · Análisis (**Uso de la app**) · Aviso del día y restablecer PIN (más adelante) |
 
@@ -438,25 +441,25 @@ que tiene su propia página (también es adonde llevan los avisos de §7):
   min, se puede cerrar): salió lleno (R14), el chofer canceló (R24), no puede pasar por ti (R29) o marcó que no
   llegaste (R21). Siempre con "Escoge otra unidad". Si lo cerró él mismo ("Ya no voy"), no hace falta aviso.
 
-**Inicio del pasajero: una puerta de entrada, no un formulario.** No todos abren la app para viajar ya: unos
-quieren saber si la línea está trabajando antes de salir de casa, ver el aviso, mirar un chofer o un viaje pasado.
-Por eso Inicio **primero informa y después pregunta**, con una sola acción principal:
+**Inicio del pasajero: mirar primero, comprometerse después.** La pregunta que trae la persona es *"¿hay un
+carro con puesto yendo para donde voy?"*. Inicio la responde sin pedir nada; el lugar se pregunta recién al apartar
+(R27). *(Oct. 2026, tras pruebas con usuarios: antes había que tocar "Necesito un transporte" y dar el lugar para ver
+las unidades.)*
 
 1. **Saludo** según la hora ("Buenos días, María").
-2. **¿Cómo está la línea?** Sin compromiso: **quién está trabajando ahora** (R7). Los choferes dan vueltas (van al
-   Centro y vuelven), así que no se separa por sentido: importa saber que hay alguien en la ruta y quién es. Por
-   cada uno: foto, nombre, ★, placa y unidad, ❄️ si tiene aire y qué hace ahora ("Recogiendo en Valle Grande",
-   "En ruta hacia el Centro", "Disponible"). Más el aviso del día. El sentido se escoge recién al pedir (paso 3).
-3. **Necesito un transporte** (la acción principal, grande). Recién ahí se pregunta **¿hacia dónde vas? y ¿dónde
-   estás?** en una hoja: sentidos, lugares recientes o escribir otro, GPS opcional → **Avisar que estoy esperando**
-   (R31). Sin choferes trabajando igual se puede: es la señal que hace salir a alguien.
-4. **Lo de siempre:** si ya viajó, un atajo de un toque que repite su último pedido ("Al Centro · desde Calle 3…").
-   La mayoría hace el mismo viaje casi todos los días.
-5. **Atajos** a Choferes y Mis viajes, para quien entró a mirar.
+2. **¿Cómo está la línea?** **Quién está trabajando ahora** (R7), sin separar por sentido (los choferes dan vueltas).
+   Por cada uno: foto, nombre, ★, placa y unidad, ❄️ si tiene aire, qué hace ahora ("En ruta hacia el Centro",
+   "Disponible") y **Ver en el mapa** (R41) para hacerse una idea de por dónde va. Más el aviso del día.
+3. **¿Hacia dónde vas?** Dos botones grandes, **Al Centro** / **A Valle Grande**, cada uno con cuántas unidades van.
+   Empieza en el sentido de su espera, si tiene; si no, el sugerido por la hora y dónde vive. Cambiarlo es un toque.
+4. **Las unidades de ese sentido**, enseguida debajo, primero las que aceptan, con puesto y llegan antes (R16): cuándo
+   recoge, **puestos libres o "Lleno"**, quién maneja, **Apartar puesto** (o lista de espera, o pedir en el camino) y
+   **Ver en el mapa**. Al apartar sube la hoja "¿Dónde te recogemos?" (R27) → Mi viaje.
+5. **Sin unidades** de ese sentido, o todas llenas: **Avísame cuando haya una** (R31), con la misma hoja de lugar.
+6. **Atajos** a Choferes y Mis viajes, para quien entró a mirar.
 
-Después de avisar que espera, Inicio pasa a **Esperando**: "Estás esperando para ir al Centro · en Calle 3…", con
-**Cambiar** y **Ya no estoy esperando**, y debajo **las unidades de ese sentido**, cada una con **Apartar puesto** de
-un toque (R27) y **Ver en el mapa** (R41). Sin unidades: "Te avisamos cuando venga una" (R32). Al apartar → Mi viaje.
+Quien pidió **Avísame cuando haya una** ve en su Inicio "Te avisamos: esperas para ir al Centro · en Calle 3…" con
+**Ya no estoy esperando**, y las unidades de ese sentido aparecen ahí mismo en cuanto haya una (R32).
 
 **Inicio del chofer.** Antes de salir, el chofer se pregunta **"¿hay gente esperando? ¿ya hay alguien
 atendiendo?"**. Inicio responde eso primero y publicar es una opción, no la pantalla entera:

@@ -11,18 +11,22 @@ import { ETIQUETA_ESTADO, enEspera, libres, llegada, SENTIDOS, type Viaje } from
 
 /**
  * Una unidad que el pasajero puede escoger (R16). Jerarquía: cuándo llega → si hay puesto → quién maneja → acción.
- * Apartar es un toque: el lugar ya lo dio al avisar que espera (R27).
+ * Al apartar sube la hoja "¿Dónde te recogemos?" (R27).
  */
 export function TarjetaUnidad({
   viaje,
   porId,
   reservaAnterior,
   yo = null,
+  recientes = [],
+  lugarInicial,
 }: {
   viaje: ViajeConChofer
   porId: Map<string, Viaje>
   reservaAnterior?: string | null
   yo?: Punto | null // GPS del pasajero (de su espera), para la distancia en el mapa
+  recientes?: string[] // lugares recientes para la hoja de lugar (R25)
+  lugarInicial?: string | null // el de su espera, si estaba esperando (R27)
 }) {
   const cuando = llegada(viaje, porId)
   const hayPuesto = libres(viaje) > 0
@@ -66,7 +70,14 @@ export function TarjetaUnidad({
       <ChoferResumen chofer={viaje.chofer} />
 
       <div className="flex flex-col gap-2">
-        <BotonApartar viajeId={viaje.id} texto={textoBoton} variante={hayPuesto ? "default" : "outline"} reservaAnterior={reservaAnterior} />
+        <BotonApartar
+          viajeId={viaje.id}
+          texto={textoBoton}
+          variante={hayPuesto ? "default" : "outline"}
+          reservaAnterior={reservaAnterior}
+          recientes={recientes}
+          lugarInicial={lugarInicial}
+        />
         <VerEnMapa choferId={viaje.chofer_id} chofer={viaje.chofer.nombre} yo={yo} />
       </div>
       {enRuta && <p className="-mt-2 text-[15px] text-muted-foreground">Ya salió. El chofer te confirma si puede pasar por ti.</p>}

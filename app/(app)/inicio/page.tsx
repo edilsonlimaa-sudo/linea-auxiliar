@@ -7,9 +7,8 @@ import { EnVivo } from "@/components/en-vivo"
 import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
 import { EstadoDeLaLinea } from "@/components/pasajero/estado-de-la-linea"
-import { EstadoEspera } from "@/components/pasajero/esperando"
-import { EstadoLinea } from "@/components/pasajero/estado-linea"
-import { Atajos, NecesitoTransporte } from "@/components/pasajero/puerta-de-entrada"
+import { AvisameCuandoHaya, EstadoEspera } from "@/components/pasajero/esperando"
+import { Atajos, SelectorSentido, sentidoDeHacia } from "@/components/pasajero/puerta-de-entrada"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import {
@@ -19,21 +18,18 @@ import {
   type AvisoDeCierre,
   type DatosInicioPasajero,
   type MiReserva,
-  type ViajeConChofer,
 } from "@/lib/datos/inicio-pasajero"
 import { saludo } from "@/lib/fechas"
 import { exigirCuentaAprobada, type Perfil } from "@/lib/sesion"
-import type { Punto } from "@/lib/mapa"
 import {
   aceptaReservas,
   haciaEnFrase,
-  llegada,
+  libres,
   ordenarParaPasajero,
   otrasConPuesto,
   SENTIDOS,
   sentidoSugerido,
   type Sentido,
-  type Viaje,
 } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Inicio · Línea Auxiliar" }
@@ -47,7 +43,7 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
     return <InicioChofer nombre={perfil.nombre} datos={datos} />
   }
 
-  const { cambiar } = await searchParams
+  const { cambiar, hacia } = await searchParams
   const datos = await cargarInicioPasajero(perfil.id)
 
   // Con un viaje en curso, Inicio es Mi viaje; solo se queda aquí para cambiarse de unidad desde la lista de
@@ -59,48 +55,37 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
   // Viaje terminado sin calificar: primero "¿Cómo te fue?" (R45)
   const [pendiente, cierre] = await Promise.all([cargarCalificacionPendiente(perfil.id), cargarAvisoDeCierre(perfil.id)])
   if (pendiente) redirect("/mi-viaje")
-  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} />
+  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} />
 }
 
 /**
- * Sin reserva (docs/especificacion.md §8 "Inicio del pasajero"): las preguntas en orden, una por vez.
- * 1. ¿Hay choferes trabajando?  2. ¿Hacia dónde vas? + ¿Dónde estás? → Avisar que estoy esperando.
- * 3. Esperando: las unidades de ese sentido, cada una con Apartar de un toque (R27).
+ * Sin reserva (docs/especificacion.md §8 "Inicio del pasajero"): mirar primero, comprometerse después.
+ * 1. ¿Cómo está la línea? (con mapa)  2. ¿Hacia dónde vas?  3. Las unidades de ese sentido, enseguida.
+ * El lugar se pregunta recién al apartar (R27). Sin unidad con puesto: "Avísame cuando haya una" (R31).
  */
-function InicioPasajero({ perfil, datos, cierre }: { perfil: Perfil; datos: DatosInicioPasajero; cierre: AvisoDeCierre | null }) {
-  const { viajes, porId, miEspera, lugaresRecientes, aviso, unidadesEnServicio, enServicio, ultimoPedido } = datos
+function InicioPasajero({
+  perfil,
+  datos,
+  cierre,
+  hacia,
+}: {
+  perfil: Perfil
+  datos: DatosInicioPasajero
+  cierre: AvisoDeCierre | null
+  hacia: Sentido | null
+}) {
+  const { viajes, porId, miEspera, lugaresRecientes, aviso, enServicio } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
+  // Empieza en el sentido de su espera; si no, el sugerido por la hora y dónde vive. Cambiarlo es un toque.
+  const sentido = hacia ?? miEspera?.sentido ?? sentidoSugerido(perfil.urbanismo)
+  const unidades = disponibles.filter((v) => v.sentido === sentido)
+  const cuantas = Object.fromEntries(
+    (Object.keys(SENTIDOS) as Sentido[]).map((s) => [s, disponibles.filter((v) => v.sentido === s).length])
+  ) as Record<Sentido, number>
+  const conPuesto = unidades.some((v) => libres(v) > 0)
+  const esperaAqui = miEspera?.sentido === sentido ? miEspera : null
+  const yo = miEspera && miEspera.lat !== null && miEspera.lng !== null ? { lat: miEspera.lat, lng: miEspera.lng } : null
 
-  // Al escoger el sentido en el formulario: cuántas unidades van y cuándo recoge la próxima
-  const resumenes = Object.fromEntries(
-    (Object.keys(SENTIDOS) as Sentido[]).map((s) => {
-      const lista = disponibles.filter((v) => v.sentido === s)
-      if (lista.length === 0) return [s, `Ahora no hay unidades ${haciaEnFrase(s)}.`]
-      const principal = llegada(lista[0], porId).principal
-      const cuantas = lista.length === 1 ? "1 unidad va" : `${lista.length} unidades van`
-      return [s, `${cuantas} ${haciaEnFrase(s)} · la próxima ${principal[0].toLowerCase()}${principal.slice(1)}.`]
-    })
-  ) as Record<Sentido, string>
-
-  // Esperando: ya dijo que quiere viajar → las unidades de su sentido
-  if (miEspera) {
-    return (
-      <div className="flex flex-col gap-6">
-        <EnVivo />
-        {cierre && <AvisoCierre aviso={cierre} />}
-        {aviso && <EstadoLinea aviso={aviso} />}
-        <EstadoEspera sentido={miEspera.sentido} lugar={miEspera.lugar} desde={miEspera.creado_en} recientes={lugaresRecientes} resumenes={resumenes} />
-        <UnidadesDelSentido
-          sentido={miEspera.sentido}
-          viajes={disponibles.filter((v) => v.sentido === miEspera.sentido)}
-          porId={porId}
-          yo={miEspera.lat !== null && miEspera.lng !== null ? { lat: miEspera.lat, lng: miEspera.lng } : null}
-        />
-      </div>
-    )
-  }
-
-  // Puerta de entrada (docs/especificacion.md §8): primero informa, después pregunta
   return (
     <div className="flex flex-col gap-6">
       <EnVivo />
@@ -108,45 +93,39 @@ function InicioPasajero({ perfil, datos, cierre }: { perfil: Perfil; datos: Dato
       <h1 className="text-[26px] leading-tight font-bold">
         {saludo()}, {perfil.nombre.split(" ")[0]}
       </h1>
-      <EstadoDeLaLinea choferes={enServicio} aviso={aviso} />
-      <NecesitoTransporte
-        recientes={lugaresRecientes}
-        sentidoSugerido={sentidoSugerido(perfil.urbanismo)}
-        resumenes={resumenes}
-        ultimo={ultimoPedido}
-        hayChoferes={unidadesEnServicio > 0}
-      />
+      <EstadoDeLaLinea choferes={enServicio} aviso={aviso} conMapa />
+
+      <SelectorSentido actual={sentido} unidades={cuantas} />
+
+      {miEspera && <EstadoEspera sentido={miEspera.sentido} lugar={miEspera.lugar} desde={miEspera.creado_en} />}
+
+      <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
+        <h2 id="titulo-unidades" className="text-xl font-bold">
+          Unidades {SENTIDOS[sentido].hacia}
+        </h2>
+        {unidades.map((v) => (
+          <TarjetaUnidad key={v.id} viaje={v} porId={porId} yo={yo} recientes={lugaresRecientes} lugarInicial={esperaAqui?.lugar} />
+        ))}
+        {!conPuesto && (
+          <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-7 text-center">
+            <BusIcon aria-hidden className="size-10 text-muted-foreground" />
+            <p className="text-lg font-bold">
+              {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
+            </p>
+            {esperaAqui ? (
+              <p className="text-muted-foreground">Ya estás en espera: la unidad aparece aquí apenas haya una.</p>
+            ) : (
+              <>
+                <p className="text-muted-foreground">Déjanos tu lugar y te avisamos. Los choferes ven que alguien espera.</p>
+                <AvisameCuandoHaya sentido={sentido} recientes={lugaresRecientes} />
+              </>
+            )}
+          </div>
+        )}
+      </section>
+
       <Atajos />
     </div>
-  )
-}
-
-function UnidadesDelSentido({
-  sentido,
-  viajes,
-  porId,
-  yo,
-}: {
-  sentido: Sentido
-  viajes: ViajeConChofer[]
-  porId: Map<string, Viaje>
-  yo: Punto | null
-}) {
-  return (
-    <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
-      <h2 id="titulo-unidades" className="text-xl font-bold">
-        Unidades {SENTIDOS[sentido].hacia}
-      </h2>
-      {viajes.length > 0 ? (
-        viajes.map((v) => <TarjetaUnidad key={v.id} viaje={v} porId={porId} yo={yo} />)
-      ) : (
-        <div className="flex flex-col items-center gap-2 rounded-3xl border-2 border-dashed px-5 py-8 text-center">
-          <BusIcon aria-hidden className="size-10 text-muted-foreground" />
-          <p className="text-lg font-bold">Todavía no hay unidades {haciaEnFrase(sentido)}</p>
-          <p className="text-muted-foreground">Te avisamos cuando venga una. Esta pantalla se actualiza sola.</p>
-        </div>
-      )}
-    </section>
   )
 }
 

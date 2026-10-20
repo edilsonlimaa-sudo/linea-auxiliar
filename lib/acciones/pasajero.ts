@@ -21,21 +21,27 @@ const numero = (fd: FormData, campo: string) => {
 }
 
 /**
- * Apartar puesto de un toque (R16–R29, R27): el lugar sale de la espera (el primer paso del pasajero, R31) o,
- * al cambiarse de unidad desde la lista de espera (R22), de su reserva actual. Lo lee el servidor: no se pide otra vez.
+ * Apartar puesto (R16–R29). El lugar llega de la hoja "¿Dónde te recogemos?" (R27). Sin hoja (al cambiarse de unidad
+ * desde la lista de espera, R22) se usa el de su reserva actual o, si no, el de su espera.
  */
-export async function apartarPuesto(viajeId: string): Promise<Resultado> {
+export async function apartarPuesto(viajeId: string, datos?: FormData): Promise<Resultado> {
   const supabase = await crearClienteServidor()
   const { data: sesion } = await supabase.auth.getClaims()
   const yo = sesion?.claims?.sub
   if (!yo) return { error: "Tu sesión terminó. Vuelve a entrar." }
 
-  const [esperaRes, reservaRes] = await Promise.all([
-    supabase.from("esperas").select("lugar, lat, lng").eq("pasajero_id", yo).eq("estado", "esperando").maybeSingle(),
-    supabase.from("reservas").select("lugar, lat, lng").eq("pasajero_id", yo).eq("estado", "activa").maybeSingle(),
-  ])
-  const origen = esperaRes.data ?? reservaRes.data
-  if (!origen) return { error: "Primero avisa hacia dónde vas y dónde estás." }
+  let origen: { lugar: string | null; lat: number | null; lng: number | null } | null = null
+  if (datos) {
+    origen = { lugar: texto(datos, "lugar") ?? null, lat: numero(datos, "lat") ?? null, lng: numero(datos, "lng") ?? null }
+    if (!origen.lugar && origen.lat === null) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
+  } else {
+    const [reservaRes, esperaRes] = await Promise.all([
+      supabase.from("reservas").select("lugar, lat, lng").eq("pasajero_id", yo).eq("estado", "activa").maybeSingle(),
+      supabase.from("esperas").select("lugar, lat, lng").eq("pasajero_id", yo).eq("estado", "esperando").maybeSingle(),
+    ])
+    origen = reservaRes.data ?? esperaRes.data
+    if (!origen) return { error: "Dinos dónde te recogemos." }
+  }
 
   const { error } = await supabase.rpc("reservar", {
     p_viaje: viajeId,
@@ -136,4 +142,17 @@ export async function posicionDeChofer(choferId: string): Promise<PosicionChofer
   const { data } = await supabase.from("posiciones").select("lat, lng, actualizada_en").eq("chofer_id", choferId).maybeSingle()
   if (!data || Date.now() - new Date(data.actualizada_en).getTime() > 10 * 60_000) return null
   return { lat: data.lat, lng: data.lng, actualizadaEn: data.actualizada_en }
+}
+
+/** Cambiar dónde lo recogen, con la reserva activa (R27) */
+export async function cambiarLugar(reservaId: string, datos: FormData): Promise<Resultado> {
+  const lugar = texto(datos, "lugar")
+  const lat = numero(datos, "lat")
+  const lng = numero(datos, "lng")
+  if (!lugar && lat === undefined) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("cambiar_lugar", { p_reserva: reservaId, p_lugar: lugar, p_lat: lat, p_lng: lng })
+  if (error) return { error: error.message }
+  revalidatePath("/mi-viaje")
+  return { ok: true }
 }

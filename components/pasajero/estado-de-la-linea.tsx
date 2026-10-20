@@ -3,23 +3,27 @@ import { SnowflakeIcon, StarIcon } from "lucide-react"
 import { promedioTexto } from "@/components/estrellas"
 import { Avatar } from "@/components/foto/avatar"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
+import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import type { ChoferEnServicio } from "@/lib/datos/inicio-pasajero"
 import { cn } from "@/lib/utils"
 
 /**
  * "¿Cómo está la línea?" (docs/especificacion.md §8, R7): quién está trabajando ahora y qué hace cada uno.
  * No se separa por sentido: los choferes dan vueltas (van al Centro y vuelven); importa que haya alguien en la
- * ruta y saber quién es. El sentido se escoge recién al pedir.
+ * ruta y saber quién es. El sentido se escoge recién al pedir. Con `conMapa` (pasajero), cada chofer tiene
+ * "Ver en el mapa" para hacerse una idea de por dónde va (R41).
  */
 export function EstadoDeLaLinea({
   choferes,
   aviso,
   titulo = "¿Cómo está la línea?",
+  conMapa = false,
   cantidad = (n) => (n === 0 ? "Ningún chofer trabajando ahora" : n === 1 ? "1 chofer trabajando ahora" : `${n} choferes trabajando ahora`),
 }: {
   choferes: ChoferEnServicio[]
   aviso: { texto: string } | null
   titulo?: string // el chofer lo ve como "Compañeros en la ruta" (§8)
+  conMapa?: boolean
   cantidad?: (n: number) => string
 }) {
   const n = choferes.length
@@ -36,7 +40,7 @@ export function EstadoDeLaLinea({
       {n > 0 && (
         <ul className="flex flex-col gap-2">
           {choferes.map((c) => (
-            <li key={c.id} className="flex items-center gap-3 rounded-2xl bg-muted px-3 py-2.5">
+            <li key={c.id} className="flex flex-wrap items-center gap-3 rounded-2xl bg-muted px-3 py-2.5">
               <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-12 text-base" />
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-x-2 font-bold">
@@ -63,6 +67,7 @@ export function EstadoDeLaLinea({
                   )}
                 </p>
               </div>
+              {conMapa && <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} className="w-full" />}
             </li>
           ))}
         </ul>
