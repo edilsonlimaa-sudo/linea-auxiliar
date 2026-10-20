@@ -140,6 +140,16 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
   carro.**
 - **R15.** "Avisar llegada" también abre WhatsApp con el mensaje para el grupo: "Llego en 3 minutos a …
   Suben los puestos 1 al N: 1. Carmen R. (Entrada de Las Cayenas) …".
+- **R56 [servidor]. Cronómetro del viaje.** Cada cambio de estado (también el estado con que se publica) queda
+  guardado con su hora y lo que el chofer había prometido en ese momento (`eta_min`). Lo graba la base sola
+  (trigger), sin pasos extra para el chofer. Solo el admin lo lee.
+  - En el panel, cada viaje (en curso y terminado) muestra su **línea de tiempo**: hora de cada estado y cuánto
+    duró cada etapa ("Recogiendo · 5 min", "En ruta · 22 min").
+  - **Puntualidad:** cuando el chofer avisa que va (`en_camino`) promete llegar en `eta_min`; se compara con la
+    hora en que llegó (primer `en_parada`, o `llegando` si no marcó parada): "A tiempo" (hasta 3 min tarde) o
+    "N min tarde".
+  - Si el chofer se saltó un estado, esa etapa no aparece; las duraciones se miden entre los estados que sí marcó.
+  - Los viajes anteriores a esta regla solo tienen salida y llegada.
 
 ### 5.5 Reservas y lista justa (el corazón de la app)
 

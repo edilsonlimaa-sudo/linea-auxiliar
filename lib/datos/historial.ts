@@ -3,7 +3,8 @@ import "server-only"
 import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
-import { nombreCorto, type Sentido } from "@/lib/viajes"
+import { cargarEventos } from "@/lib/datos/admin"
+import { type EventoViaje, nombreCorto, type Sentido } from "@/lib/viajes"
 
 type Perfil = Database["public"]["Tables"]["perfiles"]["Row"]
 type Vehiculo = {
@@ -95,6 +96,7 @@ export type ViajeTerminado = {
   noVinieron: string[]
   calificaciones: { estrellas: number; comentario: string | null; autor?: string }[]
   chofer?: { nombre: string; placa: string | null } // solo en el panel del admin
+  eventos?: EventoViaje[] // cronómetro (R56), solo en el panel del admin
 }
 
 /** Los últimos 20 viajes terminados del chofer, con quién llevó y cómo le fue */
@@ -129,7 +131,7 @@ async function cargarTerminados({
   const ids = (viajes ?? []).map((v) => v.id)
   if (ids.length === 0) return []
 
-  const [reservasRes, califsRes] = await Promise.all([
+  const [reservasRes, califsRes, eventos] = await Promise.all([
     // El chofer lee las reservas de sus viajes; el admin, todas (RLS)
     supabase
       .from("reservas")
@@ -141,6 +143,7 @@ async function cargarTerminados({
       .from("calificaciones")
       .select("viaje_id, estrellas, comentario, pasajero:perfiles!calificaciones_pasajero_id_fkey(nombre)")
       .in("viaje_id", ids),
+    admin ? cargarEventos(ids) : Promise.resolve(new Map<string, EventoViaje[]>()),
   ])
 
   return (viajes ?? []).map((v) => {
@@ -167,6 +170,7 @@ async function cargarTerminados({
       calificaciones: (califsRes.data ?? [])
         .filter((c) => c.viaje_id === v.id)
         .map((c) => ({ estrellas: c.estrellas, comentario: c.comentario, ...(admin && c.pasajero ? { autor: c.pasajero.nombre } : {}) })),
+      ...(admin ? { eventos: eventos.get(v.id) ?? [] } : {}),
       ...(admin && v.chofer ? { chofer: { nombre: v.chofer.nombre, placa: unoSolo(v.chofer.vehiculo)?.placa ?? null } } : {}),
     }
   })

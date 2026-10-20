@@ -464,6 +464,38 @@ export type Database = {
           },
         ]
       }
+      viaje_eventos: {
+        Row: {
+          en: string
+          estado: Database["public"]["Enums"]["estado_viaje"]
+          eta_min: number | null
+          id: number
+          viaje_id: string
+        }
+        Insert: {
+          en?: string
+          estado: Database["public"]["Enums"]["estado_viaje"]
+          eta_min?: number | null
+          id?: never
+          viaje_id: string
+        }
+        Update: {
+          en?: string
+          estado?: Database["public"]["Enums"]["estado_viaje"]
+          eta_min?: number | null
+          id?: never
+          viaje_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viaje_eventos_viaje_id_fkey"
+            columns: ["viaje_id"]
+            isOneToOne: false
+            referencedRelation: "viajes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       viajes: {
         Row: {
           chofer_id: string

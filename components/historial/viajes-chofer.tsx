@@ -1,6 +1,7 @@
 import { BusIcon, ChevronDownIcon, UserXIcon } from "lucide-react"
 import Link from "next/link"
 
+import { LineaDeTiempo } from "@/components/admin/linea-de-tiempo"
 import { Estrellas, promedioTexto } from "@/components/estrellas"
 import { buttonVariants } from "@/components/ui/button"
 import type { PersonaDelViaje, ViajeTerminado } from "@/lib/datos/historial"
@@ -73,6 +74,8 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                     Salió a las {hora(v.salida)} y llegó a las {hora(v.llegada)}.
                   </p>
                 )}
+                {/* Cronómetro (R56): solo el admin lo recibe */}
+                {v.eventos && <LineaDeTiempo eventos={v.eventos} />}
 
                 <section className="flex flex-col gap-2">
                   <h3 className="font-bold">

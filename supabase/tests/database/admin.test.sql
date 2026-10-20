@@ -3,7 +3,7 @@
 -- (…02) y su propia pasajera dentro de la transacción, que se deshace al final.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(26);
+select plan(29);
 
 -- ---------- Creación del admin (como superusuario, igual que el registro de Supabase Auth) ----------
 select public.crear_admin('prueba', 'admin123', '00000000-0000-4000-a000-000000000002');
@@ -58,6 +58,13 @@ insert into public.reservas (viaje_id, pasajero_id, estado, lugar) values
 insert into public.calificaciones (viaje_id, chofer_id, pasajero_id, estrellas) values
   ('00000000-0000-4000-b000-00000000000a', '00000000-0000-4000-a000-000000000031', '00000000-0000-4000-a000-000000000032', 5);
 
+-- Viaje C de Yelitza para el cronómetro (R56): se publica en camino y pasa por recogiendo y en ruta
+insert into public.viajes (id, chofer_id, sentido, puestos, estado, eta_min) values
+  ('00000000-0000-4000-b000-00000000000c', '00000000-0000-4000-a000-000000000033', 'vg_a_centro', 4, 'en_camino', 10);
+update public.viajes set estado = 'en_parada' where id = '00000000-0000-4000-b000-00000000000c';
+update public.viajes set puestos = 3 where id = '00000000-0000-4000-b000-00000000000c'; -- sin cambio de estado: no cuenta
+update public.viajes set estado = 'en_ruta' where id = '00000000-0000-4000-b000-00000000000c';
+
 -- María espera para ir al Centro (para la Demanda del panel)
 insert into public.esperas (pasajero_id, sentido, lugar)
 values ('00000000-0000-4000-a000-000000000021', 'vg_a_centro', 'Portón VGC');
@@ -80,6 +87,17 @@ select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000
 select ok(
   exists (select 1 from public.admin_cuentas('pendiente') where nombre = 'María González' and telefono = '+584140000021'),
   'El admin ve las cuentas pendientes con sus datos (un registro nuevo queda pendiente, R2)');
+
+-- ---------- Cronómetro del viaje (R56) ----------
+select is(
+  (select array_agg(estado::text || '/' || coalesce(eta_min, 0) order by id) from public.viaje_eventos
+    where viaje_id = '00000000-0000-4000-b000-00000000000c'),
+  array['en_camino/10', 'en_parada/10', 'en_ruta/10'],
+  'R56: cada cambio de estado queda con su hora y lo prometido (y nada más)');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
+select is((select count(*)::int from public.viaje_eventos), 0, 'R56: un chofer no lee el cronómetro, ni el de sus viajes');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
+select ok((select count(*) from public.viaje_eventos) >= 3, 'R56: el admin lee el cronómetro');
 
 -- ---------- Demanda (§8) ----------
 select ok(

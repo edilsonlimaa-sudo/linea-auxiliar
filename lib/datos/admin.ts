@@ -2,7 +2,7 @@
 import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
-import { aceptaReservas, ACTIVOS, libres, type Sentido, type Viaje } from "@/lib/viajes"
+import { aceptaReservas, ACTIVOS, type EventoViaje, libres, type Sentido, type Viaje } from "@/lib/viajes"
 
 type Funciones = Database["public"]["Functions"]
 export type Cuenta = Funciones["admin_cuentas"]["Returns"][number]
@@ -95,7 +95,7 @@ export type PersonaEnViaje = {
   telefono: string | null
   fotoUrl: string | null
 }
-export type ViajeEnCurso = Viaje & { personas: PersonaEnViaje[] }
+export type ViajeEnCurso = Viaje & { personas: PersonaEnViaje[]; eventos: EventoViaje[] }
 export type ChoferEnCurso = {
   id: string
   nombre: string
@@ -133,6 +133,7 @@ export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]
         .order("id")
     : { data: [] }
   const filas = reservas ?? []
+  const eventos = await cargarEventos(ids)
 
   const idsPersonas = [
     ...new Set([...filas.map((r) => r.pasajero_id), ...lista.map((v) => v.chofer_id)].filter((id): id is string => id !== null)),
@@ -174,7 +175,7 @@ export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]
       carro: [chofer?.vehiculo?.modelo, chofer?.vehiculo?.color].filter(Boolean).join(" · ") || null,
       viajes: [],
     }
-    c.viajes.push({ ...v, personas })
+    c.viajes.push({ ...v, personas, eventos: eventos.get(v.id) ?? [] })
     porChofer.set(v.chofer_id, c)
   }
 
@@ -182,4 +183,18 @@ export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]
   for (const c of choferes) c.viajes.sort((a, b) => PRIORIDAD[a.estado] - PRIORIDAD[b.estado])
   choferes.sort((a, b) => PRIORIDAD[a.viajes[0].estado] - PRIORIDAD[b.viajes[0].estado])
   return { choferes, error: null }
+}
+
+/** Cronómetro de cada viaje (R56): solo el admin puede leerlo */
+export async function cargarEventos(ids: string[]): Promise<Map<string, EventoViaje[]>> {
+  const porViaje = new Map<string, EventoViaje[]>()
+  if (ids.length === 0) return porViaje
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase.from("viaje_eventos").select("viaje_id, estado, eta_min, en").in("viaje_id", ids).order("en")
+  for (const e of data ?? []) {
+    const lista = porViaje.get(e.viaje_id) ?? []
+    lista.push({ estado: e.estado, etaMin: e.eta_min, en: e.en })
+    porViaje.set(e.viaje_id, lista)
+  }
+  return porViaje
 }

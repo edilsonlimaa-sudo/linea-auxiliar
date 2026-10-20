@@ -1,5 +1,6 @@
 import { BusIcon, HandIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucide-react"
 
+import { LineaDeTiempo } from "@/components/admin/linea-de-tiempo"
 import { Avatar } from "@/components/foto/avatar"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { buttonVariants } from "@/components/ui/button"
@@ -94,6 +95,8 @@ function BloqueViaje({ viaje: v, porId }: { viaje: ViajeEnCurso; porId: Map<stri
           {ocupados} de {v.puestos} puestos{espera > 0 && ` · ${espera} en lista de espera`}
         </p>
       </div>
+
+      <LineaDeTiempo eventos={v.eventos} />
 
       {v.personas.length === 0 ? (
         <p className="text-muted-foreground">Todavía nadie en este viaje.</p>

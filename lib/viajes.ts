@@ -205,3 +205,40 @@ export function iniciales(nombre: string): string {
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("")
 }
+
+/** Un cambio de estado del viaje con su hora (R56) */
+export type EventoViaje = { estado: EstadoViaje; etaMin: number | null; en: string }
+
+// Hasta 3 min después de lo prometido todavía es "a tiempo" (R56)
+const TOLERANCIA_MIN = 3
+
+/**
+ * Línea de tiempo del viaje (R56): cada estado marcado con cuánto duró (hasta el siguiente; el último, sin
+ * duración) y la puntualidad: lo prometido al salir a recoger (en_camino + eta_min) contra la llegada real
+ * (primer en_parada, o llegando si no marcó parada).
+ */
+export function lineaDeTiempo(eventos: EventoViaje[]): {
+  pasos: { estado: EstadoViaje; en: string; minutos: number | null }[]
+  puntualidad: { prometida: string; llegada: string; tardeMin: number; aTiempo: boolean } | null
+} {
+  const ordenados = [...eventos].sort((a, b) => new Date(a.en).getTime() - new Date(b.en).getTime())
+  const pasos = ordenados.map((e, i) => {
+    const siguiente = ordenados[i + 1]
+    return {
+      estado: e.estado,
+      en: e.en,
+      minutos: siguiente ? Math.round((new Date(siguiente.en).getTime() - new Date(e.en).getTime()) / MIN) : null,
+    }
+  })
+
+  const salida = ordenados.find((e) => e.estado === "en_camino" && e.etaMin !== null)
+  const despues = salida ? ordenados.filter((e) => new Date(e.en) >= new Date(salida.en)) : []
+  const llego = despues.find((e) => e.estado === "en_parada") ?? despues.find((e) => e.estado === "llegando")
+  if (!salida || !llego || salida.etaMin === null) return { pasos, puntualidad: null }
+  const prometida = new Date(new Date(salida.en).getTime() + salida.etaMin * MIN)
+  const tardeMin = Math.round((new Date(llego.en).getTime() - prometida.getTime()) / MIN)
+  return {
+    pasos,
+    puntualidad: { prometida: prometida.toISOString(), llegada: llego.en, tardeMin, aTiempo: tardeMin <= TOLERANCIA_MIN },
+  }
+}
