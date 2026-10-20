@@ -1,4 +1,4 @@
-import { CheckIcon, HistoryIcon, UsersIcon } from "lucide-react"
+import { CheckIcon } from "lucide-react"
 import Link from "next/link"
 
 import { cn } from "@/lib/utils"
@@ -46,24 +46,6 @@ export function SelectorSentido({ actual, unidades }: { actual: Sentido; unidade
           )
         })}
       </div>
-    </nav>
-  )
-}
-
-/** Para quien entró a mirar y no a viajar */
-export function Atajos() {
-  const clase =
-    "flex min-h-16 items-center gap-3 rounded-2xl border-2 bg-card px-4 py-3 font-bold hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
-  return (
-    <nav aria-label="Atajos" className="grid grid-cols-2 gap-3">
-      <Link href="/choferes" className={clase}>
-        <UsersIcon aria-hidden className="size-6 shrink-0 text-primary" />
-        Choferes
-      </Link>
-      <Link href="/mis-viajes" className={clase}>
-        <HistoryIcon aria-hidden className="size-6 shrink-0 text-primary" />
-        Mis viajes
-      </Link>
     </nav>
   )
 }

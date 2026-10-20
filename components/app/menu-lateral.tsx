@@ -2,10 +2,12 @@
 
 import {
   BadgeCheckIcon,
+  BellRingIcon,
   HistoryIcon,
   HouseIcon,
   IdCardIcon,
   LogOutIcon,
+  MapIcon,
   MoonIcon,
   StarIcon,
   SunIcon,
@@ -38,11 +40,14 @@ type Destino = { href: string; titulo: string; icono: LucideIcon; destacado?: bo
 
 // Solo con reserva activa: va de primero porque es lo que la persona está haciendo ahora (docs/especificacion.md §8)
 const MI_VIAJE: Destino = { href: "/mi-viaje", titulo: "Mi viaje", icono: TicketIcon, destacado: true }
+// Con espera activa (y sin viaje): lo mismo para Esperando (§8)
+const ESPERANDO: Destino = { href: "/esperando", titulo: "Esperando", icono: BellRingIcon, destacado: true }
 
 // Destinos por rol (docs/especificacion.md §8)
 const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
   pasajero: [
     { href: "/inicio", titulo: "Inicio", icono: HouseIcon },
+    { href: "/linea", titulo: "La línea", icono: MapIcon },
     { href: "/choferes", titulo: "Choferes", icono: UsersIcon },
     { href: "/mis-viajes", titulo: "Mis viajes", icono: HistoryIcon },
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },
@@ -61,11 +66,13 @@ export function MenuLateral({
   nombre,
   rol,
   conViaje = false,
+  conEspera = false,
   fotoUrl = null,
 }: {
   nombre: string
   rol: "pasajero" | "chofer"
   conViaje?: boolean
+  conEspera?: boolean
   fotoUrl?: string | null // foto de perfil (R54)
 }) {
   const ruta = usePathname()
@@ -74,7 +81,7 @@ export function MenuLateral({
   const montado = useSyncExternalStore(suscribirse, () => true, () => false)
   const oscuro = montado && resolvedTheme === "dark"
   const cerrar = () => setOpenMobile(false)
-  const destinos = conViaje ? [MI_VIAJE, ...DESTINOS[rol]] : DESTINOS[rol]
+  const destinos = conViaje ? [MI_VIAJE, ...DESTINOS[rol]] : conEspera ? [ESPERANDO, ...DESTINOS[rol]] : DESTINOS[rol]
 
   return (
     <Sidebar>

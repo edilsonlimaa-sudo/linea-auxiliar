@@ -166,16 +166,31 @@ export function ordenarParaPasajero<T extends Viaje>(viajes: T[], porId: Map<str
   )
 }
 
-/** Para "Cambiarme a otra unidad" (R22): otras del mismo sentido que aceptan reservas y tienen puesto libre */
-export function otrasConPuesto<T extends Viaje>(viajes: T[], actual: Viaje, porId: Map<string, Viaje>): T[] {
+/** Viajar acompañado (R57): de 1 a 4 personas por reserva */
+export const PERSONAS_MAX = 4
+
+/** ¿Caben todos en el carro? El grupo viaja junto: puestos para todos o nada (R57) */
+export const cabe = (v: Viaje, personas: number) => libres(v) >= personas
+
+/** Para "Cambiarme a otra unidad" (R22): otras del mismo sentido que aceptan reservas y tienen puestos para todos */
+export function otrasConPuesto<T extends Viaje>(viajes: T[], actual: Viaje, porId: Map<string, Viaje>, personas = 1): T[] {
   return ordenarParaPasajero(
-    viajes.filter((v) => v.id !== actual.id && v.sentido === actual.sentido && aceptaReservas(v) && libres(v) > 0),
+    viajes.filter((v) => v.id !== actual.id && v.sentido === actual.sentido && aceptaReservas(v) && cabe(v, personas)),
     porId
   )
 }
 
-/** ¿La reserva tiene puesto (no está en lista de espera)? */
-export const tienePuesto = (posicion: number, v: Viaje) => posicion > 0 && posicion <= v.puestos
+/** ¿La reserva tiene puesto (no está en lista de espera)? `hasta`: el último puesto que ocupa (R17, R57) */
+export const tienePuesto = (hasta: number, v: Viaje) => hasta > 0 && hasta <= v.puestos
+
+/** "Puesto 3" o "Puestos 2 a 4" (R57) */
+export const textoPuestos = (desde: number, hasta: number) => (desde === hasta ? `Puesto ${desde}` : `Puestos ${desde} a ${hasta}`)
+
+/** "Carmen R." o, con acompañantes, "Carmen R. +2" (R57) */
+export const conAcompanantes = (nombre: string, personas: number) => (personas > 1 ? `${nombre} +${personas - 1}` : nombre)
+
+/** "1 persona", "3 personas" */
+export const textoPersonas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
 
 /**
  * Sentido sugerido al abrir la app: quien vive en Valle Grande suele ir al Centro en la mañana y volver en la tarde
@@ -242,3 +257,18 @@ export function lineaDeTiempo(eventos: EventoViaje[]): {
     puntualidad: { prometida: prometida.toISOString(), llegada: llego.en, tardeMin, aTiempo: tardeMin <= TOLERANCIA_MIN },
   }
 }
+
+/**
+ * Puestos en orden de llegada contando personas (R17, R57): cada reserva ocupa del puesto `desde` al `hasta`.
+ * `filas` ya viene ordenada por creado_en.
+ */
+export function puestosEnOrden<T extends { personas: number }>(filas: T[]): (T & { desde: number; hasta: number })[] {
+  let hasta = 0
+  return filas.map((f) => {
+    hasta += f.personas
+    return { ...f, desde: hasta - f.personas + 1, hasta }
+  })
+}
+
+/** Cuántas personas, sumando los acompañantes de cada reserva o espera (R57) */
+export const sumaPersonas = (filas: { personas: number }[]) => filas.reduce((n, f) => n + f.personas, 0)

@@ -28,7 +28,10 @@ export type ViajeConChofer = Viaje & { chofer: Chofer }
 export type MiReserva = {
   reserva: Reserva
   viaje: ViajeConChofer
-  posicion: number
+  posicion: number // orden en la lista (1 = primera reserva)
+  desde: number // primer puesto que ocupa (R57: un grupo ocupa puestos seguidos)
+  hasta: number // último puesto; con puesto si hasta ≤ puestos del carro
+  turno: number // en lista de espera: 1 = el próximo
   lista: FilaLista[]
   telefonoChofer: string | null
 }
@@ -271,11 +274,16 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       supabase.from("perfiles_privados").select("telefono").eq("id", viajeReservado.chofer_id).maybeSingle(),
     ])
     const lista = listaRes.data ?? []
+    const mia = lista.find((f) => f.es_mio)
     miReserva = {
       reserva,
       viaje: viajeReservado,
       lista,
-      posicion: lista.find((f) => f.es_mio)?.posicion ?? 0,
+      posicion: mia?.posicion ?? 0,
+      desde: mia?.desde ?? 0,
+      hasta: mia?.hasta ?? 0,
+      // Cuántos sin puesto van antes, contándola (la lista de espera es de a uno, R57)
+      turno: mia ? lista.filter((f) => !f.confirmado && f.posicion <= mia.posicion).length : 0,
       telefonoChofer: telRes.data?.telefono ?? null,
     }
   }
@@ -307,4 +315,24 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       .sort((a, b) => Number(a.actividad === "Disponible") - Number(b.actividad === "Disponible") || a.nombre.localeCompare(b.nombre, "es")),
     ultimoPedido: ultimoPedido(ultEsperaRes.data, ultReservaRes.data),
   }
+}
+
+/** "También esperan" (§8 Esperando): quienes esperan en su mismo sentido, con nombre corto y desde cuándo (§6) */
+export async function cargarEsperanConmigo(): Promise<{ nombre: string; personas: number; desde: string; soyYo: boolean }[]> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase.rpc("esperan_conmigo")
+  return (data ?? []).map((e) => ({ nombre: e.nombre_corto ?? "Pasajero", personas: e.personas, desde: e.desde, soyYo: e.soy_yo }))
+}
+
+/** ¿Tiene una espera activa? El menú muestra "Esperando" de primero (§8) */
+export async function tieneEsperaActiva(pasajeroId: string): Promise<boolean> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase
+    .from("esperas")
+    .select("id")
+    .eq("pasajero_id", pasajeroId)
+    .eq("estado", "esperando")
+    .gt("creado_en", new Date(Date.now() - 2 * 3_600_000).toISOString())
+    .maybeSingle()
+  return data !== null
 }

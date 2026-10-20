@@ -5,6 +5,7 @@ import { AgregarViaje } from "@/components/chofer/agregar-viaje"
 import { CompartirUbicacion } from "@/components/chofer/compartir-ubicacion"
 import { Conexion } from "@/components/chofer/conexion"
 import { Demanda, DemandaCompacta, sentidoConMasDemanda } from "@/components/chofer/demanda"
+import { QuienEspera } from "@/components/chofer/quien-espera"
 import { ViajeChofer } from "@/components/chofer/viaje-chofer"
 import { EnVivo } from "@/components/en-vivo"
 import { EstadoDeLaLinea } from "@/components/pasajero/estado-de-la-linea"
@@ -21,7 +22,7 @@ const companerosTexto = (n: number) =>
  * El viaje "en foco" lleva la acción principal pegada abajo: el que va en ruta o, si no, la recogida actual.
  */
 export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosInicioChofer }) {
-  const { conectado, enRuta, recogida, proximos, esperando, oferta, companeros, ultimo, vehiculo } = datos
+  const { conectado, enRuta, recogida, proximos, esperando, oferta, companeros, ultimo, vehiculo, quienEspera } = datos
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
@@ -35,7 +36,9 @@ export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosIn
           {saludo()}, {nombre.split(" ")[0]}
         </h1>
         <Conexion conectado={conectado} viajesAbiertos={0} />
-        <Demanda esperando={esperando} oferta={oferta} />
+        <Demanda esperando={esperando} oferta={oferta}>
+          <QuienEspera personas={quienEspera} conectado={conectado} chofer={nombre} />
+        </Demanda>
         <AgregarViaje modo="primero" esperando={esperando} ultimo={ultimo} sentidoInicial={sentidoConMasDemanda({ esperando, oferta })} />
         <EstadoDeLaLinea choferes={companeros} aviso={null} titulo="Compañeros en la ruta" cantidad={companerosTexto} />
         <nav aria-label="Atajos" className="grid grid-cols-2 gap-3">
@@ -61,6 +64,7 @@ export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosIn
       {/* Con viajes abiertos y conectado, comparte la posición para el mapa de los pasajeros (R40) */}
       {conectado && <CompartirUbicacion />}
       <DemandaCompacta esperando={esperando} oferta={oferta} />
+      <QuienEspera personas={quienEspera} conectado={conectado} chofer={nombre} />
 
       {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} barraFija />}
       {recogida && (

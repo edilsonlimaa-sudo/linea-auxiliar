@@ -202,6 +202,7 @@ export type Database = {
           lng: number | null
           lugar: string | null
           pasajero_id: string
+          personas: number
           sentido: Database["public"]["Enums"]["sentido"]
         }
         Insert: {
@@ -213,6 +214,7 @@ export type Database = {
           lng?: number | null
           lugar?: string | null
           pasajero_id: string
+          personas?: number
           sentido: Database["public"]["Enums"]["sentido"]
         }
         Update: {
@@ -224,6 +226,7 @@ export type Database = {
           lng?: number | null
           lugar?: string | null
           pasajero_id?: string
+          personas?: number
           sentido?: Database["public"]["Enums"]["sentido"]
         }
         Relationships: [
@@ -361,6 +364,7 @@ export type Database = {
           nombre: string | null
           pasajero_id: string | null
           pendiente: boolean
+          personas: number
           viaje_id: string
         }
         Insert: {
@@ -379,6 +383,7 @@ export type Database = {
           nombre?: string | null
           pasajero_id?: string | null
           pendiente?: boolean
+          personas?: number
           viaje_id: string
         }
         Update: {
@@ -397,6 +402,7 @@ export type Database = {
           nombre?: string | null
           pasajero_id?: string | null
           pendiente?: boolean
+          personas?: number
           viaje_id?: string
         }
         Relationships: [
@@ -689,6 +695,7 @@ export type Database = {
           nombre: string | null
           pasajero_id: string | null
           pendiente: boolean
+          personas: number
           viaje_id: string
         }
         SetofOptions: {
@@ -752,6 +759,7 @@ export type Database = {
           lugar: string
           nombre: string
           pasajero_id: string
+          personas: number
           sentido: Database["public"]["Enums"]["sentido"]
           telefono: string
         }[]
@@ -866,15 +874,42 @@ export type Database = {
       es_admin: { Args: never; Returns: boolean }
       es_aprobado: { Args: never; Returns: boolean }
       es_chofer: { Args: never; Returns: boolean }
+      esperan_conmigo: {
+        Args: never
+        Returns: {
+          desde: string
+          nombre_corto: string
+          personas: number
+          soy_yo: boolean
+        }[]
+      }
+      esperando_para_choferes: {
+        Args: never
+        Returns: {
+          creado_en: string
+          foto_path: string
+          id: string
+          lat: number
+          lng: number
+          lugar: string
+          nombre: string
+          personas: number
+          sentido: Database["public"]["Enums"]["sentido"]
+          telefono: string
+        }[]
+      }
       lista_viaje: {
         Args: { p_viaje: string }
         Returns: {
           confirmado: boolean
+          desde: number
           en_camino: boolean
           es_mio: boolean
+          hasta: number
           listo: boolean
           nombre_corto: string
           pendiente: boolean
+          personas: number
           posicion: number
         }[]
       }
@@ -883,6 +918,7 @@ export type Database = {
           p_lat?: number
           p_lng?: number
           p_lugar?: string
+          p_personas?: number
           p_sentido: Database["public"]["Enums"]["sentido"]
         }
         Returns: string
@@ -931,6 +967,7 @@ export type Database = {
           p_lat?: number
           p_lng?: number
           p_lugar?: string
+          p_personas?: number
           p_viaje: string
         }
         Returns: string
@@ -941,6 +978,7 @@ export type Database = {
         Returns: undefined
       }
       vencer_esperas: { Args: never; Returns: undefined }
+      vencer_pedidos: { Args: never; Returns: undefined }
     }
     Enums: {
       estado_alerta: "activa" | "resuelta"

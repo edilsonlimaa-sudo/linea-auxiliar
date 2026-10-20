@@ -13,7 +13,8 @@ export const faltaTransporte = (esperando: number, puestosLibres: number) => esp
  * "¿Hay gente esperando?" (docs/especificacion.md §8 Inicio del chofer, R31): por sentido, cuántos esperan y cuánta
  * oferta ya hay de otros choferes. Es lo que el chofer mira antes de salir. Solo cantidades, nunca quién ni dónde.
  */
-export function Demanda({ esperando, oferta }: Props) {
+// children: "Ver quién espera" (R31), debajo de los números
+export function Demanda({ esperando, oferta, children }: Props & { children?: React.ReactNode }) {
   return (
     <section aria-labelledby="titulo-demanda" className="flex flex-col gap-3 rounded-3xl border-2 bg-card p-4">
       <h2 id="titulo-demanda" className="flex items-center gap-2 text-lg font-bold">
@@ -43,7 +44,7 @@ export function Demanda({ esperando, oferta }: Props) {
           )
         })}
       </ul>
-      <p className="text-[15px] text-muted-foreground">Solo ves cuántos esperan, no quiénes: lo ven al publicar tu viaje y apartan ellos.</p>
+      {children}
     </section>
   )
 }

@@ -7,7 +7,7 @@ import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { buttonVariants } from "@/components/ui/button"
 import type { MiReserva } from "@/lib/datos/inicio-pasajero"
 import { cn } from "@/lib/utils"
-import { llegada, SENTIDOS, tienePuesto, type EstadoViaje, type Viaje } from "@/lib/viajes"
+import { conAcompanantes, llegada, SENTIDOS, textoPersonas, tienePuesto, type EstadoViaje, type Viaje } from "@/lib/viajes"
 
 const PASOS = ["Apartado", "En camino", "Recogiendo", "En ruta"] as const
 const PASO_DE: Record<EstadoViaje, number> = {
@@ -64,10 +64,10 @@ export function MiReservaTarjeta({
   recientes?: string[] // para "Cambiar dónde me recogen" (R27)
   cambiarme?: React.ReactNode // en lista de espera: botón para cambiarse de unidad (R22), justo bajo el estado
 }) {
-  const { reserva, viaje, posicion, lista, telefonoChofer } = datos
-  const confirmado = tienePuesto(posicion, viaje)
+  const { reserva, viaje, desde, hasta, turno, lista, telefonoChofer } = datos
+  const confirmado = tienePuesto(hasta, viaje)
   const aBordo = reserva.estado === "subio" // el carro ya salió con la persona adentro
-  const turno = posicion - viaje.puestos
+  const grupo = reserva.personas > 1 // viaja acompañado (R57)
   const cuando = llegada(viaje, porId)
   const lugar = reserva.lugar ?? (reserva.lat !== null ? "tu ubicación GPS" : "sin lugar")
   const telefono = telefonoChofer?.replace(/\D/g, "")
@@ -76,14 +76,26 @@ export function MiReservaTarjeta({
   let titulo: string
   let subtitulo: string
   if (aBordo) {
-    titulo = "Vas a bordo"
+    titulo = grupo ? "Van a bordo" : "Vas a bordo"
     subtitulo = `Al llegar podrás contar cómo te fue con ${viaje.chofer.nombre.split(" ")[0]}.`
-  } else if (reserva.pendiente) {
+  } else if (reserva.pendiente && reserva.en_camino) {
     titulo = "Esperando respuesta del chofer"
     subtitulo = "Le pediste que te recoja en el camino. Te avisamos si va por ti."
+  } else if (reserva.pendiente) {
+    // Solicitud sin confirmar (R58): los puestos ya están guardados
+    titulo = "Esperando que el chofer confirme"
+    subtitulo = grupo
+      ? `Guardamos ${reserva.personas} puestos para ustedes. Si no responde en 5 minutos, se liberan.`
+      : "Tu puesto ya está guardado. Si no responde en 5 minutos, se libera."
   } else if (confirmado) {
-    titulo = `Tienes el puesto ${posicion} de ${viaje.puestos}`
-    subtitulo = reserva.aceptada_en ? "El chofer va por ti." : "Tu puesto está apartado."
+    titulo = grupo ? `Tienen los puestos ${desde} a ${hasta} de ${viaje.puestos}` : `Tienes el puesto ${hasta} de ${viaje.puestos}`
+    subtitulo = reserva.aceptada_en
+      ? reserva.en_camino
+        ? "El chofer va por ti."
+        : "¡El chofer confirmó tu puesto!"
+      : grupo
+        ? `Apartaste para ${textoPersonas(reserva.personas)}: van juntos.`
+        : "Tu puesto está apartado."
   } else {
     titulo = turno === 1 ? "Eres el próximo en la lista de espera" : `Estás de ${turno} en la lista de espera`
     subtitulo = cambiarme ? "Si alguien libera su puesto, subes solo. O cámbiate a una unidad con puesto:" : "Si alguien libera su puesto, subes solo."
@@ -164,11 +176,11 @@ export function MiReservaTarjeta({
                 key={f.posicion}
                 className={cn("flex items-center gap-3 rounded-xl px-2 py-2", f.es_mio && "bg-signal/20 font-bold")}
               >
-                <span className={cn("grid size-8 shrink-0 place-items-center rounded-full text-sm font-bold", f.confirmado ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                  {f.posicion}
+                <span className={cn("grid h-8 min-w-8 shrink-0 place-items-center rounded-full px-1.5 text-sm font-bold", f.confirmado ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                  {f.personas > 1 ? `${f.desde}–${f.hasta}` : f.desde}
                 </span>
                 <span className="flex-1">
-                  {f.nombre_corto}
+                  {conAcompanantes(f.nombre_corto ?? "Pasajero", f.personas)}
                   {f.es_mio && " (tú)"}
                 </span>
                 <span className="text-sm text-muted-foreground">{f.confirmado ? (f.listo ? "Ya está en el sitio" : "Con puesto") : "En espera"}</span>

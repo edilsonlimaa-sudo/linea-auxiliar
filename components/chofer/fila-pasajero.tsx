@@ -9,8 +9,9 @@ import { Avatar } from "@/components/foto/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { marcarNoVino, marcarSeBajo, marcarSubio, quitarAnotado, responderPedido } from "@/lib/acciones/chofer"
 import type { FilaChofer } from "@/lib/datos/inicio-chofer"
+import { hora } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
-import type { EstadoViaje } from "@/lib/viajes"
+import { textoPuestos, type EstadoViaje } from "@/lib/viajes"
 
 type Pregunta = {
   titulo: string
@@ -51,19 +52,26 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
     >
       <div className="flex items-start gap-3">
         <span
-          aria-label={`Puesto ${fila.posicion}`}
+          aria-label={textoPuestos(fila.desde, fila.hasta)}
           className={cn(
-            "grid size-11 shrink-0 place-items-center rounded-full text-xl font-bold",
+            "grid h-11 min-w-11 shrink-0 place-items-center rounded-full px-2 text-xl font-bold",
+            fila.personas > 1 && "text-base",
             fila.confirmado || enRuta ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
           )}
         >
-          {fila.posicion}
+          {fila.personas > 1 ? `${fila.desde}–${fila.hasta}` : fila.desde}
         </span>
         {/* La foto ayuda a reconocer a quien espera en la calle (R54); sin foto basta el nombre */}
         {fila.fotoUrl && <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-11" />}
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-lg font-bold">{fila.nombre}</span>
+            {/* Con acompañantes (R57): se ve de lejos cuántos suben */}
+            {fila.personas > 1 && (
+              <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">
+                +{fila.personas - 1} {fila.personas === 2 ? "acompañante" : "acompañantes"}
+              </span>
+            )}
             {!fila.conApp && fila.nombre !== "Pasajero sin app" && <span className="rounded-full bg-muted px-2 py-0.5 text-sm">Sin app</span>}
             {fila.listo && fila.conApp && !enRuta && (
               <span className="inline-flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">
@@ -71,7 +79,11 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
                 Ya está en el sitio
               </span>
             )}
-            {fila.pendiente && <span className="rounded-full border-2 border-destructive px-2 py-0.5 text-sm font-bold text-destructive">Pide que pases por él</span>}
+            {fila.pendiente && (
+              <span className="rounded-full border-2 border-destructive px-2 py-0.5 text-sm font-bold text-destructive">
+                {enRuta ? "Pide que pases por él" : "Pide puesto"}
+              </span>
+            )}
             {enRuta && fila.estado === "activa" && !fila.pendiente && (
               <span className="rounded-full bg-warning-muted px-2 py-0.5 text-sm font-bold text-warning">Vas por él</span>
             )}
@@ -125,12 +137,16 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
           <>
             <Button size="sm" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, true))}>
               {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CheckIcon aria-hidden />}
-              Voy
+              {enRuta ? "Voy" : "Aceptar"}
             </Button>
             <Button size="sm" variant="outline" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, false))}>
               <XIcon aria-hidden />
-              Sigo, no puedo
+              {enRuta ? "Sigo, no puedo" : "Rechazar"}
             </Button>
+            {/* Sin respuesta en 5 min se rechaza sola (R58): se dice la hora, que no cambia */}
+            <p className="w-full text-[15px] text-muted-foreground">
+              Si no respondes, se rechaza sola a las {hora(new Date(new Date(fila.creadoEn).getTime() + 5 * 60_000).toISOString())}.
+            </p>
           </>
         )}
         {enRuta && fila.estado === "activa" && !fila.pendiente && (
@@ -166,7 +182,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
             Se bajó
           </Button>
         )}
-        {recogiendo && fila.conApp && fila.confirmado && (
+        {recogiendo && fila.conApp && fila.confirmado && !fila.pendiente && (
           <Button size="sm" variant="outline" className="text-destructive" disabled={pendiente} onClick={noVino}>
             <UserXIcon aria-hidden />
             No vino

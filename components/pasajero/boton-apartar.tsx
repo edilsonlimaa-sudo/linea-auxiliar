@@ -7,6 +7,7 @@ import { Confirmar } from "@/components/confirmar"
 import { HojaLugar } from "@/components/pasajero/hoja-lugar"
 import { Button } from "@/components/ui/button"
 import { apartarPuesto } from "@/lib/acciones/pasajero"
+import { cn } from "@/lib/utils"
 
 /**
  * Apartar puesto (R27): sube la hoja "¿Dónde te recogemos?" y confirma. Si sale bien, la acción abre Mi viaje.
@@ -20,6 +21,9 @@ export function BotonApartar({
   reservaAnterior,
   recientes = [],
   lugarInicial,
+  personas = 1,
+  maxPersonas = 1,
+  className,
 }: {
   viajeId: string
   texto: string
@@ -27,6 +31,9 @@ export function BotonApartar({
   reservaAnterior?: string | null
   recientes?: string[]
   lugarInicial?: string | null // el de su espera, si estaba esperando
+  personas?: number // cuántos van, si ya lo dijo (su espera); la hoja lo pregunta de nuevo (R57)
+  maxPersonas?: number // hasta cuántos ofrece la hoja: los puestos libres (lista de espera: de a uno)
+  className?: string
 }) {
   const [pendiente, iniciar] = useTransition()
   const [error, setError] = useState<string>()
@@ -41,8 +48,9 @@ export function BotonApartar({
     })
 
   return (
-    <div className="flex flex-col gap-2">
-      <Button variant={variante} className="w-full" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : setHoja(true))}>
+    <div className={cn("flex flex-col gap-2", className)}>
+      {/* El texto puede ser largo ("Anotarme en la lista de espera"): baja de línea en vez de empujar el mapa fuera */}
+      <Button variant={variante} className="h-auto min-h-13 w-full py-2 text-center whitespace-normal" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : setHoja(true))}>
         {pendiente && <Loader2Icon aria-hidden className="animate-spin" />}
         {pendiente ? "Apartando…" : texto}
       </Button>
@@ -73,7 +81,17 @@ export function BotonApartar({
           descripcion="El chofer lo ve en grande al llegar."
           recientes={recientes}
           lugarInicial={lugarInicial}
-          textoBoton={texto}
+          textoBoton={(n) => (n > 1 && texto === "Apartar puesto" ? `Apartar ${n} puestos` : texto)}
+          personas={{
+            max: maxPersonas,
+            inicial: personas,
+            nota:
+              maxPersonas === 1 && texto.includes("lista de espera")
+                ? "La lista de espera es de a uno. Si van más, busquen una unidad con puestos o pidan que les avisemos."
+                : maxPersonas < 4
+                  ? `Este carro tiene ${maxPersonas === 1 ? "1 puesto libre" : `${maxPersonas} puestos libres`}.`
+                  : undefined,
+          }}
           onEnviar={(datos) => apartarPuesto(viajeId, datos)}
         />
       )}

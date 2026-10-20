@@ -4,7 +4,7 @@ import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import type { ChoferEnServicio } from "@/lib/datos/inicio-pasajero"
-import { aceptaReservas, ACTIVOS, actividadDeChofer, libres, nombreCorto, type Sentido, type Viaje } from "@/lib/viajes"
+import { aceptaReservas, ACTIVOS, actividadDeChofer, libres, nombreCorto, puestosEnOrden, type Sentido, type Viaje } from "@/lib/viajes"
 
 type Reserva = Database["public"]["Tables"]["reservas"]["Row"]
 
@@ -12,7 +12,10 @@ type Reserva = Database["public"]["Tables"]["reservas"]["Row"]
 export type FilaChofer = {
   id: string
   posicion: number // 1 = primero (R17)
-  confirmado: boolean // tiene puesto (posición ≤ puestos)
+  personas: number // quien reservó y sus acompañantes (R57)
+  desde: number // primer puesto que ocupa
+  hasta: number // último puesto que ocupa
+  confirmado: boolean // tiene puesto (hasta ≤ puestos)
   nombre: string // nombre corto ("Carmen R.") o el que puso el chofer
   conApp: boolean // false: anotado a mano (R36)
   estado: Reserva["estado"] // activa | subio
@@ -20,13 +23,19 @@ export type FilaChofer = {
   lat: number | null
   lng: number | null
   listo: boolean // "✋ Ya está en el sitio" (R23)
-  pendiente: boolean // pedido en el camino sin responder (R29)
+  pendiente: boolean // solicitud sin responder: al apartar (R58) o en el camino (R29)
+  creadoEn: string // la solicitud se rechaza sola a los 5 min (R58)
   aceptada: boolean
   telefono: string | null
   fotoUrl: string | null // foto de perfil del pasajero (R54): ayuda a reconocerlo
 }
 
 export type ViajeChofer = Viaje & { lista: FilaChofer[] }
+
+/** Alguien que espera, como lo ve un chofer conectado (R31, §6): nombre corto, foto, dónde y teléfono */
+export type EsperaParaChofer = Omit<Database["public"]["Functions"]["esperando_para_choferes"]["Returns"][number], "foto_path"> & {
+  fotoUrl: string | null
+}
 
 export type DatosInicioChofer = {
   conectado: boolean
@@ -39,6 +48,7 @@ export type DatosInicioChofer = {
   // Lo que ya ofrecen los demás choferes por sentido (§8 Inicio del chofer): unidades que aceptan reservas y sus puestos libres
   oferta: Record<Sentido, { unidades: number; puestosLibres: number }>
   companeros: ChoferEnServicio[] // quién más trabaja y qué hace (R7)
+  quienEspera: EsperaParaChofer[] // conectado: quién espera, para escribirle (R31); desconectado, vacío
 }
 
 export async function cargarInicioChofer(choferId: string, conectado: boolean): Promise<DatosInicioChofer> {
@@ -86,10 +96,13 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     const deEste = filas.filter((r) => r.viaje_id === v.id)
     return {
       ...v,
-      lista: deEste.map((r, i) => ({
+      lista: puestosEnOrden(deEste).map((r, i) => ({
         id: r.id,
         posicion: i + 1,
-        confirmado: i + 1 <= v.puestos,
+        personas: r.personas,
+        desde: r.desde,
+        hasta: r.hasta,
+        confirmado: r.hasta <= v.puestos,
         nombre: r.pasajero ? nombreCorto(r.pasajero.nombre) : (r.nombre ?? "Pasajero sin app"),
         conApp: r.pasajero_id !== null,
         estado: r.estado,
@@ -98,6 +111,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
         lng: r.lng,
         listo: r.listo,
         pendiente: r.pendiente,
+        creadoEn: r.creado_en,
         aceptada: r.aceptada_en !== null,
         telefono: r.pasajero_id ? (telefonoDe.get(r.pasajero_id) ?? null) : null,
         fotoUrl: r.pasajero?.foto_path ? (fotos.get(r.pasajero.foto_path) ?? null) : null,
@@ -144,10 +158,17 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     })
     .sort((a, b) => Number(a.actividad === "Disponible") - Number(b.actividad === "Disponible") || a.nombre.localeCompare(b.nombre, "es"))
 
+  // Quién espera: solo si está conectado (la base no le devuelve nada si no, R31)
+  const { data: esperanRes } = conectado ? await supabase.rpc("esperando_para_choferes") : { data: [] }
+  const esperan = esperanRes ?? []
+  const fotosEsperan = await firmarFotos(esperan.map((e) => e.foto_path))
+  const quienEspera = esperan.map(({ foto_path, ...e }) => ({ ...e, fotoUrl: foto_path ? (fotosEsperan.get(foto_path) ?? null) : null }))
+
   return {
     conectado,
     oferta,
     companeros,
+    quienEspera,
     enRuta: enRuta ? conLista(enRuta) : null,
     recogida: recogida ? conLista(recogida) : null,
     proximos: viajes.filter((v) => v.estado === "programado").map(conLista),

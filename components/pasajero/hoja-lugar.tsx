@@ -1,15 +1,20 @@
 "use client"
 
-import { Loader2Icon } from "lucide-react"
+import { CheckIcon, Loader2Icon } from "lucide-react"
 import { useState, useTransition } from "react"
 
 import { CasillaGps, datosDelLugar, ElegirLugar, useGpsRecordado, useLugar } from "@/components/pasajero/elegir-lugar"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
+
+/** "¿Cuántos van?" en la hoja (R57): hasta `max` (los puestos libres de ese carro, máx. 4); `nota` explica el límite */
+export type OpcionPersonas = { max: number; inicial?: number; nota?: string }
 
 /**
  * "¿Dónde te recogemos?" (R25–R27): se pregunta recién al apartar o al pedir "Avísame cuando haya una".
- * Lugares recientes de un toque (el último ya escogido), otro escrito y GPS opcional.
+ * Con `personas`, empieza por "¿Cuántos van?" (R57). Lugares recientes de un toque (el último ya escogido), otro
+ * escrito y GPS opcional. El texto del botón puede depender de cuántos van ("Apartar 3 puestos").
  */
 export function HojaLugar({
   abierta,
@@ -19,6 +24,7 @@ export function HojaLugar({
   recientes,
   lugarInicial,
   textoBoton,
+  personas,
   enviando: enviandoFuera = false,
   onEnviar,
 }: {
@@ -28,7 +34,8 @@ export function HojaLugar({
   descripcion: string
   recientes: string[]
   lugarInicial?: string | null
-  textoBoton: string
+  textoBoton: string | ((personas: number) => string)
+  personas?: OpcionPersonas
   enviando?: boolean
   onEnviar: (datos: FormData) => Promise<{ error?: string } | undefined>
 }) {
@@ -40,7 +47,7 @@ export function HojaLugar({
           <SheetDescription className="text-base">{descripcion}</SheetDescription>
         </SheetHeader>
         {/* key: al abrir de nuevo empieza con el lugar más reciente */}
-        {abierta && <Formulario recientes={recientes} lugarInicial={lugarInicial} textoBoton={textoBoton} onEnviar={onEnviar} />}
+        {abierta && <Formulario recientes={recientes} lugarInicial={lugarInicial} textoBoton={textoBoton} personas={personas} onEnviar={onEnviar} />}
       </SheetContent>
     </Sheet>
   )
@@ -50,13 +57,17 @@ function Formulario({
   recientes,
   lugarInicial,
   textoBoton,
+  personas,
   onEnviar,
 }: {
   recientes: string[]
   lugarInicial?: string | null
-  textoBoton: string
+  textoBoton: string | ((personas: number) => string)
+  personas?: OpcionPersonas
   onEnviar: (datos: FormData) => Promise<{ error?: string } | undefined>
 }) {
+  const max = Math.max(1, Math.min(4, personas?.max ?? 1))
+  const [cuantos, setCuantos] = useState(Math.min(personas?.inicial ?? 1, max))
   const lugar = useLugar(recientes, lugarInicial)
   const [gps, setGps] = useGpsRecordado()
   const [error, setError] = useState<string>()
@@ -69,6 +80,7 @@ function Formulario({
     const r = await datosDelLugar(lugar.valor, gps)
     setBuscandoGps(false)
     if ("error" in r) return setError(r.error)
+    if (personas) r.datos.set("personas", String(cuantos))
     iniciar(async () => {
       const res = await onEnviar(r.datos)
       if (res?.error) setError(res.error)
@@ -84,11 +96,37 @@ function Formulario({
       }}
       className="flex flex-col gap-5 px-5 pb-6"
     >
+      {personas && (
+        <fieldset className="flex flex-col gap-2">
+          <legend className="mb-2 font-bold">¿Cuántos van?</legend>
+          {max > 1 && (
+            <div className="grid grid-cols-4 gap-2">
+              {Array.from({ length: max }, (_, i) => i + 1).map((n) => {
+                const activo = n === cuantos
+                return (
+                  <label
+                    key={n}
+                    className={cn(
+                      "flex min-h-13 cursor-pointer items-center justify-center gap-1 rounded-2xl border-2 px-2 text-center font-bold has-focus-visible:ring-[3px] has-focus-visible:ring-ring",
+                      activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted"
+                    )}
+                  >
+                    <input type="radio" name="cuantos-van" checked={activo} onChange={() => setCuantos(n)} className="sr-only" />
+                    {activo && <CheckIcon aria-hidden className="size-4" />}
+                    {n === 1 ? "Solo yo" : n}
+                  </label>
+                )
+              })}
+            </div>
+          )}
+          {personas.nota && <p className="text-[15px] text-muted-foreground">{personas.nota}</p>}
+        </fieldset>
+      )}
       <ElegirLugar lugar={lugar} error={error} />
       <CasillaGps marcada={gps} onCambiar={setGps} />
       <Button type="submit" variant="signal" size="lg" disabled={ocupado} className="w-full">
         {ocupado && <Loader2Icon aria-hidden className="animate-spin" />}
-        {buscandoGps ? "Buscando tu ubicación…" : enviando ? "Un momento…" : textoBoton}
+        {buscandoGps ? "Buscando tu ubicación…" : enviando ? "Un momento…" : typeof textoBoton === "function" ? textoBoton(cuantos) : textoBoton}
       </Button>
     </form>
   )

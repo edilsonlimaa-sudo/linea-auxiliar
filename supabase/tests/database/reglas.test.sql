@@ -5,7 +5,7 @@
 --   pasajeros: María ...21, José ...22, Carmen ...23, Ana (pendiente) ...24, Luis ...25, Daniela ...26
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(41);
+select plan(42);
 
 -- Crea una cuenta como lo haría el registro: auth.users + identidad; el trigger crea el perfil.
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
@@ -88,7 +88,13 @@ select is((select telefono from public.perfiles_privados where id = '00000000-00
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000026", "role": "authenticated"}', true);
 select set_config('t.r_dani', public.reservar(current_setting('t.v1')::uuid, 'Portón VGC')::text, true);
 
+select is((select pendiente from public.reservas where id = current_setting('t.r_dani')::uuid), true,
+  'R58: apartar es una solicitud: queda pendiente hasta que el chofer confirme');
+
+-- El chofer confirma las solicitudes (R58)
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000011", "role": "authenticated"}', true);
+select public.responder_pedido(id, true) from public.reservas
+ where viaje_id = current_setting('t.v1')::uuid and estado = 'activa' and pendiente;
 select lives_ok($$ select public.avanzar_viaje(current_setting('t.v1')::uuid, 'en_parada') $$, 'Llegué');
 select lives_ok($$ select public.avanzar_viaje(current_setting('t.v1')::uuid, 'en_ruta') $$, 'Salir');
 select is((select estado::text from public.reservas where id = current_setting('t.r_jose')::uuid), 'subio',

@@ -30,7 +30,7 @@ export default async function PaginaMiViaje() {
   }
 
   const aBordo = miReserva.reserva.estado === "subio"
-  const otras = aBordo || tienePuesto(miReserva.posicion, miReserva.viaje) ? [] : otrasConPuesto(viajes, miReserva.viaje, porId)
+  const otras = aBordo || tienePuesto(miReserva.hasta, miReserva.viaje) ? [] : otrasConPuesto(viajes, miReserva.viaje, porId, miReserva.reserva.personas)
 
   return (
     <div className="flex flex-col gap-5">

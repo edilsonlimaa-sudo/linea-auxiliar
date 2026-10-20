@@ -80,6 +80,7 @@ export async function cargarViajesPasajero(pasajeroId: string): Promise<ViajePas
 
 export type PersonaDelViaje = {
   nombre: string
+  personas: number // con acompañantes (R57)
   // Cómo entró al carro (R50)
   entrada: "app" | "a_mano" | "en_el_camino"
   seBajoAntes: boolean
@@ -135,7 +136,7 @@ async function cargarTerminados({
     // El chofer lee las reservas de sus viajes; el admin, todas (RLS)
     supabase
       .from("reservas")
-      .select("viaje_id, estado, nombre, en_camino, pasajero:perfiles!reservas_pasajero_id_fkey(nombre)")
+      .select("viaje_id, estado, nombre, en_camino, personas, pasajero:perfiles!reservas_pasajero_id_fkey(nombre)")
       .in("viaje_id", ids)
       .in("estado", ["subio", "bajo", "no_llego"])
       .order("creado_en"),
@@ -162,6 +163,7 @@ async function cargarTerminados({
         .filter((r) => r.estado !== "no_llego")
         .map((r) => ({
           nombre: nombre(r),
+          personas: r.personas,
           entrada: !r.pasajero ? "a_mano" : r.en_camino ? "en_el_camino" : "app",
           seBajoAntes: r.estado === "bajo",
         })),

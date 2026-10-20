@@ -2,7 +2,7 @@
 import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
-import { aceptaReservas, ACTIVOS, type EventoViaje, libres, type Sentido, type Viaje } from "@/lib/viajes"
+import { aceptaReservas, ACTIVOS, type EventoViaje, libres, puestosEnOrden, type Sentido, type Viaje } from "@/lib/viajes"
 
 type Funciones = Database["public"]["Functions"]
 export type Cuenta = Funciones["admin_cuentas"]["Returns"][number]
@@ -83,6 +83,9 @@ export async function cargarDemanda(): Promise<{
 export type PersonaEnViaje = {
   id: string
   posicion: number // orden en la lista (R17)
+  personas: number // con acompañantes (R57)
+  desde: number
+  hasta: number
   confirmado: boolean // tiene puesto
   nombre: string
   conApp: boolean
@@ -147,12 +150,13 @@ export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]
 
   const porChofer = new Map<string, ChoferEnCurso>()
   for (const { chofer, ...v } of lista) {
-    const personas = filas
-      .filter((r) => r.viaje_id === v.id)
-      .map((r, i) => ({
+    const personas = puestosEnOrden(filas.filter((r) => r.viaje_id === v.id)).map((r, i) => ({
         id: r.id,
         posicion: i + 1,
-        confirmado: i + 1 <= v.puestos,
+        personas: r.personas,
+        desde: r.desde,
+        hasta: r.hasta,
+        confirmado: r.hasta <= v.puestos,
         nombre: r.pasajero?.nombre ?? r.nombre ?? "Pasajero sin app",
         conApp: r.pasajero_id !== null,
         estado: r.estado,

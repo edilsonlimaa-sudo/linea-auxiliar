@@ -77,19 +77,20 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 | `components/chofer/compartir-ubicacion.tsx` · `components/pasajero/ver-en-mapa.tsx` | Posición del chofer (R40: watchPosition, cada 15 s o 30 m, Wake Lock) y mapa del pasajero (R41: Leaflet + OSM; con la hoja abierta recibe la posición por Realtime). Cálculos en `lib/mapa.ts` |
 | `lib/datos/historial.ts` · `components/historial/` · `components/carnet.tsx` | Mis viajes (pasajero R51 con "Calificar" después; chofer R50), Mis calificaciones del chofer (R52, sin nombres) y Mi carnet (R53, ambos) |
 | `lib/fotos.ts` · `components/foto/` | Fotos (R54): `firmarFotos(rutas)` da enlaces firmados de 1 h (bucket privado); `<SubirFoto>` achica en el teléfono (1080 px, JPEG), sube **directo a Storage** a la carpeta propia y la acción `guardarFoto` la registra; `<Avatar>` cae a iniciales; `<InterruptorAire>` (R55) |
+| `components/ui/badge.tsx` · `avatar.tsx` | shadcn, ajustados a las medidas del proyecto (Badge: 14 px en negrita, alto 28 px). `AvatarGroup` para iniciales una junto a otra |
 | `components/confirmar.tsx` | Confirmación propia (hoja inferior en el celular). **Nunca `window.confirm`**. Botones que dicen qué pasa ("Sí, ya no voy" / "No, sigo en el viaje"); el foco empieza en la opción segura |
-| `components/pasajero/` | Inicio del pasajero: `SelectorSentido` y `Atajos` (`puerta-de-entrada.tsx`), `TarjetaUnidad` con `BotonApartar`, `HojaLugar` (sobre `ElegirLugar` + `CasillaGps`), `AvisameCuandoHaya` / `EstadoEspera`, `MiReservaTarjeta` con `CambiarLugar` |
+| `components/pasajero/` | Inicio del pasajero: `SelectorSentido` (`selector-sentido.tsx`), `MapaLinea` (página La línea), `TarjetaUnidad` con `BotonApartar`, `HojaLugar` (sobre `ElegirLugar` + `CasillaGps`), `AvisameCuandoHaya` y la página Esperando (`EstadoEspera`, `PasosEspera`, `EsperanContigo`), `MiReservaTarjeta` con `CambiarLugar` |
 
 Formularios: Server Action + `useActionState`, validación con zod y mensajes en español; el estado devuelve
 `errores` por campo, `valores` para volver a llenar (nunca el PIN) e `intento` (se usa como `key` del form y para
 llevar el foco al primer error).
 
 Pasajero (especificación §8 "Inicio del pasajero"): **mirar primero, comprometerse después**. Inicio: saludo →
-"¿Cómo está la línea?" (`EstadoDeLaLinea conMapa`: cada chofer con "Ver en el mapa") → **¿Hacia dónde vas?**
-(`SelectorSentido`, el sentido va en `?hacia=centro|valle`) → las unidades de ese sentido (`TarjetaUnidad`) → atajos.
+una línea "N choferes trabajando · Ver la línea" (lleva a **`/linea`**: mapa con todos los choferes y quién trabaja, `MapaLinea`) → **¿Hacia dónde vas?**
+(`SelectorSentido`, el sentido va en `?hacia=centro|valle`) → las unidades de ese sentido (`TarjetaUnidad`, corta: el detalle del chofer se abre a pedido).
 El lugar se pregunta **recién al apartar**: `BotonApartar` abre `HojaLugar` ("¿Dónde te recogemos?", recientes + texto +
 GPS) y llama `apartarPuesto(viajeId, datos)`; al cambiarse de unidad (R22) no pregunta y usa el lugar de la reserva.
-Sin unidad con puesto: **Avísame cuando haya una** (`AvisameCuandoHaya`, registra la espera, R31). En Mi viaje,
+Sin unidad con puesto: **Avísame cuando haya una** (`AvisameCuandoHaya`, registra la espera, R31) → **`/esperando`**: página aparte con el sentido fijo (`EstadoEspera` con "Cambiar dónde estoy", las unidades que van apareciendo y quién más espera en ese sentido con `rpc('esperan_conmigo')`, nombre corto). Con espera activa, `/inicio` redirige a `/esperando` y el menú muestra "Esperando" de primero. En Mi viaje,
 `CambiarLugar` usa la misma hoja. Al apartar, la acción redirige a **`/mi-viaje`** (puesto o
 turno → cuándo llega → dónde → avance → chofer → acciones). Con reserva activa, `/inicio` redirige a `/mi-viaje`
 (salvo `/inicio?cambiar=1`: otras unidades con puesto, R22) y el menú muestra "Mi viaje" de primero; "Ya no voy"
@@ -98,7 +99,7 @@ marca "Se bajó" (R38), Mi viaje muestra la calificación pendiente (12 h, `Cali
 en vivo (`EnVivo`, respaldo cada 60 s).
 
 Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pasajero o chofer?) → `/registro/[pasajero|chofer]` ·
-`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin/clave` · panel: `/admin` (Resumen), `/admin/viajes`, `/admin/viajes/terminados`, `/admin/demanda`, `/admin/choferes`, `/admin/pasajeros`, `/admin/uso`.
+`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/esperando` · `/linea` (La línea) · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin/clave` · panel: `/admin` (Resumen), `/admin/viajes`, `/admin/viajes/terminados`, `/admin/demanda`, `/admin/choferes`, `/admin/pasajeros`, `/admin/uso`.
 
 ### Administración
 
@@ -121,8 +122,9 @@ Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pas
   ya vienen en español para mostrarlos tal cual.
 - **Dónde recoger:** no hay paradas registradas. Reservas y esperas guardan `lugar` (texto libre, máx. 60) y/o
   `lat`/`lng`; la base exige al menos uno (`_validar_lugar`). Las esperas llevan `sentido` y solo las ven su dueño y el admin: los choferes leen
-  únicamente cuántos esperan por sentido con `rpc('demanda_por_sentido')` (R31; no hay pantalla "Esperando"). Lugares recientes del
+  cuántos esperan por sentido con `rpc('demanda_por_sentido')` y, **conectados**, quién espera con `rpc('esperando_para_choferes')` (nombre corto, lugar y teléfono para WhatsApp, R31; `QuienEspera`). Lugares recientes del
   pasajero: `rpc('mis_lugares_recientes')`.
+- **Reservas en grupo y confirmación:** cada reserva/espera tiene `personas` (1–4, R57); los puestos se cuentan por personas (`sum(personas)` en orden, `desde`/`hasta` en `lista_viaje` y `puestosEnOrden`). Toda reserva del pasajero nace `pendiente` hasta que el chofer la acepta (`responder_pedido`, R58); `vencer_pedidos()` (pg_cron, cada minuto) rechaza las que llevan 5 min sin respuesta.
 - **Lectura de la lista de un viaje:** `rpc('lista_viaje', { p_viaje })` (pública, sin teléfono ni ubicación).
   El chofer lee `reservas` de sus viajes directo (con ubicación). El puesto es la posición por `creado_en`.
 - **Tabla nueva:** siempre `enable row level security`, políticas explícitas y `grant` por columna;

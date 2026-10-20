@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button"
 import type { ChoferEnCurso, PersonaEnViaje, ViajeEnCurso } from "@/lib/datos/admin"
 import { hora } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
-import { enEspera, ETIQUETA_ESTADO, llegada, SENTIDOS, type Viaje } from "@/lib/viajes"
+import { conAcompanantes, enEspera, ETIQUETA_ESTADO, llegada, SENTIDOS, type Viaje } from "@/lib/viajes"
 
 /**
  * Viajes en curso del panel (§8): un bloque por chofer, con cada viaje abierto y su gente separada en
@@ -103,7 +103,7 @@ function BloqueViaje({ viaje: v, porId }: { viaje: ViajeEnCurso; porId: Map<stri
       ) : (
         <>
           <Grupo titulo="A bordo" personas={aBordo} />
-          <Grupo titulo="Pedidos en el camino" personas={pedidos} destacado />
+          <Grupo titulo={v.estado === "en_ruta" ? "Pedidos en el camino" : "Piden puesto (sin confirmar)"} personas={pedidos} destacado />
           <Grupo titulo={v.estado === "en_ruta" ? "Va a recoger en el camino" : "Por recoger"} personas={porRecoger} />
           <Grupo titulo="Lista de espera" personas={enLista} />
         </>
@@ -126,7 +126,7 @@ function Grupo({ titulo, personas, destacado }: { titulo: string; personas: Pers
               <Avatar url={p.fotoUrl} nombre={p.nombre} className="size-10" />
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="font-bold">{p.nombre}</span>
+                  <span className="font-bold">{conAcompanantes(p.nombre, p.personas)}</span>
                   {!p.conApp && <span className="rounded-full bg-card px-2 py-0.5 text-sm">Sin app</span>}
                   {p.listo && p.estado === "activa" && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">

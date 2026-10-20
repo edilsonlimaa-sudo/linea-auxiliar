@@ -18,7 +18,7 @@ import type {
 } from "@/lib/datos/admin"
 import { hace } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
-import { ETIQUETA_ESTADO, haciaEnFrase, llegada, SENTIDOS, type Sentido, type Viaje } from "@/lib/viajes"
+import { conAcompanantes, ETIQUETA_ESTADO, haciaEnFrase, llegada, SENTIDOS, sumaPersonas, type Sentido, type Viaje } from "@/lib/viajes"
 
 const ORDEN: Sentido[] = ["vg_a_centro", "centro_a_vg"]
 
@@ -50,7 +50,7 @@ export function Resumen({
 
   return (
     <div className="flex flex-col gap-6">
-      <Indicadores conectados={conectados.length} resumen={resumen} esperando={esperando.length} />
+      <Indicadores conectados={conectados.length} resumen={resumen} esperando={sumaPersonas(esperando)} />
 
       <Atencion pendientes={pendientes} esperando={esperando} oferta={oferta} />
 
@@ -145,7 +145,7 @@ function Atencion({
       accion: "Revisar",
     })
   for (const s of ORDEN) {
-    const esperan = esperando.filter((e) => e.sentido === s).length
+    const esperan = sumaPersonas(esperando.filter((e) => e.sentido === s))
     const libres = oferta[s].puestosLibres
     if (esperan > libres)
       items.push({
@@ -260,7 +260,7 @@ function EsperandoAhora({
     <Tarjeta titulo="Esperando ahora" enlace={{ href: "/admin/demanda", texto: "Demanda" }}>
       <div className="grid gap-3 sm:grid-cols-2">
         {ORDEN.map((s) => (
-          <PorSentido key={s} sentido={s} esperan={esperando.filter((e) => e.sentido === s).length} oferta={oferta[s]} />
+          <PorSentido key={s} sentido={s} esperan={sumaPersonas(esperando.filter((e) => e.sentido === s))} oferta={oferta[s]} />
         ))}
       </div>
       {primeros.length > 0 && (
@@ -272,7 +272,7 @@ function EsperandoAhora({
                 <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-10" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold">
-                    {e.nombre} <span className="font-normal text-muted-foreground">· {haciaEnFrase(e.sentido)}</span>
+                    {conAcompanantes(e.nombre, e.personas)} <span className="font-normal text-muted-foreground">· {haciaEnFrase(e.sentido)}</span>
                   </p>
                   <p className="flex items-center gap-1 truncate text-[15px] text-muted-foreground">
                     <MapPinIcon aria-hidden className="size-4 shrink-0" />

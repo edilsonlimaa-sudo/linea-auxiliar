@@ -3,7 +3,7 @@
 -- (…02) y su propia pasajera dentro de la transacción, que se deshace al final.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(32);
+select plan(38);
 
 -- ---------- Creación del admin (como superusuario, igual que el registro de Supabase Auth) ----------
 select public.crear_admin('prueba', 'admin123', '00000000-0000-4000-a000-000000000002');
@@ -79,6 +79,10 @@ insert into public.reservas (viaje_id, pasajero_id, nombre, estado, en_camino, l
 -- María espera para ir al Centro (para la Demanda del panel)
 insert into public.esperas (pasajero_id, sentido, lugar)
 values ('00000000-0000-4000-a000-000000000021', 'vg_a_centro', 'Portón VGC');
+-- Ana también espera al Centro; José, a Valle Grande (para "También esperan", §8 Esperando)
+insert into public.esperas (pasajero_id, sentido, lugar) values
+  ('00000000-0000-4000-a000-000000000034', 'vg_a_centro', 'Calle 3'),
+  ('00000000-0000-4000-a000-000000000032', 'centro_a_vg', 'Plaza Bolívar');
 
 -- ---------- Panel ----------
 set local role authenticated;
@@ -124,6 +128,34 @@ select results_eq(
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
 select throws_ok($$ select * from public.admin_uso_pasajeros(now()) $$, 'P0001', 'Solo para administración',
   'Un chofer no ve el uso de la app');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
+
+-- ---------- También esperan (§8 Esperando, §6) ----------
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000034", "role": "authenticated"}', true);
+select results_eq(
+  $$ select nombre_corto, soy_yo from public.esperan_conmigo() $$,
+  $$ values ('María G.'::text, false), ('Ana S.'::text, true) $$,
+  'Quien espera ve a los que esperan en su mismo sentido, con nombre corto (no los del otro sentido)');
+select is(
+  pg_get_function_result('public.esperan_conmigo()'::regprocedure),
+  'TABLE(nombre_corto text, personas integer, desde timestamp with time zone, soy_yo boolean)',
+  '§6: nombre corto, cuántos van y desde cuándo; nunca el lugar ni el teléfono');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
+select is((select count(*)::int from public.esperan_conmigo()), 0, 'Sin espera propia no se ve a nadie');
+
+-- Quién espera, para los choferes (R31, §6): Yelitza (...33) desconectada no ve a nadie; conectada, sí y con teléfono
+select is((select count(*)::int from public.esperando_para_choferes()), 0, 'R31: el chofer desconectado no ve quién espera');
+reset role;
+update public.perfiles set conectado_en = now() where id = '00000000-0000-4000-a000-000000000033';
+set local role authenticated;
+select ok(
+  exists (select 1 from public.esperando_para_choferes()
+           where nombre = 'Ana S.' and lugar = 'Calle 3' and telefono = '+584140000034' and sentido = 'vg_a_centro'),
+  'R31: el chofer conectado ve quién espera, dónde y su teléfono (para escribirle por WhatsApp)');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000034", "role": "authenticated"}', true);
+select throws_ok('select * from public.esperando_para_choferes()', 'P0001', 'Solo para choferes',
+  'R31: un pasajero no ve la lista de quién espera');
+select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000033", "role": "authenticated"}', true);
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000002", "role": "authenticated"}', true);
 
 -- ---------- Demanda (§8) ----------

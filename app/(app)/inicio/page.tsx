@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, BusIcon } from "lucide-react"
+import { ArrowLeftIcon, BusIcon, ChevronRightIcon } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
@@ -6,9 +6,9 @@ import { redirect } from "next/navigation"
 import { EnVivo } from "@/components/en-vivo"
 import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
-import { EstadoDeLaLinea } from "@/components/pasajero/estado-de-la-linea"
-import { AvisameCuandoHaya, EstadoEspera } from "@/components/pasajero/esperando"
-import { Atajos, SelectorSentido, sentidoDeHacia } from "@/components/pasajero/puerta-de-entrada"
+import { EstadoLinea } from "@/components/pasajero/estado-linea"
+import { AvisameCuandoHaya } from "@/components/pasajero/esperando"
+import { SelectorSentido, sentidoDeHacia } from "@/components/pasajero/selector-sentido"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import {
@@ -55,13 +55,15 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
   // Viaje terminado sin calificar: primero "¿Cómo te fue?" (R45)
   const [pendiente, cierre] = await Promise.all([cargarCalificacionPendiente(perfil.id), cargarAvisoDeCierre(perfil.id)])
   if (pendiente) redirect("/mi-viaje")
+  // Esperando es un estado aparte, con el sentido fijo (§8)
+  if (datos.miEspera) redirect("/esperando")
   return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} />
 }
 
 /**
- * Sin reserva (docs/especificacion.md §8 "Inicio del pasajero"): mirar primero, comprometerse después.
- * 1. ¿Cómo está la línea? (con mapa)  2. ¿Hacia dónde vas?  3. Las unidades de ese sentido, enseguida.
- * El lugar se pregunta recién al apartar (R27). Sin unidad con puesto: "Avísame cuando haya una" (R31).
+ * Sin reserva (docs/especificacion.md §8): Inicio es "quiero viajar". Una línea con cuántos choferes trabajan (lleva a
+ * La línea) → ¿Hacia dónde vas? → las unidades de ese sentido. El lugar se pregunta recién al apartar (R27).
+ * Sin unidad con puesto: "Avísame cuando haya una" (R31). Ver la línea y el menú cubren lo demás.
  */
 function InicioPasajero({
   perfil,
@@ -74,37 +76,50 @@ function InicioPasajero({
   cierre: AvisoDeCierre | null
   hacia: Sentido | null
 }) {
-  const { viajes, porId, miEspera, lugaresRecientes, aviso, enServicio } = datos
+  const { viajes, porId, lugaresRecientes, aviso, enServicio } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
-  // Empieza en el sentido de su espera; si no, el sugerido por la hora y dónde vive. Cambiarlo es un toque.
-  const sentido = hacia ?? miEspera?.sentido ?? sentidoSugerido(perfil.urbanismo)
+  // Empieza en el sentido sugerido por la hora y dónde vive. Cambiarlo es un toque.
+  const sentido = hacia ?? sentidoSugerido(perfil.urbanismo)
   const unidades = disponibles.filter((v) => v.sentido === sentido)
   const cuantas = Object.fromEntries(
     (Object.keys(SENTIDOS) as Sentido[]).map((s) => [s, disponibles.filter((v) => v.sentido === s).length])
   ) as Record<Sentido, number>
+  // ¿Cuántos van? se pregunta al apartar (R57)
   const conPuesto = unidades.some((v) => libres(v) > 0)
-  const esperaAqui = miEspera?.sentido === sentido ? miEspera : null
-  const yo = miEspera && miEspera.lat !== null && miEspera.lng !== null ? { lat: miEspera.lat, lng: miEspera.lng } : null
 
   return (
     <div className="flex flex-col gap-6">
       <EnVivo />
       {cierre && <AvisoCierre aviso={cierre} />}
-      <h1 className="text-[26px] leading-tight font-bold">
-        {saludo()}, {perfil.nombre.split(" ")[0]}
-      </h1>
-      <EstadoDeLaLinea choferes={enServicio} aviso={aviso} conMapa />
+      <header className="flex flex-col gap-2">
+        <h1 className="text-[26px] leading-tight font-bold">
+          {saludo()}, {perfil.nombre.split(" ")[0]}
+        </h1>
+        {/* "¿Cómo está la línea?" en una línea; el detalle y el mapa de todos están en La línea */}
+        <Link
+          href="/linea"
+          className="flex min-h-12 items-center gap-2.5 self-start rounded-full border-2 bg-card px-4 py-2 font-bold hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+        >
+          <span aria-hidden className={enServicio.length > 0 ? "size-2.5 rounded-full bg-success" : "size-2.5 rounded-full bg-muted-foreground"} />
+          {enServicio.length === 0
+            ? "Ningún chofer trabajando ahora"
+            : enServicio.length === 1
+              ? "1 chofer trabajando"
+              : `${enServicio.length} choferes trabajando`}
+          <span className="text-primary">· Ver la línea</span>
+          <ChevronRightIcon aria-hidden className="size-5 text-primary" />
+        </Link>
+      </header>
+      {aviso && <EstadoLinea aviso={aviso} />}
 
       <SelectorSentido actual={sentido} unidades={cuantas} />
-
-      {miEspera && <EstadoEspera sentido={miEspera.sentido} lugar={miEspera.lugar} desde={miEspera.creado_en} />}
 
       <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
         <h2 id="titulo-unidades" className="text-xl font-bold">
           Unidades {SENTIDOS[sentido].hacia}
         </h2>
         {unidades.map((v) => (
-          <TarjetaUnidad key={v.id} viaje={v} porId={porId} yo={yo} recientes={lugaresRecientes} lugarInicial={esperaAqui?.lugar} />
+          <TarjetaUnidad key={v.id} viaje={v} porId={porId} recientes={lugaresRecientes} />
         ))}
         {!conPuesto && (
           <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-7 text-center">
@@ -112,19 +127,11 @@ function InicioPasajero({
             <p className="text-lg font-bold">
               {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
             </p>
-            {esperaAqui ? (
-              <p className="text-muted-foreground">Ya estás en espera: la unidad aparece aquí apenas haya una.</p>
-            ) : (
-              <>
-                <p className="text-muted-foreground">Déjanos tu lugar y te avisamos. Los choferes ven que alguien espera.</p>
-                <AvisameCuandoHaya sentido={sentido} recientes={lugaresRecientes} />
-              </>
-            )}
+            <p className="text-muted-foreground">Déjanos tu lugar y te avisamos. Los choferes ven que alguien espera.</p>
+            <AvisameCuandoHaya sentido={sentido} recientes={lugaresRecientes} />
           </div>
         )}
       </section>
-
-      <Atajos />
     </div>
   )
 }
@@ -132,7 +139,7 @@ function InicioPasajero({
 /** En lista de espera: otras unidades del mismo sentido con puesto (R22). Apartar en una cancela la anterior (R18). */
 function CambiarDeUnidad({ datos, miReserva }: { datos: DatosInicioPasajero; miReserva: MiReserva }) {
   const { viajes, porId } = datos
-  const otras = otrasConPuesto(viajes, miReserva.viaje, porId)
+  const otras = otrasConPuesto(viajes, miReserva.viaje, porId, miReserva.reserva.personas)
 
   return (
     <div className="flex flex-col gap-5">
@@ -154,6 +161,7 @@ function CambiarDeUnidad({ datos, miReserva }: { datos: DatosInicioPasajero; miR
             viaje={v}
             porId={porId}
             reservaAnterior={miReserva.viaje.chofer.nombre}
+            personas={miReserva.reserva.personas}
             yo={miReserva.reserva.lat !== null && miReserva.reserva.lng !== null ? { lat: miReserva.reserva.lat, lng: miReserva.reserva.lng } : null}
           />
         ))

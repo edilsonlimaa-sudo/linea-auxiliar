@@ -11,6 +11,7 @@ import type {
 } from "@/lib/datos/inicio-chofer"
 import { cn } from "@/lib/utils"
 import {
+  conAcompanantes,
   enEspera,
   estadoParaChofer,
   libres,
@@ -63,13 +64,13 @@ function mensajeGrupo(
     ? ` · ${vehiculo.unidad ? `Unidad ${vehiculo.unidad} · ` : ""}${vehiculo.placa}`
     : ""
   const lineas = confirmados.map(
-    (f) => `${f.posicion}. ${f.nombre}${f.lugar ? ` (${f.lugar})` : ""}`
+    (f) => `${f.personas > 1 ? `${f.desde}–${f.hasta}` : f.desde}. ${conAcompanantes(f.nombre, f.personas)}${f.lugar ? ` (${f.lugar})` : ""}`
   )
   return [
     `🚐 Llego en 3 minutos a recoger ${SENTIDOS[v.sentido].enRecogida}${carro}.`,
     confirmados.length === 0
       ? "Hay puestos libres."
-      : `Suben los puestos 1 al ${confirmados.length}:`,
+      : `Suben los puestos 1 al ${confirmados.at(-1)?.hasta ?? confirmados.length}:`,
     ...lineas,
   ].join("\n")
 }
@@ -94,8 +95,10 @@ export function ViajeChofer({
 }) {
   const { titulo, detalle } = estadoParaChofer(viaje, porId)
   const enRuta = viaje.estado === "en_ruta"
-  const conPuesto = viaje.lista.filter((f) => f.confirmado)
-  const enLista = viaje.lista.filter((f) => !f.confirmado)
+  // Las solicitudes sin responder van aparte, arriba (R58)
+  const solicitudes = viaje.lista.filter((f) => f.pendiente)
+  const conPuesto = viaje.lista.filter((f) => f.confirmado && !f.pendiente)
+  const enLista = viaje.lista.filter((f) => !f.confirmado && !f.pendiente)
   const sinLlegar = conPuesto
     .filter((f) => f.conApp && !f.listo)
     .map((f) => f.nombre)
@@ -220,6 +223,7 @@ export function ViajeChofer({
           </>
         ) : (
           <>
+            <Seccion titulo="Piden puesto: confírmalos" filas={solicitudes} estado={viaje.estado} />
             <Seccion
               titulo="Con puesto"
               filas={conPuesto}

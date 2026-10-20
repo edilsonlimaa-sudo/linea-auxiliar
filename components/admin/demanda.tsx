@@ -12,7 +12,7 @@ import { buttonVariants } from "@/components/ui/button"
 import type { DemandaHoy, Esperando, OfertaSentido } from "@/lib/datos/admin"
 import { hace } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
-import { haciaEnFrase, SENTIDOS, type Sentido } from "@/lib/viajes"
+import { conAcompanantes, haciaEnFrase, SENTIDOS, sumaPersonas, type Sentido } from "@/lib/viajes"
 
 const ORDEN: Sentido[] = ["vg_a_centro", "centro_a_vg"]
 // Desde aquí la espera se marca en amarillo: alguien lleva mucho rato sin transporte
@@ -39,7 +39,7 @@ export function Demanda({
           <PorSentido
             key={s}
             sentido={s}
-            esperan={esperando.filter((e) => e.sentido === s).length}
+            esperan={sumaPersonas(esperando.filter((e) => e.sentido === s))}
             oferta={oferta[s]}
           />
         ))}
@@ -146,7 +146,7 @@ function FilaEspera({ espera: e }: { espera: Esperando }) {
       <div className="flex items-center gap-3">
         <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-14 text-lg" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg leading-tight font-bold">{e.nombre}</p>
+          <p className="truncate text-lg leading-tight font-bold">{conAcompanantes(e.nombre, e.personas)}</p>
           <p
             className={cn(
               "flex items-center gap-1.5 text-[15px]",

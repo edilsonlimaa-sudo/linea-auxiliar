@@ -6,7 +6,7 @@ import { Estrellas, promedioTexto } from "@/components/estrellas"
 import { buttonVariants } from "@/components/ui/button"
 import type { PersonaDelViaje, ViajeTerminado } from "@/lib/datos/historial"
 import { diaYHora, hora } from "@/lib/fechas"
-import { duracion, SENTIDOS } from "@/lib/viajes"
+import { conAcompanantes, duracion, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
 const ENTRADA: Record<PersonaDelViaje["entrada"], string> = {
   app: "Con la app",
@@ -61,7 +61,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                   <span className="block text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[v.sentido].largo}</span>
                   <span className="block text-lg leading-tight font-bold">{v.salida ? diaYHora(v.salida) : "Sin hora de salida"}</span>
                   <span className="block text-[15px] text-muted-foreground">
-                    {v.llevo.length === 1 ? "1 pasajero" : `${v.llevo.length} pasajeros`}
+                    {sumaPersonas(v.llevo) === 1 ? "1 pasajero" : `${sumaPersonas(v.llevo)} pasajeros`}
                     {v.minutos !== null && ` · ${duracion(v.minutos)}`}
                     {promedio !== null && ` · ★ ${promedioTexto(promedio)}`}
                   </span>
@@ -80,7 +80,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
 
                 <section className="flex flex-col gap-2">
                   <h3 className="font-bold">
-                    {admin ? "Llevó" : "Llevaste"} <span className="font-normal text-muted-foreground">({v.llevo.length} de {v.puestos} puestos)</span>
+                    {admin ? "Llevó" : "Llevaste"} <span className="font-normal text-muted-foreground">({sumaPersonas(v.llevo)} de {v.puestos} puestos)</span>
                   </h3>
                   {v.llevo.length === 0 ? (
                     <p className="text-muted-foreground">Nadie en este viaje.</p>
@@ -88,7 +88,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                     <ul className="flex flex-col gap-1">
                       {v.llevo.map((p, i) => (
                         <li key={i} className="flex flex-wrap items-baseline justify-between gap-x-3 rounded-xl bg-muted px-3 py-2">
-                          <span className="font-bold">{p.nombre}</span>
+                          <span className="font-bold">{conAcompanantes(p.nombre, p.personas)}</span>
                           <span className="text-sm text-muted-foreground">
                             {ENTRADA[p.entrada]}
                             {p.seBajoAntes && " · se bajó antes"}

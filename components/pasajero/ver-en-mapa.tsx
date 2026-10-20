@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils"
 import { crearClienteNavegador } from "@/lib/supabase/cliente-navegador"
 
 // Con el mapa abierto la posición llega por Realtime; cada 60 s se vuelve a leer para descartar la vieja (R42)
-const REVISAR_MS = 60_000
-const CENTRO_INICIAL: Punto = { lat: 9.7457, lng: -63.1832 } // Maturín
+export const REVISAR_MS = 60_000
+export const CENTRO_INICIAL: Punto = { lat: 9.7457, lng: -63.1832 } // Maturín
 
 /** Marcador sin imágenes (los íconos por defecto de Leaflet no viajan bien con el empaquetador) */
 const icono = (L: typeof import("leaflet"), emoji: string, etiqueta: string) =>
@@ -31,7 +31,7 @@ const icono = (L: typeof import("leaflet"), emoji: string, etiqueta: string) =>
  * Marcador del carro: el 🚐 en pie (mira a la izquierda o a la derecha) y una flecha alrededor que apunta hacia
  * dónde va (R41). La flecha empieza escondida hasta que hay rumbo.
  */
-const iconoCarro = (L: typeof import("leaflet")) =>
+export const iconoCarro = (L: typeof import("leaflet")) =>
   L.divIcon({
     className: "",
     html: `<div role="img" aria-label="El carro" style="position:relative;width:56px;height:56px">
@@ -48,7 +48,7 @@ const iconoCarro = (L: typeof import("leaflet")) =>
  * Apunta la flecha al rumbo. `giro` acumula el ángulo para que la flecha gire por el lado corto (de 350° a 10°
  * avanza 20°, no retrocede 340°). El 🚐 de los emojis mira a la izquierda: hacia el este se refleja.
  */
-function apuntar(marcador: Marker, grados: number, giro: { current: number | null }) {
+export function apuntar(marcador: Marker, grados: number, giro: { current: number | null }) {
   const el = marcador.getElement()
   const flecha = el?.querySelector<HTMLElement>("[data-flecha]")
   const emoji = el?.querySelector<HTMLElement>("[data-emoji]")
@@ -66,10 +66,10 @@ function apuntar(marcador: Marker, grados: number, giro: { current: number | nul
 }
 
 // Zoom de calle: se distinguen las cuadras y el nombre de las calles
-const ZOOM_CALLE = 17
+export const ZOOM_CALLE = 17
 
 /** Desliza el marcador hasta la posición nueva (1 s) en vez de saltar */
-function deslizar(marcador: Marker, destino: Punto) {
+export function deslizar(marcador: Marker, destino: Punto) {
   const desde = marcador.getLatLng()
   const inicio = performance.now()
   const paso = (ahora: number) => {
@@ -207,8 +207,9 @@ function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; s
     mover(() => m.setView(carro, Math.max(m.getZoom(), ZOOM_CALLE - 1)))
   }
 
+  // isolate: los z-index de Leaflet (hasta 1000) quedan adentro; si no, el mapa tapa el menú lateral
   return (
-    <div className="relative">
+    <div className="relative isolate">
       <div ref={contenedor} className="h-[55svh] w-full overflow-hidden rounded-2xl border-2 bg-muted" />
       {senal && (
         // Arriba a la derecha (el zoom está a la izquierda), encima de los controles de Leaflet
@@ -243,12 +244,14 @@ export function VerEnMapa({
   yo,
   admin = false,
   className = "w-full",
+  compacto = false,
 }: {
   choferId: string
   chofer: string
   yo: Punto | null
   admin?: boolean // el panel del admin sigue a cualquier chofer conectado (§8): sin "viene" ni "comparte tu GPS"
   className?: string
+  compacto?: boolean // botón chico, solo el ícono (en las tarjetas de unidad, §8)
 }) {
   const [abierta, setAbierta] = useState(false)
   const [carro, setCarro] = useState<PosicionChofer | undefined>(undefined) // undefined = cargando
@@ -303,10 +306,16 @@ export function VerEnMapa({
 
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), !v && setCarro(undefined))}>
-      <SheetTrigger render={<Button variant="outline" className={className} />}>
-        <MapIcon aria-hidden />
-        Ver en el mapa
-      </SheetTrigger>
+      {compacto ? (
+        <SheetTrigger render={<Button variant="outline" size="icon" aria-label={`Ver en el mapa por dónde va ${chofer.split(" ")[0]}`} className="size-13 shrink-0" />}>
+          <MapIcon aria-hidden className="size-6" />
+        </SheetTrigger>
+      ) : (
+        <SheetTrigger render={<Button variant="outline" className={className} />}>
+          <MapIcon aria-hidden />
+          Ver en el mapa
+        </SheetTrigger>
+      )}
       <SheetContent side="bottom" className="mx-auto max-w-2xl">
         <SheetHeader>
           <SheetTitle>{admin ? `Dónde está ${nombre}` : `Por dónde viene ${nombre}`}</SheetTitle>

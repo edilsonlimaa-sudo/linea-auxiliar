@@ -30,14 +30,20 @@ export async function apartarPuesto(viajeId: string, datos?: FormData): Promise<
   const yo = sesion?.claims?.sub
   if (!yo) return { error: "Tu sesión terminó. Vuelve a entrar." }
 
-  let origen: { lugar: string | null; lat: number | null; lng: number | null } | null = null
+  // Cuántos van (R57): de la hoja o, al cambiarse de unidad, los mismos de su reserva
+  let origen: { lugar: string | null; lat: number | null; lng: number | null; personas: number } | null = null
   if (datos) {
-    origen = { lugar: texto(datos, "lugar") ?? null, lat: numero(datos, "lat") ?? null, lng: numero(datos, "lng") ?? null }
+    origen = {
+      lugar: texto(datos, "lugar") ?? null,
+      lat: numero(datos, "lat") ?? null,
+      lng: numero(datos, "lng") ?? null,
+      personas: numero(datos, "personas") ?? 1,
+    }
     if (!origen.lugar && origen.lat === null) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
   } else {
     const [reservaRes, esperaRes] = await Promise.all([
-      supabase.from("reservas").select("lugar, lat, lng").eq("pasajero_id", yo).eq("estado", "activa").maybeSingle(),
-      supabase.from("esperas").select("lugar, lat, lng").eq("pasajero_id", yo).eq("estado", "esperando").maybeSingle(),
+      supabase.from("reservas").select("lugar, lat, lng, personas").eq("pasajero_id", yo).eq("estado", "activa").maybeSingle(),
+      supabase.from("esperas").select("lugar, lat, lng, personas").eq("pasajero_id", yo).eq("estado", "esperando").maybeSingle(),
     ])
     origen = reservaRes.data ?? esperaRes.data
     if (!origen) return { error: "Dinos dónde te recogemos." }
@@ -48,6 +54,7 @@ export async function apartarPuesto(viajeId: string, datos?: FormData): Promise<
     p_lugar: origen.lugar ?? undefined,
     p_lat: origen.lat ?? undefined,
     p_lng: origen.lng ?? undefined,
+    p_personas: origen.personas,
   })
   if (error) return { error: error.message }
   actualizarApp()
@@ -73,18 +80,20 @@ export async function avisarQueLlegue(reservaId: string, listo: boolean): Promis
   return { ok: true }
 }
 
-/** "Avisar que estoy esperando": el primer paso del pasajero, sentido + lugar (R31). Repetirlo cambia la espera. */
+/** "Avísame cuando haya una": sentido + lugar (R31). Repetirlo cambia la espera (p. ej. "Cambiar dónde estoy"). */
 export async function avisarQueEspero(fd: FormData): Promise<Resultado> {
   const sentido = texto(fd, "sentido")
   const lugar = texto(fd, "lugar")
   const lat = numero(fd, "lat")
   const lng = numero(fd, "lng")
+  const personas = numero(fd, "personas") ?? 1
   if (sentido !== "vg_a_centro" && sentido !== "centro_a_vg") return { error: "Escoge hacia dónde vas." }
   if (!lugar && lat === undefined) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
   const supabase = await crearClienteServidor()
-  const { error } = await supabase.rpc("marcar_espera", { p_sentido: sentido, p_lugar: lugar, p_lat: lat, p_lng: lng })
+  const { error } = await supabase.rpc("marcar_espera", { p_sentido: sentido, p_lugar: lugar, p_lat: lat, p_lng: lng, p_personas: personas })
   if (error) return { error: error.message }
-  revalidatePath("/inicio")
+  // Inicio, Esperando y el menú ("Esperando" de primero) dependen de la espera
+  actualizarApp()
   return { ok: true }
 }
 
@@ -92,8 +101,8 @@ export async function dejarDeEsperar(): Promise<Resultado> {
   const supabase = await crearClienteServidor()
   const { error } = await supabase.rpc("cancelar_espera")
   if (error) return { error: error.message }
-  revalidatePath("/inicio")
-  return { ok: true }
+  actualizarApp()
+  redirect("/inicio")
 }
 
 const ETIQUETAS = ["Puntual", "Seguro", "Amable", "Respetó el orden", "Carro limpio"]
@@ -142,6 +151,16 @@ export async function posicionDeChofer(choferId: string): Promise<PosicionChofer
   const { data } = await supabase.from("posiciones").select("lat, lng, actualizada_en").eq("chofer_id", choferId).maybeSingle()
   if (!data || Date.now() - new Date(data.actualizada_en).getTime() > 10 * 60_000) return null
   return { lat: data.lat, lng: data.lng, actualizadaEn: data.actualizada_en }
+}
+
+/** Posiciones recientes de todos los choferes conectados, para el mapa de La línea (§8, R41–R42) */
+export async function posicionesDeLaLinea(): Promise<Record<string, { lat: number; lng: number; actualizadaEn: string }>> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase
+    .from("posiciones")
+    .select("chofer_id, lat, lng, actualizada_en")
+    .gte("actualizada_en", new Date(Date.now() - 10 * 60_000).toISOString())
+  return Object.fromEntries((data ?? []).map((p) => [p.chofer_id, { lat: p.lat, lng: p.lng, actualizadaEn: p.actualizada_en }]))
 }
 
 /** Cambiar dónde lo recogen, con la reserva activa (R27) */
