@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronRightIcon, HandIcon, Loader2Icon, MapPinIcon, TriangleAlertIcon } from "lucide-react"
+import { ChevronRightIcon, HandIcon, Loader2Icon, MapPinIcon, TimerIcon, TriangleAlertIcon } from "lucide-react"
 import { useCallback, useId, useState, useSyncExternalStore, useTransition } from "react"
 
 import { Opcion } from "@/components/chofer/publicar-viaje"
@@ -21,7 +21,31 @@ import { cn } from "@/lib/utils"
 import { iniciales, libres, type Viaje } from "@/lib/viajes"
 
 const LEJOS_M = 300 // más lejos que esto, "¿Ya estás en Gina?" (R62)
+const VALE_MIN = 45 // el aviso vence a los 45 min (R62)
 const AVISAR_ANTES_MIN = 10 // "¿Sigues ahí?" a los 35 de 45 min (R62)
+// "18 min", "menos de 1 min" (el reloj de la pantalla avanza cada 15 s: redondear al más cercano)
+const minutos = (m: number) => (m < 1 ? "menos de 1 min" : `${Math.round(m)} min`)
+
+/** Lo que le queda al lugar, de 45 min a 0; en amarillo los últimos 10 */
+function BarraVence({ quedan }: { quedan: number }) {
+  const porVencer = quedan <= AVISAR_ANTES_MIN
+  return (
+    <div
+      role="progressbar"
+      aria-label="Tiempo que vale tu lugar"
+      aria-valuemin={0}
+      aria-valuemax={VALE_MIN}
+      aria-valuenow={Math.round(quedan)}
+      aria-valuetext={`Quedan ${minutos(quedan)}`}
+      className={cn("h-2.5 overflow-hidden rounded-full", porVencer ? "bg-warning/25" : "bg-muted")}
+    >
+      <div
+        className={cn("h-full rounded-full transition-[width] duration-700", porVencer ? "bg-warning" : "bg-primary")}
+        style={{ width: `${Math.min(100, (quedan / VALE_MIN) * 100)}%` }}
+      />
+    </div>
+  )
+}
 const personas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
 const suma = (l: EnListaGina[]) => l.reduce((n, e) => n + e.personas, 0)
 
@@ -196,7 +220,8 @@ function MiLugar({ mio, lista }: { mio: EnListaGina; lista: EnListaGina[] }) {
     return () => clearInterval(id)
   }, [])
   const ahora = useSyncExternalStore(suscribir, () => Math.floor(Date.now() / 15_000) * 15_000, () => 0)
-  const porVencer = ahora > 0 && (new Date(mio.venceEn).getTime() - ahora) / 60_000 <= AVISAR_ANTES_MIN
+  const quedanMin = ahora > 0 ? Math.max(0, (new Date(mio.venceEn).getTime() - ahora) / 60_000) : VALE_MIN
+  const porVencer = ahora > 0 && quedanMin <= AVISAR_ANTES_MIN
 
   const ejecutar = (accion: () => Promise<Resultado>, alTerminar?: () => void) =>
     iniciar(async () => {
@@ -226,15 +251,38 @@ function MiLugar({ mio, lista }: { mio: EnListaGina; lista: EnListaGina[] }) {
         </div>
       </section>
 
-      {porVencer && (
+      {/* Cuánto vale el lugar (R62), siempre a la vista; a los 35 min se vuelve "¿Sigues ahí?" */}
+      {porVencer ? (
         <div role="alert" className="flex flex-col gap-3 rounded-2xl border-2 border-warning/50 bg-warning-muted p-4">
           <p className="flex items-start gap-2 font-bold">
             <TriangleAlertIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
             ¿Sigues ahí? Si no respondes, a las {hora(mio.venceEn)} sales de la lista.
           </p>
+          <BarraVence quedan={quedanMin} />
           <Button size="lg" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
             {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
             Sí, sigo aquí
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
+          <p className="flex items-start gap-2">
+            <TimerIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
+            <span>
+              {ahora > 0 ? (
+                <>
+                  <strong>Tu lugar vale {minutos(quedanMin)} más</strong> · hasta las {hora(mio.venceEn)}
+                </>
+              ) : (
+                <strong>Tu lugar vale 45 min</strong>
+              )}
+              <span className="block text-[15px] text-muted-foreground">Si sigues esperando, renuévalo cuando quieras.</span>
+            </span>
+          </p>
+          {ahora > 0 && <BarraVence quedan={quedanMin} />}
+          <Button variant="outline" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
+            {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
+            Sigo aquí: 45 min más
           </Button>
         </div>
       )}

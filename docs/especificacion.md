@@ -380,8 +380,10 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   **cuántos van** (1–4, R57): el grupo **sube junto o no sube**. Una sola entrada activa por persona.
   - Avisar es estar ahí: no hay "llego en 5 min". Si el GPS dice que está a más de 300 m de Gina, la app pregunta
     "¿Ya estás en Gina?" y deja seguir igual; se guarda la distancia para medir abusos.
-  - El aviso **vence a los 45 min**; a los 35 pregunta **"¿Sigues ahí?"** (Sí, sigo aquí renueva sin perder el
-    lugar). **Me fui** está siempre a un toque y saca a la persona de la lista al instante.
+  - El aviso **vence a los 45 min**. El pasajero **ve siempre cuánto le queda** (barra y "Tu lugar vale 18 min más ·
+    hasta las 3:45 p. m.") y puede renovarlo cuando quiera con **Sigo aquí** (vuelve a 45 min sin perder el lugar).
+    A los 35 el contador se vuelve un aviso amarillo **"¿Sigues ahí?"** con el mismo botón, grande. **Me fui** está
+    siempre a un toque y saca a la persona de la lista al instante.
 - **R63. Una sola lista, por orden de llegada [servidor].** El orden lo pone el reloj del servidor. Todos ven
   la misma lista: **nombre corto, cuántos van, dónde está** (Gina o el lugar escrito) y su posición ("Eres el 5").
   Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
