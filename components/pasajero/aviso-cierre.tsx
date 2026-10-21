@@ -19,13 +19,12 @@ const suscribirse = () => () => {}
 const TEXTO: Record<AvisoDeCierre["motivo"], (chofer: string) => { titulo: string; detalle: string }> = {
   salio_lleno: (c) => ({ titulo: "Te quedaste sin puesto", detalle: `El carro de ${c} salió lleno antes de que te tocara. Escoge otra unidad aquí abajo.` }),
   cancelo: (c) => ({ titulo: "Tu viaje se canceló", detalle: `${c} canceló el viaje. Escoge otra unidad aquí abajo.` }),
-  // Rechazó la solicitud o no respondió en 5 min (R58), o no puede pasar en el camino (R29)
-  rechazo: (c) => ({ titulo: "El chofer no confirmó tu puesto", detalle: `${c} no pudo confirmarte esta vez. Escoge otra unidad aquí abajo.` }),
+  rechazo: (c) => ({ titulo: "No pueden pasar por ti", detalle: `${c} no puede pasar por ti esta vez. Escoge otra unidad aquí abajo.` }),
   no_llego: (c) => ({ titulo: "Perdiste tu puesto", detalle: `${c} marcó que no estabas cuando pasó. Si todavía quieres ir, escoge una unidad aquí abajo.` }),
 }
 
 /**
- * Explica por qué el pasajero volvió a Inicio cuando otro cerró su reserva (§8; R14, R21, R24, R29, R58).
+ * Explica por qué el pasajero volvió a Inicio cuando otro cerró su reserva (§8; R14, R21, R24, R29).
  * Se puede cerrar; lo cerrado se recuerda en este celular. La base lo deja de enviar a los 30 min.
  */
 export function AvisoCierre({ aviso }: { aviso: AvisoDeCierre }) {

@@ -78,21 +78,13 @@ export function MiReservaTarjeta({
   if (aBordo) {
     titulo = grupo ? "Van a bordo" : "Vas a bordo"
     subtitulo = `Al llegar podrás contar cómo te fue con ${viaje.chofer.nombre.split(" ")[0]}.`
-  } else if (reserva.pendiente && reserva.en_camino) {
+  } else if (reserva.pendiente) {
     titulo = "Esperando respuesta del chofer"
     subtitulo = "Le pediste que te recoja en el camino. Te avisamos si va por ti."
-  } else if (reserva.pendiente) {
-    // Solicitud sin confirmar (R58): los puestos ya están guardados
-    titulo = "Esperando que el chofer confirme"
-    subtitulo = grupo
-      ? `Guardamos ${reserva.personas} puestos para ustedes. Si no responde en 5 minutos, se liberan.`
-      : "Tu puesto ya está guardado. Si no responde en 5 minutos, se libera."
   } else if (confirmado) {
     titulo = grupo ? `Tienen los puestos ${desde} a ${hasta} de ${viaje.puestos}` : `Tienes el puesto ${hasta} de ${viaje.puestos}`
     subtitulo = reserva.aceptada_en
-      ? reserva.en_camino
-        ? "El chofer va por ti."
-        : "¡El chofer confirmó tu puesto!"
+      ? "El chofer va por ti."
       : grupo
         ? `Apartaste para ${textoPersonas(reserva.personas)}: van juntos.`
         : "Tu puesto está apartado."

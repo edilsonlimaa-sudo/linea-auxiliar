@@ -92,12 +92,10 @@ select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000
 select throws_ok($$ select public.reservar(current_setting('t.v1')::uuid, 'Portón VGC') $$,
   'P0001', 'Ese carro ya va lleno', 'R59: Daniela no se anota con el carro lleno');
 
--- El chofer ve la solicitud pendiente y la confirma (R58)
+-- Al apartar, el puesto queda garantizado: no hay que esperar al chofer (R58 eliminada)
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000011", "role": "authenticated"}', true);
-select is((select pendiente from public.reservas where id = current_setting('t.r_carmen')::uuid), true,
-  'R58: apartar es una solicitud: queda pendiente hasta que el chofer confirme');
-select public.responder_pedido(id, true) from public.reservas
- where viaje_id = current_setting('t.v1')::uuid and estado = 'activa' and pendiente;
+select is((select pendiente from public.reservas where id = current_setting('t.r_carmen')::uuid), false,
+  'R58 eliminada: al apartar, el puesto queda garantizado (no queda pendiente)');
 select lives_ok($$ select public.avanzar_viaje(current_setting('t.v1')::uuid, 'en_parada') $$, 'Llegué');
 select lives_ok($$ select public.avanzar_viaje(current_setting('t.v1')::uuid, 'en_ruta') $$, 'Salir');
 select is((select estado::text from public.reservas where id = current_setting('t.r_jose')::uuid), 'subio',

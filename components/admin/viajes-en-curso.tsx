@@ -103,7 +103,7 @@ function BloqueViaje({ viaje: v, porId }: { viaje: ViajeEnCurso; porId: Map<stri
       ) : (
         <>
           <Grupo titulo="A bordo" personas={aBordo} />
-          <Grupo titulo={v.estado === "en_ruta" ? "Pedidos en el camino" : "Piden puesto (sin confirmar)"} personas={pedidos} destacado />
+          <Grupo titulo="Pedidos en el camino" personas={pedidos} destacado />
           <Grupo titulo={v.estado === "en_ruta" ? "Va a recoger en el camino" : "Por recoger"} personas={porRecoger} />
           <Grupo titulo="Lista de espera" personas={enLista} />
         </>
