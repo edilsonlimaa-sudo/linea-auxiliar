@@ -33,6 +33,9 @@ export const SENTIDOS: Record<
   },
 }
 
+/** El sentido de la vuelta (R61) */
+export const contrario = (s: Sentido): Sentido => (s === "vg_a_centro" ? "centro_a_vg" : "vg_a_centro")
+
 /** "Al Centro" → "al Centro", para usar dentro de una frase */
 export const haciaEnFrase = (s: Sentido) => SENTIDOS[s].corto[0].toLowerCase() + SENTIDOS[s].corto.slice(1)
 

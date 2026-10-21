@@ -1,6 +1,7 @@
 import { AgregarViaje } from "@/components/chofer/agregar-viaje"
 import { Companeros } from "@/components/chofer/companeros"
 import { EstadoEnCabecera, EstadoServicio } from "@/components/chofer/conexion"
+import { PreguntarVuelta } from "@/components/chofer/preguntar-vuelta"
 import { ViajeChofer } from "@/components/chofer/viaje-chofer"
 import { EnVivo } from "@/components/en-vivo"
 import type { DatosInicioChofer } from "@/lib/datos/inicio-chofer"
@@ -13,7 +14,15 @@ import type { Viaje } from "@/lib/viajes"
  * Sin viajes: un bloque azul con el saludo, el estado y "Publicar un viaje"; los compañeros en su franja.
  * Con viajes abiertos: el estado en una línea, el viaje en foco (con su acción pegada abajo), los próximos plegados.
  */
-export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosInicioChofer }) {
+export function InicioChofer({
+  nombre,
+  datos,
+  preguntarVuelta = false,
+}: {
+  nombre: string
+  datos: DatosInicioChofer
+  preguntarVuelta?: boolean // recién salió (?vuelta=1): preguntar por la vuelta (R61)
+}) {
   const { conectado, enRuta, recogida, proximos, companeros, viajesCompaneros, ultimo, vehiculo } = datos
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
@@ -58,6 +67,8 @@ export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosIn
       <h1 className="sr-only">Inicio</h1>
       {/* Conexión y ubicación (R40) en una línea: solo crece si el GPS falla */}
       <EstadoServicio conectado={conectado} viajesAbiertos={publicados} />
+      {/* R61: solo si va en ruta sin otro viaje publicado (con la vuelta ya publicada no se pregunta) */}
+      {preguntarVuelta && enRuta && abiertos.length === 1 && <PreguntarVuelta viaje={enRuta} />}
 
       {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} barraFija />}
       {recogida && (

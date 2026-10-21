@@ -4,11 +4,13 @@ import { revalidatePath } from "next/cache"
 
 import type { Database } from "@/lib/database.types"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
+import { contrario } from "@/lib/viajes"
 
 // Acciones del chofer. Todas pasan por las funciones RPC (reglas en el servidor); los errores ya vienen en español.
 export type Resultado = { ok?: boolean; error?: string; intento?: number }
 
 type EstadoViaje = Database["public"]["Enums"]["estado_viaje"]
+type Sentido = Database["public"]["Enums"]["sentido"]
 
 async function rpc(llamada: (s: Awaited<ReturnType<typeof crearClienteServidor>>) => PromiseLike<{ error: { message: string } | null }>): Promise<Resultado> {
   const supabase = await crearClienteServidor()
@@ -52,8 +54,32 @@ function horaDeCaracas(hhmm: string): Date | null {
 /**
  * Publicar viaje (R10) o agregar otro a la cadena (R11): sentido, puestos y cuándo llega a recoger,
  * en minutos ("minutos") o a una hora fija ("hora", HH:MM). La base decide si queda en camino o como próximo.
+ * Con "vuelta" (minutos después de salir, R61) publica también la vuelta: sentido contrario y mismos puestos, que
+ * queda encadenada detrás de la ida.
  */
 export async function publicarViaje(fd: FormData): Promise<Resultado> {
+  const vuelta = String(fd.get("vuelta") ?? "")
+  const minutosVuelta = Number(vuelta)
+  if (vuelta && (!Number.isInteger(minutosVuelta) || minutosVuelta < 1 || minutosVuelta > 240)) {
+    return { error: "Escoge cuánto tardas en llegar a recoger para la vuelta." }
+  }
+  const ida = await publicarIda(fd)
+  if (!ida.ok || !vuelta) return ida
+  const sentido = String(fd.get("sentido")) as Sentido
+  const vueltaRes = await rpc((s) =>
+    s.rpc("publicar_viaje", { p_sentido: contrario(sentido), p_puestos: Number(fd.get("puestos")), p_eta_min: minutosVuelta })
+  )
+  // La ida ya quedó publicada: se dice para que agregue la vuelta a mano
+  return vueltaRes.ok ? vueltaRes : { error: `Tu viaje quedó publicado, pero la vuelta no: ${vueltaRes.error} Agrégala con "Agregar otro viaje".` }
+}
+
+/** La vuelta al salir (R61): sentido contrario, mismos puestos; con un viaje en ruta queda en camino ya */
+export async function publicarVuelta(sentidoIda: Sentido, puestos: number, minutos: number): Promise<Resultado> {
+  if (!Number.isInteger(minutos) || minutos < 1 || minutos > 240) return { error: "Escoge cuándo llegas a recoger." }
+  return rpc((s) => s.rpc("publicar_viaje", { p_sentido: contrario(sentidoIda), p_puestos: puestos, p_eta_min: minutos }))
+}
+
+async function publicarIda(fd: FormData): Promise<Resultado> {
   const sentido = String(fd.get("sentido") ?? "")
   const puestos = Number(fd.get("puestos"))
   const hora = String(fd.get("hora") ?? "")

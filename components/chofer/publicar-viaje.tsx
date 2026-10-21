@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { publicarViaje } from "@/lib/acciones/chofer"
 import { cn } from "@/lib/utils"
-import { SENTIDOS, type Sentido } from "@/lib/viajes"
+import { contrario, SENTIDOS, type Sentido } from "@/lib/viajes"
 
 /**
  * Cómo se pregunta el tiempo (docs/especificacion.md §8):
@@ -78,13 +78,16 @@ export function PublicarViaje({
   const idHora = useId()
   const tiempos = TIEMPOS[modo]
   const [sentido, setSentido] = useState<Sentido>(
-    sentidoInicial ?? (ultimo ? (ultimo.sentido === "vg_a_centro" ? "centro_a_vg" : "vg_a_centro") : "vg_a_centro")
+    sentidoInicial ?? (ultimo ? contrario(ultimo.sentido) : "vg_a_centro")
   )
   const [puestos, setPuestos] = useState(ultimo?.puestos ?? 4)
   const [cuando, setCuando] = useState<number | "otro" | "hora">(tiempos.inicial)
   const [otro, setOtro] = useState("")
   const [hora, setHora] = useState("")
+  const [vuelta, setVuelta] = useState<number | null>(null) // R61: null = solo ida; si no, minutos después de salir
+  const [conVuelta, setConVuelta] = useState(false)
   const [error, setError] = useState<string>()
+  const regreso = contrario(sentido)
   const [enviando, iniciar] = useTransition()
 
   const publicar = () =>
@@ -94,6 +97,8 @@ export function PublicarViaje({
       datos.set("puestos", String(puestos))
       if (cuando === "hora") datos.set("hora", hora)
       else datos.set("minutos", cuando === "otro" ? otro : String(cuando))
+      if (conVuelta) datos.set("vuelta", vuelta === null ? "" : String(vuelta))
+      if (conVuelta && vuelta === null) return setError("Escoge cuánto tardas en llegar a recoger para la vuelta.")
       const r = await publicarViaje(datos)
       setError(r.error)
       if (r.ok) onPublicado?.()
@@ -188,6 +193,34 @@ export function PublicarViaje({
         )}
       </fieldset>
 
+      {/* R61: la vuelta es el sentido contrario con los mismos puestos; solo se pregunta cuándo llega a recoger */}
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 text-lg font-bold">¿Haces también la vuelta?</legend>
+        <div className="grid grid-cols-2 gap-2">
+          <Opcion nombre="vuelta" elegida={!conVuelta} onElegir={() => (setConVuelta(false), setVuelta(null))}>
+            Solo ida
+          </Opcion>
+          <Opcion nombre="vuelta" elegida={conVuelta} onElegir={() => setConVuelta(true)}>
+            Ida y vuelta
+          </Opcion>
+        </div>
+        {conVuelta && (
+          <div className="mt-2 flex flex-col gap-2">
+            <p className="font-bold">¿Cuánto tardas en llegar a recoger {SENTIDOS[regreso].enRecogida} después de salir?</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[15, 20, 30, 45].map((m) => (
+                <Opcion key={m} nombre="vuelta-min" elegida={vuelta === m} onElegir={() => setVuelta(m)}>
+                  {m} min
+                </Opcion>
+              ))}
+            </div>
+            <p className="text-[15px] text-muted-foreground">
+              La vuelta ({SENTIDOS[regreso].hacia}, {puestos} {puestos === 1 ? "puesto" : "puestos"}) se publica ya y empieza sola cuando sales.
+            </p>
+          </div>
+        )}
+      </fieldset>
+
       {error && (
         <p role="alert" className="font-bold text-destructive">
           {error}
@@ -203,7 +236,7 @@ export function PublicarViaje({
       >
         <Button type="submit" variant="signal" size="lg" className="w-full" disabled={enviando}>
           {enviando ? <Loader2Icon aria-hidden className="animate-spin" /> : <SendIcon aria-hidden />}
-          {enviando ? "Publicando…" : modo === "cadena" ? "Agregar como próximo viaje" : "Publicar viaje"}
+          {enviando ? "Publicando…" : conVuelta ? "Publicar ida y vuelta" : modo === "cadena" ? "Agregar como próximo viaje" : "Publicar viaje"}
         </Button>
       </div>
     </form>

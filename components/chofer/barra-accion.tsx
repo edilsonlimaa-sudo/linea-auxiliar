@@ -1,6 +1,7 @@
 "use client"
 
 import { BellRingIcon, FlagIcon, Loader2Icon, MapPinCheckIcon, MessageCircleIcon, PlayIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -29,6 +30,7 @@ export function BarraAccion({
   mensajeGrupo: string // R15
   fija?: boolean // pegada abajo (viaje en foco) o dentro de la tarjeta
 }) {
+  const router = useRouter()
   const { ejecutar, pendiente, error } = useAccion()
   const [confirmarSalida, setConfirmarSalida] = useState(false)
   const avanzar = (a: EstadoViaje, alTerminar?: () => void) => ejecutar(() => avanzarViaje(viajeId, a), alTerminar)
@@ -120,7 +122,8 @@ export function BarraAccion({
         cancelar="Esperar un poco más"
         ocupado={pendiente}
         error={error}
-        onConfirmar={() => avanzar("en_ruta", () => setConfirmarSalida(false))}
+        // R61: ya en ruta, Inicio pregunta por la vuelta (si no tiene otro viaje publicado)
+        onConfirmar={() => avanzar("en_ruta", () => (setConfirmarSalida(false), router.replace("/inicio?vuelta=1", { scroll: false })))}
       />
     </div>
   )
