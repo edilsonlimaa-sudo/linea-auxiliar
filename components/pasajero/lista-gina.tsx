@@ -37,13 +37,15 @@ export function ListaGina({
   enPausa,
 }: {
   lista: EnListaGina[]
-  carros: ViajeConChofer[] // del tramo Centro → Valle Grande que todavía no salieron de Gina
+  carros: ViajeConChofer[] // del tramo Centro → Valle Grande: los que no salieron de Gina y los en ruta con puesto
   porId: Map<string, Viaje>
   enPausa: ChoferEnPausa[]
 }) {
   const mio = lista.find((e) => e.esMio) ?? null
-  // El primero que pasa con puesto se destaca, como en las unidades (ya vienen ordenadas)
-  const primeroConPuesto = carros.find((v) => libres(v) > 0)
+  // Los que ya salieron de Gina no le sirven a quien espera en Gina; a quien espera en el camino, sí (R67)
+  const visibles = mio?.enGina ? carros.filter((v) => v.estado !== "en_ruta") : carros
+  // El primero que pasa por Gina con puesto se destaca, como en las unidades (ya vienen ordenadas)
+  const primeroConPuesto = visibles.find((v) => v.estado !== "en_ruta" && libres(v) > 0)
   const [hoja, setHoja] = useState(false)
 
   return (
@@ -75,7 +77,7 @@ export function ListaGina({
         <h2 id="titulo-carros" className="text-xl font-bold">
           Carros que vienen
         </h2>
-        {carros.length === 0 ? (
+        {visibles.length === 0 ? (
           <div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed px-4 py-4">
             <p className="text-muted-foreground">Ningún carro va hacia Valle Grande ahora. Esta pantalla se actualiza sola.</p>
             <QuienVuelve choferes={enPausa} className="border-t pt-3" />
@@ -83,7 +85,7 @@ export function ListaGina({
         ) : (
           <div className="flex flex-col gap-3">
             {/* El mismo cartón de las unidades, sin apartar: cuándo pasa por Gina, puestos, chofer, mapa */}
-            {carros.map((v) => (
+            {visibles.map((v) => (
               <TarjetaUnidad key={v.id} viaje={v} porId={porId} porLista destacada={v.id === primeroConPuesto?.id} />
             ))}
           </div>

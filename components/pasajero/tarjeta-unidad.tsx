@@ -15,16 +15,17 @@ import { cabe, iniciales, libres, llegada, nombreCorto, SENTIDOS, type Viaje } f
 
 /**
  * El estado como etiqueta (§8), solo cuando dice algo que el título no dice: que es el próximo viaje del chofer o
- * que el carro ya salió y se le pide en el camino. "Recogiendo ahora" o "Recoge en ~8 min" ya lo dice el título.
+ * que el carro ya salió y se le pide en el camino (hacia Valle Grande no se pide: recoge a los de la lista, R67).
+ * "Recogiendo ahora" o "Recoge en ~8 min" ya lo dice el título.
  */
-function EtiquetaEstado({ estado }: { estado: Viaje["estado"] }) {
+function EtiquetaEstado({ estado, porLista }: { estado: Viaje["estado"]; porLista: boolean }) {
   if (estado === "programado")
     return (
       <Badge variant="outline">
         <ClockIcon aria-hidden /> Próximo viaje
       </Badge>
     )
-  if (estado === "en_ruta") return <Badge variant="warning">Pide en el camino</Badge>
+  if (estado === "en_ruta") return <Badge variant="warning">{porLista ? "Recoge en el camino" : "Pide en el camino"}</Badge>
   return null
 }
 
@@ -79,7 +80,7 @@ export function TarjetaUnidad({
       )}
       {/* 1. Estado y cuándo recoge: es lo que decide primero */}
       <CardHeader className="gap-1.5">
-        <EtiquetaEstado estado={viaje.estado} />
+        <EtiquetaEstado estado={viaje.estado} porLista={porLista} />
         {/* La ruta siempre a la vista (R39): nadie debe adivinar adónde va el carro */}
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[viaje.sentido].largo}</p>
         <p className={cn("text-[22px] leading-tight font-bold", recogiendo && "text-success")}>{cuando.principal}</p>
@@ -135,9 +136,14 @@ export function TarjetaUnidad({
       <CardFooter className="flex-col items-stretch gap-2">
         <div className="flex items-start gap-2">
           {porLista ? (
-            // Hacia Valle Grande se sube por la lista: el carro llama en orden a quienes se anotaron (R64)
+            // Hacia Valle Grande se sube por la lista: el carro llama en orden a quienes se anotaron (R64); ya en
+            // ruta, recoge a los del camino (R67)
             <p className="min-h-13 flex-1 rounded-2xl bg-muted px-4 py-3 text-[15px] font-bold text-muted-foreground">
-              {hayPuesto ? "Sube por la lista: llama en orden a los anotados" : "Va lleno"}
+              {!hayPuesto
+                ? "Va lleno"
+                : enRuta
+                  ? `Ya salió de Gina con ${n === 1 ? "1 puesto" : `${n} puestos`}: puede recogerte al pasar`
+                  : "Sube por la lista: llama en orden a los anotados"}
             </p>
           ) : hayPuesto ? (
             <BotonApartar

@@ -2,10 +2,12 @@ import { ChevronDownIcon, FlagIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BarraAccion } from "@/components/chofer/barra-accion"
 import { FilaPasajero } from "@/components/chofer/fila-pasajero"
+import { FilaLista } from "@/components/chofer/lista-tramo"
 import { MasOpciones } from "@/components/chofer/mas-opciones"
 import { OcuparPuesto } from "@/components/chofer/ocupar-puesto"
 import { Asientos } from "@/components/pasajero/asientos"
 import type {
+  EntradaTramo,
   FilaChofer,
   ViajeChofer as Viaje,
 } from "@/lib/datos/inicio-chofer"
@@ -144,12 +146,14 @@ export function ViajeChofer({
   vehiculo,
   barraFija = false,
   plegado = false,
+  esperanEnCamino,
 }: {
   viaje: Viaje
   porId: Map<string, ViajeBase>
   vehiculo: { unidad: string | null; placa: string } | null
   barraFija?: boolean
   plegado?: boolean
+  esperanEnCamino?: EntradaTramo[] // R67: en ruta hacia Valle Grande, de la lista del tramo, sin carro y caben
 }) {
   const { titulo, detalle: detalleBase } = estadoParaChofer(viaje, porId)
   // En ruta, "a bordo" son los que subieron: a quien falta recoger en el camino se lo cuenta aparte
@@ -308,6 +312,24 @@ export function ViajeChofer({
               filas={viaje.lista.filter((f) => f.pendiente)}
               estado={viaje.estado}
             />
+            {/* R67: avisaron en el camino después de que saliste de Gina. "Voy" la liga a este carro */}
+            {esperanEnCamino && esperanEnCamino.length > 0 && (
+              <section className="flex flex-col gap-2 rounded-2xl border-2 border-warning bg-warning-muted p-3">
+                <h3 className="flex items-center gap-2 text-[15px] font-bold tracking-wide text-warning uppercase">
+                  <FlagIcon aria-hidden className="size-5 shrink-0" />
+                  Espera en el camino <span className="font-normal">({esperanEnCamino.length})</span>
+                </h3>
+                <p className="text-[15px] leading-snug">
+                  {esperanEnCamino.length === 1 ? "Se anotó" : "Se anotaron"} después de que saliste de Gina. Toca <strong>Voy</strong> si pasas por ahí: los demás
+                  choferes ya no paran.
+                </p>
+                <ol className="flex flex-col gap-2">
+                  {esperanEnCamino.map((e) => (
+                    <FilaLista key={e.id} entrada={e} viajeId={viaje.id} puedeIr puedeSubir conNoEstaba compacta />
+                  ))}
+                </ol>
+              </section>
+            )}
             {/* Lo que no se puede olvidar: a quién recoger en el camino, en amarillo y arriba */}
             <Seccion
               titulo="Recoge en el camino"

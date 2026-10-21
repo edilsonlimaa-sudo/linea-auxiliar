@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckIcon, ChevronRightIcon, Loader2Icon, MapPinIcon, NavigationIcon, PhoneIcon, UserXIcon } from "lucide-react"
+import { CarFrontIcon, CheckIcon, ChevronRightIcon, Loader2Icon, MapPinIcon, NavigationIcon, PhoneIcon, UserXIcon } from "lucide-react"
 import { useState, useSyncExternalStore } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -9,7 +9,7 @@ import { Avatar } from "@/components/foto/avatar"
 import { Avatar as AvatarUi, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components/ui/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { noEstabaEnLista, subioDeLista } from "@/lib/acciones/chofer"
+import { noEstabaEnLista, subioDeLista, voyPorEl } from "@/lib/acciones/chofer"
 import type { EntradaGina, EntradaTramo } from "@/lib/datos/inicio-chofer"
 import { hace } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
@@ -36,7 +36,8 @@ const ROL: Record<EntradaGina["rol"], { texto: string; clase: string }> = {
  * franja en Inicio, que ven todos, con cuántos esperan y dónde; tocarla abre la lista completa en una hoja.
  * - enGina: este chofer está recogiendo en Gina (R64): la hoja muestra el plan de su carro (Llama / Guarda puesto /
  *   Sigue) y deja marcar Subió y No estaba.
- * - enRuta: va hacia Valle Grande (R67): puede subir a quien espera en otro lugar del camino.
+ * - enRuta: va hacia Valle Grande (R67): a quien espera en otro lugar del camino puede decirle "Voy" (queda ligado a
+ *   su carro y los demás choferes dejan de verlo) o marcarlo Subió.
  */
 export function ListaTramo({
   lista,
@@ -109,7 +110,8 @@ export function ListaTramo({
             )}
             {enRuta && !enGina && (
               <p className="rounded-2xl bg-muted px-3 py-2 text-[15px]">
-                Vas hacia Valle Grande con {personas(enRuta.libres)} de espacio: si paras por alguien de la lista, márcalo Subió.
+                Vas hacia Valle Grande con {personas(enRuta.libres)} de espacio: toca <strong>Voy</strong> si pasas por alguien del
+                camino (los demás choferes ya no paran ahí) o Subió si ya lo recogiste.
               </p>
             )}
           </SheetHeader>
@@ -118,10 +120,21 @@ export function ListaTramo({
               const p = plan.get(e.id)
               // En Gina: lo que diga el plan. En ruta: solo los de otro lugar del camino, si caben
               const viajeId = enGina?.viajeId ?? enRuta?.viajeId ?? null
-              const puedeSubir = enGina ? Boolean(p?.cabe && e.enGina) : Boolean(enRuta && !e.enGina && e.personas <= enRuta.libres)
+              const cabeEnRuta = Boolean(enRuta && !e.enGina && e.personas <= enRuta.libres)
+              const puedeSubir = enGina ? Boolean(p?.cabe && e.enGina) : cabeEnRuta
               // "No estaba": en Gina, solo a los de Gina (a los de otro lugar se los busca después); en ruta, a los del camino
               const conNoEstaba = enGina ? e.enGina : Boolean(enRuta && !e.enGina)
-              return <Fila key={e.id} entrada={e} rol={p?.rol ?? null} viajeId={viajeId} puedeSubir={puedeSubir} conNoEstaba={conNoEstaba} />
+              return (
+                <FilaLista
+                  key={e.id}
+                  entrada={e}
+                  rol={p?.rol ?? null}
+                  viajeId={viajeId}
+                  puedeIr={!enGina && cabeEnRuta}
+                  puedeSubir={puedeSubir}
+                  conNoEstaba={conNoEstaba}
+                />
+              )
             })}
           </ol>
         </SheetContent>
@@ -130,18 +143,23 @@ export function ListaTramo({
   )
 }
 
-function Fila({
+/** Una persona de la lista con lo que el chofer puede hacer ahora. También va en el aviso "Espera en el camino" del viaje */
+export function FilaLista({
   entrada: e,
-  rol,
+  rol = null,
   viajeId,
+  puedeIr = false,
   puedeSubir,
   conNoEstaba,
+  compacta = false,
 }: {
   entrada: EntradaTramo
-  rol: EntradaGina["rol"] | null
+  rol?: EntradaGina["rol"] | null
   viajeId: string | null
+  puedeIr?: boolean // en ruta (R67): "Voy" la liga a este carro
   puedeSubir: boolean
   conNoEstaba: boolean
+  compacta?: boolean // en el aviso del viaje (angosto): sin el número y con llamar / cómo llegar abajo
 }) {
   const { ejecutar, pendiente, error } = useAccion()
   const [confirmar, setConfirmar] = useState(false)
@@ -154,10 +172,54 @@ function Fila({
   const telefono = e.telefono?.replace(/\D/g, "")
   const gps = e.lat !== null && e.lng !== null ? `${e.lat},${e.lng}` : null
 
+  // Llamar y cómo llegar: arriba, junto al nombre; en el aviso del viaje (angosto), abajo con No estaba
+  const contacto = (
+    <>
+      {telefono && (
+        <a href={`tel:+${telefono}`} aria-label={`Llamar a ${e.nombre}`} className={buttonVariants({ variant: "outline", size: "icon-sm", className: "rounded-full" })}>
+          <PhoneIcon aria-hidden />
+        </a>
+      )}
+      {!e.enGina && gps && (
+        <a
+          href={`https://www.google.com/maps/dir/?api=1&destination=${gps}`}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Cómo llegar a ${e.nombre}`}
+          className={buttonVariants({ variant: "outline", size: "icon-sm", className: "rounded-full" })}
+        >
+          <NavigationIcon aria-hidden />
+        </a>
+      )}
+    </>
+  )
+  const botonNoEstaba = conNoEstaba && (
+    <Button size="sm" variant="ghost" className="text-destructive" disabled={pendiente} onClick={() => setConfirmar(true)}>
+      <UserXIcon aria-hidden />
+      No estaba
+    </Button>
+  )
+  const botonSubio = (principal: boolean) =>
+    viajeId &&
+    puedeSubir && (
+      <Button
+        size="sm"
+        variant={principal ? "default" : "outline"}
+        className="flex-1"
+        disabled={pendiente}
+        onClick={() => ejecutar(() => subioDeLista(e.id, viajeId))}
+      >
+        {pendiente && principal ? <Loader2Icon aria-hidden className="animate-spin" /> : <CheckIcon aria-hidden />}
+        Subió
+      </Button>
+    )
+
   return (
     <li className="flex flex-col gap-2 rounded-2xl border-2 bg-card p-3">
       <div className="flex items-center gap-3">
-        <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary font-bold text-primary-foreground">{e.posicion}</span>
+        {!compacta && (
+          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary font-bold text-primary-foreground">{e.posicion}</span>
+        )}
         <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-10 text-sm" />
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
@@ -172,40 +234,36 @@ function Fila({
           </p>
           {montado && <p className="text-sm text-muted-foreground">{hace(e.creadaEn)}</p>}
         </div>
-        {telefono && (
-          <a href={`tel:+${telefono}`} aria-label={`Llamar a ${e.nombre}`} className={buttonVariants({ variant: "outline", size: "icon-sm", className: "rounded-full" })}>
-            <PhoneIcon aria-hidden />
-          </a>
-        )}
-        {!e.enGina && gps && (
-          <a
-            href={`https://www.google.com/maps/dir/?api=1&destination=${gps}`}
-            target="_blank"
-            rel="noreferrer"
-            aria-label={`Cómo llegar a ${e.nombre}`}
-            className={buttonVariants({ variant: "outline", size: "icon-sm", className: "rounded-full" })}
-          >
-            <NavigationIcon aria-hidden />
-          </a>
-        )}
+        {!compacta && contacto}
       </div>
 
-      {viajeId && (puedeSubir || conNoEstaba) && (
-        <div className="flex gap-2">
-          {puedeSubir && (
-            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => subioDeLista(e.id, viajeId))}>
-              {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CheckIcon aria-hidden />}
-              Subió
+      {viajeId && puedeIr ? (
+        // En ruta (R67): Voy y Subió lado a lado; abajo, No estaba
+        <>
+          <div className="flex gap-2">
+            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => voyPorEl(e.id, viajeId))}>
+              {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CarFrontIcon aria-hidden />}
+              Voy
             </Button>
+            {botonSubio(false)}
+          </div>
+          {(compacta || botonNoEstaba) && (
+            <div className="flex items-center gap-2">
+              {compacta && contacto}
+              <span className="ml-auto">{botonNoEstaba}</span>
+            </div>
           )}
-          {conNoEstaba && (
-            <Button size="sm" variant="ghost" className="text-destructive" disabled={pendiente} onClick={() => setConfirmar(true)}>
-              <UserXIcon aria-hidden />
-              No estaba
-            </Button>
-          )}
-        </div>
+        </>
+      ) : (
+        viajeId &&
+        (puedeSubir || conNoEstaba) && (
+          <div className="flex gap-2">
+            {botonSubio(true)}
+            {botonNoEstaba}
+          </div>
+        )
       )}
+      {compacta && !puedeIr && <div className="flex gap-2">{contacto}</div>}
       {rol === "despues" && e.personas > 1 && !puedeSubir && (
         <p className="text-sm text-muted-foreground">El grupo no cabe en lo que queda: sigue para el siguiente carro.</p>
       )}

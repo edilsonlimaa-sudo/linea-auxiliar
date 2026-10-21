@@ -33,6 +33,8 @@ export function InicioChofer({
   const enGina = recogida?.sentido === "centro_a_vg" && recogida.estado === "en_parada" ? { viajeId: recogida.id, plan: recogida.gina ?? [] } : null
   const haciaValle = enRuta?.sentido === "centro_a_vg" ? { viajeId: enRuta.id, libres: libres(enRuta) } : null
   const lista = <ListaTramo lista={datos.listaTramo} enGina={enGina} enRuta={haciaValle} />
+  // R67: en ruta hacia Valle Grande, quien espera en el camino sin carro y cabe va como aviso en el viaje
+  const esperanEnCamino = haciaValle ? datos.listaTramo.filter((e) => !e.enGina && e.personas <= haciaValle.libres) : undefined
 
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
@@ -78,7 +80,7 @@ export function InicioChofer({
       {/* R61: solo si va en ruta sin otro viaje publicado (con la vuelta ya publicada no se pregunta) */}
       {preguntarVuelta && enRuta && abiertos.length === 1 && <PreguntarVuelta viaje={enRuta} />}
 
-      {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} barraFija />}
+      {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} esperanEnCamino={esperanEnCamino} barraFija />}
       {recogida && (
         <>
           {enRuta && <h2 className="mt-2 text-xl font-bold">Tu siguiente recogida</h2>}

@@ -118,7 +118,8 @@ function InicioPasajero({
         <ListaGina
           lista={lista}
           carros={ordenarParaPasajero(
-            viajes.filter((v) => v.sentido === "centro_a_vg" && v.estado !== "en_ruta"),
+            // Los que ya salieron de Gina solo si llevan puesto: pueden recoger en el camino (R67)
+            viajes.filter((v) => v.sentido === "centro_a_vg" && (v.estado !== "en_ruta" || libres(v) > 0)),
             porId
           )}
           porId={porId}
