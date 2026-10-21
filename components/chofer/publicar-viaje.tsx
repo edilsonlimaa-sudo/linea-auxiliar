@@ -1,7 +1,7 @@
 "use client"
 
-import { CheckIcon, Loader2Icon, MinusIcon, PlusIcon, SendIcon } from "lucide-react"
-import { useId, useState, useTransition } from "react"
+import { CheckIcon, ChevronDownIcon, Loader2Icon, MinusIcon, PlusIcon, SendIcon } from "lucide-react"
+import { useEffect, useId, useRef, useState, useTransition } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -88,6 +88,18 @@ export function PublicarViaje({
   const [conVuelta, setConVuelta] = useState(false)
   const [error, setError] = useState<string>()
   const regreso = contrario(sentido)
+
+  // La pregunta de la vuelta queda al final, detrás del botón fijo: mientras no se ve, la barra muestra la escogida y
+  // lleva hasta ella con un toque (R61). El margen de abajo descuenta lo que tapa la barra.
+  const refVuelta = useRef<HTMLFieldSetElement>(null)
+  const [vueltaALaVista, setVueltaALaVista] = useState(true)
+  useEffect(() => {
+    const el = refVuelta.current
+    if (!el) return
+    const observador = new IntersectionObserver(([e]) => setVueltaALaVista(e.isIntersecting), { rootMargin: "0px 0px -160px 0px" })
+    observador.observe(el)
+    return () => observador.disconnect()
+  }, [])
   const [enviando, iniciar] = useTransition()
 
   const publicar = () =>
@@ -194,7 +206,7 @@ export function PublicarViaje({
       </fieldset>
 
       {/* R61: la vuelta es el sentido contrario con los mismos puestos; solo se pregunta cuándo llega a recoger */}
-      <fieldset className="flex flex-col gap-2">
+      <fieldset ref={refVuelta} className="flex scroll-mt-4 flex-col gap-2">
         <legend className="mb-2 text-lg font-bold">¿Después recoges gente {SENTIDOS[regreso].enRecogida} para volver?</legend>
         <div className="grid grid-cols-2 gap-2">
           <Opcion nombre="vuelta" elegida={!conVuelta} onElegir={() => (setConVuelta(false), setVuelta(null))}>
@@ -234,6 +246,22 @@ export function PublicarViaje({
             : "sticky bottom-0 -mx-4 border-t bg-background/95 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur"
         }
       >
+        {!vueltaALaVista && (
+          <button
+            type="button"
+            onClick={() => refVuelta.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+            className="mb-2 flex min-h-11 w-full items-center gap-1.5 rounded-xl px-1 text-left text-[15px] outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            <span className="font-bold">{conVuelta ? "Ida y vuelta" : "Solo ida"}</span>
+            <span aria-hidden className="text-muted-foreground">
+              ·
+            </span>
+            <span className="min-w-0 flex-1 truncate font-bold text-primary">
+              {conVuelta ? (vuelta === null ? "Falta cuándo recoges" : `recoges ${vuelta} min después`) : "¿Recoges gente para volver?"}
+            </span>
+            <ChevronDownIcon aria-hidden className="size-5 shrink-0 text-primary" />
+          </button>
+        )}
         <Button type="submit" variant="signal" size="lg" className="w-full" disabled={enviando}>
           {enviando ? <Loader2Icon aria-hidden className="animate-spin" /> : <SendIcon aria-hidden />}
           {enviando ? "Publicando…" : conVuelta ? "Publicar ida y vuelta" : modo === "cadena" ? "Agregar como próximo viaje" : "Publicar viaje"}
