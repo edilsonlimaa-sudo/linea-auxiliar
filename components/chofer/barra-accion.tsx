@@ -1,6 +1,6 @@
 "use client"
 
-import { BellRingIcon, FlagIcon, Loader2Icon, MapPinCheckIcon, MessageCircleIcon, PlayIcon } from "lucide-react"
+import { BellRingIcon, FlagIcon, Loader2Icon, MapPinCheckIcon, MessageCircleIcon, PlayIcon, TriangleAlertIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -21,6 +21,7 @@ export function BarraAccion({
   confirmados,
   sinLlegar,
   enCamino = [],
+  avisoSalida = null,
   mensajeGrupo,
   fija = true,
 }: {
@@ -29,6 +30,7 @@ export function BarraAccion({
   confirmados: number // personas que suben (con los acompañantes de cada grupo, R57)
   sinLlegar: string[] // confirmados con app que no han tocado "Ya estoy en el sitio"
   enCamino?: string[] // Centro → Valle Grande: a quién recoge en el camino al salir ("Carla P. (Plaza del Indio)")
+  avisoSalida?: string | null // Centro → Valle Grande: nadie marcado Subió, o alguien dice que se montó (R66)
   mensajeGrupo: string // R15
   fija?: boolean // pegada abajo (viaje en foco) o dentro de la tarjeta
 }) {
@@ -115,6 +117,12 @@ export function BarraAccion({
                 {sinLlegar.length === 1
                   ? `${sinLlegar[0]} no ha avisado que está en el sitio.`
                   : `${sinLlegar.join(", ")} no han avisado que están en el sitio.`}
+              </strong>
+            )}
+            {avisoSalida && (
+              <strong className="mt-2 flex items-start gap-2 rounded-xl bg-warning-muted px-3 py-2 text-foreground">
+                <TriangleAlertIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
+                {avisoSalida}
               </strong>
             )}
             {enCamino.length > 0 && (

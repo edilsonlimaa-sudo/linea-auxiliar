@@ -45,7 +45,7 @@ export function ListaTramo({
   enRuta,
 }: {
   lista: EntradaTramo[]
-  enGina: { viajeId: string; plan: EntradaGina[] } | null
+  enGina: { viajeId: string; plan: EntradaGina[]; libres: number } | null
   enRuta: { viajeId: string; libres: number } | null
 }) {
   const [abierta, setAbierta] = useState(false)
@@ -54,6 +54,8 @@ export function ListaTramo({
   const guardar = enGina?.plan.filter((e) => e.rol === "guardar") ?? []
   const visibles = lista.slice(0, 3) // pocas caras: el texto es lo que se lee
   const total = suma(lista)
+  // R62: avisaron "Me monté" y nadie los marcó: lo primero que el chofer en Gina o en ruta tiene que ver
+  const dicen = enGina || enRuta ? lista.filter((e) => e.diceQueSubio) : []
 
   return (
     <>
@@ -62,7 +64,7 @@ export function ListaTramo({
         onClick={() => setAbierta(true)}
         className={cn(
           "flex min-h-16 w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring",
-          enGina ? "border-signal bg-signal/15" : "bg-card"
+          enGina || dicen.length > 0 ? "border-signal bg-signal/15" : "bg-card"
         )}
       >
         {lista.length > 0 ? (
@@ -80,7 +82,11 @@ export function ListaTramo({
         )}
         <span className="min-w-0 flex-1 leading-tight">
           <span className="block font-bold">
-            {enGina ? "Estás en Gina: abre la lista" : "Lista hacia Valle Grande"}
+            {dicen.length > 0
+              ? `${dicen.length === 1 ? `${dicen[0].nombre} dice que ya se montó` : `${dicen.length} dicen que ya se montaron`}: ${dicen.length === 1 ? "márcalo" : "márcalos"} Subió`
+              : enGina
+                ? "Estás en Gina: abre la lista"
+                : "Lista hacia Valle Grande"}
           </span>
           <span className="block text-[15px] text-muted-foreground">
             {lista.length === 0
@@ -121,7 +127,10 @@ export function ListaTramo({
               // En Gina: lo que diga el plan. En ruta: solo los de otro lugar del camino, si caben
               const viajeId = enGina?.viajeId ?? enRuta?.viajeId ?? null
               const cabeEnRuta = Boolean(enRuta && !e.enGina && e.personas <= enRuta.libres)
-              const puedeSubir = enGina ? Boolean(p?.cabe && e.enGina) : cabeEnRuta
+              // Quien dice que ya se montó se marca aunque no le tocara o el carro ya haya salido de Gina, si cabe (R62)
+              const libres = enGina?.libres ?? enRuta?.libres ?? 0
+              const yaSeMonto = Boolean((enGina || enRuta) && e.diceQueSubio && e.personas <= libres)
+              const puedeSubir = yaSeMonto || (enGina ? Boolean(p?.cabe && e.enGina) : cabeEnRuta)
               // "No estaba": en Gina, solo a los de Gina (a los de otro lugar se los busca después); en ruta, a los del camino
               const conNoEstaba = enGina ? e.enGina : Boolean(enRuta && !e.enGina)
               return (
@@ -130,7 +139,7 @@ export function ListaTramo({
                   entrada={e}
                   rol={p?.rol ?? null}
                   viajeId={viajeId}
-                  puedeIr={!enGina && cabeEnRuta}
+                  puedeIr={!enGina && cabeEnRuta && !e.diceQueSubio}
                   puedeSubir={puedeSubir}
                   conNoEstaba={conNoEstaba}
                 />
@@ -215,7 +224,7 @@ export function FilaLista({
     )
 
   return (
-    <li className="flex flex-col gap-2 rounded-2xl border-2 bg-card p-3">
+    <li className={cn("flex flex-col gap-2 rounded-2xl border-2 bg-card p-3", e.diceQueSubio && "border-signal")}>
       <div className="flex items-center gap-3">
         {!compacta && (
           <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary font-bold text-primary-foreground">{e.posicion}</span>
@@ -225,7 +234,11 @@ export function FilaLista({
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-lg leading-tight font-bold">{e.nombre}</span>
             {e.personas > 1 && <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">+{e.personas - 1}</span>}
-            {rol && <span className={cn("rounded-full px-2 py-0.5 text-sm font-bold", ROL[rol].clase)}>{ROL[rol].texto}</span>}
+            {e.diceQueSubio ? (
+              <span className="rounded-full bg-signal px-2 py-0.5 text-sm font-bold text-signal-foreground">Dice que ya se montó</span>
+            ) : (
+              rol && <span className={cn("rounded-full px-2 py-0.5 text-sm font-bold", ROL[rol].clase)}>{ROL[rol].texto}</span>
+            )}
           </p>
           {/* Dónde espera (lo que el chofer necesita) y, más chico, desde cuándo */}
           <p className={cn("text-[15px] leading-snug", e.enGina ? "text-muted-foreground" : "font-bold text-primary")}>

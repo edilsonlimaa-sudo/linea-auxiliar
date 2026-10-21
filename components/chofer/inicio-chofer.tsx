@@ -30,11 +30,18 @@ export function InicioChofer({
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
   // La lista hacia Valle Grande es del tramo, no de un viaje: la ven todos los choferes (§5.17). Si este chofer está
   // recogiendo en Gina o va en ruta hacia Valle Grande, la misma lista deja subir a la gente (R64, R67)
-  const enGina = recogida?.sentido === "centro_a_vg" && recogida.estado === "en_parada" ? { viajeId: recogida.id, plan: recogida.gina ?? [] } : null
+  const enGina =
+    recogida?.sentido === "centro_a_vg" && recogida.estado === "en_parada"
+      ? { viajeId: recogida.id, plan: recogida.gina ?? [], libres: libres(recogida) }
+      : null
   const haciaValle = enRuta?.sentido === "centro_a_vg" ? { viajeId: enRuta.id, libres: libres(enRuta) } : null
   const lista = <ListaTramo lista={datos.listaTramo} enGina={enGina} enRuta={haciaValle} />
   // R67: en ruta hacia Valle Grande, quien espera en el camino sin carro y cabe va como aviso en el viaje
-  const esperanEnCamino = haciaValle ? datos.listaTramo.filter((e) => !e.enGina && e.personas <= haciaValle.libres) : undefined
+  const esperanEnCamino = haciaValle
+    ? datos.listaTramo.filter((e) => !e.enGina && !e.diceQueSubio && e.personas <= haciaValle.libres)
+    : undefined
+  // R62/R66: en Gina, quienes dicen que ya se montaron y no están marcados: Salir lo advierte
+  const dicenQueSubieron = enGina ? datos.listaTramo.filter((e) => e.diceQueSubio).map((e) => e.nombre) : undefined
 
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
@@ -84,7 +91,7 @@ export function InicioChofer({
       {recogida && (
         <>
           {enRuta && <h2 className="mt-2 text-xl font-bold">Tu siguiente recogida</h2>}
-          <ViajeChofer viaje={recogida} porId={porId} vehiculo={vehiculo} barraFija={!enRuta} />
+          <ViajeChofer viaje={recogida} porId={porId} vehiculo={vehiculo} dicenQueSubieron={dicenQueSubieron} barraFija={!enRuta} />
         </>
       )}
 

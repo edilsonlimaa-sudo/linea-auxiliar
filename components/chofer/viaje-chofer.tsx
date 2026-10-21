@@ -147,6 +147,7 @@ export function ViajeChofer({
   barraFija = false,
   plegado = false,
   esperanEnCamino,
+  dicenQueSubieron = [],
 }: {
   viaje: Viaje
   porId: Map<string, ViajeBase>
@@ -154,6 +155,7 @@ export function ViajeChofer({
   barraFija?: boolean
   plegado?: boolean
   esperanEnCamino?: EntradaTramo[] // R67: en ruta hacia Valle Grande, de la lista del tramo, sin carro y caben
+  dicenQueSubieron?: string[] // R62: en Gina, quienes avisaron que se montaron y no están marcados Subió
 }) {
   const { titulo, detalle: detalleBase } = estadoParaChofer(viaje, porId)
   // En ruta, "a bordo" son los que subieron: a quien falta recoger en el camino se lo cuenta aparte
@@ -177,14 +179,26 @@ export function ViajeChofer({
       ? (viaje.gina ?? []).filter((e) => e.rol === "guardar")
       : []
 
+  // Que nadie salga de Gina sin marcar a quien se montó (R66): sin nadie marcado, o con alguien que dice que ya subió
+  const personasConPuesto = conPuesto.reduce((n, f) => n + f.personas, 0)
+  const avisoSalida =
+    viaje.gina && viaje.estado === "en_parada"
+      ? dicenQueSubieron.length > 0
+        ? `${dicenQueSubieron.join(", ")} ${dicenQueSubieron.length === 1 ? "dice que ya se montó y no está marcado" : "dicen que ya se montaron y no están marcados"} Subió: ${dicenQueSubieron.length === 1 ? "márcalo" : "márcalos"} en la lista antes de salir.`
+        : personasConPuesto === 0
+          ? "Nadie está marcado Subió. Si se montó alguien, márcalo en la lista antes de salir: así cuenta su puesto."
+          : null
+      : null
+
   const barra = (
     <BarraAccion
       viajeId={viaje.id}
       estado={viaje.estado}
       // Personas, no reservas: un grupo (R57) sube completo ("Beto +1" son 2)
-      confirmados={conPuesto.reduce((n, f) => n + f.personas, 0)}
+      confirmados={personasConPuesto}
       sinLlegar={sinLlegar}
       enCamino={recogerEnCamino.map((e) => `${e.nombre} (${e.lugar})`)}
+      avisoSalida={avisoSalida}
       mensajeGrupo={mensajeGrupo(viaje, vehiculo)}
       fija={barraFija}
     />

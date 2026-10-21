@@ -23,7 +23,7 @@ import { Avatar as AvatarUi, AvatarFallback, AvatarGroup, AvatarGroupCount, Avat
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { estoyEnLista, meFui, sigoEnLista, type Resultado } from "@/lib/acciones/pasajero"
+import { estoyEnLista, meFui, meMonte, sigoEnLista, type Resultado } from "@/lib/acciones/pasajero"
 import type { ChoferEnPausa, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import type { EnListaGina } from "@/lib/datos/lista-gina"
 import { hace, hora } from "@/lib/fechas"
@@ -250,21 +250,27 @@ function MiLugar({ mio, lista }: { mio: EnListaGina; lista: EnListaGina[] }) {
         <div className="flex flex-col gap-1 p-5 pt-6">
           <p className="text-sm font-bold tracking-wide uppercase opacity-90">Centro → Valle Grande</p>
           <h2 id="titulo-mi-lugar" className="text-[32px] leading-tight font-bold">
-            {mio.posicion === 1 ? "Eres el primero" : `Eres el ${mio.posicion}`}
+            {mio.diceQueSubio ? "Avisaste que te montaste" : mio.posicion === 1 ? "Eres el primero" : `Eres el ${mio.posicion}`}
           </h2>
           <p className="text-lg">
             {mio.enGina ? "en Gina" : <>en {mio.lugar}</>}
             {mio.personas > 1 && ` · van ${mio.personas}`}
           </p>
           <p className="text-[15px] opacity-90">
-            {antes === 0 ? "Nadie antes que tú." : `Antes que tú: ${personas(antes)}.`}
-            {!mio.enGina && " El carro te guarda puesto y te recoge al pasar."}
+            {mio.diceQueSubio ? (
+              "El chofer te marca Subió en su lista. Si no pasa en un rato, recuérdaselo."
+            ) : (
+              <>
+                {antes === 0 ? "Nadie antes que tú." : `Antes que tú: ${personas(antes)}.`}
+                {!mio.enGina && " El carro te guarda puesto y te recoge al pasar."}
+              </>
+            )}
           </p>
         </div>
       </section>
 
       {/* Cuánto vale el lugar (R62), siempre a la vista; a los 35 min se vuelve "¿Sigues ahí?" */}
-      {porVencer ? (
+      {mio.diceQueSubio ? null : porVencer ? (
         <div role="alert" className="flex flex-col gap-3 rounded-2xl border-2 border-warning/50 bg-warning-muted p-4">
           <p className="flex items-start gap-2 font-bold">
             <TriangleAlertIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
@@ -313,6 +319,7 @@ function MiLugar({ mio, lista }: { mio: EnListaGina; lista: EnListaGina[] }) {
         pendiente={pendiente}
         error={error}
         onMotivo={(m) => ejecutar(() => meFui(m), () => setConfirmar(false))}
+        onMeMonte={mio.diceQueSubio ? undefined : () => ejecutar(meMonte, () => setConfirmar(false))}
       />
     </>
   )
@@ -328,7 +335,8 @@ const ICONO_ME_FUI: Record<MotivoMeFui, typeof BusIcon> = {
 
 /**
  * "Me fui" (R62): sale de la lista diciendo cómo se va, en un toque (cada opción confirma). Sirve para medir cuánta
- * gente se lleva la van. Seguir esperando es lo seguro: recibe el foco al abrir.
+ * gente se lleva la van. Arriba y aparte, "Me monté en un carro de la línea": montarse no es irse (lo marca el
+ * chofer), pero hubo quien tocó "Me fui" al montarse. Seguir esperando es lo seguro: recibe el foco al abrir.
  */
 function HojaMeFui({
   abierta,
@@ -336,24 +344,45 @@ function HojaMeFui({
   pendiente,
   error,
   onMotivo,
+  onMeMonte,
 }: {
   abierta: boolean
   onCambiar: (abierta: boolean) => void
   pendiente: boolean
   error?: string
   onMotivo: (m: MotivoMeFui) => void
+  onMeMonte?: () => void // sin esto (ya avisó que se montó), no se ofrece
 }) {
-  const [escogido, setEscogido] = useState<MotivoMeFui>()
+  const [escogido, setEscogido] = useState<MotivoMeFui | "monte">()
   return (
     <Sheet open={abierta} onOpenChange={(v) => !pendiente && onCambiar(v)}>
       <SheetContent side="bottom" className="mx-auto max-h-[90svh] max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>¿Cómo te vas?</SheetTitle>
-          <SheetDescription className="text-base">
-            Sales de la lista. Si vuelves, te anotas otra vez al final. Tu respuesta nos ayuda a mejorar la línea.
-          </SheetDescription>
+          <SheetTitle>¿Qué pasó?</SheetTitle>
+          <SheetDescription className="sr-only">Si te montaste en un carro de la línea, o cómo te vas sin ella</SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-2.5 px-5 pb-6">
+          {onMeMonte && (
+            <div className="mb-3 flex flex-col gap-2 rounded-2xl bg-secondary p-3">
+              <Button
+                size="lg"
+                className="w-full"
+                disabled={pendiente}
+                onClick={() => {
+                  setEscogido("monte")
+                  onMeMonte()
+                }}
+              >
+                {pendiente && escogido === "monte" ? <Loader2Icon aria-hidden className="animate-spin" /> : <CarFrontIcon aria-hidden />}
+                Me monté en un carro de la línea
+              </Button>
+              <p className="text-[15px] text-secondary-foreground">No sales de la lista: el chofer te marca Subió.</p>
+            </div>
+          )}
+          <p className="font-bold">Me voy sin la línea</p>
+          <p className="-mt-1.5 text-[15px] text-muted-foreground">
+            Sales de la lista. Si vuelves, te anotas otra vez al final. Tu respuesta nos ayuda a mejorar la línea.
+          </p>
           {MOTIVOS_SALIDA.map((m) => {
             const Icono = ICONO_ME_FUI[m]
             return (
