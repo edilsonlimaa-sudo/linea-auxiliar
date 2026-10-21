@@ -5,11 +5,12 @@ import { useState } from "react"
 
 import { promedioTexto } from "@/components/estrellas"
 import { Asientos } from "@/components/pasajero/asientos"
+import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import type { ChoferEnServicio, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
+import type { ChoferEnPausa, ChoferEnServicio, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import { cn } from "@/lib/utils"
 import { haciaEnFrase, iniciales, libres, llegada, SENTIDOS, type Sentido, type Viaje } from "@/lib/viajes"
 
@@ -30,12 +31,14 @@ type Situacion = {
  */
 export function LineaAhora({
   choferes,
+  enPausa = [],
   viajes,
   sentido,
   className,
   children,
 }: {
   choferes: ChoferEnServicio[]
+  enPausa?: ChoferEnPausa[] // R60: desconectados que dijeron si vuelven
   viajes: ViajeConChofer[]
   sentido: Sentido
   className?: string
@@ -59,14 +62,24 @@ export function LineaAhora({
             </SheetDescription>
           </SheetHeader>
           {/* Solo con la hoja abierta: los "en ~5 min" se calculan con la hora del celular */}
-          {abierta && <Contenido choferes={choferes} viajes={viajes} sentido={sentido} />}
+          {abierta && <Contenido choferes={choferes} enPausa={enPausa} viajes={viajes} sentido={sentido} />}
         </SheetContent>
       </Sheet>
     </>
   )
 }
 
-function Contenido({ choferes, viajes, sentido }: { choferes: ChoferEnServicio[]; viajes: ViajeConChofer[]; sentido: Sentido }) {
+function Contenido({
+  choferes,
+  enPausa,
+  viajes,
+  sentido,
+}: {
+  choferes: ChoferEnServicio[]
+  enPausa: ChoferEnPausa[]
+  viajes: ViajeConChofer[]
+  sentido: Sentido
+}) {
   const porId = new Map<string, Viaje>(viajes.map((v) => [v.id, v]))
   const situaciones: Situacion[] = choferes
     .map((chofer) => {
@@ -88,6 +101,15 @@ function Contenido({ choferes, viajes, sentido }: { choferes: ChoferEnServicio[]
             <FilaChofer key={s.chofer.id} situacion={s} porId={porId} sentido={sentido} />
           ))}
         </ul>
+      )}
+      {/* R60: aparte de quienes trabajan, quién vuelve y a qué hora */}
+      {enPausa.length > 0 && (
+        <section aria-labelledby="titulo-en-pausa" className="mt-2 flex flex-col gap-3">
+          <h3 id="titulo-en-pausa" className="font-bold">
+            Desconectados
+          </h3>
+          <QuienVuelve choferes={enPausa} />
+        </section>
       )}
     </div>
   )

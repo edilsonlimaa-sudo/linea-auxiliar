@@ -239,6 +239,38 @@ export type Database = {
           },
         ]
       }
+      pausas: {
+        Row: {
+          cerrada_en: string | null
+          chofer_id: string
+          id: string
+          inicio: string
+          vuelve_en: string | null
+        }
+        Insert: {
+          cerrada_en?: string | null
+          chofer_id: string
+          id?: string
+          inicio?: string
+          vuelve_en?: string | null
+        }
+        Update: {
+          cerrada_en?: string | null
+          chofer_id?: string
+          id?: string
+          inicio?: string
+          vuelve_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pausas_chofer_id_fkey"
+            columns: ["chofer_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfiles: {
         Row: {
           aprobado_en: string | null
@@ -843,6 +875,15 @@ export type Database = {
       cancelar_espera: { Args: never; Returns: undefined }
       cancelar_reserva: { Args: { p_reserva: string }; Returns: undefined }
       cancelar_viaje: { Args: { p_viaje: string }; Returns: undefined }
+      choferes_en_pausa: {
+        Args: never
+        Returns: {
+          chofer_id: string
+          foto_path: string
+          nombre: string
+          vuelve_en: string
+        }[]
+      }
       clave_cambiada: { Args: never; Returns: undefined }
       conectar: { Args: never; Returns: undefined }
       correo_de_telefono: { Args: { p_telefono: string }; Returns: string }
@@ -865,7 +906,7 @@ export type Database = {
           sentido: Database["public"]["Enums"]["sentido"]
         }[]
       }
-      desconectar: { Args: never; Returns: undefined }
+      desconectar: { Args: { p_vuelve_en?: string }; Returns: undefined }
       desconectar_inactivos: { Args: never; Returns: undefined }
       eliminar_cuenta: {
         Args: { p_con_historial?: boolean; p_usuario: string }
@@ -978,7 +1019,6 @@ export type Database = {
         Returns: undefined
       }
       vencer_esperas: { Args: never; Returns: undefined }
-      vencer_pedidos: { Args: never; Returns: undefined }
     }
     Enums: {
       estado_alerta: "activa" | "resuelta"

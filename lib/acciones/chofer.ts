@@ -22,9 +22,20 @@ export async function conectarme() {
   return rpc((s) => s.rpc("conectar"))
 }
 
-/** Desconectarse cancela los viajes publicados (R8) */
-export async function desconectarme() {
-  return rpc((s) => s.rpc("desconectar"))
+/**
+ * Desconectarse cancela los viajes publicados (R8) y dice si vuelve hoy (R60): en unos minutos, a una hora ("HH:MM",
+ * en Caracas) o null = terminó por hoy.
+ */
+export async function desconectarme(vuelta: { minutos: number } | { hora: string } | null): Promise<Resultado> {
+  let vuelveEn: Date | null = null
+  if (vuelta && "minutos" in vuelta) {
+    if (!Number.isInteger(vuelta.minutos) || vuelta.minutos < 5 || vuelta.minutos > 720) return { error: "Escoge en cuánto vuelves." }
+    vuelveEn = new Date(Date.now() + vuelta.minutos * 60_000)
+  } else if (vuelta) {
+    vuelveEn = horaDeCaracas(vuelta.hora)
+    if (!vuelveEn) return { error: "Escribe la hora en que vuelves." }
+  }
+  return rpc((s) => s.rpc("desconectar", vuelveEn ? { p_vuelve_en: vuelveEn.toISOString() } : {}))
 }
 
 // "14:30" en Caracas (UTC-4, sin horario de verano) → instante. Si esa hora ya pasó hoy, es la de mañana (R10).

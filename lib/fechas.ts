@@ -62,3 +62,15 @@ export function inicioDelDia(dias = 0, ahora = new Date()): Date {
 export function hoyEnPalabras(ahora = new Date()): string {
   return new Intl.DateTimeFormat("es-VE", { weekday: "long", day: "numeric", month: "long", timeZone: ZONA }).format(ahora)
 }
+
+/**
+ * Cuándo vuelve un chofer en pausa (R60), como hora y nunca como "en 1 hora" (envejece en la pantalla):
+ * "vuelve como a las 5:30 p. m." · "vuelve mañana como a las 7:00 a. m." · ya pasada: "dijo que volvía a las…" ·
+ * sin hora: "terminó por hoy".
+ */
+export function textoVuelta(vuelveEn: string | null, ahora = new Date()): string {
+  if (!vuelveEn) return "terminó por hoy"
+  const d = new Date(vuelveEn)
+  if (d.getTime() <= ahora.getTime()) return `dijo que volvía a las ${hora(vuelveEn)}`
+  return diaCaracas(d) === diaCaracas(ahora) ? `vuelve como a las ${hora(vuelveEn)}` : `vuelve mañana como a las ${hora(vuelveEn)}`
+}

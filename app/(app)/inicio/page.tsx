@@ -8,6 +8,7 @@ import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { CabeceraInicio, sentidoDeHacia } from "@/components/pasajero/cabecera-inicio"
+import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -75,7 +76,7 @@ function InicioPasajero({
   cierre: AvisoDeCierre | null
   hacia: Sentido | null
 }) {
-  const { viajes, porId, lugaresRecientes, aviso, enServicio } = datos
+  const { viajes, porId, lugaresRecientes, aviso, enServicio, enPausa } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
   // Empieza en el sentido sugerido por la hora y dónde vive. Cambiarlo es un toque.
   const sentido = hacia ?? sentidoSugerido(perfil.urbanismo)
@@ -96,6 +97,7 @@ function InicioPasajero({
         sentido={sentido}
         unidades={cuantas}
         choferes={enServicio}
+        enPausa={enPausa}
         viajes={viajes}
       />
       {aviso && <EstadoLinea aviso={aviso} />}
@@ -122,6 +124,8 @@ function InicioPasajero({
               {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
             </p>
             <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
+            {/* R60: si alguien dijo que vuelve, se dice aquí: es donde más ayuda */}
+            <QuienVuelve choferes={enPausa} className="w-full border-t pt-3" />
           </Card>
         )}
       </section>

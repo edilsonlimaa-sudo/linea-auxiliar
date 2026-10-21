@@ -47,6 +47,9 @@ export type ChoferEnServicio = {
   actividad: string // "Recogiendo en Valle Grande", "En ruta hacia el Centro", "Disponible"
 }
 
+/** Chofer desconectado que dijo si vuelve hoy (R60). vuelveEn null = terminó por hoy */
+export type ChoferEnPausa = { id: string; nombre: string; fotoUrl: string | null; vuelveEn: string | null }
+
 export type DatosInicioPasajero = {
   viajes: ViajeConChofer[]
   porId: Map<string, Viaje>
@@ -58,6 +61,7 @@ export type DatosInicioPasajero = {
   aviso: { texto: string; creado_en: string } | null
   unidadesEnServicio: number
   enServicio: ChoferEnServicio[] // quién trabaja ahora y qué hace (R7)
+  enPausa: ChoferEnPausa[] // quién vuelve y a qué hora, quién terminó por hoy (R60)
 }
 
 // Inicio del día en America/Caracas (UTC-4, sin horario de verano) para el aviso del día (R47)
@@ -182,7 +186,7 @@ function ultimoPedido(
 export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosInicioPasajero> {
   const supabase = await crearClienteServidor()
 
-  const [viajesRes, reservaRes, esperaRes, recientesRes, avisoRes, enServicioRes, ultEsperaRes, ultReservaRes] = await Promise.all([
+  const [viajesRes, reservaRes, esperaRes, recientesRes, avisoRes, enServicioRes, ultEsperaRes, ultReservaRes, pausaRes] = await Promise.all([
     supabase
       .from("viajes")
       .select("*, chofer:perfiles!viajes_chofer_id_fkey(id, nombre, foto_path, vehiculo:vehiculos(unidad, placa, modelo, color, foto_path, aire_acondicionado))")
@@ -219,7 +223,10 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       .order("creado_en", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    // R60: los que se desconectaron diciendo si vuelven (la base ya filtra lo vencido)
+    supabase.rpc("choferes_en_pausa"),
   ])
+  const pausas = pausaRes.data ?? []
 
   // Reputación de los choferes que aparecen (R46)
   const filas = viajesRes.data ?? []
@@ -237,7 +244,7 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
   // vehiculos tiene chofer_id único: puede venir como objeto o como lista de uno
   const vehiculoDe = (c: (typeof filas)[number]["chofer"]) => (Array.isArray(c?.vehiculo) ? (c.vehiculo[0] ?? null) : (c?.vehiculo ?? null))
   // Fotos del chofer y del carro (R54): enlaces firmados en una sola llamada
-  const fotos = await firmarFotos([...filas.flatMap((v) => [v.chofer?.foto_path, vehiculoDe(v.chofer)?.foto_path]), ...conectados.map((c) => c.foto_path)])
+  const fotos = await firmarFotos([...filas.flatMap((v) => [v.chofer?.foto_path, vehiculoDe(v.chofer)?.foto_path]), ...conectados.map((c) => c.foto_path), ...pausas.map((p) => p.foto_path)])
 
   const viajes: ViajeConChofer[] = filas.map(({ chofer, ...v }) => {
     const r = reputacion.get(v.chofer_id)
@@ -314,5 +321,11 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       // Los que tienen algo en marcha primero; los disponibles al final
       .sort((a, b) => Number(a.actividad === "Disponible") - Number(b.actividad === "Disponible") || a.nombre.localeCompare(b.nombre, "es")),
     ultimoPedido: ultimoPedido(ultEsperaRes.data, ultReservaRes.data),
+    enPausa: pausas.map((p) => ({
+      id: p.chofer_id,
+      nombre: p.nombre,
+      fotoUrl: p.foto_path ? (fotos.get(p.foto_path) ?? null) : null,
+      vuelveEn: p.vuelve_en,
+    })),
   }
 }

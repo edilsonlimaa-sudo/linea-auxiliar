@@ -4,7 +4,8 @@ import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components/ui/avatar"
 import { LineaAhora } from "@/components/pasajero/linea-ahora"
 import { Badge } from "@/components/ui/badge"
-import type { ChoferEnServicio, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
+import type { ChoferEnPausa, ChoferEnServicio, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
+import { textoVuelta } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
 import { iniciales, SENTIDOS, type Sentido } from "@/lib/viajes"
 
@@ -22,16 +23,20 @@ export function CabeceraInicio({
   sentido,
   unidades,
   choferes,
+  enPausa,
   viajes,
 }: {
   saludo: string
   sentido: Sentido
   unidades: Record<Sentido, number>
   choferes: ChoferEnServicio[]
+  enPausa: ChoferEnPausa[] // R60
   viajes: ViajeConChofer[] // los abiertos de toda la línea, para "La línea ahora"
 }) {
   const visibles = choferes.slice(0, 4)
   const resto = choferes.length - visibles.length
+  // Sin nadie trabajando, la franja adelanta quién vuelve primero (R60)
+  const vuelve = choferes.length === 0 ? enPausa.find((c) => c.vuelveEn) : undefined
 
   return (
     <section aria-labelledby="titulo-hacia" className="relative overflow-hidden rounded-3xl bg-header text-header-foreground shadow-md">
@@ -82,6 +87,7 @@ export function CabeceraInicio({
       {/* ¿Está trabajando la línea? En una franja, con las caras; al tocarla, qué hace cada chofer */}
       <LineaAhora
         choferes={choferes}
+        enPausa={enPausa}
         viajes={viajes}
         sentido={sentido}
         className="flex min-h-14 w-full items-center gap-3 border-t border-header-foreground/15 bg-header-foreground/10 px-5 py-2.5 text-left font-bold outline-none hover:bg-header-foreground/15 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset"
@@ -105,7 +111,9 @@ export function CabeceraInicio({
             : choferes.length === 1
               ? "1 chofer trabajando"
               : `${choferes.length} choferes trabajando`}
-          <span className="block text-sm font-normal opacity-90">Qué hace cada chofer y qué viene después</span>
+          <span className="block text-sm font-normal opacity-90">
+            {vuelve ? `${vuelve.nombre.split(" ")[0]} ${textoVuelta(vuelve.vuelveEn)}` : "Qué hace cada chofer y qué viene después"}
+          </span>
         </span>
         <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-signal" />
       </LineaAhora>
