@@ -195,7 +195,7 @@ export function PublicarViaje({
 
       {/* R61: la vuelta es el sentido contrario con los mismos puestos; solo se pregunta cuándo llega a recoger */}
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-lg font-bold">¿Haces también la vuelta?</legend>
+        <legend className="mb-2 text-lg font-bold">¿Después recoges gente {SENTIDOS[regreso].enRecogida} para volver?</legend>
         <div className="grid grid-cols-2 gap-2">
           <Opcion nombre="vuelta" elegida={!conVuelta} onElegir={() => (setConVuelta(false), setVuelta(null))}>
             Solo ida

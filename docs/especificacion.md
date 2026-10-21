@@ -133,11 +133,14 @@ puede ocultar botones, pero nunca es la única barrera.
   que iba en ruta se **finaliza solo**.
 - **R61. Ida y vuelta.** *(Oct. 2026: que la vuelta se vea desde temprano sin publicarla a mano.)* La vuelta es
   siempre el **sentido contrario** con los **mismos puestos**; solo se pregunta cuándo llega a recoger. Dos momentos:
-  - **Al publicar**: "¿Haces también la vuelta?" → **Solo ida** (lo normal) · **Ida y vuelta** → "¿Cuánto tardas en
+  - **Al publicar**: "¿Después recoges gente en … para volver?" → **Solo ida** (lo normal) · **Ida y vuelta** → "¿Cuánto tardas en
     llegar a recoger en … después de salir?" (15, 20, 30, 45 min). La vuelta queda encadenada como próximo viaje
     (`programado`, R11) y acepta reservas desde ya; empieza sola al salir (R12).
-  - **Al salir** (`en_ruta`) **sin otro viaje publicado**: una hoja pregunta "¿Haces la vuelta a …?" con "¿Cuándo
-    llegas a recoger en …?" (20, 30, 45 min, 1 hora). **Sí** la publica `en_camino` (como "Agregar otro viaje" en
+  - **Al salir** (`en_ruta`) **sin otro viaje publicado**: una hoja que **primero confirma la salida** ("✓ Saliste
+    hacia el Centro con 3 pasajeros") y pregunta en palabras del chofer: "**¿Recoges gente en el Centro para volver a
+    Valle Grande?**", con lo que gana ("Si publicas tu vuelta ahora, la gente que espera ahí ya la ve y aparta puesto
+    mientras llegas"), "¿Cuándo llegas a recoger en …?" (20, 30, 45 min, 1 hora) y lo que se publicará ("Vuelta:
+    Centro → Valle Grande · 4 puestos"). **Sí, publicar mi vuelta** la publica `en_camino` (como "Agregar otro viaje" en
     ruta, R11/R13); cerrar la hoja o **No, por ahora no** no hace nada y no se vuelve a preguntar. Se pregunta
     todavía parado, nunca con el carro andando. Si ya tenía la vuelta publicada, no aparece.
 
