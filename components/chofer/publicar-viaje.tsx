@@ -92,6 +92,18 @@ export function PublicarViaje({
   // La pregunta de la vuelta queda al final, detrás del botón fijo: mientras no se ve, la barra muestra la escogida y
   // lleva hasta ella con un toque (R61). El margen de abajo descuenta lo que tapa la barra.
   const refVuelta = useRef<HTMLFieldSetElement>(null)
+  const refBarra = useRef<HTMLDivElement>(null)
+  // Lleva la pregunta (con sus minutos) justo encima de la barra fija, descontando lo que mide la barra
+  const mostrarVuelta = () => {
+    const el = refVuelta.current
+    if (!el) return
+    el.style.scrollMarginBottom = `${(refBarra.current?.offsetHeight ?? 0) + 16}px`
+    el.scrollIntoView({ behavior: "smooth", block: "end" })
+  }
+  // Al escoger "Ida y vuelta" aparecen los minutos debajo: que no queden detrás de la barra
+  useEffect(() => {
+    if (conVuelta) mostrarVuelta()
+  }, [conVuelta])
   const [vueltaALaVista, setVueltaALaVista] = useState(true)
   useEffect(() => {
     const el = refVuelta.current
@@ -240,6 +252,7 @@ export function PublicarViaje({
       )}
 
       <div
+        ref={refBarra}
         className={
           enHoja
             ? "sticky bottom-0 -mx-5 border-t bg-popover px-5 pt-3 pb-5"
@@ -249,7 +262,7 @@ export function PublicarViaje({
         {!vueltaALaVista && (
           <button
             type="button"
-            onClick={() => refVuelta.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+            onClick={mostrarVuelta}
             className="mb-2 flex min-h-11 w-full items-center gap-1.5 rounded-xl px-1 text-left text-[15px] outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
           >
             <span className="font-bold">{conVuelta ? "Ida y vuelta" : "Solo ida"}</span>
