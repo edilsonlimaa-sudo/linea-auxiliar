@@ -239,6 +239,155 @@ export type Database = {
           },
         ]
       }
+      lista_gina: {
+        Row: {
+          cerrada_en: string | null
+          creada_en: string
+          en_gina: boolean
+          estado: Database["public"]["Enums"]["estado_en_lista"]
+          id: string
+          lugar: string | null
+          pasajero_id: string
+          personas: number
+          reserva_id: string | null
+          vence_en: string
+          viaje_id: string | null
+        }
+        Insert: {
+          cerrada_en?: string | null
+          creada_en?: string
+          en_gina: boolean
+          estado?: Database["public"]["Enums"]["estado_en_lista"]
+          id?: string
+          lugar?: string | null
+          pasajero_id: string
+          personas?: number
+          reserva_id?: string | null
+          vence_en?: string
+          viaje_id?: string | null
+        }
+        Update: {
+          cerrada_en?: string | null
+          creada_en?: string
+          en_gina?: boolean
+          estado?: Database["public"]["Enums"]["estado_en_lista"]
+          id?: string
+          lugar?: string | null
+          pasajero_id?: string
+          personas?: number
+          reserva_id?: string | null
+          vence_en?: string
+          viaje_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lista_gina_pasajero_id_fkey"
+            columns: ["pasajero_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lista_gina_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lista_gina_viaje_id_fkey"
+            columns: ["viaje_id"]
+            isOneToOne: false
+            referencedRelation: "viajes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lista_gina_privado: {
+        Row: {
+          distancia_m: number | null
+          id: string
+          lat: number | null
+          lng: number | null
+        }
+        Insert: {
+          distancia_m?: number | null
+          id: string
+          lat?: number | null
+          lng?: number | null
+        }
+        Update: {
+          distancia_m?: number | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lista_gina_privado_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "lista_gina"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paradas: {
+        Row: {
+          activa: boolean
+          creado_en: string
+          id: string
+          lat: number
+          lng: number
+          nombre: string
+          referencia: string | null
+        }
+        Insert: {
+          activa?: boolean
+          creado_en?: string
+          id?: string
+          lat: number
+          lng: number
+          nombre: string
+          referencia?: string | null
+        }
+        Update: {
+          activa?: boolean
+          creado_en?: string
+          id?: string
+          lat?: number
+          lng?: number
+          nombre?: string
+          referencia?: string | null
+        }
+        Relationships: []
+      }
+      paradas_sentido: {
+        Row: {
+          orden: number
+          parada_id: string
+          sentido: Database["public"]["Enums"]["sentido"]
+        }
+        Insert: {
+          orden: number
+          parada_id: string
+          sentido: Database["public"]["Enums"]["sentido"]
+        }
+        Update: {
+          orden?: number
+          parada_id?: string
+          sentido?: Database["public"]["Enums"]["sentido"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paradas_sentido_parada_id_fkey"
+            columns: ["parada_id"]
+            isOneToOne: false
+            referencedRelation: "paradas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pausas: {
         Row: {
           cerrada_en: string | null
@@ -461,6 +610,60 @@ export type Database = {
           },
         ]
       }
+      senales: {
+        Row: {
+          cerrada_en: string | null
+          creada_en: string
+          distancia_m: number | null
+          estado: Database["public"]["Enums"]["estado_senal"]
+          id: string
+          parada_id: string
+          pasajero_id: string
+          personas: number
+          sentido: Database["public"]["Enums"]["sentido"]
+          vence_en: string
+        }
+        Insert: {
+          cerrada_en?: string | null
+          creada_en?: string
+          distancia_m?: number | null
+          estado?: Database["public"]["Enums"]["estado_senal"]
+          id?: string
+          parada_id: string
+          pasajero_id: string
+          personas?: number
+          sentido: Database["public"]["Enums"]["sentido"]
+          vence_en?: string
+        }
+        Update: {
+          cerrada_en?: string | null
+          creada_en?: string
+          distancia_m?: number | null
+          estado?: Database["public"]["Enums"]["estado_senal"]
+          id?: string
+          parada_id?: string
+          pasajero_id?: string
+          personas?: number
+          sentido?: Database["public"]["Enums"]["sentido"]
+          vence_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "senales_parada_id_fkey"
+            columns: ["parada_id"]
+            isOneToOne: false
+            referencedRelation: "paradas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "senales_pasajero_id_fkey"
+            columns: ["pasajero_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehiculos: {
         Row: {
           aire_acondicionado: boolean
@@ -618,6 +821,10 @@ export type Database = {
         Args: { p_pasajero: string }
         Returns: undefined
       }
+      _compactar_paradas: {
+        Args: { p_sentido: Database["public"]["Enums"]["sentido"] }
+        Returns: undefined
+      }
       _exigir_aprobado: {
         Args: never
         Returns: {
@@ -684,6 +891,13 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _mi_fila: {
+        Args: never
+        Returns: {
+          parada_id: string
+          sentido: Database["public"]["Enums"]["sentido"]
+        }[]
+      }
       _mi_viaje: {
         Args: { p_viaje: string }
         Returns: {
@@ -707,6 +921,15 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      _ocupado_por_otros: { Args: { p_viaje: string }; Returns: string[] }
+      _plan_gina: {
+        Args: { p_excluir?: string[]; p_viaje: string }
+        Returns: {
+          cabe: boolean
+          entrada_id: string
+          rol: string
+        }[]
       }
       _promover: { Args: { p_chofer: string }; Returns: undefined }
       _reserva: {
@@ -741,6 +964,7 @@ export type Database = {
         Args: { p_lat: number; p_lng: number; p_lugar: string }
         Returns: undefined
       }
+      _vincular_camino: { Args: { p_viaje: string }; Returns: undefined }
       admin_actividad: {
         Args: never
         Returns: {
@@ -906,6 +1130,7 @@ export type Database = {
           sentido: Database["public"]["Enums"]["sentido"]
         }[]
       }
+      desactivar_parada: { Args: { p_id: string }; Returns: undefined }
       desconectar: { Args: { p_vuelve_en?: string }; Returns: undefined }
       desconectar_inactivos: { Args: never; Returns: undefined }
       eliminar_cuenta: {
@@ -936,6 +1161,92 @@ export type Database = {
           nombre: string
           personas: number
           sentido: Database["public"]["Enums"]["sentido"]
+          telefono: string
+        }[]
+      }
+      esperando_por_parada: {
+        Args: { p_sentido: Database["public"]["Enums"]["sentido"] }
+        Returns: {
+          avisos: number
+          parada_id: string
+          personas: number
+        }[]
+      }
+      estoy_en_la_parada: {
+        Args: {
+          p_distancia_m?: number
+          p_parada: string
+          p_personas?: number
+          p_sentido: Database["public"]["Enums"]["sentido"]
+        }
+        Returns: string
+      }
+      estoy_en_lista: {
+        Args: {
+          p_distancia_m?: number
+          p_en_gina: boolean
+          p_lat?: number
+          p_lng?: number
+          p_lugar?: string
+          p_personas?: number
+        }
+        Returns: string
+      }
+      fila_de_parada: {
+        Args: {
+          p_parada: string
+          p_sentido: Database["public"]["Enums"]["sentido"]
+        }
+        Returns: {
+          creada_en: string
+          distancia_m: number
+          es_mio: boolean
+          foto_path: string
+          id: string
+          nombre: string
+          personas: number
+          posicion: number
+        }[]
+      }
+      guardar_parada: {
+        Args: {
+          p_id: string
+          p_lat: number
+          p_lng: number
+          p_nombre: string
+          p_referencia: string
+          p_sentidos: Database["public"]["Enums"]["sentido"][]
+        }
+        Returns: string
+      }
+      lista_de_gina: {
+        Args: never
+        Returns: {
+          creada_en: string
+          en_gina: boolean
+          es_mio: boolean
+          foto_path: string
+          id: string
+          lugar: string
+          nombre: string
+          personas: number
+          posicion: number
+          vence_en: string
+        }[]
+      }
+      lista_para_choferes: {
+        Args: never
+        Returns: {
+          creada_en: string
+          en_gina: boolean
+          foto_path: string
+          id: string
+          lat: number
+          lng: number
+          lugar: string
+          nombre: string
+          personas: number
+          posicion: number
           telefono: string
         }[]
       }
@@ -971,6 +1282,7 @@ export type Database = {
       marcar_no_vino: { Args: { p_reserva: string }; Returns: undefined }
       marcar_se_bajo: { Args: { p_reserva: string }; Returns: undefined }
       marcar_subio: { Args: { p_reserva: string }; Returns: undefined }
+      me_fui: { Args: never; Returns: undefined }
       mis_datos_privados: {
         Args: never
         Returns: {
@@ -984,6 +1296,7 @@ export type Database = {
           lugar: string
         }[]
       }
+      no_estaba_en_lista: { Args: { p_entrada: string }; Returns: undefined }
       nombre_corto: { Args: { p_nombre: string }; Returns: string }
       normalizar_telefono: { Args: { p_telefono: string }; Returns: string }
       ocupar_puesto: {
@@ -991,6 +1304,31 @@ export type Database = {
         Returns: string
       }
       omitir_calificacion: { Args: { p_reserva: string }; Returns: undefined }
+      ordenar_paradas: {
+        Args: {
+          p_ids: string[]
+          p_sentido: Database["public"]["Enums"]["sentido"]
+        }
+        Returns: undefined
+      }
+      plan_de_gina: {
+        Args: { p_viaje: string }
+        Returns: {
+          cabe: boolean
+          creada_en: string
+          en_gina: boolean
+          foto_path: string
+          id: string
+          lat: number
+          lng: number
+          lugar: string
+          nombre: string
+          personas: number
+          posicion: number
+          rol: string
+          telefono: string
+        }[]
+      }
       posicion_reserva: { Args: { p_reserva: string }; Returns: number }
       publicar_viaje: {
         Args: {
@@ -1018,11 +1356,27 @@ export type Database = {
         Args: { p_acepta: boolean; p_reserva: string }
         Returns: undefined
       }
+      sigo_aqui: { Args: never; Returns: undefined }
+      sigo_en_lista: { Args: never; Returns: undefined }
+      subio_de_lista: {
+        Args: { p_entrada: string; p_viaje: string }
+        Returns: string
+      }
       vencer_esperas: { Args: never; Returns: undefined }
+      vencer_lista_gina: { Args: never; Returns: undefined }
+      vencer_senales: { Args: never; Returns: undefined }
+      ya_no_espero: { Args: never; Returns: undefined }
     }
     Enums: {
       estado_alerta: "activa" | "resuelta"
       estado_cuenta: "pendiente" | "aprobado" | "rechazado"
+      estado_en_lista:
+        | "esperando"
+        | "en_carro"
+        | "subio"
+        | "se_fue"
+        | "vencida"
+        | "no_estaba"
       estado_espera: "esperando" | "reservo" | "cancelada" | "expirada"
       estado_reserva:
         | "activa"
@@ -1032,6 +1386,7 @@ export type Database = {
         | "cancelada"
         | "sin_puesto"
         | "rechazada"
+      estado_senal: "esperando" | "subio" | "se_fue" | "vencida" | "no_estaba"
       estado_viaje:
         | "programado"
         | "en_camino"
@@ -1175,6 +1530,14 @@ export const Constants = {
     Enums: {
       estado_alerta: ["activa", "resuelta"],
       estado_cuenta: ["pendiente", "aprobado", "rechazado"],
+      estado_en_lista: [
+        "esperando",
+        "en_carro",
+        "subio",
+        "se_fue",
+        "vencida",
+        "no_estaba",
+      ],
       estado_espera: ["esperando", "reservo", "cancelada", "expirada"],
       estado_reserva: [
         "activa",
@@ -1185,6 +1548,7 @@ export const Constants = {
         "sin_puesto",
         "rechazada",
       ],
+      estado_senal: ["esperando", "subio", "se_fue", "vencida", "no_estaba"],
       estado_viaje: [
         "programado",
         "en_camino",

@@ -46,6 +46,8 @@ Una persona tiene un solo rol. El admin se asigna a mano en la base de datos.
 | **Turno / lista de espera** | Reservas que quedaron después del puesto N |
 | **Espera** | Aviso de demanda: "estoy esperando para ir al Centro, en tal lugar" cuando no ve un carro que le sirva |
 | **Pedido en el camino** | Reserva hecha sobre un carro que **ya salió**; el chofer decide si pasa ("Voy") o no ("Sigo") |
+| **Lista hacia Valle Grande** | En el tramo **Centro → Valle Grande**, la lista única de quienes esperan, por orden de llegada (R62). Cada uno dice dónde está (casi siempre Gina). Reemplaza a apartar puesto en ese sentido |
+| **Aviso** | Anotarse en la Lista hacia Valle Grande diciendo dónde está ("En Gina" o el lugar que escribe): la entrada de una persona (o un grupo) |
 | **Conectado** | El chofer está trabajando y los pasajeros lo ven entre las "unidades en servicio" |
 
 ## 4. Decisiones
@@ -178,6 +180,10 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
   - Los viajes anteriores a esta regla solo tienen salida y llegada.
 
 ### 5.5 Reservas y lista justa (el corazón de la app)
+
+> **Solo en Valle Grande → Centro.** Desde oct. 2026 (modelo híbrido), en **Centro → Valle Grande** no se aparta
+> puesto: rige la **Lista hacia Valle Grande** (§5.17). Las reglas de reservas, pedidos en el camino (§5.7) y lugar (§5.6)
+> aplican solo a Valle Grande → Centro.
 
 - **R16. El pasajero escoge el carro.** No hay turno entre choferes ni asignación por orden de salida. Los
   viajes se muestran agrupados por **sentido**, primero los que tienen puestos y llegan antes.
@@ -361,6 +367,60 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R55. Aire acondicionado.** El chofer indica si su carro tiene aire (al registrarse y en Mi carnet). Los
   pasajeros lo ven en cada unidad y en Mi viaje ("❄️ Con aire").
 
+### 5.17 Lista hacia Valle Grande: el tramo Centro → Valle Grande (modelo híbrido)
+
+*(Oct. 2026, hablado con choferes y pasajeros.)* La competencia por puesto está en la salida del Centro: ahí la
+gente espera, casi siempre en la parada de **Gina**, y el que llega primero debe subir primero. En ese tramo la app deja
+de apartar puestos y arma **una sola lista del tramo, por orden de llegada**: la lista no es de una parada; cada uno
+dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Centro sigue igual (apartar).
+
+- **R62. Anotarse en la lista [servidor].** En Centro → Valle Grande el pasajero no escoge carro: **se anota en la
+  lista del tramo** (**Anotarme en la lista**) y dice **dónde está**: **En Gina** es la opción principal, ya escogida
+  (un toque); si espera en otro punto del camino, lo **escribe** ("Plaza del Indio", máx. 60) o usa su GPS. Pregunta
+  **cuántos van** (1–4, R57): el grupo **sube junto o no sube**. Una sola entrada activa por persona.
+  - Avisar es estar ahí: no hay "llego en 5 min". Si el GPS dice que está a más de 300 m de Gina, la app pregunta
+    "¿Ya estás en Gina?" y deja seguir igual; se guarda la distancia para medir abusos.
+  - El aviso **vence a los 45 min**; a los 35 pregunta **"¿Sigues ahí?"** (Sí, sigo aquí renueva sin perder el
+    lugar). **Me fui** está siempre a un toque y saca a la persona de la lista al instante.
+- **R63. Una sola lista, por orden de llegada [servidor].** El orden lo pone el reloj del servidor. Todos ven
+  la misma lista: **nombre corto, cuántos van, dónde está** (Gina o el lugar escrito) y su posición ("Eres el 5").
+  Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
+  - **El pasajero la ve igual, en una franja** ("La lista · 21 personas · 15 en Gina · 6 en otro lugar") que abre la
+    lista completa en una hoja, con la suya destacada; su lugar en grande va arriba ("Eres el 11").
+  - **Los choferes la ven siempre, fuera de sus viajes**: es del tramo, no de un carro. En su Inicio, una franja
+    "Lista hacia Valle Grande" (caras, cuántos y dónde: "En Gina: 4 · En otro lugar: 1") abre la **lista completa** en
+    una hoja: posición, nombre, cuántos van, **dónde espera**, desde cuándo, teléfono (si está conectado) y "Cómo
+    llegar" para los de otro lugar con GPS. Al estar en Gina (R64) o en ruta hacia Valle Grande (R67), la misma hoja
+    deja subir a la gente.
+- **R64. El carro en Gina: llama, guarda y sube [servidor].** El chofer sigue publicando su viaje Centro → Valle
+  Grande (para que vean cuándo llega y con cuántos puestos, R10, R61); nadie aparta en él. Al tocar **Ya llegué**
+  en Gina, la lista del tramo (R63) se destaca ("Estás en Gina: abre la lista") y la app arma **el plan del carro** recorriendo la lista en orden hasta
+  llenar los puestos:
+  - Quien está **en Gina** → "Llama a" (en orden). El chofer marca **Subió**.
+  - Quien está **en el camino** y entra en el plan → **"Guarda N puestos para"** (con su lugar). Ese puesto no se
+    ofrece en Gina.
+  - Un grupo que no cabe en lo que queda no entra en el plan y **sigue en su lugar** para el siguiente carro.
+  - **+ Subió alguien sin app** (R36) ocupa un puesto sin nombre.
+  - **Dos carros en Gina a la vez:** arma su plan primero el que llegó primero; el otro arma el suyo con lo que
+    sigue en la lista, sin repetir a quienes el primero ya llama o les guarda puesto.
+- **R65. Quien no aparece sigue primero [servidor].** Si alguien de Gina no está al llamarlo ("viene en camino"),
+  el chofer no lo marca: **conserva su lugar arriba** para el siguiente carro, y el plan ofrece ese puesto al que
+  sigue en la lista. Si el chofer lo llamó y no apareció ni respondió, puede marcar **No estaba**: sale de la
+  lista (cuenta para medir, como "No vino").
+- **R66. Al salir, el carro se lleva a los del camino [servidor].** Al tocar **Salir**, quienes tenían puesto
+  guardado en el camino quedan **vinculados a ese carro**: ven "José va por ti con tu puesto · ya salió de Gina",
+  y el siguiente carro **no** les guarda puesto otra vez. Al pasar, el chofer marca **Subió** o **No estaba**.
+  Los de Gina que no subieron vuelven a la lista en su lugar (R65).
+  - **Que no se olvide a nadie del camino:** en Gina, el viaje muestra un aviso amarillo "Al salir, recoges en el
+    camino: Carla P. · Plaza del Indio"; la confirmación de Salir lo repite ("En el camino recoges a …"); y en ruta
+    **Recoge en el camino** va arriba, en amarillo, con Subió / No vino. Arriba se lee "3 pasajeros a bordo · 1 por
+    recoger" (a bordo son solo los que subieron).
+- **R67. Avisos del camino con el carro ya en ruta.** El chofer en ruta ve a quienes esperan **en el camino sin
+  carro** (avisaron después de que salió de Gina) y, si para y tiene puesto, los marca **Subió**. Si no para,
+  esperan al siguiente carro, que les guarda puesto como en R64.
+- **R68. A bordo, igual que hoy.** Cada **Subió** crea un pasajero a bordo del viaje: **Se bajó** (R38),
+  historial (R50–R51) y calificaciones (R44–R45) funcionan como en Valle Grande → Centro.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -372,6 +432,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 | **Cédula** | Solo la propia persona y el admin |
 | Lugar escrito y GPS de un pasajero (reserva) | Solo el chofer del viaje. La lista pública no lo muestra |
 | Espera de un pasajero | Él, el admin y los **choferes conectados** (nombre corto, foto, sentido, cuántos van, lugar, desde cuándo y WhatsApp, R31). Quien también espera en el mismo sentido ve su **nombre corto y desde cuándo** (como la lista pública de un viaje), nunca el lugar |
+| Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Cualquier usuario con sesión. La **distancia** al avisar (R62), solo el admin |
+| **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
 | Alertas de auxilio | Solo choferes |
 
