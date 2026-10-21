@@ -30,7 +30,7 @@ const TIEMPOS: Record<ModoPublicar, { pregunta: string; ayuda?: string; rapidos:
 }
 
 /** Tarjeta de opción grande (radio nativo oculto: teclado y lector de pantalla funcionan) */
-function Opcion({
+export function Opcion({
   nombre,
   elegida,
   onElegir,
@@ -63,16 +63,14 @@ function Opcion({
  */
 export function PublicarViaje({
   modo,
-  esperando,
   ultimo,
   sentidoInicial,
   enHoja = false,
   onPublicado,
 }: {
   modo: ModoPublicar
-  esperando: Record<Sentido, number>
   ultimo: { sentido: Sentido; puestos: number } | null
-  sentidoInicial?: Sentido | null // p. ej. el de más demanda sin atender (§8); si no, el contrario al último viaje
+  sentidoInicial?: Sentido | null // si no se indica, el contrario al último viaje
   enHoja?: boolean // dentro de "Agregar otro viaje": el botón no se pega abajo de la página
   onPublicado?: () => void
 }) {
@@ -117,9 +115,6 @@ export function PublicarViaje({
               <span className="flex items-center gap-1.5 text-lg">
                 {sentido === s && <CheckIcon aria-hidden className="size-5" />}
                 {SENTIDOS[s].corto}
-              </span>
-              <span className={cn("text-sm font-normal", sentido === s ? "opacity-90" : "text-muted-foreground")}>
-                {esperando[s] === 0 ? "Nadie esperando" : esperando[s] === 1 ? "1 esperando" : `${esperando[s]} esperando`}
               </span>
             </Opcion>
           ))}

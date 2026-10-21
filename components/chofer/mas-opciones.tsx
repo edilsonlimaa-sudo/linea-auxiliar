@@ -21,9 +21,9 @@ export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: s
   return (
     <>
       <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), setNuevos(puestos))}>
-        <SheetTrigger render={<Button variant="ghost" className="w-full" />}>
+        <SheetTrigger render={<Button variant="outline" className="h-auto min-h-11 w-full whitespace-normal" />}>
           <EllipsisIcon aria-hidden />
-          Más opciones del viaje
+          Opciones
         </SheetTrigger>
         <SheetContent side="bottom" className="mx-auto max-w-2xl">
           <SheetHeader>

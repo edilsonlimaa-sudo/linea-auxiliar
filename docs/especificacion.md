@@ -103,6 +103,20 @@ puede ocultar botones, pero nunca es la única barrera.
 - **R8 [servidor].** Al desconectarse se **cancelan** sus viajes publicados (los anotados reciben aviso). Con
   un viaje **en ruta** no puede desconectarse: primero lo termina.
 - **R9 [servidor].** A medianoche (America/Caracas) todos los choferes quedan desconectados.
+- **R60. ¿Vuelves hoy? [servidor].** *(Oct. 2026: previsibilidad para el pasajero.)* Al tocar **Desconectarme**
+  el chofer responde **"¿Vuelves a trabajar hoy?"**: **Sí, vuelvo** → "¿En cuánto?" (30 min, 1 hora, 2 horas o **a una
+  hora**) · **No, terminé por hoy**. Se guarda como una **pausa** (desde, vuelve a las…, cerrada) y se responde con dos
+  toques, sin escribir.
+  - La hora de vuelta va de ahora a 12 h como máximo. Se muestra como **hora** ("vuelve como a las 5:30 p. m."; si cae
+    al día siguiente, "mañana como a las 7:00 a. m."), nunca como "en 1 hora", que envejece en la pantalla.
+  - Es una **estimación, no una promesa**: se deja de mostrar 30 min después de la hora dicha si no volvió.
+    "Terminó por hoy" se muestra hasta la medianoche.
+  - Al **conectarse o publicar** un viaje, la pausa se cierra sola. La desconexión automática (R9) no crea pausa:
+    nadie respondió, no se muestra nada.
+  - Los pasajeros lo ven donde más ayuda: en Inicio **cuando no hay unidad con puesto** ("José vuelve como a las
+    5:30 p. m. · Luisa terminó por hoy") y en "La línea ahora", aparte de quienes trabajan.
+  - Cada pausa queda guardada con la hora en que de verdad volvió: más adelante el panel podrá mostrar si cada chofer
+    cumple lo que dice.
 
 ### 5.3 Publicar viajes y cadena
 
@@ -177,16 +191,9 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
     Al anotar a mano (R36) sigue siendo de a uno.
   - La espera (R31) también dice cuántos van; la demanda que ven los choferes y el admin cuenta **personas**.
   - Al cambiarse de unidad (R22) se lleva el mismo número de personas.
-- **R58. El chofer confirma cada reserva [servidor].** Apartar es una **solicitud**: los puestos quedan **guardados**
-  para esa persona al instante (nadie más los toma, R17) y la reserva queda `pendiente` hasta que el chofer
-  responde, como el pedido en el camino (R29).
-  - Al chofer le aparece arriba de su lista, en rojo: "Pide puesto · Carmen R. +2 · Portón VGC · se rechaza sola en
-    4 min", con **Aceptar** y **Rechazar**.
-  - Al pasajero: "Esperando que el chofer confirme" en Mi viaje. Aceptada: "¡El chofer confirmó tu puesto!".
-  - **Sin respuesta en 5 minutos, se rechaza sola** (el chofer suele ir manejando): se liberan los puestos y el
-    pasajero ve "El chofer no confirmó tu puesto; escoge otra unidad" (aviso de cierre). Igual si el chofer sale con
-    el viaje sin haber respondido.
-  - "No vino" y "Salir" no cuentan a quien sigue pendiente. Lo anotado a mano por el chofer (R36) no se confirma.
+- **R58.** *(Eliminada en oct. 2026.)* Apartar ya no es una solicitud que el chofer confirma: **al apartar, el
+  puesto queda garantizado** (R17). Solo el pedido en el camino (R29, con el carro ya en ruta) espera la respuesta
+  del chofer, sin vencimiento automático.
 - **R18. Una reserva activa por pasajero [servidor].** Si aparta en otro carro, se le pregunta y la anterior
   se cancela.
 - **R19. Lista pública.** Todos ven la misma lista con nombre corto ("Carmen R."). Nunca el teléfono.
@@ -521,53 +528,50 @@ Al apartar → Mi viaje. La espera vence sola a las 2 h (R35): vuelve a Inicio.
 
 Quien pidió **Avísame cuando haya una** pasa a la página **Esperando** (§8): el sentido queda fijo mientras espera.
 
-**Inicio del chofer.** Antes de salir, el chofer se pregunta **"¿hay gente esperando? ¿ya hay alguien
-atendiendo?"**. Inicio responde eso primero y publicar es una opción, no la pantalla entera:
+**Inicio del chofer.** El chofer usa la app **parado en la recogida o en un semáforo, con prisa y a veces con una
+mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, el resto queda a un toque.**
 
-1. **Saludo** y su **conexión** (Conectado / Desconectado).
-2. **¿Hay gente esperando?** (R31) Por sentido, con números grandes: cuántos esperan y cuánta oferta hay ya
-   (unidades de otros choferes que aceptan reservas y sus puestos libres). Si esperan más que los puestos libres:
-   **"Falta transporte"** en destaque. Aquí sí importa el sentido: es la decisión del chofer.
-3. **Publicar un viaje** (la acción principal): abre el formulario en una hoja, con el sentido **de más demanda
-   sin atender** ya escogido (si no hay demanda, el contrario al último viaje).
-4. **Compañeros en la ruta:** quién más trabaja y qué hace (R7), para no ir todos al mismo lado.
-5. **Atajos** a Mis viajes y Mis calificaciones.
+**Sin viajes ("¿salgo ahora?"):**
 
-**Con un viaje abierto**, Inicio es la gestión de ese viaje (lo que sigue) y arriba queda una línea con la demanda
-("Esperando: 3 al Centro · nadie a Valle Grande"). El chofer usa la app **parado en la recogida o en un semáforo,
-con prisa y a veces con una mano**. Por eso:
+1. **Bloque principal** (azul de la línea, como el del pasajero): saludo, el **estado** en una etiqueta (Conectado /
+   Desconectado) y la acción principal **Publicar un viaje** (abre el formulario en una hoja, con el sentido
+   contrario al último viaje ya escogido).
+2. **Compañeros en la ruta** en una franja: sus caras y "2 compañeros trabajando ›". Tocarla abre la lista (quién
+   y qué hace, R7) y **tocar un compañero** abre su detalle: foto, nombre, ★, placa, unidad y ❄️; **qué hace ahora**
+   (sentido, estado, "lleva 3 de 4"); **sus próximos viajes** (sentido y hora); el **mapa** (R41) y **WhatsApp** /
+   **Llamar** (§6). Sin nombres de pasajeros. Mis viajes y Mis calificaciones están en el menú.
 
+**Con un viaje abierto ("¿qué hago ahora y a quién recojo?"):**
+
+- **Estado en una línea** arriba: "● Conectado · Ubicación activa". Tocarla deja desconectarse (con confirmación si
+  cancela viajes, R8) después de "¿Vuelves a trabajar hoy?" (R60). Solo si el GPS falla se vuelve un aviso amarillo con "Intentar de nuevo" (R40).
 - **Una sola acción principal a la vez**, grande y fija abajo (zona del pulgar), que cambia con el estado:
-  en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando →
-  **Ya llegué** · recogiendo → **Salir con N pasajeros** · en ruta → **Terminar viaje**.
-- **Casi nada que escribir.** Publicar es tocar: sentido (dos botones; se sugiere el de más demanda sin atender o,
-  si no hay, el contrario al último viaje),
-  puestos (− / +, empieza con los del último viaje) y cuándo llega ("Ya estoy aquí", 5, 10, 15, 20 min u
-  "Otro"). Encima de cada sentido se ve cuánta gente espera (R10).
-- **La lista es el centro de la pantalla**, en el orden justo (R17). Cada fila: número de puesto en grande,
-  nombre corto, **el lugar en grande** (R25), "✋ Ya está en el sitio" (R23) y acciones de una mano: Llamar,
-  WhatsApp, **Cómo llegar** si compartió GPS (R26), **No vino** (R21). La lista de espera va aparte, debajo.
-- **➕ Ocupar puesto** para quien sube sin app: un toque; el nombre es opcional (R36).
-- **Salir pide confirmación** y avisa quién todavía no está en el sitio ("Rosa M. no ha avisado que llegó"),
-  porque al salir la lista se cierra (R14).
-- **Avisar que llego** ofrece también el mensaje listo para el grupo de WhatsApp (R15).
-- **En ruta:** "A bordo (N)" con **Se bajó** (R38), "Subió en el camino" (ocupar puesto) y los **pedidos en el
-  camino** arriba, en rojo, con **✓ Voy / ✕ Sigo** y luego **Subió** / **No vino** (R29).
-- **➕ Agregar otro viaje** (R11), debajo del viaje actual, siempre que tenga un viaje abierto. Abre el mismo
-  formulario en una hoja inferior, con el sentido contrario al último viaje ya escogido. Lo que pregunta el
-  tiempo depende de la situación:
-  - **Con una recogida en curso** (en camino, llegando, recogiendo), el viaje nuevo queda como *próximo*
-    (`programado`): "**¿Cuánto tardas en llegar a recoger después de salir?**" (15, 20, 30, 45 min, otro o a
-    una hora). Arranca solo cuando sale con el actual (R12).
-  - **Solo con un viaje en ruta**, el nuevo empieza ya *en camino*: "¿Cuándo llegas a recoger?" como al
-    publicar el primero. Al tocar **Ya llegué** en esa recogida, el viaje en ruta se termina solo (R13).
-- **Próximos viajes** debajo, uno por tarjeta plegada con su resumen ("Próximo: recoges en el Centro a las
-  4:13 · 2 anotados de 4"). Al abrirla: su lista, **➕ Ocupar puesto** (R36) y **Más opciones** (puestos,
-  cancelar). No tienen acción principal: empiezan solos.
-- En todos los formularios de tiempo hay **"A una hora"** (R10) para quien prefiere decir "llego a las 2".
-- Lo que se usa poco va en **"Más opciones"**: cambiar puestos, cancelar el viaje (con confirmación, R24).
-- **Conexión** arriba: "Conectado / Desconectado" con su botón. Desconectarse con viajes publicados pide
-  confirmación porque los cancela (R8).
+  en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando → **Ya llegué** · recogiendo → **Salir con N
+  pasajeros** · en ruta → **Terminar viaje**.
+- **El viaje en foco**: ruta, qué hace ahora en grande ("Recogiendo en Valle Grande") con su detalle, una **barra de
+  pasos** (En camino · Llegando · Recogiendo · En ruta) en vez de más texto, y los puestos dibujados ("3 de 4").
+- **La lista es el centro**, en el orden justo (R17): **una fila por reserva**, corta: puesto en grande ("2–4" si es
+  un grupo), nombre corto (+ acompañantes), **el lugar** (R25) y "✋ En el sitio" (R23). **Solo la acción del
+  momento** va en la fila: pedido en el camino → ✓ Voy / ✕ Sigo (R29, en rojo, arriba); en ruta → Subió / No vino
+  y Se bajó (R38); recogiendo → No vino (R21). **Llamar, WhatsApp, Cómo llegar y Waze** van detrás de un botón de
+  contacto en la fila (una hoja), para no llenar la pantalla de botones.
+- **➕ Ocupar puesto** (R36) y **Opciones** (puestos, cancelar con confirmación, R24) van chicos, lado a lado, al pie
+  del viaje.
+- **Salir pide confirmación** y avisa quién todavía no está en el sitio, porque al salir la lista se cierra (R14).
+  **Avisar que llego** ofrece también el mensaje listo para el grupo de WhatsApp (R15).
+- **Próximos viajes** debajo, plegados con su resumen ("Próximo: recoges en el Centro a las 4:13 · 2 de 4"). Al
+  abrir: su lista y sus opciones. Empiezan solos (R12).
+- **➕ Agregar otro viaje** (R11), debajo de los próximos. Lo que pregunta el tiempo depende de la situación:
+  - **Con una recogida en curso**, el nuevo queda como *próximo* (`programado`): "**¿Cuánto tardas en llegar a
+    recoger después de salir?**" (15, 20, 30, 45 min, otro o a una hora). Arranca solo al salir con el actual (R12).
+  - **Solo con un viaje en ruta**, empieza ya *en camino*: "¿Cuándo llegas a recoger?". Al tocar **Ya llegué** en
+    esa recogida, el viaje en ruta se termina solo (R13).
+- **Publicar es tocar:** sentido (dos botones), puestos (− / +) y cuándo llega ("Ya estoy aquí", 5, 10, 15, 20 min,
+  "Otro" o **"A una hora"**, R10).
+- **Compañeros** en la misma franja, al final.
+
+*(Oct. 2026: con R31 suspendida no hay "¿Hay gente esperando?", ni "Ver quién espera", ni cuántos esperan al
+publicar.)*
 
 ## 9. Modelo de datos (conceptual)
 

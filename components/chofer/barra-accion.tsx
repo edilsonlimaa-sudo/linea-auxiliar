@@ -105,7 +105,7 @@ export function BarraAccion({
         titulo={confirmados === 1 ? "¿Salir con 1 pasajero?" : `¿Salir con ${confirmados} pasajeros?`}
         descripcion={
           <>
-            Al salir se cierra la lista: las solicitudes que no confirmaste se rechazan.
+            Al salir se cierra la lista.
             {sinLlegar.length > 0 && (
               <strong className="mt-2 block text-foreground">
                 {sinLlegar.length === 1

@@ -14,12 +14,10 @@ import type { Sentido } from "@/lib/viajes"
  */
 export function AgregarViaje({
   modo,
-  esperando,
   ultimo,
   sentidoInicial,
 }: {
   modo: ModoPublicar
-  esperando: Record<Sentido, number>
   ultimo: { sentido: Sentido; puestos: number } | null
   sentidoInicial?: Sentido | null
 }) {
@@ -54,7 +52,6 @@ export function AgregarViaje({
           <PublicarViaje
             key={String(abierta)}
             modo={modo}
-            esperando={esperando}
             ultimo={ultimo}
             sentidoInicial={sentidoInicial}
             enHoja

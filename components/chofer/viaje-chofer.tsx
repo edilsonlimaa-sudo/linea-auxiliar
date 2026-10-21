@@ -16,8 +16,52 @@ import {
   estadoParaChofer,
   libres,
   SENTIDOS,
+  type EstadoViaje,
   type Viaje as ViajeBase,
 } from "@/lib/viajes"
+
+const PASOS = ["En camino", "Llegando", "Recogiendo", "En ruta"] as const
+const PASO_DE: Partial<Record<EstadoViaje, number>> = {
+  en_camino: 0,
+  llegando: 1,
+  en_parada: 2,
+  en_ruta: 3,
+}
+
+/**
+ * Dónde va el viaje, sin más texto: cuatro barras y lo que sigue. El título ya dice qué hace ahora en grande.
+ * Un viaje "programado" todavía no empezó: no lleva barra.
+ */
+function PasosViaje({ estado }: { estado: EstadoViaje }) {
+  const actual = PASO_DE[estado]
+  if (actual === undefined) return null
+  const siguiente = PASOS[actual + 1]
+  return (
+    <div className="flex flex-col gap-1.5">
+      <ol className="grid grid-cols-4 gap-1.5" aria-label="Avance del viaje">
+        {PASOS.map((paso, i) => (
+          <li
+            key={paso}
+            aria-current={i === actual ? "step" : undefined}
+            className={cn(
+              "h-2 rounded-full",
+              i <= actual ? "bg-primary" : "bg-muted"
+            )}
+          >
+            <span className="sr-only">
+              {paso}
+              {i < actual ? " (listo)" : i === actual ? " (ahora)" : ""}
+            </span>
+          </li>
+        ))}
+      </ol>
+      <p aria-hidden className="text-sm text-muted-foreground">
+        Paso {actual + 1} de {PASOS.length}
+        {siguiente && ` · Después: ${siguiente.toLowerCase()}`}
+      </p>
+    </div>
+  )
+}
 
 function Seccion({
   titulo,
@@ -33,7 +77,7 @@ function Seccion({
   if (filas.length === 0 && !vacio) return null
   return (
     <section className="flex flex-col gap-2">
-      <h3 className="font-bold">
+      <h3 className="text-[15px] font-bold tracking-wide text-muted-foreground uppercase">
         {titulo}{" "}
         <span className="font-normal text-muted-foreground">
           ({filas.length})
@@ -64,7 +108,8 @@ function mensajeGrupo(
     ? ` · ${vehiculo.unidad ? `Unidad ${vehiculo.unidad} · ` : ""}${vehiculo.placa}`
     : ""
   const lineas = confirmados.map(
-    (f) => `${f.personas > 1 ? `${f.desde}–${f.hasta}` : f.desde}. ${conAcompanantes(f.nombre, f.personas)}${f.lugar ? ` (${f.lugar})` : ""}`
+    (f) =>
+      `${f.personas > 1 ? `${f.desde}–${f.hasta}` : f.desde}. ${conAcompanantes(f.nombre, f.personas)}${f.lugar ? ` (${f.lugar})` : ""}`
   )
   return [
     `🚐 Llego en 3 minutos a recoger ${SENTIDOS[v.sentido].enRecogida}${carro}.`,
@@ -95,8 +140,6 @@ export function ViajeChofer({
 }) {
   const { titulo, detalle } = estadoParaChofer(viaje, porId)
   const enRuta = viaje.estado === "en_ruta"
-  // Las solicitudes sin responder van aparte, arriba (R58)
-  const solicitudes = viaje.lista.filter((f) => f.pendiente)
   const conPuesto = viaje.lista.filter((f) => f.confirmado && !f.pendiente)
   const enLista = viaje.lista.filter((f) => !f.confirmado && !f.pendiente)
   const sinLlegar = conPuesto
@@ -143,7 +186,7 @@ export function ViajeChofer({
         </summary>
         <div className="flex flex-col gap-5 px-4 pb-4">
           <p className="text-muted-foreground">{detalle}</p>
-          {cuerpo()}
+          {cuerpo(true)}
         </div>
       </details>
     )
@@ -156,9 +199,12 @@ export function ViajeChofer({
         className="flex flex-col gap-5 rounded-3xl border-2 border-primary bg-card p-4 text-card-foreground shadow-sm"
       >
         <div className="flex flex-col gap-1">
-          <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">
-            {SENTIDOS[viaje.sentido].largo}
-          </p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">
+              {SENTIDOS[viaje.sentido].largo}
+            </p>
+            {ocupacion(true)}
+          </div>
           <h2
             id={`viaje-${viaje.id}`}
             className={cn(
@@ -170,35 +216,47 @@ export function ViajeChofer({
           </h2>
           <p className="text-muted-foreground">{detalle}</p>
         </div>
-        {cuerpo()}
+        <PasosViaje estado={viaje.estado} />
+        {cuerpo(false)}
         {!barraFija && barra}
       </section>
       {barraFija && barra}
     </>
   )
 
-  // Puestos, lista y opciones: igual en la tarjeta abierta y en la plegada
-  function cuerpo() {
+  // Los puestos dibujados y "3 de 4": en la cabecera del viaje en foco, arriba de la lista en el plegado
+  function ocupacion(corta: boolean) {
+    const n = libres(viaje)
+    return (
+      <p className="flex shrink-0 items-center gap-2 font-bold">
+        <Asientos
+          puestos={viaje.puestos}
+          ocupados={Math.min(viaje.ocupados, viaje.puestos)}
+        />
+        <span>
+          {Math.min(viaje.ocupados, viaje.puestos)}/{viaje.puestos}
+          {!corta && n > 0 && !enRuta && (
+            <span className="text-success">
+              {" "}
+              · {n === 1 ? "1 libre" : `${n} libres`}
+            </span>
+          )}
+          {espera > 0 && (
+            <span className="font-normal text-muted-foreground">
+              {" "}
+              · {espera} en espera
+            </span>
+          )}
+        </span>
+      </p>
+    )
+  }
+
+  // Lista y opciones: igual en la tarjeta abierta y en la plegada
+  function cuerpo(conOcupacion: boolean) {
     return (
       <>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <Asientos
-            puestos={viaje.puestos}
-            ocupados={Math.min(viaje.ocupados, viaje.puestos)}
-          />
-          <p className="font-bold">
-            {Math.min(viaje.ocupados, viaje.puestos)} de {viaje.puestos} puestos
-            {libres(viaje) > 0 && !enRuta && (
-              <span className="text-success"> · {libres(viaje)} libres</span>
-            )}
-            {espera > 0 && (
-              <span className="font-normal text-muted-foreground">
-                {" "}
-                · {espera} en espera
-              </span>
-            )}
-          </p>
-        </div>
+        {conOcupacion && ocupacion(false)}
 
         {enRuta ? (
           <>
@@ -223,7 +281,6 @@ export function ViajeChofer({
           </>
         ) : (
           <>
-            <Seccion titulo="Piden puesto: confírmalos" filas={solicitudes} estado={viaje.estado} />
             <Seccion
               titulo="Con puesto"
               filas={conPuesto}
@@ -238,13 +295,10 @@ export function ViajeChofer({
           </>
         )}
 
-        <div className="flex flex-col gap-2">
-          {/* Sin lista de espera (R59): con el carro lleno no se anota a nadie */}
+        {/* Chicos y lado a lado: se usan poco. Sin lista de espera (R59): con el carro lleno no se anota a nadie */}
+        <div className="grid grid-cols-2 gap-2">
           {libres(viaje) > 0 && (
-            <OcuparPuesto
-              viajeId={viaje.id}
-              enRuta={enRuta}
-            />
+            <OcuparPuesto viajeId={viaje.id} enRuta={enRuta} />
           )}
           <MasOpciones
             viajeId={viaje.id}

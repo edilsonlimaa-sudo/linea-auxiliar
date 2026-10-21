@@ -1,55 +1,51 @@
-import { HistoryIcon, StarIcon } from "lucide-react"
-import Link from "next/link"
-
 import { AgregarViaje } from "@/components/chofer/agregar-viaje"
-import { CompartirUbicacion } from "@/components/chofer/compartir-ubicacion"
-import { Conexion } from "@/components/chofer/conexion"
-import { Demanda, DemandaCompacta, sentidoConMasDemanda } from "@/components/chofer/demanda"
-import { QuienEspera } from "@/components/chofer/quien-espera"
+import { Companeros } from "@/components/chofer/companeros"
+import { EstadoEnCabecera, EstadoServicio } from "@/components/chofer/conexion"
 import { ViajeChofer } from "@/components/chofer/viaje-chofer"
 import { EnVivo } from "@/components/en-vivo"
-import { EstadoDeLaLinea } from "@/components/pasajero/estado-de-la-linea"
 import type { DatosInicioChofer } from "@/lib/datos/inicio-chofer"
 import { saludo } from "@/lib/fechas"
 import type { Viaje } from "@/lib/viajes"
 
-const companerosTexto = (n: number) =>
-  n === 0 ? "Nadie más está trabajando ahora" : n === 1 ? "1 compañero trabajando ahora" : `${n} compañeros trabajando ahora`
-
 /**
- * Inicio del chofer (docs/especificacion.md §8). Sin viajes: primero la demanda ("¿hay gente esperando?") y
- * publicar es la acción principal, en una hoja. Con viajes abiertos: su gestión, con la demanda arriba en una línea.
- * El viaje "en foco" lleva la acción principal pegada abajo: el que va en ruta o, si no, la recogida actual.
+ * Inicio del chofer (docs/especificacion.md §8). Lo normal se ve discreto, lo que pide acción se ve claro y el resto
+ * queda a un toque.
+ * Sin viajes: un bloque azul con el saludo, el estado y "Publicar un viaje"; los compañeros en su franja.
+ * Con viajes abiertos: el estado en una línea, el viaje en foco (con su acción pegada abajo), los próximos plegados.
  */
 export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosInicioChofer }) {
-  const { conectado, enRuta, recogida, proximos, esperando, oferta, companeros, ultimo, vehiculo, quienEspera } = datos
+  const { conectado, enRuta, recogida, proximos, companeros, viajesCompaneros, ultimo, vehiculo } = datos
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
 
-  // Sin viajes abiertos: puerta de entrada con la demanda y "Publicar un viaje"
+  // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
     return (
       <div className="flex flex-col gap-5">
         <EnVivo />
-        <h1 className="text-[26px] leading-tight font-bold">
-          {saludo()}, {nombre.split(" ")[0]}
-        </h1>
-        <Conexion conectado={conectado} viajesAbiertos={0} />
-        <Demanda esperando={esperando} oferta={oferta}>
-          <QuienEspera personas={quienEspera} conectado={conectado} chofer={nombre} />
-        </Demanda>
-        <AgregarViaje modo="primero" esperando={esperando} ultimo={ultimo} sentidoInicial={sentidoConMasDemanda({ esperando, oferta })} />
-        <EstadoDeLaLinea choferes={companeros} aviso={null} titulo="Compañeros en la ruta" cantidad={companerosTexto} />
-        <nav aria-label="Atajos" className="grid grid-cols-2 gap-3">
-          <Atajo href="/mis-viajes" icono={<HistoryIcon aria-hidden className="size-6 shrink-0 text-primary" />} texto="Mis viajes" />
-          <Atajo href="/calificaciones" icono={<StarIcon aria-hidden className="size-6 shrink-0 text-primary" />} texto="Mis calificaciones" />
-        </nav>
+        <section aria-labelledby="titulo-inicio" className="relative overflow-hidden rounded-3xl bg-header text-header-foreground shadow-md">
+          {/* Franja amarilla de la línea, como en el Inicio del pasajero */}
+          <span aria-hidden className="absolute inset-x-0 top-0 h-1.5 bg-signal" />
+          <div className="flex flex-col gap-4 p-5 pt-6">
+            <div>
+              <p className="text-[15px] opacity-90">
+                {saludo()}, {nombre.split(" ")[0]}
+              </p>
+              <h1 id="titulo-inicio" className="text-[28px] leading-tight font-bold">
+                ¿Sales a trabajar?
+              </h1>
+            </div>
+            <EstadoEnCabecera conectado={conectado} />
+            <AgregarViaje modo="primero" ultimo={ultimo} />
+          </div>
+          <Companeros companeros={companeros} viajes={viajesCompaneros} chofer={nombre} enCabecera />
+        </section>
       </div>
     )
   }
 
-  // Con viajes abiertos: la gestión del viaje
+  // Con viajes abiertos: "¿qué hago ahora y a quién recojo?"
   // Con una recogida en curso, el viaje nuevo queda como próximo; si solo va en ruta, empieza ya (R11–R13)
   const modoAgregar = recogida ? "cadena" : "desde_ruta"
   // El viaje nuevo sale de donde termina el último de la cadena: se sugiere el sentido contrario a ese
@@ -57,14 +53,11 @@ export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosIn
   const sugerencia = finDeCadena ? { sentido: finDeCadena.sentido, puestos: finDeCadena.puestos } : ultimo
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <EnVivo />
       <h1 className="sr-only">Inicio</h1>
-      <Conexion conectado={conectado} viajesAbiertos={publicados} />
-      {/* Con viajes abiertos y conectado, comparte la posición para el mapa de los pasajeros (R40) */}
-      {conectado && <CompartirUbicacion />}
-      <DemandaCompacta esperando={esperando} oferta={oferta} />
-      <QuienEspera personas={quienEspera} conectado={conectado} chofer={nombre} />
+      {/* Conexión y ubicación (R40) en una línea: solo crece si el GPS falla */}
+      <EstadoServicio conectado={conectado} viajesAbiertos={publicados} />
 
       {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} barraFija />}
       {recogida && (
@@ -85,21 +78,11 @@ export function InicioChofer({ nombre, datos }: { nombre: string; datos: DatosIn
         </section>
       )}
 
-      <AgregarViaje modo={modoAgregar} esperando={esperando} ultimo={sugerencia} />
+      <AgregarViaje modo={modoAgregar} ultimo={sugerencia} />
+      {/* También trabajando: coordinarse con los compañeros, a un toque (§8) */}
+      <Companeros companeros={companeros} viajes={viajesCompaneros} chofer={nombre} />
       {/* Espacio para que la barra fija de abajo no tape lo último de la página */}
       <div aria-hidden className="h-36" />
     </div>
-  )
-}
-
-function Atajo({ href, icono, texto }: { href: string; icono: React.ReactNode; texto: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex min-h-16 items-center gap-3 rounded-2xl border-2 bg-card px-4 py-3 font-bold hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
-    >
-      {icono}
-      {texto}
-    </Link>
   )
 }

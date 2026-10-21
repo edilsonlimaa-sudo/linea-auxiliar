@@ -24,9 +24,9 @@ export function OcuparPuesto({ viajeId, enRuta }: { viajeId: string; enRuta: boo
 
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), limpiar())}>
-      <SheetTrigger render={<Button variant="outline" className="w-full" />}>
+      <SheetTrigger render={<Button variant="outline" className="h-auto min-h-11 w-full whitespace-normal" />}>
         <UserPlusIcon aria-hidden />
-        {enRuta ? "Subió alguien en el camino" : "Ocupar puesto"}
+        {enRuta ? "Subió alguien" : "Ocupar puesto"}
       </SheetTrigger>
       <SheetContent side="bottom" className="mx-auto max-w-2xl">
         <form

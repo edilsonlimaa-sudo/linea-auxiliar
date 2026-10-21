@@ -7,11 +7,11 @@ import { useAccion } from "@/components/chofer/use-accion"
 import { Confirmar } from "@/components/confirmar"
 import { Avatar } from "@/components/foto/avatar"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { marcarNoVino, marcarSeBajo, marcarSubio, quitarAnotado, responderPedido } from "@/lib/acciones/chofer"
 import type { FilaChofer } from "@/lib/datos/inicio-chofer"
-import { hora } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
-import { textoPuestos, type EstadoViaje } from "@/lib/viajes"
+import { textoPersonas, textoPuestos, type EstadoViaje } from "@/lib/viajes"
 
 type Pregunta = {
   titulo: string
@@ -45,117 +45,62 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
   return (
     <li
       className={cn(
-        "flex flex-col gap-3 rounded-2xl border-2 bg-card p-3",
+        "flex flex-col gap-2.5 rounded-2xl border-2 bg-card p-3",
         fila.pendiente && "border-destructive bg-destructive/5",
         !fila.confirmado && !enRuta && "border-dashed"
       )}
     >
-      <div className="flex items-start gap-3">
-        <span
-          aria-label={textoPuestos(fila.desde, fila.hasta)}
-          className={cn(
-            "grid h-11 min-w-11 shrink-0 place-items-center rounded-full px-2 text-xl font-bold",
-            fila.personas > 1 && "text-base",
-            fila.confirmado || enRuta ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-          )}
-        >
-          {fila.personas > 1 ? `${fila.desde}–${fila.hasta}` : fila.desde}
-        </span>
-        {/* La foto ayuda a reconocer a quien espera en la calle (R54); sin foto basta el nombre */}
-        {fila.fotoUrl && <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-11" />}
+      {/* Pedido en el camino (R29): lo único en rojo de la lista, arriba de todo */}
+      {fila.pendiente && <p className="text-sm font-bold tracking-wide text-destructive uppercase">Pide que pases por él</p>}
+      <div className="flex items-center gap-3">
+        <Puesto fila={fila} activo={fila.confirmado || enRuta} />
         <div className="min-w-0 flex-1">
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-lg font-bold">{fila.nombre}</span>
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+            <span className="text-lg leading-tight font-bold">{fila.nombre}</span>
             {/* Con acompañantes (R57): se ve de lejos cuántos suben */}
             {fila.personas > 1 && (
-              <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">
-                +{fila.personas - 1} {fila.personas === 2 ? "acompañante" : "acompañantes"}
-              </span>
+              <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">+{fila.personas - 1}</span>
             )}
             {!fila.conApp && fila.nombre !== "Pasajero sin app" && <span className="rounded-full bg-muted px-2 py-0.5 text-sm">Sin app</span>}
             {fila.listo && fila.conApp && !enRuta && (
               <span className="inline-flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">
                 <HandIcon aria-hidden className="size-4" />
-                Ya está en el sitio
+                En el sitio
               </span>
-            )}
-            {fila.pendiente && (
-              <span className="rounded-full border-2 border-destructive px-2 py-0.5 text-sm font-bold text-destructive">
-                {enRuta ? "Pide que pases por él" : "Pide puesto"}
-              </span>
-            )}
-            {enRuta && fila.estado === "activa" && !fila.pendiente && (
-              <span className="rounded-full bg-warning-muted px-2 py-0.5 text-sm font-bold text-warning">Vas por él</span>
             )}
           </p>
           {(fila.lugar || gps) && (
-            <p className="mt-0.5 flex items-start gap-1.5 text-lg leading-snug">
-              <MapPinIcon aria-hidden className="mt-1 size-5 shrink-0 text-muted-foreground" />
+            <p className="mt-0.5 flex items-start gap-1 leading-snug">
+              <MapPinIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <span>{fila.lugar ?? "Solo compartió su GPS"}</span>
             </p>
           )}
         </div>
+        {/* Llamar, WhatsApp, Cómo llegar y Waze: a un toque, sin llenar la fila de botones */}
+        {(telefono || gps) && <Contacto fila={fila} telefono={telefono} gps={gps} />}
       </div>
-
-      {/* Contacto y cómo llegar: botones de una mano */}
-      {(telefono || gps) && (
-        <div className="flex flex-wrap gap-2">
-          {telefono && (
-            <a href={`tel:+${telefono}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-              <PhoneIcon aria-hidden />
-              Llamar
-            </a>
-          )}
-          {telefono && (
-            <a href={`https://wa.me/${telefono}`} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
-              <MessageCircleIcon aria-hidden />
-              WhatsApp
-            </a>
-          )}
-          {gps && (
-            <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${gps}`}
-              target="_blank"
-              rel="noreferrer"
-              className={buttonVariants({ variant: "outline", size: "sm" })}
-            >
-              <NavigationIcon aria-hidden />
-              Cómo llegar
-            </a>
-          )}
-          {gps && (
-            <a href={`https://waze.com/ul?ll=${gps}&navigate=yes`} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline", size: "sm" })}>
-              Waze
-            </a>
-          )}
-        </div>
-      )}
 
       {/* Acciones sobre la reserva */}
       <div className="flex flex-wrap gap-2 empty:hidden">
         {fila.pendiente && (
           <>
-            <Button size="sm" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, true))}>
+            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, true))}>
               {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CheckIcon aria-hidden />}
-              {enRuta ? "Voy" : "Aceptar"}
+              Voy
             </Button>
-            <Button size="sm" variant="outline" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, false))}>
+            <Button size="sm" variant="outline" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, false))}>
               <XIcon aria-hidden />
-              {enRuta ? "Sigo, no puedo" : "Rechazar"}
+              Sigo, no puedo
             </Button>
-            {/* Sin respuesta en 5 min se rechaza sola (R58): se dice la hora, que no cambia */}
-            <p className="w-full text-[15px] text-muted-foreground">
-              Si no respondes, se rechaza sola a las {hora(new Date(new Date(fila.creadoEn).getTime() + 5 * 60_000).toISOString())}.
-            </p>
           </>
         )}
         {enRuta && fila.estado === "activa" && !fila.pendiente && (
           <>
-            <Button size="sm" disabled={pendiente} onClick={() => ejecutar(() => marcarSubio(fila.id))}>
+            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => marcarSubio(fila.id))}>
               <CheckIcon aria-hidden />
               Subió
             </Button>
-            <Button size="sm" variant="outline" className="text-destructive" disabled={pendiente} onClick={noVino}>
+            <Button size="sm" variant="outline" className="flex-1 text-destructive" disabled={pendiente} onClick={noVino}>
               <UserXIcon aria-hidden />
               No vino
             </Button>
@@ -183,7 +128,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
           </Button>
         )}
         {recogiendo && fila.conApp && fila.confirmado && !fila.pendiente && (
-          <Button size="sm" variant="outline" className="text-destructive" disabled={pendiente} onClick={noVino}>
+          <Button size="sm" variant="ghost" className="-ml-2 text-destructive" disabled={pendiente} onClick={noVino}>
             <UserXIcon aria-hidden />
             No vino
           </Button>
@@ -229,5 +174,84 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
         />
       )}
     </li>
+  )
+}
+
+/**
+ * El puesto en grande ("2–4" si es un grupo). Con foto (R54), la foto ayuda a reconocerla en la calle y el puesto va
+ * como etiqueta encima: las dos cosas en el espacio de una.
+ */
+function Puesto({ fila, activo }: { fila: FilaChofer; activo: boolean }) {
+  const texto = fila.personas > 1 ? `${fila.desde}–${fila.hasta}` : String(fila.desde)
+  const color = activo ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+  if (fila.fotoUrl) {
+    return (
+      <span className="relative shrink-0" aria-label={textoPuestos(fila.desde, fila.hasta)}>
+        <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-12" />
+        <span className={cn("absolute -right-1.5 -bottom-1 grid h-6 min-w-6 place-items-center rounded-full px-1 text-sm font-bold ring-2 ring-card", color)}>
+          {texto}
+        </span>
+      </span>
+    )
+  }
+  return (
+    <span
+      aria-label={textoPuestos(fila.desde, fila.hasta)}
+      className={cn("grid h-12 min-w-12 shrink-0 place-items-center rounded-full px-2 text-xl font-bold", fila.personas > 1 && "text-base", color)}
+    >
+      {texto}
+    </span>
+  )
+}
+
+/** Contacto y cómo llegar en una hoja: el chofer abre solo lo que necesita y la lista queda limpia. */
+function Contacto({ fila, telefono, gps }: { fila: FilaChofer; telefono: string | undefined; gps: string | null }) {
+  const grande = buttonVariants({ variant: "outline" })
+  return (
+    <Sheet>
+      <SheetTrigger render={<Button variant="outline" size="icon-sm" className="rounded-full" aria-label={`Contactar a ${fila.nombre}`} />}>
+        <PhoneIcon aria-hidden />
+      </SheetTrigger>
+      <SheetContent side="bottom" className="mx-auto max-w-2xl">
+        <SheetHeader>
+          <div className="flex items-center gap-3">
+            <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-14 text-lg" />
+            <div className="min-w-0">
+              <SheetTitle>{fila.nombre}</SheetTitle>
+              <SheetDescription className="text-base">
+                {textoPuestos(fila.desde, fila.hasta)}
+                {fila.personas > 1 && ` · ${textoPersonas(fila.personas)}`}
+                {fila.lugar && ` · ${fila.lugar}`}
+              </SheetDescription>
+            </div>
+          </div>
+        </SheetHeader>
+        <div className="grid grid-cols-2 gap-2.5 px-5 pb-6">
+          {telefono && (
+            <a href={`tel:+${telefono}`} className={grande}>
+              <PhoneIcon aria-hidden />
+              Llamar
+            </a>
+          )}
+          {telefono && (
+            <a href={`https://wa.me/${telefono}`} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "whatsapp" })}>
+              <MessageCircleIcon aria-hidden />
+              WhatsApp
+            </a>
+          )}
+          {gps && (
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${gps}`} target="_blank" rel="noreferrer" className={grande}>
+              <NavigationIcon aria-hidden />
+              Cómo llegar
+            </a>
+          )}
+          {gps && (
+            <a href={`https://waze.com/ul?ll=${gps}&navigate=yes`} target="_blank" rel="noreferrer" className={grande}>
+              Waze
+            </a>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

@@ -4,7 +4,7 @@ import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import type { ChoferEnServicio } from "@/lib/datos/inicio-pasajero"
-import { aceptaReservas, ACTIVOS, actividadDeChofer, libres, nombreCorto, puestosEnOrden, type Sentido, type Viaje } from "@/lib/viajes"
+import { ACTIVOS, actividadDeChofer, nombreCorto, puestosEnOrden, type Sentido, type Viaje } from "@/lib/viajes"
 
 type Reserva = Database["public"]["Tables"]["reservas"]["Row"]
 
@@ -23,8 +23,7 @@ export type FilaChofer = {
   lat: number | null
   lng: number | null
   listo: boolean // "✋ Ya está en el sitio" (R23)
-  pendiente: boolean // solicitud sin responder: al apartar (R58) o en el camino (R29)
-  creadoEn: string // la solicitud se rechaza sola a los 5 min (R58)
+  pendiente: boolean // pedido en el camino sin responder (R29)
   aceptada: boolean
   telefono: string | null
   fotoUrl: string | null // foto de perfil del pasajero (R54): ayuda a reconocerlo
@@ -32,34 +31,28 @@ export type FilaChofer = {
 
 export type ViajeChofer = Viaje & { lista: FilaChofer[] }
 
-/** Alguien que espera, como lo ve un chofer conectado (R31, §6): nombre corto, foto, dónde y teléfono */
-export type EsperaParaChofer = Omit<Database["public"]["Functions"]["esperando_para_choferes"]["Returns"][number], "foto_path"> & {
-  fotoUrl: string | null
-}
+/** Un compañero en la ruta: lo de "¿Cómo está la línea?" más su teléfono (§6: los choferes se ven entre ellos) */
+export type Companero = ChoferEnServicio & { telefono: string | null }
 
 export type DatosInicioChofer = {
   conectado: boolean
   enRuta: ViajeChofer | null // va hacia el destino con gente a bordo
   recogida: ViajeChofer | null // recogida actual: en camino, llegando o recogiendo
   proximos: ViajeChofer[] // encadenados (programado)
-  esperando: Record<Sentido, number> // demanda por sentido (R10, R31)
   ultimo: { sentido: Sentido; puestos: number } | null // último viaje no cancelado, para sugerir al publicar
   vehiculo: { unidad: string | null; placa: string } | null
-  // Lo que ya ofrecen los demás choferes por sentido (§8 Inicio del chofer): unidades que aceptan reservas y sus puestos libres
-  oferta: Record<Sentido, { unidades: number; puestosLibres: number }>
-  companeros: ChoferEnServicio[] // quién más trabaja y qué hace (R7)
-  quienEspera: EsperaParaChofer[] // conectado: quién espera, para escribirle (R31); desconectado, vacío
+  companeros: Companero[] // quién más trabaja y qué hace (R7)
+  viajesCompaneros: Viaje[] // sus viajes abiertos: para ver qué hace cada uno y qué viene después (§8)
 }
 
 export async function cargarInicioChofer(choferId: string, conectado: boolean): Promise<DatosInicioChofer> {
   const supabase = await crearClienteServidor()
 
-  const [viajesRes, esperasRes, ultimoRes, vehiculoRes, lineaRes, conectadosRes] = await Promise.all([
+  const [viajesRes, ultimoRes, vehiculoRes, lineaRes, conectadosRes] = await Promise.all([
     supabase.from("viajes").select("*").eq("chofer_id", choferId).in("estado", ACTIVOS).order("creado_en"),
-    supabase.rpc("demanda_por_sentido"), // solo cuántos esperan, no quién ni dónde (R31)
     supabase.from("viajes").select("sentido, puestos").eq("chofer_id", choferId).neq("estado", "cancelado").order("creado_en", { ascending: false }).limit(1).maybeSingle(),
     supabase.from("vehiculos").select("unidad, placa").eq("chofer_id", choferId).maybeSingle(),
-    // Viajes abiertos de toda la línea (para la oferta y qué hace cada compañero)
+    // Viajes abiertos de toda la línea (para saber qué hace cada compañero)
     supabase.from("viajes").select("*").in("estado", ACTIVOS),
     supabase
       .from("perfiles")
@@ -111,7 +104,6 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
         lng: r.lng,
         listo: r.listo,
         pendiente: r.pendiente,
-        creadoEn: r.creado_en,
         aceptada: r.aceptada_en !== null,
         telefono: r.pasajero_id ? (telefonoDe.get(r.pasajero_id) ?? null) : null,
         fotoUrl: r.pasajero?.foto_path ? (fotos.get(r.pasajero.foto_path) ?? null) : null,
@@ -119,29 +111,24 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     }
   }
 
-  const esperando: Record<Sentido, number> = { vg_a_centro: 0, centro_a_vg: 0 }
-  for (const d of esperasRes.data ?? []) esperando[d.sentido] = d.esperando
-
   const enRuta = viajes.find((v) => v.estado === "en_ruta")
   const recogida = viajes.find((v) => v.estado === "en_camino" || v.estado === "llegando" || v.estado === "en_parada")
 
-  // Oferta de los demás por sentido: lo que un pasajero que espera ya podría apartar
-  const oferta: DatosInicioChofer["oferta"] = { vg_a_centro: { unidades: 0, puestosLibres: 0 }, centro_a_vg: { unidades: 0, puestosLibres: 0 } }
-  for (const v of deLaLinea) {
-    if (!aceptaReservas(v) || libres(v) === 0) continue
-    oferta[v.sentido].unidades += 1
-    oferta[v.sentido].puestosLibres += libres(v)
-  }
-
   // Compañeros en la ruta (R7): foto, carro, ★ y qué hace cada uno
   const conectados = conectadosRes.data ?? []
-  const [fotosCompaneros, califsRes] = await Promise.all([
+  const idsCompaneros = conectados.map((c) => c.id)
+  const [fotosCompaneros, califsRes, telefonosRes] = await Promise.all([
     firmarFotos(conectados.map((c) => c.foto_path)),
     conectados.length
-      ? supabase.from("calificaciones").select("chofer_id, estrellas").in("chofer_id", conectados.map((c) => c.id))
+      ? supabase.from("calificaciones").select("chofer_id, estrellas").in("chofer_id", idsCompaneros)
       : Promise.resolve({ data: [] as { chofer_id: string; estrellas: number }[] }),
+    // Los choferes ven el teléfono de los otros choferes (§6)
+    conectados.length
+      ? supabase.from("perfiles_privados").select("id, telefono").in("id", idsCompaneros)
+      : Promise.resolve({ data: [] as { id: string; telefono: string | null }[] }),
   ])
-  const companeros: ChoferEnServicio[] = conectados
+  const telefonoDeCompanero = new Map((telefonosRes.data ?? []).map((t) => [t.id, t.telefono]))
+  const companeros: Companero[] = conectados
     .map((c) => {
       const carro = Array.isArray(c.vehiculo) ? (c.vehiculo[0] ?? null) : c.vehiculo
       const suyas = (califsRes.data ?? []).filter((k) => k.chofer_id === c.id)
@@ -154,25 +141,18 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
         aire: carro?.aire_acondicionado ?? false,
         estrellas: suyas.length ? suyas.reduce((s, k) => s + k.estrellas, 0) / suyas.length : null,
         actividad: actividadDeChofer(deLaLinea.filter((v) => v.chofer_id === c.id)),
+        telefono: telefonoDeCompanero.get(c.id) ?? null,
       }
     })
     .sort((a, b) => Number(a.actividad === "Disponible") - Number(b.actividad === "Disponible") || a.nombre.localeCompare(b.nombre, "es"))
 
-  // Quién espera: solo si está conectado (la base no le devuelve nada si no, R31)
-  const { data: esperanRes } = conectado ? await supabase.rpc("esperando_para_choferes") : { data: [] }
-  const esperan = esperanRes ?? []
-  const fotosEsperan = await firmarFotos(esperan.map((e) => e.foto_path))
-  const quienEspera = esperan.map(({ foto_path, ...e }) => ({ ...e, fotoUrl: foto_path ? (fotosEsperan.get(foto_path) ?? null) : null }))
-
   return {
     conectado,
-    oferta,
     companeros,
-    quienEspera,
+    viajesCompaneros: deLaLinea,
     enRuta: enRuta ? conLista(enRuta) : null,
     recogida: recogida ? conLista(recogida) : null,
     proximos: viajes.filter((v) => v.estado === "programado").map(conLista),
-    esperando,
     ultimo: ultimoRes.data ?? null,
     vehiculo: vehiculoRes.data ?? null,
   }
