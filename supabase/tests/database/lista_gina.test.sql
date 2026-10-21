@@ -3,7 +3,7 @@
 --   choferes: José ...45, Pedro ...46 · pasajeros: Ana ...64, Beto ...65, Rosa ...66 (camino), Carla ...67, Luis ...68 (grupo de 2), Marta ...69 (camino), Nora ...70 (camino, con los carros ya en ruta)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(37);
+select plan(39);
 
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
 returns void language plpgsql as $$
@@ -157,7 +157,13 @@ select ok(not public.puede_ver_telefono('00000000-0000-4000-a000-000000000068'),
 select pg_temp.yo('46');
 select public.no_estaba_en_lista(l.id) from public.lista_gina l where pasajero_id = '00000000-0000-4000-a000-000000000064' and estado = 'esperando';
 select pg_temp.yo('68');
-select lives_ok($$ select public.me_fui() $$, 'R62: "Me fui"');
+select throws_ok($$ select public.me_fui('aburrido') $$, 'P0001', 'Motivo no válido', 'R62: solo los motivos de la lista');
+select lives_ok($$ select public.me_fui('van') $$, 'R62: "Me fui" diciendo cómo se va');
+reset role;
+select is((select lp.motivo_salida from public.lista_gina_privado lp join public.lista_gina l on l.id = lp.id
+            where l.pasajero_id = '00000000-0000-4000-a000-000000000068' and l.estado = 'se_fue'), 'van',
+  'R62: queda guardado que se fue en la van');
+set local role authenticated;
 select is((select count(*)::int from public.lista_de_gina()), 0, 'R62/R65: No estaba y Me fui sacan de la lista');
 
 -- Nora avisa en el camino con los dos carros ya en ruta: José va lleno; Pedro dice "Voy" y la lleva (R67)

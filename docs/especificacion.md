@@ -384,6 +384,10 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     hasta las 3:45 p. m.") y puede renovarlo cuando quiera con **Sigo aquí** (vuelve a 45 min sin perder el lugar).
     A los 35 el contador se vuelve un aviso amarillo **"¿Sigues ahí?"** con el mismo botón, grande. **Me fui** está
     siempre a un toque y saca a la persona de la lista al instante.
+  - **¿Cómo te vas? [servidor].** Al tocar **Me fui** la app pregunta por qué, con opciones grandes que confirman en un
+    toque: **Me fui en la van** (el transporte autorizado, que no usa el app), **En otro carro o taxi**, **Me cansé de
+    esperar**, **Cambié de planes** u **Otra razón**. Sirve para medir cuánta gente se pierde y por qué (sobre todo
+    por la van). El motivo lo ven solo el admin y los choferes (`lista_gina_privado`), no los demás pasajeros.
 - **R63. Una sola lista, por orden de llegada [servidor].** El orden lo pone el reloj del servidor. Todos ven
   la misma lista: **nombre corto, cuántos van, dónde está** (Gina o el lugar escrito) y su posición ("Eres el 5").
   Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
@@ -429,9 +433,9 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     con 1 puesto: puede recogerte al pasar").
   - Si nadie va por esa persona, espera al siguiente carro, que le guarda puesto como en R64.
 - **Historial de la lista (panel).** El admin ve, además de la lista en vivo, **quién pasó por la lista y por qué
-  salió**, por período (hoy, ayer, 7 días): subió en Gina o en el camino (y con qué chofer), se fue ("Me fui"), venció
+  salió**, por período (hoy, ayer, 7 días): subió en Gina o en el camino (y con qué chofer), se fue ("Me fui", con su motivo: en la van, en otro carro…), venció
   sin responder "¿Sigues ahí?", el chofer marcó "No estaba", no estaba cuando pasó el carro, canceló o se canceló el
-  viaje. Con dónde esperaba, cuánto tiempo estuvo en la lista y a qué hora salió, y un resumen por motivo arriba.
+  viaje. Con dónde esperaba, cuánto tiempo estuvo en la lista y a qué hora salió, y un resumen por motivo arriba (con cuántos se fueron en la van).
 - **R68. A bordo, igual que hoy.** Cada **Subió** crea un pasajero a bordo del viaje: **Se bajó** (R38),
   historial (R50–R51) y calificaciones (R44–R45) funcionan como en Valle Grande → Centro.
 

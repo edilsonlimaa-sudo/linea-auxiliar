@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 
 // Resultado de las acciones del pasajero. Los errores de las funciones de la base ya vienen en español.
@@ -190,7 +191,8 @@ export async function sigoEnLista(): Promise<Resultado> {
   return llamarLista((s) => s.rpc("sigo_en_lista"))
 }
 
-/** "Me fui" (R62) */
-export async function meFui(): Promise<Resultado> {
-  return llamarLista((s) => s.rpc("me_fui"))
+/** "Me fui" (R62), con cómo se va (en la van, en otro carro…) */
+export async function meFui(motivo: MotivoMeFui): Promise<Resultado> {
+  if (!esMotivoMeFui(motivo)) return { error: "Escoge una opción" }
+  return llamarLista((s) => s.rpc("me_fui", { p_motivo: motivo }))
 }

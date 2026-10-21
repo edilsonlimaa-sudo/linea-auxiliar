@@ -309,18 +309,21 @@ export type Database = {
           id: string
           lat: number | null
           lng: number | null
+          motivo_salida: string | null
         }
         Insert: {
           distancia_m?: number | null
           id: string
           lat?: number | null
           lng?: number | null
+          motivo_salida?: string | null
         }
         Update: {
           distancia_m?: number | null
           id?: string
           lat?: number | null
           lng?: number | null
+          motivo_salida?: string | null
         }
         Relationships: [
           {
@@ -1282,7 +1285,7 @@ export type Database = {
       marcar_no_vino: { Args: { p_reserva: string }; Returns: undefined }
       marcar_se_bajo: { Args: { p_reserva: string }; Returns: undefined }
       marcar_subio: { Args: { p_reserva: string }; Returns: undefined }
-      me_fui: { Args: never; Returns: undefined }
+      me_fui: { Args: { p_motivo?: string }; Returns: undefined }
       mis_datos_privados: {
         Args: never
         Returns: {
