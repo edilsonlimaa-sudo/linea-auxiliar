@@ -62,6 +62,7 @@ export type EntradaTramo = {
   telefono: string | null // solo si el chofer está conectado (§6)
   lat: number | null
   lng: number | null
+  diceQueSubio: boolean // avisó "Me monté en un carro de la línea" (R62): falta marcarlo Subió
 }
 
 // gina: el plan de la lista hacia Valle Grande (solo Centro → Valle Grande, recogiendo o en ruta); null en los demás
@@ -225,6 +226,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     telefono: e.telefono,
     lat: e.lat,
     lng: e.lng,
+    diceQueSubio: e.dice_que_subio,
   }))
 
   return {

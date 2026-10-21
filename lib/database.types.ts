@@ -243,6 +243,7 @@ export type Database = {
         Row: {
           cerrada_en: string | null
           creada_en: string
+          dice_que_subio: string | null
           en_gina: boolean
           estado: Database["public"]["Enums"]["estado_en_lista"]
           id: string
@@ -256,6 +257,7 @@ export type Database = {
         Insert: {
           cerrada_en?: string | null
           creada_en?: string
+          dice_que_subio?: string | null
           en_gina: boolean
           estado?: Database["public"]["Enums"]["estado_en_lista"]
           id?: string
@@ -269,6 +271,7 @@ export type Database = {
         Update: {
           cerrada_en?: string | null
           creada_en?: string
+          dice_que_subio?: string | null
           en_gina?: boolean
           estado?: Database["public"]["Enums"]["estado_en_lista"]
           id?: string
@@ -1226,6 +1229,7 @@ export type Database = {
         Args: never
         Returns: {
           creada_en: string
+          dice_que_subio: boolean
           en_gina: boolean
           es_mio: boolean
           foto_path: string
@@ -1241,6 +1245,7 @@ export type Database = {
         Args: never
         Returns: {
           creada_en: string
+          dice_que_subio: boolean
           en_gina: boolean
           foto_path: string
           id: string
@@ -1286,6 +1291,7 @@ export type Database = {
       marcar_se_bajo: { Args: { p_reserva: string }; Returns: undefined }
       marcar_subio: { Args: { p_reserva: string }; Returns: undefined }
       me_fui: { Args: { p_motivo?: string }; Returns: undefined }
+      me_monte: { Args: never; Returns: undefined }
       mis_datos_privados: {
         Args: never
         Returns: {

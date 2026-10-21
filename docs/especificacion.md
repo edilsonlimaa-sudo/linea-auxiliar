@@ -388,6 +388,12 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     toque: **Me fui en la van** (el transporte autorizado, que no usa el app), **En otro carro o taxi**, **Me cansé de
     esperar**, **Cambié de planes** u **Otra razón**. Sirve para medir cuánta gente se pierde y por qué (sobre todo
     por la van). El motivo lo ven solo el admin y los choferes (`lista_gina_privado`), no los demás pasajeros.
+  - **"Me monté en un carro de la línea" [servidor].** Montarse **no es** "Me fui": lo marca el chofer con **Subió**.
+    Por si alguien se confunde (o se lo pidieron mal), la hoja de Me fui empieza con esa opción, aparte y destacada:
+    **no saca de la lista**; deja a la persona marcada "dice que se montó" (y su lugar vale al menos 30 min más).
+    Ella ve "Avisaste que te montaste: el chofer te marca Subió". Los choferes en Gina o en ruta hacia Valle Grande
+    la ven destacada en la lista ("Dice que ya se montó") con **Subió** a mano, **aunque ya hayan salido de Gina**
+    y aunque no le tocara en el plan (si cabe en el carro).
 - **R63. Una sola lista, por orden de llegada [servidor].** El orden lo pone el reloj del servidor. Todos ven
   la misma lista: **nombre corto, cuántos van, dónde está** (Gina o el lugar escrito) y su posición ("Eres el 5").
   Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
@@ -419,7 +425,10 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   Los de Gina que no subieron vuelven a la lista en su lugar (R65).
   - **Que no se olvide a nadie del camino:** en Gina, el viaje muestra un aviso amarillo "Al salir, recoges en el
     camino: Carla P. · Plaza del Indio"; la confirmación de Salir lo repite ("En el camino recoges a …"); y en ruta
-    **Recoge en el camino** va arriba, en amarillo, con Subió / No vino. Arriba se lee "3 pasajeros a bordo · 1 por
+    **Recoge en el camino** va arriba, en amarillo, con Subió / No vino.
+  - **Que nadie salga sin marcar a quien subió:** si el chofer toca **Salir** de Gina **sin nadie marcado Subió**, la
+    confirmación lo advierte ("Nadie está marcado Subió: si se montó alguien, márcalo en la lista antes de salir");
+    y si alguien **dice que ya se montó** y no está marcado, lo nombra. Arriba se lee "3 pasajeros a bordo · 1 por
     recoger" (a bordo son solo los que subieron).
 - **R67. Avisos del camino con el carro ya en ruta [servidor].** Si alguien se anota en otro lugar del camino cuando
   los carros ya salieron de Gina:

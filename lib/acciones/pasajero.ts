@@ -191,6 +191,11 @@ export async function sigoEnLista(): Promise<Resultado> {
   return llamarLista((s) => s.rpc("sigo_en_lista"))
 }
 
+/** "Me monté en un carro de la línea" (R62): no sale de la lista; el chofer lo marca Subió */
+export async function meMonte(): Promise<Resultado> {
+  return llamarLista((s) => s.rpc("me_monte"))
+}
+
 /** "Me fui" (R62), con cómo se va (en la van, en otro carro…) */
 export async function meFui(motivo: MotivoMeFui): Promise<Resultado> {
   if (!esMotivoMeFui(motivo)) return { error: "Escoge una opción" }

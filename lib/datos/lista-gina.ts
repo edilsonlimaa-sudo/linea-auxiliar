@@ -17,6 +17,7 @@ export type EnListaGina = {
   creadaEn: string
   venceEn: string
   esMio: boolean
+  diceQueSubio: boolean // tocó "Me monté en un carro de la línea" (R62): el chofer lo marca Subió
 }
 
 export async function cargarListaGina(): Promise<EnListaGina[]> {
@@ -34,6 +35,7 @@ export async function cargarListaGina(): Promise<EnListaGina[]> {
     creadaEn: e.creada_en,
     venceEn: e.vence_en,
     esMio: e.es_mio,
+    diceQueSubio: e.dice_que_subio,
   }))
 }
 
