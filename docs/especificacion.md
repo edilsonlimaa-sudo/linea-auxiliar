@@ -415,9 +415,17 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     camino: Carla P. · Plaza del Indio"; la confirmación de Salir lo repite ("En el camino recoges a …"); y en ruta
     **Recoge en el camino** va arriba, en amarillo, con Subió / No vino. Arriba se lee "3 pasajeros a bordo · 1 por
     recoger" (a bordo son solo los que subieron).
-- **R67. Avisos del camino con el carro ya en ruta.** El chofer en ruta ve a quienes esperan **en el camino sin
-  carro** (avisaron después de que salió de Gina) y, si para y tiene puesto, los marca **Subió**. Si no para,
-  esperan al siguiente carro, que les guarda puesto como en R64.
+- **R67. Avisos del camino con el carro ya en ruta [servidor].** Si alguien se anota en otro lugar del camino cuando
+  los carros ya salieron de Gina:
+  - **Cada chofer en ruta hacia Valle Grande con puesto** lo ve en su viaje con un **aviso amarillo** ("Espera en el
+    camino: Marta P. · Redoma de Juanico", con teléfono y "Cómo llegar"), sin tener que abrir la lista.
+  - **Voy**: el chofer que va por esa persona la toma: queda **ligada a su carro** (como al salir de Gina, R66), sale
+    de la lista y del aviso de los demás choferes, y la persona ve "José va por ti". El primero que toca **Voy** (o
+    **Subió**) se la lleva; el otro ve que ya no está en la lista. Solo si cabe en el carro.
+  - **Subió** directo, si paró sin avisar antes.
+  - El pasajero en el camino ve también los **carros en ruta con puesto** en "Carros que vienen" ("Ya salió de Gina
+    con 1 puesto: puede recogerte al pasar").
+  - Si nadie va por esa persona, espera al siguiente carro, que le guarda puesto como en R64.
 - **Historial de la lista (panel).** El admin ve, además de la lista en vivo, **quién pasó por la lista y por qué
   salió**, por período (hoy, ayer, 7 días): subió en Gina o en el camino (y con qué chofer), se fue ("Me fui"), venció
   sin responder "¿Sigues ahí?", el chofer marcó "No estaba", no estaba cuando pasó el carro, canceló o se canceló el

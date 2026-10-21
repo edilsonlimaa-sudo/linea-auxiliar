@@ -1,9 +1,9 @@
 -- Pruebas de la Lista de Gina (docs/especificacion.md §5.17, R62–R68). Se ejecutan con:  npx supabase test db
 -- Crean sus propias cuentas dentro de la transacción, que se deshace al final.
---   choferes: José ...45, Pedro ...46 · pasajeros: Ana ...64, Beto ...65, Rosa ...66 (camino), Carla ...67, Luis ...68 (grupo de 2), Marta ...69 (camino)
+--   choferes: José ...45, Pedro ...46 · pasajeros: Ana ...64, Beto ...65, Rosa ...66 (camino), Carla ...67, Luis ...68 (grupo de 2), Marta ...69 (camino), Nora ...70 (camino, con los carros ya en ruta)
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(30);
+select plan(37);
 
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
 returns void language plpgsql as $$
@@ -28,8 +28,9 @@ select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000066', '0414-000006
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000067', '0414-0000067', '{"rol": "pasajero", "nombre": "Carla Mora"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000068', '0414-0000068', '{"rol": "pasajero", "nombre": "Luis Lara"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000069', '0414-0000069', '{"rol": "pasajero", "nombre": "Marta Ruiz"}');
+select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000070', '0414-0000070', '{"rol": "pasajero", "nombre": "Nora Vega"}');
 update public.perfiles set estado = 'aprobado', aprobado_en = now() where id::text like '00000000-0000-4000-a000-0000000000%'
-   and id::text between '00000000-0000-4000-a000-000000000045' and '00000000-0000-4000-a000-000000000069';
+   and id::text between '00000000-0000-4000-a000-000000000045' and '00000000-0000-4000-a000-000000000070';
 -- La lista empieza vacía en esta transacción (la base local puede tener avisos reales; todo se deshace al final)
 delete from public.lista_gina;
 -- …y sin otros carros en Gina ni hacia Valle Grande: el plan depende de quién llegó antes (R64). También se deshace
@@ -102,6 +103,8 @@ set local role authenticated;
 select pg_temp.yo('46');
 select set_config('t.pedro', public.publicar_viaje('centro_a_vg', 4, 0)::text, true);
 select is(pg_temp.plan(current_setting('t.pedro')), 'Luis:llamar', 'R64: el segundo carro arma su plan con lo que sigue');
+select is((select count(*)::int from public.plan_de_gina(current_setting('t.pedro')::uuid) where rol = 'guardar'), 0,
+  'R64: el segundo carro no le guarda puesto a quien ya guarda el primero (no salen los dos con un puesto vacío)');
 
 -- Ana no aparece ("viene en camino"): José sube a Beto y a Carla; Ana sigue arriba (R65)
 select pg_temp.yo('45');
@@ -122,6 +125,9 @@ select results_eq(
       where l.pasajero_id = '00000000-0000-4000-a000-000000000066' $$,
   $$ values ('en_carro'::text, 'activa'::text, true) $$, 'R66: al salir, el del camino queda con su puesto en el carro');
 select is((select string_agg(nombre, ', ' order by posicion) from public.lista_de_gina()), 'Ana P., Luis L.', 'R66: Ana sigue en la lista y Rosa ya no');
+select is((select count(*)::int from public.reservas r join public.perfiles pf on pf.id = r.pasajero_id
+            where pf.nombre = 'Rosa Tovar' and r.estado = 'activa' and r.viaje_id <> current_setting('t.jose')::uuid), 0,
+  'R66: el puesto de Rosa queda en un solo carro (el que llegó primero)');
 select is((select count(*)::int from public.reservas where viaje_id = current_setting('t.jose')::uuid and estado = 'subio'), 2,
   'R68: los que subieron en Gina van a bordo');
 
@@ -153,6 +159,24 @@ select public.no_estaba_en_lista(l.id) from public.lista_gina l where pasajero_i
 select pg_temp.yo('68');
 select lives_ok($$ select public.me_fui() $$, 'R62: "Me fui"');
 select is((select count(*)::int from public.lista_de_gina()), 0, 'R62/R65: No estaba y Me fui sacan de la lista');
+
+-- Nora avisa en el camino con los dos carros ya en ruta: José va lleno; Pedro dice "Voy" y la lleva (R67)
+select public.avanzar_viaje(current_setting('t.pedro')::uuid, 'en_ruta') from (select pg_temp.yo('46')) x;
+select pg_temp.yo('70');
+select public.estoy_en_lista(false, 'Las Cocuizas');
+select pg_temp.yo('45');
+select throws_ok(format($$ select public.voy_por_el(l.id, '%s') from public.lista_gina l where pasajero_id = '00000000-0000-4000-a000-000000000070' $$,
+  current_setting('t.jose')), 'P0001', 'Vas lleno', 'R67: "Voy" solo si cabe en el carro');
+select pg_temp.yo('46');
+select lives_ok(format($$ select public.voy_por_el(l.id, '%s') from public.lista_gina l where pasajero_id = '00000000-0000-4000-a000-000000000070' $$,
+  current_setting('t.pedro')), 'R67: "Voy": el chofer en ruta toma a quien espera en el camino');
+select results_eq(
+  $$ select l.estado::text, r.estado::text, r.en_camino, r.lugar from public.lista_gina l join public.reservas r on r.id = l.reserva_id
+      where l.pasajero_id = '00000000-0000-4000-a000-000000000070' $$,
+  $$ values ('en_carro'::text, 'activa'::text, true, 'Las Cocuizas'::text) $$, 'R67: queda ligada al carro, como al salir de Gina');
+select is((select count(*)::int from public.lista_de_gina()), 0, 'R67: sale de la lista (y del aviso de los demás choferes)');
+select throws_ok(format($$ select public.voy_por_el(l.id, '%s') from public.lista_gina l where pasajero_id = '00000000-0000-4000-a000-000000000070' $$,
+  current_setting('t.pedro')), 'P0001', 'Esa persona ya no está en la lista: otro carro va por ella o se fue', 'R67: el primero que dice "Voy" se la lleva');
 
 -- La API corre las funciones "stable" en modo solo lectura: ninguna puede bloquear filas (FOR UPDATE) ni llamar a
 -- _mi_viaje / _reserva, que las bloquean (así falló plan_de_gina en el app aunque las demás pruebas pasaban)

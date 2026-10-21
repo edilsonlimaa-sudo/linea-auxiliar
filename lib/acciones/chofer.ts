@@ -121,6 +121,11 @@ export async function noEstabaEnLista(entradaId: string) {
   return rpc((s) => s.rpc("no_estaba_en_lista", { p_entrada: entradaId }))
 }
 
+/** Lista hacia Valle Grande, en ruta: "Voy" por quien espera en el camino (R67; el primero se la lleva) */
+export async function voyPorEl(entradaId: string, viajeId: string) {
+  return rpc((s) => s.rpc("voy_por_el", { p_entrada: entradaId, p_viaje: viajeId }))
+}
+
 /** "No vino" (R21, R29) */
 export async function marcarNoVino(reservaId: string) {
   return rpc((s) => s.rpc("marcar_no_vino", { p_reserva: reservaId }))

@@ -1365,6 +1365,10 @@ export type Database = {
       vencer_esperas: { Args: never; Returns: undefined }
       vencer_lista_gina: { Args: never; Returns: undefined }
       vencer_senales: { Args: never; Returns: undefined }
+      voy_por_el: {
+        Args: { p_entrada: string; p_viaje: string }
+        Returns: string
+      }
       ya_no_espero: { Args: never; Returns: undefined }
     }
     Enums: {
