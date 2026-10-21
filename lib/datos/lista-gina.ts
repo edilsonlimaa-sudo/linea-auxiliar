@@ -1,6 +1,7 @@
 import "server-only"
 
 import { firmarFotos } from "@/lib/fotos"
+import { DETALLE_ME_FUI, esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { nombreCorto } from "@/lib/viajes"
 
@@ -61,7 +62,8 @@ export type SalidaLista = {
   creadaEn: string
   cerradaEn: string | null
   motivo: MotivoSalida
-  detalle: string // "Subió en Gina con José R.", "Se fue (tocó «Me fui»)"…
+  meFui: MotivoMeFui | null // si tocó "Me fui": cómo se fue (en la van…)
+  detalle: string // "Subió en Gina con José R.", "Se fue en la van"…
 }
 
 // Como en el resto del app ("José Rey" → "José R.")
@@ -76,7 +78,7 @@ export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date): Prom
   let consulta = supabase
     .from("lista_gina")
     .select(
-      "id, personas, en_gina, lugar, estado, creada_en, cerrada_en, pasajero:perfiles!lista_gina_pasajero_id_fkey(nombre, foto_path), viaje:viajes!lista_gina_viaje_id_fkey(chofer:perfiles!viajes_chofer_id_fkey(nombre)), reserva:reservas!lista_gina_reserva_id_fkey(estado)"
+      "id, personas, en_gina, lugar, estado, creada_en, cerrada_en, pasajero:perfiles!lista_gina_pasajero_id_fkey(nombre, foto_path), viaje:viajes!lista_gina_viaje_id_fkey(chofer:perfiles!viajes_chofer_id_fkey(nombre)), reserva:reservas!lista_gina_reserva_id_fkey(estado), privado:lista_gina_privado(motivo_salida)"
     )
     .neq("estado", "esperando")
     .gte("creada_en", desde.toISOString())
@@ -91,6 +93,7 @@ export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date): Prom
     const donde = e.en_gina ? "en Gina" : "en el camino"
     let motivo: MotivoSalida
     let detalle: string
+    const meFui = e.estado === "se_fue" && esMotivoMeFui(e.privado?.motivo_salida) ? e.privado.motivo_salida : null
     if (e.estado === "subio") {
       motivo = "subio"
       detalle = `Subió ${donde} con ${chofer}`
@@ -115,7 +118,7 @@ export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date): Prom
       }
     } else if (e.estado === "se_fue") {
       motivo = "se_fue"
-      detalle = "Se fue (tocó «Me fui»)"
+      detalle = meFui ? DETALLE_ME_FUI[meFui] : "Se fue (tocó «Me fui»)"
     } else if (e.estado === "vencida") {
       motivo = "vencida"
       detalle = "No respondió «¿Sigues ahí?»: venció"
@@ -133,6 +136,7 @@ export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date): Prom
       creadaEn: e.creada_en,
       cerradaEn: e.cerrada_en,
       motivo,
+      meFui,
       detalle,
     }
   })

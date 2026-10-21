@@ -46,6 +46,8 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
   const porMotivo = (Object.keys(MOTIVOS) as MotivoSalida[])
     .map((m) => ({ m, n: historial.filter((h) => h.motivo === m).length }))
     .filter((x) => x.n > 0)
+  // Lo que más se quiere medir: cuánta gente se lleva la van (R62)
+  const enLaVan = historial.filter((h) => h.meFui === "van").length
 
   return (
     <div className="flex flex-col gap-8">
@@ -134,6 +136,9 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
                 {MOTIVOS[m].texto}: {n}
               </li>
             ))}
+            {enLaVan > 0 && (
+              <li className="rounded-full bg-warning-muted px-3 py-1 text-[15px] font-bold text-warning">Se fueron en la van: {enLaVan}</li>
+            )}
           </ul>
         )}
 

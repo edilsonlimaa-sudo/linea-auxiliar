@@ -1,10 +1,21 @@
 "use client"
 
-import { ChevronRightIcon, HandIcon, Loader2Icon, MapPinIcon, TimerIcon, TriangleAlertIcon } from "lucide-react"
+import {
+  BusIcon,
+  CarFrontIcon,
+  ChevronRightIcon,
+  EllipsisIcon,
+  HandIcon,
+  HourglassIcon,
+  Loader2Icon,
+  MapPinIcon,
+  TimerIcon,
+  TriangleAlertIcon,
+  UndoIcon,
+} from "lucide-react"
 import { useCallback, useId, useState, useSyncExternalStore, useTransition } from "react"
 
 import { Opcion } from "@/components/chofer/publicar-viaje"
-import { Confirmar } from "@/components/confirmar"
 import { Avatar } from "@/components/foto/avatar"
 import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
@@ -17,6 +28,7 @@ import type { ChoferEnPausa, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import type { EnListaGina } from "@/lib/datos/lista-gina"
 import { hace, hora } from "@/lib/fechas"
 import { distanciaMetros, distanciaTexto, GINA, type Punto } from "@/lib/mapa"
+import { MOTIVOS_SALIDA, OPCION_ME_FUI, type MotivoMeFui } from "@/lib/motivos-salida"
 import { cn } from "@/lib/utils"
 import { iniciales, libres, type Viaje } from "@/lib/viajes"
 
@@ -295,18 +307,83 @@ function MiLugar({ mio, lista }: { mio: EnListaGina; lista: EnListaGina[] }) {
       <Button variant="outline" className="text-destructive" onClick={() => setConfirmar(true)}>
         Me fui
       </Button>
-      <Confirmar
-        abierto={confirmar}
+      <HojaMeFui
+        abierta={confirmar}
         onCambiar={setConfirmar}
-        titulo="¿Te fuiste?"
-        descripcion="Sales de la lista. Si vuelves, te anotas otra vez al final."
-        confirmar="Sí, me fui"
-        cancelar="No, sigo esperando"
-        ocupado={pendiente}
+        pendiente={pendiente}
         error={error}
-        onConfirmar={() => ejecutar(meFui, () => setConfirmar(false))}
+        onMotivo={(m) => ejecutar(() => meFui(m), () => setConfirmar(false))}
       />
     </>
+  )
+}
+
+const ICONO_ME_FUI: Record<MotivoMeFui, typeof BusIcon> = {
+  van: BusIcon,
+  otro_carro: CarFrontIcon,
+  cansado: HourglassIcon,
+  cambio_planes: UndoIcon,
+  otra: EllipsisIcon,
+}
+
+/**
+ * "Me fui" (R62): sale de la lista diciendo cómo se va, en un toque (cada opción confirma). Sirve para medir cuánta
+ * gente se lleva la van. Seguir esperando es lo seguro: recibe el foco al abrir.
+ */
+function HojaMeFui({
+  abierta,
+  onCambiar,
+  pendiente,
+  error,
+  onMotivo,
+}: {
+  abierta: boolean
+  onCambiar: (abierta: boolean) => void
+  pendiente: boolean
+  error?: string
+  onMotivo: (m: MotivoMeFui) => void
+}) {
+  const [escogido, setEscogido] = useState<MotivoMeFui>()
+  return (
+    <Sheet open={abierta} onOpenChange={(v) => !pendiente && onCambiar(v)}>
+      <SheetContent side="bottom" className="mx-auto max-h-[90svh] max-w-2xl overflow-y-auto">
+        <SheetHeader>
+          <SheetTitle>¿Cómo te vas?</SheetTitle>
+          <SheetDescription className="text-base">
+            Sales de la lista. Si vuelves, te anotas otra vez al final. Tu respuesta nos ayuda a mejorar la línea.
+          </SheetDescription>
+        </SheetHeader>
+        <div className="flex flex-col gap-2.5 px-5 pb-6">
+          {MOTIVOS_SALIDA.map((m) => {
+            const Icono = ICONO_ME_FUI[m]
+            return (
+              <Button
+                key={m}
+                variant="outline"
+                size="lg"
+                className="w-full justify-start"
+                disabled={pendiente}
+                onClick={() => {
+                  setEscogido(m)
+                  onMotivo(m)
+                }}
+              >
+                {pendiente && escogido === m ? <Loader2Icon aria-hidden className="animate-spin" /> : <Icono aria-hidden />}
+                {OPCION_ME_FUI[m]}
+              </Button>
+            )
+          })}
+          {error && (
+            <p role="alert" className="font-bold text-destructive">
+              {error}
+            </p>
+          )}
+          <Button variant="secondary" size="lg" className="mt-2 w-full" disabled={pendiente} autoFocus onClick={() => onCambiar(false)}>
+            No, sigo esperando
+          </Button>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }
 
