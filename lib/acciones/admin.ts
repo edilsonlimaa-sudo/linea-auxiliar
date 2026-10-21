@@ -118,3 +118,21 @@ export async function salirAdmin() {
   await supabase.auth.signOut()
   redirect("/admin/entrar")
 }
+
+/** Cerrar un viaje desde Viajes en curso (R69): sin salir se cancela; en ruta se termina */
+export async function cerrarViajeAdmin(viajeId: string): Promise<{ error?: string }> {
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("admin_cerrar_viaje", { p_viaje: viajeId })
+  if (error) return { error: error.message }
+  revalidatePath("/", "layout")
+  return {}
+}
+
+/** Desconectar a un chofer (R69): cierra todos sus viajes abiertos y queda "terminó por hoy" */
+export async function desconectarChoferAdmin(choferId: string): Promise<{ error?: string }> {
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("admin_desconectar", { p_chofer: choferId })
+  if (error) return { error: error.message }
+  revalidatePath("/", "layout")
+  return {}
+}

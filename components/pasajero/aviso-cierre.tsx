@@ -18,7 +18,8 @@ const suscribirse = () => () => {}
 
 const TEXTO: Record<AvisoDeCierre["motivo"], (chofer: string) => { titulo: string; detalle: string }> = {
   salio_lleno: (c) => ({ titulo: "Te quedaste sin puesto", detalle: `El carro de ${c} salió lleno antes de que te tocara. Escoge otra unidad aquí abajo.` }),
-  cancelo: (c) => ({ titulo: "Tu viaje se canceló", detalle: `${c} canceló el viaje. Escoge otra unidad aquí abajo.` }),
+  cancelo: (c) => ({ titulo: "Tu viaje se canceló", detalle: `Se canceló el viaje con ${c}. Escoge otra unidad aquí abajo.` }),
+  cerrado: (c) => ({ titulo: "Tu viaje se cerró", detalle: `El viaje de ${c} se cerró sin pasar por ti. Escoge otra unidad aquí abajo.` }),
   rechazo: (c) => ({ titulo: "No pueden pasar por ti", detalle: `${c} no puede pasar por ti esta vez. Escoge otra unidad aquí abajo.` }),
   no_llego: (c) => ({ titulo: "Perdiste tu puesto", detalle: `${c} marcó que no estabas cuando pasó. Si todavía quieres ir, escoge una unidad aquí abajo.` }),
 }

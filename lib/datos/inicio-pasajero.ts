@@ -150,14 +150,14 @@ export async function tieneViajeEnCurso(pasajeroId: string): Promise<boolean> {
   return data !== null || (await cargarCalificacionPendiente(pasajeroId)) !== null
 }
 
-export type AvisoDeCierre = { reservaId: string; motivo: "salio_lleno" | "cancelo" | "rechazo" | "no_llego"; chofer: string }
+export type AvisoDeCierre = { reservaId: string; motivo: "salio_lleno" | "cancelo" | "cerrado" | "rechazo" | "no_llego"; chofer: string }
 
 /** Si en los últimos 30 min otro cerró su reserva, se le explica qué pasó (R14, R21, R24, R29) */
 export async function cargarAvisoDeCierre(pasajeroId: string): Promise<AvisoDeCierre | null> {
   const supabase = await crearClienteServidor()
   const { data } = await supabase
     .from("reservas")
-    .select("id, estado, viaje:viajes!inner(estado, chofer:perfiles!viajes_chofer_id_fkey(nombre))")
+    .select("id, estado, cerrada_en, viaje:viajes!inner(estado, sentido, salida_en, chofer:perfiles!viajes_chofer_id_fkey(nombre))")
     .eq("pasajero_id", pasajeroId)
     .in("estado", ["sin_puesto", "rechazada", "no_llego"])
     .gt("cerrada_en", new Date(Date.now() - 30 * 60_000).toISOString())
@@ -165,8 +165,21 @@ export async function cargarAvisoDeCierre(pasajeroId: string): Promise<AvisoDeCi
     .limit(1)
     .maybeSingle()
   if (!data) return null
+  // Hacia Valle Grande, quien queda sin puesto vuelve a la lista en su lugar (R69): no hay nada que explicar
+  if (data.estado === "sin_puesto" && data.viaje.sentido === "centro_a_vg") return null
+  // Sin puesto después de salir el carro: el viaje se cerró sin pasar por él (R69), no que salió lleno
+  const despuesDeSalir =
+    data.viaje.salida_en !== null && data.cerrada_en !== null && new Date(data.cerrada_en).getTime() - new Date(data.viaje.salida_en).getTime() > 60_000
   const motivo =
-    data.estado === "rechazada" ? "rechazo" : data.estado === "no_llego" ? "no_llego" : data.viaje.estado === "cancelado" ? "cancelo" : "salio_lleno"
+    data.estado === "rechazada"
+      ? "rechazo"
+      : data.estado === "no_llego"
+        ? "no_llego"
+        : data.viaje.estado === "cancelado"
+          ? "cancelo"
+          : despuesDeSalir
+            ? "cerrado"
+            : "salio_lleno"
   return { reservaId: data.id, motivo, chofer: data.viaje.chofer?.nombre ?? "El chofer" }
 }
 

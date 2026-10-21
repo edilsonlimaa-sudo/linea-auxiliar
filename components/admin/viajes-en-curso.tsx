@@ -1,5 +1,6 @@
 import { BusIcon, HandIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucide-react"
 
+import { CerrarViaje, DesconectarChofer } from "@/components/admin/acciones-viaje"
 import { LineaDeTiempo } from "@/components/admin/linea-de-tiempo"
 import { Avatar } from "@/components/foto/avatar"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
@@ -11,7 +12,8 @@ import { conAcompanantes, enEspera, ETIQUETA_ESTADO, llegada, SENTIDOS, type Via
 
 /**
  * Viajes en curso del panel (§8): un bloque por chofer, con cada viaje abierto y su gente separada en
- * a bordo, por recoger, pedidos en el camino y lista de espera. Solo lectura.
+ * a bordo, por recoger, pedidos en el camino y lista de espera. El admin no cambia listas, pero puede cerrar un
+ * viaje o desconectar al chofer (R69).
  */
 export function ViajesEnCurso({ choferes }: { choferes: ChoferEnCurso[] }) {
   if (choferes.length === 0) {
@@ -55,16 +57,17 @@ function BloqueChofer({ chofer: c }: { chofer: ChoferEnCurso }) {
       <div className="flex flex-wrap gap-2">
         <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin className="flex-1" />
         <Contacto telefono={c.telefono} />
+        <DesconectarChofer choferId={c.id} chofer={c.nombre} viajesAbiertos={c.viajes.length} />
       </div>
 
       {c.viajes.map((v) => (
-        <BloqueViaje key={v.id} viaje={v} porId={porId} />
+        <BloqueViaje key={v.id} viaje={v} porId={porId} chofer={c.nombre} />
       ))}
     </article>
   )
 }
 
-function BloqueViaje({ viaje: v, porId }: { viaje: ViajeEnCurso; porId: Map<string, Viaje> }) {
+function BloqueViaje({ viaje: v, porId, chofer }: { viaje: ViajeEnCurso; porId: Map<string, Viaje>; chofer: string }) {
   const cuando =
     v.estado === "en_ruta"
       ? `${ETIQUETA_ESTADO.en_ruta} ${SENTIDOS[v.sentido].hacia}${v.salida_en ? `, salió a las ${hora(v.salida_en)}` : ""}`
@@ -108,6 +111,8 @@ function BloqueViaje({ viaje: v, porId }: { viaje: ViajeEnCurso; porId: Map<stri
           <Grupo titulo="Lista de espera" personas={enLista} />
         </>
       )}
+
+      <CerrarViaje viajeId={v.id} chofer={chofer} enRuta={v.estado === "en_ruta"} haciaValle={v.sentido === "centro_a_vg"} />
     </section>
   )
 }
