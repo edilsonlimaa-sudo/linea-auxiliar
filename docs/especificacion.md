@@ -119,6 +119,17 @@ puede ocultar botones, pero nunca es la única barrera.
     5:30 p. m. · Luisa terminó por hoy") y en "La línea ahora", aparte de quienes trabajan.
   - Cada pausa queda guardada con la hora en que de verdad volvió: más adelante el panel podrá mostrar si cada chofer
     cumple lo que dice.
+- **R69. El admin cierra viajes y desconecta choferes [servidor].** *(Oct. 2026: viajes muertos y choferes que avisan
+  que no pueden seguir.)* Desde **Viajes en curso**, con confirmación:
+  - **Cerrar viaje:** si todavía no salió, se **cancela** (como cuando cancela el chofer, R24); si va **en ruta**, se
+    **termina**: quienes ya subieron quedan como viaje hecho y quienes faltaba recoger quedan **sin puesto**. Se
+    promueve el siguiente viaje de la cadena, como siempre (R12).
+  - **Desconectar:** cierra **todos** sus viajes abiertos (también el que va en ruta, que el chofer no puede cerrar
+    desconectándose, R8) y lo desconecta con "terminó por hoy" (R60).
+  - **Nadie de la lista hacia Valle Grande pierde su lugar:** quien estaba ligado al carro (del camino, R66) o subió
+    en Gina en un viaje que no llegó a salir **vuelve a la lista en su mismo lugar**, con 45 min para que lo busque otro
+    carro. Esto vale también cuando el chofer cancela o se desconecta.
+  - Al pasajero con puesto se le explica en Inicio ("Tu viaje se canceló" o "Tu viaje se cerró sin pasar por ti").
 
 ### 5.3 Publicar viajes y cadena
 
@@ -539,7 +550,8 @@ menú (formularios).
   **Ver en el mapa** (R41). Por cada viaje: sentido, estado ("En ruta hacia el Centro, salió a las 7:40" /
   "Recoge en Valle Grande en ~5 min" / "Próximo viaje"), puestos ocupados de cuántos, y la gente separada en
   **A bordo**, **Por recoger** (con dónde y "✋ ya está en el sitio"), **Pedidos en el camino** y **Lista de espera**.
-  Cada persona con nombre completo, dónde la recogen, WhatsApp y Llamar. Solo lectura: el admin no cambia listas.
+  Cada persona con nombre completo, dónde la recogen, WhatsApp y Llamar. El admin no cambia listas, pero puede
+  **Cerrar** un viaje y **Desconectar** al chofer (R69).
 - **Viajes terminados**: los
   viajes finalizados de toda la línea, del más reciente al más viejo, con filtro **Hoy · 7 días · 30 días**
   (máx. 100). Arriba, el total del período: viajes, pasajeros llevados y ★ promedio. Cada viaje, plegado como en

@@ -827,8 +827,13 @@ export type Database = {
         Args: { p_pasajero: string }
         Returns: undefined
       }
+      _cerrar_viaje: { Args: { p_viaje: string }; Returns: undefined }
       _compactar_paradas: {
         Args: { p_sentido: Database["public"]["Enums"]["sentido"] }
+        Returns: undefined
+      }
+      _devolver_a_lista: {
+        Args: { p_con_subio: boolean; p_viaje: string }
         Returns: undefined
       }
       _exigir_aprobado: {
@@ -982,6 +987,7 @@ export type Database = {
           viajes: number
         }[]
       }
+      admin_cerrar_viaje: { Args: { p_viaje: string }; Returns: undefined }
       admin_cuentas: {
         Args: { p_estado?: Database["public"]["Enums"]["estado_cuenta"] }
         Returns: {
@@ -1036,6 +1042,7 @@ export type Database = {
           sin_transporte: number
         }[]
       }
+      admin_desconectar: { Args: { p_chofer: string }; Returns: undefined }
       admin_historial: {
         Args: { p_usuario: string }
         Returns: {
