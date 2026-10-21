@@ -418,6 +418,10 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
 - **R67. Avisos del camino con el carro ya en ruta.** El chofer en ruta ve a quienes esperan **en el camino sin
   carro** (avisaron después de que salió de Gina) y, si para y tiene puesto, los marca **Subió**. Si no para,
   esperan al siguiente carro, que les guarda puesto como en R64.
+- **Historial de la lista (panel).** El admin ve, además de la lista en vivo, **quién pasó por la lista y por qué
+  salió**, por período (hoy, ayer, 7 días): subió en Gina o en el camino (y con qué chofer), se fue ("Me fui"), venció
+  sin responder "¿Sigues ahí?", el chofer marcó "No estaba", no estaba cuando pasó el carro, canceló o se canceló el
+  viaje. Con dónde esperaba, cuánto tiempo estuvo en la lista y a qué hora salió, y un resumen por motivo arriba.
 - **R68. A bordo, igual que hoy.** Cada **Subió** crea un pasajero a bordo del viaje: **Se bajó** (R38),
   historial (R50–R51) y calificaciones (R44–R45) funcionan como en Valle Grande → Centro.
 
