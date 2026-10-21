@@ -151,3 +151,46 @@ export async function cambiarLugar(reservaId: string, datos: FormData): Promise<
   revalidatePath("/mi-viaje")
   return { ok: true }
 }
+
+// ---------- Lista de Gina: Centro → Valle Grande (docs/especificacion.md §5.17) ----------
+
+async function llamarLista(fn: (s: Awaited<ReturnType<typeof crearClienteServidor>>) => PromiseLike<{ error: { message: string } | null }>): Promise<Resultado> {
+  const supabase = await crearClienteServidor()
+  const { error } = await fn(supabase)
+  if (error) return { error: error.message }
+  actualizarApp()
+  return { ok: true }
+}
+
+/**
+ * "Estoy en Gina" o "Estoy en …" del camino (R62). distanciaM: qué tan lejos de Gina estaba según su GPS (para
+ * medir abusos); null sin GPS.
+ */
+export async function estoyEnLista(d: {
+  enGina: boolean
+  lugar: string | null
+  lat: number | null
+  lng: number | null
+  personas: number
+  distanciaM: number | null
+}): Promise<Resultado> {
+  return llamarLista((s) =>
+    s.rpc("estoy_en_lista", {
+      p_en_gina: d.enGina,
+      ...(d.lugar ? { p_lugar: d.lugar } : {}),
+      ...(d.lat !== null && d.lng !== null ? { p_lat: d.lat, p_lng: d.lng } : {}),
+      p_personas: d.personas,
+      ...(d.distanciaM !== null ? { p_distancia_m: Math.round(d.distanciaM) } : {}),
+    })
+  )
+}
+
+/** "Sí, sigo aquí" (R62) */
+export async function sigoEnLista(): Promise<Resultado> {
+  return llamarLista((s) => s.rpc("sigo_en_lista"))
+}
+
+/** "Me fui" (R62) */
+export async function meFui(): Promise<Resultado> {
+  return llamarLista((s) => s.rpc("me_fui"))
+}

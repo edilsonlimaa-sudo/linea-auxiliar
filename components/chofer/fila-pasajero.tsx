@@ -127,7 +127,8 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
             Se bajó
           </Button>
         )}
-        {recogiendo && fila.conApp && fila.confirmado && !fila.pendiente && (
+        {/* Quien ya subió por la Lista de Gina (R64) no tiene "No vino" */}
+        {recogiendo && fila.conApp && fila.confirmado && !fila.pendiente && fila.estado === "activa" && (
           <Button size="sm" variant="ghost" className="-ml-2 text-destructive" disabled={pendiente} onClick={noVino}>
             <UserXIcon aria-hidden />
             No vino

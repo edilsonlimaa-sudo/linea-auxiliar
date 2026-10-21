@@ -1,12 +1,13 @@
 import { AgregarViaje } from "@/components/chofer/agregar-viaje"
 import { Companeros } from "@/components/chofer/companeros"
 import { EstadoEnCabecera, EstadoServicio } from "@/components/chofer/conexion"
+import { ListaTramo } from "@/components/chofer/lista-tramo"
 import { PreguntarVuelta } from "@/components/chofer/preguntar-vuelta"
 import { ViajeChofer } from "@/components/chofer/viaje-chofer"
 import { EnVivo } from "@/components/en-vivo"
 import type { DatosInicioChofer } from "@/lib/datos/inicio-chofer"
 import { saludo } from "@/lib/fechas"
-import type { Viaje } from "@/lib/viajes"
+import { libres, type Viaje } from "@/lib/viajes"
 
 /**
  * Inicio del chofer (docs/especificacion.md §8). Lo normal se ve discreto, lo que pide acción se ve claro y el resto
@@ -27,6 +28,11 @@ export function InicioChofer({
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
+  // La lista hacia Valle Grande es del tramo, no de un viaje: la ven todos los choferes (§5.17). Si este chofer está
+  // recogiendo en Gina o va en ruta hacia Valle Grande, la misma lista deja subir a la gente (R64, R67)
+  const enGina = recogida?.sentido === "centro_a_vg" && recogida.estado === "en_parada" ? { viajeId: recogida.id, plan: recogida.gina ?? [] } : null
+  const haciaValle = enRuta?.sentido === "centro_a_vg" ? { viajeId: enRuta.id, libres: libres(enRuta) } : null
+  const lista = <ListaTramo lista={datos.listaTramo} enGina={enGina} enRuta={haciaValle} />
 
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
@@ -50,6 +56,7 @@ export function InicioChofer({
           </div>
           <Companeros companeros={companeros} viajes={viajesCompaneros} chofer={nombre} enCabecera />
         </section>
+        {lista}
       </div>
     )
   }
@@ -67,6 +74,7 @@ export function InicioChofer({
       <h1 className="sr-only">Inicio</h1>
       {/* Conexión y ubicación (R40) en una línea: solo crece si el GPS falla */}
       <EstadoServicio conectado={conectado} viajesAbiertos={publicados} />
+      {lista}
       {/* R61: solo si va en ruta sin otro viaje publicado (con la vuelta ya publicada no se pregunta) */}
       {preguntarVuelta && enRuta && abiertos.length === 1 && <PreguntarVuelta viaje={enRuta} />}
 

@@ -8,6 +8,7 @@ import {
   HistoryIcon,
   KeyRoundIcon,
   LayoutDashboardIcon,
+  ListOrderedIcon,
   LogOutIcon,
   MoonIcon,
   SunIcon,
@@ -37,7 +38,7 @@ import { salirAdmin } from "@/lib/acciones/admin"
 import { cn } from "@/lib/utils"
 
 /** Contadores del menú: los que piden acción (aprobar) van en amarillo; los que informan, en gris */
-export type ContadoresAdmin = { choferes: number; pasajeros: number; enCurso: number; esperando: number }
+export type ContadoresAdmin = { choferes: number; pasajeros: number; enCurso: number; esperando: number; listaGina: number }
 
 type Destino = { href: string; titulo: string; icono: LucideIcon; contador?: keyof ContadoresAdmin; accion?: boolean }
 
@@ -48,6 +49,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
     titulo: "Operación",
     destinos: [
       { href: "/admin/viajes", titulo: "Viajes en curso", icono: BusIcon, contador: "enCurso" },
+      { href: "/admin/lista-gina", titulo: "Lista a Valle Grande", icono: ListOrderedIcon, contador: "listaGina" },
       { href: "/admin/demanda", titulo: "Demanda", icono: HandIcon, contador: "esperando" },
       { href: "/admin/viajes/terminados", titulo: "Viajes terminados", icono: HistoryIcon },
     ],

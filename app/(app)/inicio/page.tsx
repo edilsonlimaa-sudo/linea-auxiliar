@@ -8,6 +8,7 @@ import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { CabeceraInicio, sentidoDeHacia } from "@/components/pasajero/cabecera-inicio"
+import { ListaGina } from "@/components/pasajero/lista-gina"
 import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { Badge } from "@/components/ui/badge"
@@ -22,6 +23,7 @@ import {
   type MiReserva,
 } from "@/lib/datos/inicio-pasajero"
 import { saludo } from "@/lib/fechas"
+import { cargarListaGina, type EnListaGina } from "@/lib/datos/lista-gina"
 import { exigirCuentaAprobada, type Perfil } from "@/lib/sesion"
 import {
   aceptaReservas,
@@ -56,9 +58,15 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
     return <CambiarDeUnidad datos={datos} miReserva={datos.miReserva} />
   }
   // Viaje terminado sin calificar: primero "¿Cómo te fue?" (R45)
-  const [pendiente, cierre] = await Promise.all([cargarCalificacionPendiente(perfil.id), cargarAvisoDeCierre(perfil.id)])
+  const [pendiente, cierre, lista] = await Promise.all([
+    cargarCalificacionPendiente(perfil.id),
+    cargarAvisoDeCierre(perfil.id),
+    cargarListaGina(),
+  ])
   if (pendiente) redirect("/mi-viaje")
-  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} />
+  // Si está en la Lista de Gina, Inicio abre en Centro → Valle Grande (R62)
+  const sentido = sentidoDeHacia(hacia) ?? (lista.some((e) => e.esMio) ? "centro_a_vg" : null)
+  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentido} lista={lista} />
 }
 
 /**
@@ -71,11 +79,13 @@ function InicioPasajero({
   datos,
   cierre,
   hacia,
+  lista,
 }: {
   perfil: Perfil
   datos: DatosInicioPasajero
   cierre: AvisoDeCierre | null
   hacia: Sentido | null
+  lista: EnListaGina[]
 }) {
   const { viajes, porId, lugaresRecientes, aviso, enServicio, enPausa } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
@@ -103,33 +113,46 @@ function InicioPasajero({
       />
       {aviso && <EstadoLinea aviso={aviso} />}
 
-      <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
-        <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-          <h2 id="titulo-unidades" className="flex items-center gap-2 text-xl font-bold">
-            Unidades {SENTIDOS[sentido].hacia}
-            {unidades.length > 0 && <Badge variant="secondary">{unidades.length}</Badge>}
-          </h2>
-          {unidades.length > 1 && <p className="text-[15px] text-muted-foreground">La que recoge primero, arriba</p>}
-        </header>
-
-        {unidades.map((v) => (
-          <TarjetaUnidad key={v.id} viaje={v} porId={porId} recientes={lugaresRecientes} destacada={v.id === primeraConPuesto?.id} />
-        ))}
-
-        {!conPuesto && (
-          <Card className="items-center gap-3 rounded-3xl border-2 border-dashed px-5 text-center shadow-none ring-0">
-            <span aria-hidden className="grid size-14 place-items-center rounded-full bg-muted">
-              <BusIcon className="size-7 text-muted-foreground" />
-            </span>
-            <p className="text-lg font-bold">
-              {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
-            </p>
-            <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
-            {/* R60: si alguien dijo que vuelve, se dice aquí: es donde más ayuda */}
-            <QuienVuelve choferes={enPausa} className="w-full border-t pt-3" />
-          </Card>
-        )}
-      </section>
+      {/* Centro → Valle Grande: no se aparta, se espera en la Lista de Gina (§5.17) */}
+      {sentido === "centro_a_vg" ? (
+        <ListaGina
+          lista={lista}
+          carros={ordenarParaPasajero(
+            viajes.filter((v) => v.sentido === "centro_a_vg" && v.estado !== "en_ruta"),
+            porId
+          )}
+          porId={porId}
+          enPausa={enPausa}
+        />
+      ) : (
+        <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
+          <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+            <h2 id="titulo-unidades" className="flex items-center gap-2 text-xl font-bold">
+              Unidades {SENTIDOS[sentido].hacia}
+              {unidades.length > 0 && <Badge variant="secondary">{unidades.length}</Badge>}
+            </h2>
+            {unidades.length > 1 && <p className="text-[15px] text-muted-foreground">La que recoge primero, arriba</p>}
+          </header>
+  
+          {unidades.map((v) => (
+            <TarjetaUnidad key={v.id} viaje={v} porId={porId} recientes={lugaresRecientes} destacada={v.id === primeraConPuesto?.id} />
+          ))}
+  
+          {!conPuesto && (
+            <Card className="items-center gap-3 rounded-3xl border-2 border-dashed px-5 text-center shadow-none ring-0">
+              <span aria-hidden className="grid size-14 place-items-center rounded-full bg-muted">
+                <BusIcon className="size-7 text-muted-foreground" />
+              </span>
+              <p className="text-lg font-bold">
+                {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
+              </p>
+              <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
+              {/* R60: si alguien dijo que vuelve, se dice aquí: es donde más ayuda */}
+              <QuienVuelve choferes={enPausa} className="w-full border-t pt-3" />
+            </Card>
+          )}
+        </section>
+      )}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon, FlagIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BarraAccion } from "@/components/chofer/barra-accion"
 import { FilaPasajero } from "@/components/chofer/fila-pasajero"
@@ -68,18 +68,31 @@ function Seccion({
   filas,
   estado,
   vacio,
+  alerta = false,
 }: {
   titulo: string
   filas: FilaChofer[]
   estado: Viaje["estado"]
   vacio?: string
+  alerta?: boolean // lo que no se puede olvidar (recoger en el camino): en amarillo, arriba
 }) {
   if (filas.length === 0 && !vacio) return null
   return (
-    <section className="flex flex-col gap-2">
-      <h3 className="text-[15px] font-bold tracking-wide text-muted-foreground uppercase">
+    <section
+      className={cn(
+        "flex flex-col gap-2",
+        alerta && "rounded-2xl border-2 border-warning bg-warning-muted p-3"
+      )}
+    >
+      <h3
+        className={cn(
+          "text-[15px] font-bold tracking-wide uppercase",
+          alerta ? "flex items-center gap-2 text-warning" : "text-muted-foreground"
+        )}
+      >
+        {alerta && <FlagIcon aria-hidden className="size-5 shrink-0" />}
         {titulo}{" "}
-        <span className="font-normal text-muted-foreground">
+        <span className={cn("font-normal", alerta ? "" : "text-muted-foreground")}>
           ({filas.length})
         </span>
       </h3>
@@ -138,7 +151,15 @@ export function ViajeChofer({
   barraFija?: boolean
   plegado?: boolean
 }) {
-  const { titulo, detalle } = estadoParaChofer(viaje, porId)
+  const { titulo, detalle: detalleBase } = estadoParaChofer(viaje, porId)
+  // En ruta, "a bordo" son los que subieron: a quien falta recoger en el camino se lo cuenta aparte
+  const sumar = (estado: FilaChofer["estado"]) =>
+    viaje.lista.filter((f) => f.estado === estado && !f.pendiente).reduce((n, f) => n + f.personas, 0)
+  const porRecoger = viaje.estado === "en_ruta" ? sumar("activa") : 0
+  const detalle =
+    porRecoger > 0
+      ? `${sumar("subio") === 1 ? "1 pasajero a bordo" : `${sumar("subio")} pasajeros a bordo`} · ${porRecoger} por recoger`
+      : detalleBase
   const enRuta = viaje.estado === "en_ruta"
   const conPuesto = viaje.lista.filter((f) => f.confirmado && !f.pendiente)
   const enLista = viaje.lista.filter((f) => !f.confirmado && !f.pendiente)
@@ -146,13 +167,20 @@ export function ViajeChofer({
     .filter((f) => f.conApp && !f.listo)
     .map((f) => f.nombre)
   const espera = enEspera(viaje)
+  // Centro → Valle Grande, en Gina: los del camino a los que se les guarda puesto (R64–R66)
+  const recogerEnCamino =
+    viaje.estado === "en_parada"
+      ? (viaje.gina ?? []).filter((e) => e.rol === "guardar")
+      : []
 
   const barra = (
     <BarraAccion
       viajeId={viaje.id}
       estado={viaje.estado}
-      confirmados={conPuesto.length}
+      // Personas, no reservas: un grupo (R57) sube completo ("Beto +1" son 2)
+      confirmados={conPuesto.reduce((n, f) => n + f.personas, 0)}
       sinLlegar={sinLlegar}
+      enCamino={recogerEnCamino.map((e) => `${e.nombre} (${e.lugar})`)}
       mensajeGrupo={mensajeGrupo(viaje, vehiculo)}
       fija={barraFija}
     />
@@ -217,6 +245,21 @@ export function ViajeChofer({
           <p className="text-muted-foreground">{detalle}</p>
         </div>
         <PasosViaje estado={viaje.estado} />
+        {recogerEnCamino.length > 0 && (
+          <p
+            role="status"
+            className="flex items-start gap-2 rounded-2xl border-2 border-warning bg-warning-muted px-3 py-2.5"
+          >
+            <TriangleAlertIcon
+              aria-hidden
+              className="mt-0.5 size-5 shrink-0 text-warning"
+            />
+            <span>
+              <strong>Al salir, recoges en el camino:</strong>{" "}
+              {recogerEnCamino.map((e) => `${e.nombre} · ${e.lugar}`).join(", ")}
+            </span>
+          </p>
+        )}
         {cuerpo(false)}
         {!barraFija && barra}
       </section>
@@ -265,12 +308,14 @@ export function ViajeChofer({
               filas={viaje.lista.filter((f) => f.pendiente)}
               estado={viaje.estado}
             />
+            {/* Lo que no se puede olvidar: a quién recoger en el camino, en amarillo y arriba */}
             <Seccion
-              titulo="Vas a recoger"
+              titulo="Recoge en el camino"
               filas={viaje.lista.filter(
                 (f) => f.estado === "activa" && !f.pendiente
               )}
               estado={viaje.estado}
+              alerta
             />
             <Seccion
               titulo="A bordo"
@@ -281,11 +326,18 @@ export function ViajeChofer({
           </>
         ) : (
           <>
+            {/* Centro → Valle Grande: nadie aparta; se sube desde la lista del tramo (R64), que está fuera del viaje */}
             <Seccion
-              titulo="Con puesto"
+              titulo={viaje.gina ? "A bordo" : "Con puesto"}
               filas={conPuesto}
               estado={viaje.estado}
-              vacio="Todavía nadie ha apartado. Los pasajeros ya ven tu viaje."
+              vacio={
+                viaje.gina
+                  ? viaje.estado === "en_parada"
+                    ? "Todavía no sube nadie. Abre la lista hacia Valle Grande para llamarlos."
+                    : undefined
+                  : "Todavía nadie ha apartado. Los pasajeros ya ven tu viaje."
+              }
             />
             <Seccion
               titulo="Lista de espera"

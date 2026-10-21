@@ -66,8 +66,11 @@ export function MiReservaTarjeta({
 }) {
   const { reserva, viaje, desde, hasta, turno, lista, telefonoChofer } = datos
   const confirmado = tienePuesto(hasta, viaje)
-  const aBordo = reserva.estado === "subio" // el carro ya salió con la persona adentro
+  // Ya subió: con el carro en ruta o, en la lista hacia Valle Grande, todavía en Gina (R64). No se desiste: lo baja el chofer
+  const aBordo = reserva.estado === "subio"
   const grupo = reserva.personas > 1 // viaja acompañado (R57)
+  // Lista de Gina: esperaba en el camino y el carro salió de Gina con su puesto guardado (R66)
+  const vaPorTi = viaje.sentido === "centro_a_vg" && viaje.estado === "en_ruta" && reserva.estado === "activa" && !reserva.pendiente
   const cuando = llegada(viaje, porId)
   const lugar = reserva.lugar ?? (reserva.lat !== null ? "tu ubicación GPS" : "sin lugar")
   const telefono = telefonoChofer?.replace(/\D/g, "")
@@ -81,6 +84,9 @@ export function MiReservaTarjeta({
   } else if (reserva.pendiente) {
     titulo = "Esperando respuesta del chofer"
     subtitulo = "Le pediste que te recoja en el camino. Te avisamos si va por ti."
+  } else if (vaPorTi) {
+    titulo = `${viaje.chofer.nombre.split(" ")[0]} va por ti`
+    subtitulo = `Ya salió de Gina con ${grupo ? "sus puestos" : "tu puesto"}. Te recoge al pasar por ${reserva.lugar ?? "donde estás"}.`
   } else if (confirmado) {
     titulo = grupo ? `Tienen los puestos ${desde} a ${hasta} de ${viaje.puestos}` : `Tienes el puesto ${hasta} de ${viaje.puestos}`
     subtitulo = reserva.aceptada_en
@@ -137,7 +143,7 @@ export function MiReservaTarjeta({
 
       <PasosViaje estado={viaje.estado} />
 
-      {confirmado && !reserva.pendiente && viaje.estado !== "en_ruta" && <BotonYaLlegue reservaId={reserva.id} listo={reserva.listo} />}
+      {confirmado && !aBordo && !reserva.pendiente && viaje.estado !== "en_ruta" && <BotonYaLlegue reservaId={reserva.id} listo={reserva.listo} />}
 
       <ChoferResumen chofer={viaje.chofer} />
       {/* Mientras viene: la foto del carro ayuda a reconocerlo (R54) */}
@@ -182,7 +188,7 @@ export function MiReservaTarjeta({
         </details>
       )}
 
-      {(viaje.estado !== "en_ruta" || reserva.pendiente) && <BotonYaNoVoy reservaId={reserva.id} confirmado={confirmado} chofer={viaje.chofer.nombre} />}
+      {!aBordo && (viaje.estado !== "en_ruta" || reserva.pendiente || vaPorTi) && <BotonYaNoVoy reservaId={reserva.id} confirmado={confirmado} chofer={viaje.chofer.nombre} />}
     </section>
   )
 }

@@ -20,13 +20,15 @@ export function BarraAccion({
   estado,
   confirmados,
   sinLlegar,
+  enCamino = [],
   mensajeGrupo,
   fija = true,
 }: {
   viajeId: string
   estado: EstadoViaje
-  confirmados: number
+  confirmados: number // personas que suben (con los acompañantes de cada grupo, R57)
   sinLlegar: string[] // confirmados con app que no han tocado "Ya estoy en el sitio"
+  enCamino?: string[] // Centro → Valle Grande: a quién recoge en el camino al salir ("Carla P. (Plaza del Indio)")
   mensajeGrupo: string // R15
   fija?: boolean // pegada abajo (viaje en foco) o dentro de la tarjeta
 }) {
@@ -114,6 +116,9 @@ export function BarraAccion({
                   ? `${sinLlegar[0]} no ha avisado que está en el sitio.`
                   : `${sinLlegar.join(", ")} no han avisado que están en el sitio.`}
               </strong>
+            )}
+            {enCamino.length > 0 && (
+              <strong className="mt-2 block text-foreground">En el camino recoges a {enCamino.join(", ")}.</strong>
             )}
           </>
         }

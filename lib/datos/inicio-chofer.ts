@@ -29,7 +29,43 @@ export type FilaChofer = {
   fotoUrl: string | null // foto de perfil del pasajero (R54): ayuda a reconocerlo
 }
 
-export type ViajeChofer = Viaje & { lista: FilaChofer[] }
+/**
+ * Una persona de la Lista de Gina en el plan del carro (docs/especificacion.md R64–R67). rol: "llamar" (está en Gina
+ * y entra), "guardar" (está en el camino: se le guarda puesto), "despues" (no entra o su grupo no cabe).
+ * cabe: si se la puede subir ya (a quien no aparece se lo salta, R65).
+ */
+export type EntradaGina = {
+  id: string
+  posicion: number
+  nombre: string
+  fotoUrl: string | null
+  personas: number
+  enGina: boolean
+  lugar: string | null
+  rol: "llamar" | "guardar" | "despues"
+  cabe: boolean
+  telefono: string | null
+  lat: number | null
+  lng: number | null
+}
+
+/** La lista hacia Valle Grande tal como la ven todos los choferes (R63): dónde espera cada uno, teléfono y GPS */
+export type EntradaTramo = {
+  id: string
+  posicion: number
+  nombre: string
+  fotoUrl: string | null
+  personas: number
+  enGina: boolean
+  lugar: string | null
+  creadaEn: string
+  telefono: string | null // solo si el chofer está conectado (§6)
+  lat: number | null
+  lng: number | null
+}
+
+// gina: el plan de la lista hacia Valle Grande (solo Centro → Valle Grande, recogiendo o en ruta); null en los demás
+export type ViajeChofer = Viaje & { lista: FilaChofer[]; gina: EntradaGina[] | null }
 
 /** Un compañero en la ruta: lo de "¿Cómo está la línea?" más su teléfono (§6: los choferes se ven entre ellos) */
 export type Companero = ChoferEnServicio & { telefono: string | null }
@@ -42,6 +78,7 @@ export type DatosInicioChofer = {
   ultimo: { sentido: Sentido; puestos: number } | null // último viaje no cancelado, para sugerir al publicar
   vehiculo: { unidad: string | null; placa: string } | null
   companeros: Companero[] // quién más trabaja y qué hace (R7)
+  listaTramo: EntradaTramo[] // la lista hacia Valle Grande, para todos los choferes (§5.17)
   viajesCompaneros: Viaje[] // sus viajes abiertos: para ver qué hace cada uno y qué viene después (§8)
 }
 
@@ -89,6 +126,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     const deEste = filas.filter((r) => r.viaje_id === v.id)
     return {
       ...v,
+      gina: null,
       lista: puestosEnOrden(deEste).map((r, i) => ({
         id: r.id,
         posicion: i + 1,
@@ -146,12 +184,56 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     })
     .sort((a, b) => Number(a.actividad === "Disponible") - Number(b.actividad === "Disponible") || a.nombre.localeCompare(b.nombre, "es"))
 
+  // Centro → Valle Grande: el plan de la Lista de Gina para la recogida y para el viaje en ruta (R64, R67)
+  const conGina = async (v: ViajeChofer | null): Promise<ViajeChofer | null> => {
+    if (!v || v.sentido !== "centro_a_vg") return v
+    const { data } = await supabase.rpc("plan_de_gina", { p_viaje: v.id })
+    const fotosLista = await firmarFotos((data ?? []).map((e) => e.foto_path))
+    return {
+      ...v,
+      gina: (data ?? []).map((e) => ({
+        id: e.id,
+        posicion: e.posicion,
+        nombre: e.nombre,
+        fotoUrl: e.foto_path ? (fotosLista.get(e.foto_path) ?? null) : null,
+        personas: e.personas,
+        enGina: e.en_gina,
+        lugar: e.lugar,
+        rol: e.rol as EntradaGina["rol"],
+        cabe: e.cabe,
+        telefono: e.telefono,
+        lat: e.lat,
+        lng: e.lng,
+      })),
+    }
+  }
+  const [enRutaConGina, recogidaConGina, tramoRes] = await Promise.all([
+    conGina(enRuta ? conLista(enRuta) : null),
+    conGina(recogida ? conLista(recogida) : null),
+    supabase.rpc("lista_para_choferes"),
+  ])
+  const fotosTramo = await firmarFotos((tramoRes.data ?? []).map((e) => e.foto_path))
+  const listaTramo: EntradaTramo[] = (tramoRes.data ?? []).map((e) => ({
+    id: e.id,
+    posicion: e.posicion,
+    nombre: e.nombre,
+    fotoUrl: e.foto_path ? (fotosTramo.get(e.foto_path) ?? null) : null,
+    personas: e.personas,
+    enGina: e.en_gina,
+    lugar: e.lugar,
+    creadaEn: e.creada_en,
+    telefono: e.telefono,
+    lat: e.lat,
+    lng: e.lng,
+  }))
+
   return {
     conectado,
     companeros,
     viajesCompaneros: deLaLinea,
-    enRuta: enRuta ? conLista(enRuta) : null,
-    recogida: recogida ? conLista(recogida) : null,
+    listaTramo,
+    enRuta: enRutaConGina,
+    recogida: recogidaConGina,
     proximos: viajes.filter((v) => v.estado === "programado").map(conLista),
     ultimo: ultimoRes.data ?? null,
     vehiculo: vehiculoRes.data ?? null,

@@ -42,6 +42,7 @@ export function TarjetaUnidad({
   lugarInicial,
   personas = 1,
   destacada = false,
+  porLista = false,
 }: {
   viaje: ViajeConChofer
   porId: Map<string, Viaje>
@@ -51,6 +52,7 @@ export function TarjetaUnidad({
   lugarInicial?: string | null // el de su espera, si estaba esperando (R27)
   personas?: number // cuántos van, si ya lo dijo al esperar (R57); si no, se pregunta al apartar
   destacada?: boolean
+  porLista?: boolean // Centro → Valle Grande: no se aparta, se sube por la lista del tramo (§5.17)
 }) {
   const cuando = llegada(viaje, porId)
   const n = libres(viaje)
@@ -132,7 +134,12 @@ export function TarjetaUnidad({
       {/* 4. La acción, con el mapa al lado */}
       <CardFooter className="flex-col items-stretch gap-2">
         <div className="flex items-start gap-2">
-          {hayPuesto ? (
+          {porLista ? (
+            // Hacia Valle Grande se sube por la lista: el carro llama en orden a quienes se anotaron (R64)
+            <p className="min-h-13 flex-1 rounded-2xl bg-muted px-4 py-3 text-[15px] font-bold text-muted-foreground">
+              {hayPuesto ? "Sube por la lista: llama en orden a los anotados" : "Va lleno"}
+            </p>
+          ) : hayPuesto ? (
             <BotonApartar
               viajeId={viaje.id}
               texto={textoBoton}
@@ -150,7 +157,7 @@ export function TarjetaUnidad({
           )}
           <VerEnMapa choferId={viaje.chofer_id} chofer={chofer.nombre} yo={yo} compacto />
         </div>
-        {enRuta && <p className="text-[15px] text-muted-foreground">El chofer te confirma si puede pasar por ti.</p>}
+        {enRuta && !porLista && <p className="text-[15px] text-muted-foreground">El chofer te confirma si puede pasar por ti.</p>}
 
         {/* Lo demás, a pedido */}
         <details className="group">

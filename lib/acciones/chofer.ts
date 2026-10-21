@@ -111,6 +111,16 @@ export async function cambiarPuestos(viajeId: string, puestos: number) {
   return rpc((s) => s.rpc("cambiar_puestos", { p_viaje: viajeId, p_puestos: puestos }))
 }
 
+/** Lista de Gina: "Subió" en Gina o en el camino (R64, R67) */
+export async function subioDeLista(entradaId: string, viajeId: string) {
+  return rpc((s) => s.rpc("subio_de_lista", { p_entrada: entradaId, p_viaje: viajeId }))
+}
+
+/** Lista de Gina: "No estaba" (R65) */
+export async function noEstabaEnLista(entradaId: string) {
+  return rpc((s) => s.rpc("no_estaba_en_lista", { p_entrada: entradaId }))
+}
+
 /** "No vino" (R21, R29) */
 export async function marcarNoVino(reservaId: string) {
   return rpc((s) => s.rpc("marcar_no_vino", { p_reserva: reservaId }))

@@ -35,3 +35,6 @@ export const MOVIMIENTO_MINIMO_M = 15
 
 /** El chofer envía cada 15 s: sin nada en 1 min, el mapa avisa "Sin señal" (R42) */
 export const EN_VIVO_MS = 60_000
+
+/** La parada de Gina, en el Centro: de donde sale Centro → Valle Grande (docs/especificacion.md R62) */
+export const GINA: Punto = { lat: 9.74505, lng: -63.17923 }
