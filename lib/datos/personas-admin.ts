@@ -1,46 +1,36 @@
 import "server-only"
 
-// Choferes y Pasajeros del panel (docs/especificacion.md §8): lista con búsqueda y el detalle de cada persona.
+// Choferes y Pasajeros del panel (docs/especificacion.md §8): la lista (se busca en pantalla) y el detalle de cada persona.
 // El admin lee todo por RLS; las cuentas con teléfono y cédula salen de admin_cuentas (cargarCuentas).
 import { cargarCuentas, type CuentaConActividad, type RolCuenta } from "@/lib/datos/admin"
 import { cargarHistorialListaAdmin, type SalidaLista } from "@/lib/datos/lista-gina"
 import { cargarViajesDeChoferAdmin, type ViajeTerminado } from "@/lib/datos/historial"
+import { hace } from "@/lib/fechas"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import type { Sentido } from "@/lib/viajes"
 
-// "José Ramírez" / "jose ramirez" / "JOSÉ": se busca sin tildes ni mayúsculas
-const normal = (s: string | null | undefined) =>
-  (s ?? "")
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase()
+// Lo que cambia con la hora ("último hace 5 min") se calcula aquí: la lista se filtra en el celular (lib/buscar-personas.ts)
+export type FilaPersona = CuentaConActividad & { fotoUrl: string | null; ultimoTexto: string }
 
-export type FilaPersona = CuentaConActividad & { fotoUrl: string | null }
-
-/** Los aprobados de un rol, filtrados por la búsqueda: conectados primero, después quien viajó más reciente */
-export async function cargarPersonas(rol: RolCuenta, busqueda: string): Promise<{ personas: FilaPersona[]; total: number; error: string | null }> {
+/** Todos los aprobados de un rol: conectados primero, después quien viajó más reciente. La búsqueda es en pantalla */
+export async function cargarPersonas(rol: RolCuenta): Promise<{ personas: FilaPersona[]; error: string | null }> {
   const { cuentas, error } = await cargarCuentas()
-  const aprobados = cuentas.filter((c) => c.rol === rol && c.estado === "aprobado")
-  const q = normal(busqueda.trim())
-  const digitos = busqueda.replace(/\D/g, "")
-  const coinciden = q
-    ? aprobados.filter((c) => {
-        const textos = [c.nombre, c.cedula, rol === "chofer" ? c.placa : c.urbanismo, rol === "chofer" ? c.unidad : null]
-        // El teléfono, por sus dígitos (sin el 58 ni el 0 del principio importa: basta con que contenga lo escrito)
-        return textos.some((t) => normal(t).includes(q)) || (digitos.length >= 3 && (c.telefono ?? "").replace(/\D/g, "").includes(digitos.replace(/^0/, "")))
-      })
-    : aprobados
-  const orden = [...coinciden].sort(
-    (a, b) =>
-      Number(Boolean(b.actividad?.conectado)) - Number(Boolean(a.actividad?.conectado)) ||
-      (b.actividad?.ultimo_viaje ?? "").localeCompare(a.actividad?.ultimo_viaje ?? "") ||
-      a.nombre.localeCompare(b.nombre)
-  )
+  const orden = cuentas
+    .filter((c) => c.rol === rol && c.estado === "aprobado")
+    .sort(
+      (a, b) =>
+        Number(Boolean(b.actividad?.conectado)) - Number(Boolean(a.actividad?.conectado)) ||
+        (b.actividad?.ultimo_viaje ?? "").localeCompare(a.actividad?.ultimo_viaje ?? "") ||
+        a.nombre.localeCompare(b.nombre)
+    )
   const fotos = await firmarFotos(orden.map((c) => c.foto_path))
   return {
-    personas: orden.map((c) => ({ ...c, fotoUrl: c.foto_path ? (fotos.get(c.foto_path) ?? null) : null })),
-    total: aprobados.length,
+    personas: orden.map((c) => ({
+      ...c,
+      fotoUrl: c.foto_path ? (fotos.get(c.foto_path) ?? null) : null,
+      ultimoTexto: c.actividad?.ultimo_viaje ? `último ${hace(c.actividad.ultimo_viaje)}` : "sin viajes",
+    })),
     error,
   }
 }

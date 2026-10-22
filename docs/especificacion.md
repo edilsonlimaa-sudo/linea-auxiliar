@@ -633,7 +633,8 @@ menú (formularios).
   teléfono, cédula, dónde vive, placa, unidad, carro y aire; WhatsApp y Llamar; **Aprobar**, **Rechazar** y, en
   rechazados, **Eliminar**.
 - **Choferes** y **Pasajeros**: la **lista de los aprobados**, con **búsqueda** (nombre, teléfono, cédula; en choferes
-  también placa y unidad; en pasajeros, dónde vive), sin importar tildes ni mayúsculas. Una fila corta por persona:
+  también placa y unidad; en pasajeros, dónde vive), sin importar tildes ni mayúsculas. **Filtra al escribir**, sobre la
+  lista que ya está en pantalla (sin ir al servidor), y queda en la dirección para volver del detalle con ella puesta. Una fila corta por persona:
   foto, nombre y lo que la distingue (chofer: placa, ● conectado, ★ y viajes; pasajero: dónde vive y viajes) y su
   último viaje. Los choferes conectados van primero; después, quien viajó más reciente. Tocar la fila abre el
   **detalle**.
