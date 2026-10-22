@@ -87,7 +87,7 @@ export function InicioChofer({
       {/* R61: solo si va en ruta sin otro viaje publicado (con la vuelta ya publicada no se pregunta) */}
       {preguntarVuelta && enRuta && abiertos.length === 1 && <PreguntarVuelta viaje={enRuta} />}
 
-      {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} esperanEnCamino={esperanEnCamino} barraFija />}
+      {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} esperanEnCamino={esperanEnCamino} sinVuelta={abiertos.length === 1} barraFija />}
       {recogida && (
         <>
           {enRuta && <h2 className="mt-2 text-base font-bold">Tu siguiente recogida</h2>}

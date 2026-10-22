@@ -157,6 +157,15 @@ puede ocultar botones, pero nunca es la única barrera.
     Centro → Valle Grande · 4 puestos"). **Sí, publicar mi vuelta** la publica `en_camino` (como "Agregar otro viaje" en
     ruta, R11/R13); cerrar la hoja o **No, por ahora no** no hace nada y no se vuelve a preguntar. Se pregunta
     todavía parado, nunca con el carro andando. Si ya tenía la vuelta publicada, no aparece.
+- **R71. Terminar viaje, sin apuro.** *(Oct. 2026: choferes terminaban el viaje a 1 min de salir, por el mismo botón
+  donde acababan de tocar Salir o creyendo que hacía falta para publicar la vuelta; sus pasajeros quedaban calificando
+  con el carro andando y él se veía libre.)* **Terminar viaje** sigue siendo la acción principal en ruta, pero:
+  - Si lo toca antes de **10 min** desde que salió, se confirma: "Saliste hace 1 minuto. ¿Ya dejaste a todos en …?" →
+    **Sí, terminar** · **No, sigo en ruta** (el foco en la opción segura). La confirmación recuerda que no hace falta
+    terminar para publicar la vuelta. Después de 10 min termina directo.
+  - Debajo del botón, una línea lo aclara: "No hace falta terminar para publicar tu vuelta: este viaje se termina solo
+    al tocar Ya llegué en tu próxima recogida" (R13). Con la vuelta ya publicada: "Este viaje se termina solo al tocar
+    Ya llegué en tu próxima recogida".
 
 ### 5.4 Estados del viaje
 
@@ -172,7 +181,7 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 | `en_camino` | Va hacia la zona de recogida | **Avisar llegada (a 3 min)** |
 | `llegando` | A 2–3 min | **Llegué** |
 | `en_parada` | Llegó y está **recogiendo** ("Suben los puestos 1 al N"). En pantalla: "Recogiendo" | **Salir con N pasajeros** |
-| `en_ruta` | Va hacia el destino | **Terminar viaje** |
+| `en_ruta` | Va hacia el destino | **Terminar viaje** (confirma si salió hace menos de 10 min, R71) |
 | `finalizado` / `cancelado` | Cerrado | — |
 
 - **R14 [servidor]. Al salir** (`en_ruta`): los confirmados pasan a `subio`; los de lista de espera pasan a
@@ -684,7 +693,7 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
   cancela viajes, R8) después de "¿Vuelves a trabajar hoy?" (R60). Solo si el GPS falla se vuelve un aviso amarillo con "Intentar de nuevo" (R40).
 - **Una sola acción principal a la vez**, grande y fija abajo (zona del pulgar), que cambia con el estado:
   en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando → **Ya llegué** · recogiendo → **Salir con N
-  pasajeros** · en ruta → **Terminar viaje**.
+  pasajeros** · en ruta → **Terminar viaje** (R71).
 - **El viaje en foco**: ruta, qué hace ahora en grande ("Recogiendo en Valle Grande") con su detalle, una **barra de
   pasos** (En camino · Llegando · Recogiendo · En ruta) en vez de más texto, y los puestos dibujados ("3 de 4").
 - **La lista es el centro**, en el orden justo (R17): **una fila por reserva**, corta: puesto en grande ("2–4" si es

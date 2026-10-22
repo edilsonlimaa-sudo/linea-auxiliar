@@ -10,10 +10,13 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { avanzarViaje } from "@/lib/acciones/chofer"
 import type { EstadoViaje } from "@/lib/viajes"
 
+const MIN_EN_RUTA = 10 // antes de esto, Terminar viaje pide confirmación (R71)
+
 /**
  * La acción principal del chofer, fija abajo (zona del pulgar) y siempre a la vista aunque baje a los próximos
  * viajes (por eso `fixed` y no `sticky`; la página deja espacio debajo). Una sola por estado:
- * en camino → Avisar que llego · llegando → Ya llegué · recogiendo → Salir con N · en ruta → Terminar viaje.
+ * en camino → Avisar que llego · llegando → Ya llegué · recogiendo → Salir con N · en ruta → Terminar viaje (confirmado si
+ * salió hace menos de 10 min, R71).
  */
 export function BarraAccion({
   viajeId,
@@ -24,6 +27,9 @@ export function BarraAccion({
   avisoSalida = null,
   mensajeGrupo,
   fija = true,
+  salioEn,
+  destino,
+  sinVuelta = false,
 }: {
   viajeId: string
   estado: EstadoViaje
@@ -33,10 +39,14 @@ export function BarraAccion({
   avisoSalida?: string | null // Centro → Valle Grande: nadie marcado Subió, o alguien dice que se montó (R66)
   mensajeGrupo: string // R15
   fija?: boolean // pegada abajo (viaje en foco) o dentro de la tarjeta
+  salioEn?: string // en ruta: cuándo salió (estado_en), para no terminar a los pocos minutos (R71)
+  destino?: string // en ruta: dónde deja a la gente, en frase ("en Valle Grande")
+  sinVuelta?: boolean // en ruta sin otro viaje publicado: se aclara que no hace falta terminar para publicarla (R71)
 }) {
   const router = useRouter()
   const { ejecutar, pendiente, error } = useAccion()
   const [confirmarSalida, setConfirmarSalida] = useState(false)
+  const [haceMin, setHaceMin] = useState<number | null>(null) // Terminar antes de tiempo: minutos desde que salió
   const avanzar = (a: EstadoViaje, alTerminar?: () => void) => ejecutar(() => avanzarViaje(viajeId, a), alTerminar)
   const icono = pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : null
 
@@ -81,11 +91,23 @@ export function BarraAccion({
       </Button>
     )
   } else if (estado === "en_ruta") {
+    // R71: terminar a los pocos minutos de salir casi siempre es un toque sin querer o para publicar la vuelta
+    const terminar = () => {
+      const min = salioEn ? (Date.now() - new Date(salioEn).getTime()) / 60_000 : Infinity
+      if (min < MIN_EN_RUTA) setHaceMin(Math.max(0, Math.floor(min)))
+      else avanzar("finalizado")
+    }
     principal = (
-      <Button variant="signal" size="lg" className="w-full" disabled={pendiente} onClick={() => avanzar("finalizado")}>
+      <Button variant="signal" size="lg" className="w-full" disabled={pendiente} onClick={terminar}>
         {icono ?? <FlagIcon aria-hidden />}
         Terminar viaje
       </Button>
+    )
+    secundaria = (
+      <p className="text-center text-sm text-muted-foreground">
+        {sinVuelta ? "No hace falta terminar para publicar tu vuelta: este" : "Este"} viaje se termina solo al tocar Ya llegué
+        en tu próxima recogida.
+      </p>
     )
   }
   if (!principal) return null
@@ -98,7 +120,7 @@ export function BarraAccion({
           : "flex flex-col gap-2"
       }
     >
-      {error && !confirmarSalida && (
+      {error && !confirmarSalida && haceMin === null && (
         <p role="alert" className="font-bold text-destructive">
           {error}
         </p>
@@ -137,6 +159,27 @@ export function BarraAccion({
         error={error}
         // R61: ya en ruta, Inicio pregunta por la vuelta (si no tiene otro viaje publicado)
         onConfirmar={() => avanzar("en_ruta", () => (setConfirmarSalida(false), router.replace("/inicio?vuelta=1", { scroll: false })))}
+      />
+      <Confirmar
+        abierto={haceMin !== null}
+        onCambiar={(v) => !v && setHaceMin(null)}
+        titulo={haceMin === 0 ? "Acabas de salir" : `Saliste hace ${haceMin === 1 ? "1 minuto" : `${haceMin} minutos`}`}
+        descripcion={
+          <>
+            ¿Ya dejaste a todos{destino ? ` ${destino}` : ""}? Al terminar, tus pasajeros ven que llegaron y tú quedas libre.
+            {sinVuelta && (
+              <strong className="mt-2 block text-foreground">
+                Para publicar tu vuelta no hace falta terminar: usa «Agregar otro viaje».
+              </strong>
+            )}
+          </>
+        }
+        confirmar="Sí, terminar"
+        variante="signal"
+        cancelar="No, sigo en ruta"
+        ocupado={pendiente}
+        error={error}
+        onConfirmar={() => avanzar("finalizado", () => setHaceMin(null))}
       />
     </div>
   )

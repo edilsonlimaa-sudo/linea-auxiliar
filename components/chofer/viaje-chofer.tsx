@@ -15,6 +15,7 @@ import type {
 import { cn } from "@/lib/utils"
 import {
   conAcompanantes,
+  contrario,
   enEspera,
   estadoParaChofer,
   libres,
@@ -149,6 +150,7 @@ export function ViajeChofer({
   plegado = false,
   esperanEnCamino,
   dicenQueSubieron = [],
+  sinVuelta = false,
 }: {
   viaje: Viaje
   porId: Map<string, ViajeBase>
@@ -157,6 +159,7 @@ export function ViajeChofer({
   plegado?: boolean
   esperanEnCamino?: EntradaTramo[] // R67: en ruta hacia Valle Grande, de la lista del tramo, sin carro y caben
   dicenQueSubieron?: string[] // R62: en Gina, quienes avisaron que se montaron y no están marcados Subió
+  sinVuelta?: boolean // en ruta sin otro viaje publicado (R71)
 }) {
   const { titulo, detalle: detalleBase } = estadoParaChofer(viaje, porId)
   // En ruta, "a bordo" son los que subieron: a quien falta recoger en el camino se lo cuenta aparte
@@ -202,6 +205,9 @@ export function ViajeChofer({
       avisoSalida={avisoSalida}
       mensajeGrupo={mensajeGrupo(viaje, vehiculo)}
       fija={barraFija}
+      salioEn={viaje.estado_en}
+      destino={SENTIDOS[contrario(viaje.sentido)].enRecogida} // "en el Centro" / "en Valle Grande"
+      sinVuelta={sinVuelta}
     />
   )
 
