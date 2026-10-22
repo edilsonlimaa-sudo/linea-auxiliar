@@ -49,6 +49,14 @@ export function ListaTramo({
   enRuta: { viajeId: string; libres: number } | null
 }) {
   const [abierta, setAbierta] = useState(false)
+  // R64: al tocar "Ya llegué" en Gina, la lista se abre sola (tiene que montar a quien está en ella). Solo en ese
+  // momento: al abrir la página ya en Gina (recargar, volver) no se abre otra vez
+  const viajeEnGina = enGina?.viajeId ?? null
+  const [visto, setVisto] = useState(viajeEnGina)
+  if (viajeEnGina !== visto) {
+    setVisto(viajeEnGina)
+    if (viajeEnGina) setAbierta(true)
+  }
   const plan = new Map((enGina?.plan ?? []).map((e) => [e.id, e]))
   const llamar = enGina?.plan.filter((e) => e.rol === "llamar") ?? []
   const guardar = enGina?.plan.filter((e) => e.rol === "guardar") ?? []

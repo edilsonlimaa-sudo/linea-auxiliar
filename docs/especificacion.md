@@ -428,7 +428,8 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     deja subir a la gente.
 - **R64. El carro en Gina: llama, guarda y sube [servidor].** El chofer sigue publicando su viaje Centro → Valle
   Grande (para que vean cuándo llega y con cuántos puestos, R10, R61); nadie aparta en él. Al tocar **Ya llegué**
-  en Gina, la lista del tramo (R63) se destaca ("Estás en Gina: abre la lista") y la app arma **el plan del carro** recorriendo la lista en orden hasta
+  en Gina, **la lista del tramo se abre sola** en la hoja (R63; cerrada, la franja sigue destacada: "Estás en Gina: abre
+  la lista") y la app arma **el plan del carro** recorriendo la lista en orden hasta
   llenar los puestos:
   - Quien está **en Gina** → "Llama a" (en orden). El chofer marca **Subió**.
   - Quien está **en el camino** y entra en el plan → **"Guarda N puestos para"** (con su lugar). Ese puesto no se
