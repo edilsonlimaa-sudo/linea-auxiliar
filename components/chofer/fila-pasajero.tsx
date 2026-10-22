@@ -56,7 +56,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
         <Puesto fila={fila} activo={fila.confirmado || enRuta} />
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span className="text-lg leading-tight font-bold">{fila.nombre}</span>
+            <span className="text-base leading-tight font-bold">{fila.nombre}</span>
             {/* Con acompañantes (R57): se ve de lejos cuántos suben */}
             {fila.personas > 1 && (
               <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">+{fila.personas - 1}</span>
@@ -188,8 +188,8 @@ function Puesto({ fila, activo }: { fila: FilaChofer; activo: boolean }) {
   if (fila.fotoUrl) {
     return (
       <span className="relative shrink-0" aria-label={textoPuestos(fila.desde, fila.hasta)}>
-        <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-12" />
-        <span className={cn("absolute -right-1.5 -bottom-1 grid h-6 min-w-6 place-items-center rounded-full px-1 text-sm font-bold ring-2 ring-card", color)}>
+        <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-10" />
+        <span className={cn("absolute -right-1.5 -bottom-1 grid h-5 min-w-5 place-items-center rounded-full px-1 text-[13px] font-bold ring-2 ring-card", color)}>
           {texto}
         </span>
       </span>
@@ -198,7 +198,7 @@ function Puesto({ fila, activo }: { fila: FilaChofer; activo: boolean }) {
   return (
     <span
       aria-label={textoPuestos(fila.desde, fila.hasta)}
-      className={cn("grid h-12 min-w-12 shrink-0 place-items-center rounded-full px-2 text-xl font-bold", fila.personas > 1 && "text-base", color)}
+      className={cn("grid h-9 min-w-9 shrink-0 place-items-center rounded-full px-2 text-[15px] font-bold", fila.personas > 1 && "text-sm", color)}
     >
       {texto}
     </span>
@@ -216,7 +216,7 @@ function Contacto({ fila, telefono, gps }: { fila: FilaChofer; telefono: string 
       <SheetContent side="bottom" className="mx-auto max-w-2xl">
         <SheetHeader>
           <div className="flex items-center gap-3">
-            <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-14 text-lg" />
+            <Avatar url={fila.fotoUrl} nombre={fila.nombre} className="size-12 text-base" />
             <div className="min-w-0">
               <SheetTitle>{fila.nombre}</SheetTitle>
               <SheetDescription className="text-base">
@@ -227,7 +227,7 @@ function Contacto({ fila, telefono, gps }: { fila: FilaChofer; telefono: string 
             </div>
           </div>
         </SheetHeader>
-        <div className="grid grid-cols-2 gap-2.5 px-5 pb-6">
+        <div className="grid grid-cols-2 gap-2.5 px-4 pb-6">
           {telefono && (
             <a href={`tel:+${telefono}`} className={grande}>
               <PhoneIcon aria-hidden />

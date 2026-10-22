@@ -26,7 +26,7 @@ export default async function PanelAdmin({ searchParams }: PageProps<"/admin">) 
     <div className="flex flex-col gap-6">
       <EnVivo />
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Resumen</h1>
+        <h1 className="text-xl leading-tight font-bold">Resumen</h1>
         <p className="text-muted-foreground first-letter:uppercase">{hoyEnPalabras()} · se actualiza solo</p>
       </header>
 

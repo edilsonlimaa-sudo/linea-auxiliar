@@ -49,9 +49,9 @@ export default async function PaginaCalificaciones({ searchParams }: PageProps<"
   const chofer = choferId ? (todas.find((c) => c.chofer.id === choferId)?.chofer ?? null) : null
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Calificaciones</h1>
+        <h1 className="text-xl leading-tight font-bold">Calificaciones</h1>
         <p className="text-muted-foreground">Lo que dicen los pasajeros de cada chofer, con quién lo dijo.</p>
       </header>
 
@@ -76,7 +76,7 @@ export default async function PaginaCalificaciones({ searchParams }: PageProps<"
       <ResumenNotas calificaciones={delChofer} />
 
       <section aria-labelledby="titulo-lista" className="flex flex-col gap-3">
-        <h2 id="titulo-lista" className="text-xl font-bold">
+        <h2 id="titulo-lista" className="text-base font-bold">
           {nota.id === "bajas" ? "Calificaciones bajas" : "Todas las calificaciones"}{" "}
           <span className="font-normal text-muted-foreground">({lista.length})</span>
         </h2>
@@ -91,7 +91,7 @@ export default async function PaginaCalificaciones({ searchParams }: PageProps<"
             ))}
           </ol>
         )}
-        {todas.length === 1000 && <p className="text-[15px] text-muted-foreground">Se muestran las 1000 más recientes.</p>}
+        {todas.length === 1000 && <p className="text-sm text-muted-foreground">Se muestran las 1000 más recientes.</p>}
       </section>
     </div>
   )
@@ -124,7 +124,7 @@ function ResumenNotas({ calificaciones: l }: { calificaciones: CalificacionAdmin
   const etiquetas = [...l.flatMap((c) => c.etiquetas).reduce((m, e) => m.set(e, (m.get(e) ?? 0) + 1), new Map<string, number>())]
     .sort((a, b) => b[1] - a[1])
   return (
-    <section aria-label="Resumen" className="grid gap-4 rounded-3xl border-2 bg-card p-4 sm:grid-cols-[auto_1fr]">
+    <section aria-label="Resumen" className="grid gap-4 rounded-2xl border-2 bg-card p-4 sm:grid-cols-[auto_1fr]">
       <div className="flex flex-col justify-center gap-1 sm:pr-4">
         <p className="flex items-center gap-2 text-4xl font-bold tabular-nums">
           <StarIcon aria-hidden className="size-8 fill-signal text-signal" />
@@ -137,7 +137,7 @@ function ResumenNotas({ calificaciones: l }: { calificaciones: CalificacionAdmin
           {[5, 4, 3, 2, 1].map((n) => {
             const k = l.filter((c) => c.estrellas === n).length
             return (
-              <li key={n} className="grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 text-[15px]">
+              <li key={n} className="grid grid-cols-[3.5rem_1fr_2.5rem] items-center gap-2 text-sm">
                 <span className="inline-flex items-center gap-1 font-bold">
                   {n} <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
                 </span>
@@ -155,7 +155,7 @@ function ResumenNotas({ calificaciones: l }: { calificaciones: CalificacionAdmin
         {etiquetas.length > 0 && (
           <ul aria-label="Etiquetas" className="flex flex-wrap gap-2">
             {etiquetas.map(([e, k]) => (
-              <li key={e} className="rounded-full bg-secondary px-3 py-1 text-[15px] font-bold text-secondary-foreground">
+              <li key={e} className="rounded-full bg-secondary px-3 py-1 text-sm font-bold text-secondary-foreground">
                 {e} · {k}
               </li>
             ))}
@@ -181,7 +181,7 @@ function PorChofer({ calificaciones, filtros }: { calificaciones: CalificacionAd
 
   return (
     <section aria-labelledby="titulo-por-chofer" className="flex flex-col gap-2">
-      <h2 id="titulo-por-chofer" className="text-xl font-bold">
+      <h2 id="titulo-por-chofer" className="text-base font-bold">
         Por chofer
       </h2>
       <ul className="grid gap-2 lg:grid-cols-2">
@@ -189,12 +189,12 @@ function PorChofer({ calificaciones, filtros }: { calificaciones: CalificacionAd
           <li key={f.chofer.id}>
             <Link
               href={enlace(filtros, { chofer: f.chofer.id })}
-              className="flex min-h-16 items-center gap-3 rounded-2xl border-2 bg-card px-3 py-2.5 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
+              className="flex min-h-14 items-center gap-3 rounded-2xl border-2 bg-card px-3 py-2.5 outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
             >
               <Avatar url={f.chofer.fotoUrl} nombre={f.chofer.nombre} className="size-11" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-bold">{f.chofer.nombre}</span>
-                <span className="flex flex-wrap items-center gap-x-2 text-[15px]">
+                <span className="flex flex-wrap items-center gap-x-2 text-sm">
                   <span className="inline-flex items-center gap-1 font-bold">
                     <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
                     {promedioTexto(f.prom)}
@@ -225,7 +225,7 @@ function Tarjeta({ c, conChofer }: { c: CalificacionAdmin; conChofer: boolean })
           {hace(c.creadaEn)}
         </span>
       </div>
-      {c.comentario && <p className="text-lg leading-snug">“{c.comentario}”</p>}
+      {c.comentario && <p className="text-base leading-snug">“{c.comentario}”</p>}
       {c.etiquetas.length > 0 && (
         <ul aria-label="Etiquetas" className="flex flex-wrap gap-1.5">
           {c.etiquetas.map((e) => (
@@ -235,7 +235,7 @@ function Tarjeta({ c, conChofer }: { c: CalificacionAdmin; conChofer: boolean })
           ))}
         </ul>
       )}
-      <div className="flex flex-col gap-1.5 border-t pt-2 text-[15px]">
+      <div className="flex flex-col gap-1.5 border-t pt-2 text-sm">
         <p className="flex items-center gap-2">
           <Avatar url={c.pasajero.fotoUrl} nombre={c.pasajero.nombre} className="size-8 text-xs" />
           <span>

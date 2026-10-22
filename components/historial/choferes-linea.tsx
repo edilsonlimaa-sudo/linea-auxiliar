@@ -20,9 +20,9 @@ export function ChoferesLinea({ choferes }: { choferes: ChoferDeLaLinea[] }) {
 
   if (choferes.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-10 text-center">
         <UsersIcon aria-hidden className="size-10 text-muted-foreground" />
-        <p className="text-lg font-bold">Todavía no hay choferes verificados</p>
+        <p className="text-base font-bold">Todavía no hay choferes verificados</p>
         <p className="text-muted-foreground">Cuando el administrador apruebe a los choferes de la línea, los vas a ver aquí.</p>
       </div>
     )
@@ -34,12 +34,12 @@ export function ChoferesLinea({ choferes }: { choferes: ChoferDeLaLinea[] }) {
         {choferes.map((c) => {
           const v = c.vehiculo
           return (
-            <li key={c.id} className="flex flex-col gap-4 rounded-3xl border-2 bg-card p-4">
+            <li key={c.id} className="flex flex-col gap-4 rounded-2xl border-2 bg-card p-4">
               <div className="flex items-center gap-4">
-                <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-16 text-xl" />
+                <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-16 text-base" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-lg leading-tight font-bold">{c.nombre}</p>
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+                  <p className="text-base leading-tight font-bold">{c.nombre}</p>
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
                     <span className="inline-flex items-center gap-1 font-bold text-success">
                       <BadgeCheckIcon aria-hidden className="size-4" />
                       Verificado

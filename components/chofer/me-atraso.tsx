@@ -61,26 +61,26 @@ export function MeAtraso({ viajeId, estadoEn, etaMin }: { viajeId: string; estad
             <SheetTitle>¿En cuánto llegas a recoger?</SheetTitle>
             <SheetDescription className="text-base">Tus pasajeros ven la hora nueva y que avisaste que te atrasas.</SheetDescription>
           </SheetHeader>
-          <div className="flex flex-col gap-3 px-5 pb-6">
+          <div className="flex flex-col gap-3 px-4 pb-6">
             <div className="grid grid-cols-2 gap-2">
               {OPCIONES.map((m) => (
                 <Button
                   key={m}
                   variant="outline"
                   size="lg"
-                  className="h-auto min-h-16 flex-col gap-0 py-2"
+                  className="h-auto min-h-14 flex-col gap-0 py-2"
                   disabled={pendiente}
                   onClick={() => {
                     setEscogido(m)
                     ejecutar(() => meAtraso(viajeId, m), () => setAbierta(false))
                   }}
                 >
-                  <span className="flex items-center gap-1.5 text-lg font-bold">
+                  <span className="flex items-center gap-1.5 text-base font-bold">
                     {pendiente && escogido === m && <Loader2Icon aria-hidden className="animate-spin" />}
                     {texto(m)}
                   </span>
                   {ahora > 0 && (
-                    <span className="text-[15px] font-normal text-muted-foreground">a las {hora(new Date(ahora + m * MIN).toISOString())}</span>
+                    <span className="text-sm font-normal text-muted-foreground">a las {hora(new Date(ahora + m * MIN).toISOString())}</span>
                   )}
                 </Button>
               ))}

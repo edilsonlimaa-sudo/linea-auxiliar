@@ -13,9 +13,9 @@ export default async function PaginaCalificaciones() {
   if (perfil.rol !== "chofer") redirect("/inicio")
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-[26px] leading-tight font-bold">Mis calificaciones</h1>
+        <h1 className="text-xl leading-tight font-bold">Mis calificaciones</h1>
         <p className="text-muted-foreground">Lo que dicen tus pasajeros al terminar cada viaje.</p>
       </div>
       <CalificacionesChofer resumen={await cargarCalificacionesChofer(perfil.id)} />

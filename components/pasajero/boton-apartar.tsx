@@ -48,7 +48,7 @@ export function BotonApartar({
   return (
     <div className={cn("flex flex-col gap-2", className)}>
       {/* Si el texto es largo, baja de línea en vez de empujar el mapa fuera de la tarjeta */}
-      <Button variant={variante} className="h-auto min-h-13 w-full py-2 text-center whitespace-normal" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : setHoja(true))}>
+      <Button variant={variante} className="h-auto min-h-11 w-full py-2 text-center whitespace-normal" disabled={pendiente} onClick={() => (reservaAnterior ? setConfirmar(true) : setHoja(true))}>
         {pendiente && <Loader2Icon aria-hidden className="animate-spin" />}
         {pendiente ? "Apartando…" : texto}
       </Button>

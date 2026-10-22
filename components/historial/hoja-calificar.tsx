@@ -21,7 +21,7 @@ export function HojaCalificar({
           <SheetTitle>Calificar el viaje</SheetTitle>
           <SheetDescription>Cuenta cómo te fue con el chofer.</SheetDescription>
         </SheetHeader>
-        <div className="px-5 pt-6 pb-6">
+        <div className="px-4 pt-6 pb-6">
           {viaje && (
             <CalificarViaje
               key={viaje.reservaId}

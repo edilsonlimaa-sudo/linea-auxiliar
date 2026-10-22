@@ -8,11 +8,11 @@ export const metadata: Metadata = { title: "Crear cuenta · Línea Auxiliar" }
 export default function PaginaEscogerRol() {
   return (
     <div className="flex flex-col gap-6">
-      <Link href="/" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-lg font-bold text-primary dark:text-foreground">
+      <Link href="/" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-base font-bold text-primary dark:text-foreground">
         <ChevronLeftIcon aria-hidden className="size-6" /> Atrás
       </Link>
       <header>
-        <h1 className="text-[26px] leading-tight font-bold">Crear una cuenta</h1>
+        <h1 className="text-xl leading-tight font-bold">Crear una cuenta</h1>
         <p className="mt-1 text-muted-foreground">¿Cómo vas a usar la app?</p>
       </header>
 
@@ -21,7 +21,7 @@ export default function PaginaEscogerRol() {
         <OpcionRol href="/registro/chofer" icono="🚐" titulo="Soy chofer" detalle="Publicar mi salida y ordenar mis puestos" fondoIcono="bg-secondary" />
       </nav>
 
-      <p className="text-center text-lg">
+      <p className="text-center text-base">
         ¿Ya tienes cuenta?{" "}
         <Link href="/" className="font-bold text-primary underline underline-offset-4 dark:text-foreground">
           Entrar
@@ -41,7 +41,7 @@ function OpcionRol({ href, icono, titulo, detalle, fondoIcono }: { href: string;
         {icono}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[22px] leading-tight font-bold">{titulo}</span>
+        <span className="block text-lg leading-tight font-bold">{titulo}</span>
         <span className="mt-1 block text-base text-muted-foreground">{detalle}</span>
       </span>
       <ChevronRightIcon aria-hidden className="size-8 shrink-0 text-primary dark:text-foreground" />

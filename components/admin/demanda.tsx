@@ -32,7 +32,7 @@ export function Demanda({
   hoy: DemandaHoy | null
 }) {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* 1. Por sentido */}
       <div className="grid gap-3 sm:grid-cols-2">
         {ORDEN.map((s) => (
@@ -47,12 +47,12 @@ export function Demanda({
 
       {/* 2. Quién espera */}
       {esperando.length === 0 ? (
-        <p className="flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed p-8 text-center text-muted-foreground">
+        <p className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center text-muted-foreground">
           <CheckCircle2Icon aria-hidden className="size-5" />
           Nadie está esperando transporte ahora.
         </p>
       ) : (
-        <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+        <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
           {ORDEN.filter((s) => esperando.some((e) => e.sentido === s)).map(
             (s) => (
               <section
@@ -60,7 +60,7 @@ export function Demanda({
                 aria-labelledby={`espera-${s}`}
                 className="flex flex-col gap-3"
               >
-                <h2 id={`espera-${s}`} className="text-xl font-bold">
+                <h2 id={`espera-${s}`} className="text-base font-bold">
                   Esperan {haciaEnFrase(s)}{" "}
                   <span className="font-normal text-muted-foreground">
                     ({SENTIDOS[s].largo})
@@ -99,20 +99,20 @@ export function PorSentido({
     <section
       aria-label={SENTIDOS[sentido].largo}
       className={cn(
-        "flex flex-col gap-2 rounded-3xl border-2 p-4",
+        "flex flex-col gap-2 rounded-2xl border-2 p-4",
         falta ? "border-warning bg-warning-muted" : "bg-card"
       )}
     >
       <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">
         {SENTIDOS[sentido].largo}
       </p>
-      <p className="text-[28px] leading-none font-bold tabular-nums">
+      <p className="text-xl leading-none font-bold tabular-nums">
         {esperan}{" "}
-        <span className="text-lg font-bold">
+        <span className="text-base font-bold">
           {esperan === 1 ? "espera" : "esperan"}
         </span>
       </p>
-      <p className="text-[15px]">
+      <p className="text-sm">
         {oferta.unidades === 0
           ? "Ninguna unidad aceptando pasajeros"
           : `${oferta.unidades} ${oferta.unidades === 1 ? "unidad" : "unidades"} con ${oferta.puestosLibres} ${oferta.puestosLibres === 1 ? "puesto libre" : "puestos libres"}`}
@@ -144,12 +144,12 @@ function FilaEspera({ espera: e }: { espera: Esperando }) {
   return (
     <li className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
       <div className="flex items-center gap-3">
-        <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-14 text-lg" />
+        <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-12 text-base" />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-lg leading-tight font-bold">{conAcompanantes(e.nombre, e.personas)}</p>
+          <p className="truncate text-base leading-tight font-bold">{conAcompanantes(e.nombre, e.personas)}</p>
           <p
             className={cn(
-              "flex items-center gap-1.5 text-[15px]",
+              "flex items-center gap-1.5 text-sm",
               larga ? "font-bold text-warning" : "text-muted-foreground"
             )}
           >
@@ -235,9 +235,9 @@ function Hoy({ hoy }: { hoy: DemandaHoy }) {
   return (
     <section
       aria-labelledby="demanda-hoy"
-      className="flex flex-col gap-3 rounded-3xl border-2 bg-card p-4"
+      className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4"
     >
-      <h2 id="demanda-hoy" className="text-lg font-bold">
+      <h2 id="demanda-hoy" className="text-base font-bold">
         Hoy
       </h2>
       <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -248,7 +248,7 @@ function Hoy({ hoy }: { hoy: DemandaHoy }) {
           >
             <span
               className={cn(
-                "text-[28px] leading-none font-bold tabular-nums",
+                "text-xl leading-none font-bold tabular-nums",
                 d.clase
               )}
             >
@@ -260,7 +260,7 @@ function Hoy({ hoy }: { hoy: DemandaHoy }) {
           </div>
         ))}
       </div>
-      <p className="text-[15px] text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {hoy.espera_promedio_min !== null
           ? `Quien consiguió puesto esperó en promedio ${hoy.espera_promedio_min} min.`
           : "Todavía nadie consiguió puesto hoy."}

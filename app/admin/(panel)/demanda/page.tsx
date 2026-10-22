@@ -14,10 +14,10 @@ export default async function PaginaDemanda() {
   const { esperando, oferta, hoy, error } = await cargarDemanda()
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <EnVivo />
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Demanda</h1>
+        <h1 className="text-xl leading-tight font-bold">Demanda</h1>
         <p className="text-muted-foreground">Quién espera transporte ahora. Se actualiza sola.</p>
       </header>
       {error ? (

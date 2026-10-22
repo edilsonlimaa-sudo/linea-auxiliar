@@ -28,7 +28,7 @@ export function EstadoServicio({ conectado, viajesAbiertos }: { conectado: boole
           <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-muted-foreground" />
           <p className="min-w-0 flex-1 font-bold">
             Desconectado
-            <span className="block text-[15px] font-normal text-muted-foreground">Los pasajeros no te ven.</span>
+            <span className="block text-sm font-normal text-muted-foreground">Los pasajeros no te ven.</span>
           </p>
           <Button variant="outline" size="sm" disabled={pendiente} onClick={() => ejecutar(conectarme)}>
             {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <PowerIcon aria-hidden />}
@@ -49,7 +49,7 @@ export function EstadoServicio({ conectado, viajesAbiertos }: { conectado: boole
       <button
         type="button"
         onClick={() => setHoja(true)}
-        className="flex min-h-11 w-full items-center gap-2 rounded-full px-1 text-left text-[15px] font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+        className="flex min-h-11 w-full items-center gap-2 rounded-full px-1 text-left text-sm font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
       >
         <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-success" />
         <span>Conectado</span>
@@ -74,7 +74,7 @@ export function EstadoServicio({ conectado, viajesAbiertos }: { conectado: boole
         <div role="alert" className="flex flex-col gap-2 rounded-2xl border-2 border-warning/50 bg-warning-muted px-4 py-3">
           <p className="font-bold">
             Tus pasajeros no ven por dónde vas
-            <span className="block text-[15px] font-normal text-muted-foreground">
+            <span className="block text-sm font-normal text-muted-foreground">
               {estado === "sin_permiso" ? "Permite la ubicación para esta página en tu navegador." : "Revisa que el GPS esté encendido."}
             </span>
           </p>
@@ -106,7 +106,7 @@ export function EstadoEnCabecera({ conectado }: { conectado: boolean }) {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <span
           className={cn(
-            "inline-flex h-8 items-center gap-2 rounded-full px-3 text-[15px] font-bold",
+            "inline-flex h-8 items-center gap-2 rounded-full px-3 text-sm font-bold",
             conectado ? "bg-success-muted text-success" : "bg-header-foreground/15 text-header-foreground"
           )}
         >
@@ -117,14 +117,14 @@ export function EstadoEnCabecera({ conectado }: { conectado: boolean }) {
           type="button"
           disabled={pendiente}
           onClick={() => (conectado ? setHoja(true) : ejecutar(conectarme))}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-[15px] font-bold underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-60"
+          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-sm font-bold underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-60"
         >
           {pendiente ? <Loader2Icon aria-hidden className="size-4 animate-spin" /> : <PowerIcon aria-hidden className="size-4" />}
           {conectado ? "Desconectarme" : "Conectarme"}
         </button>
       </div>
       {/* Desconectado sí necesita explicación: es la razón de que nadie lo vea */}
-      {!conectado && <p className="text-[15px] opacity-90">Los pasajeros no te ven. Publicar un viaje te conecta.</p>}
+      {!conectado && <p className="text-sm opacity-90">Los pasajeros no te ven. Publicar un viaje te conecta.</p>}
       {error && (
         <p role="alert" className="font-bold text-signal">
           {error}

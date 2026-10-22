@@ -30,7 +30,7 @@ export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: s
             <SheetTitle>Más opciones</SheetTitle>
             <SheetDescription className="text-base">Cambios que se hacen poco.</SheetDescription>
           </SheetHeader>
-          <div className="flex flex-col gap-6 px-5 pb-6">
+          <div className="flex flex-col gap-6 px-4 pb-6">
             <section className="flex flex-col gap-2">
               <h3 className="font-bold">Puestos del carro</h3>
               <div className="flex items-center gap-3">
@@ -44,7 +44,7 @@ export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: s
                   <PlusIcon aria-hidden />
                 </Button>
               </div>
-              <p className="text-[15px] text-muted-foreground">No puedes bajar de los puestos que ya tienen reserva.</p>
+              <p className="text-sm text-muted-foreground">No puedes bajar de los puestos que ya tienen reserva.</p>
               <Button
                 disabled={nuevos === puestos || puestosAccion.pendiente}
                 onClick={() => puestosAccion.ejecutar(() => cambiarPuestos(viajeId, nuevos), () => setAbierta(false))}
@@ -62,7 +62,7 @@ export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: s
             {!enRuta && (
               <section className="flex flex-col gap-2 border-t pt-5">
                 <h3 className="font-bold">Cancelar este viaje</h3>
-                <p className="text-[15px] text-muted-foreground">Los anotados tendrán que escoger otra unidad.</p>
+                <p className="text-sm text-muted-foreground">Los anotados tendrán que escoger otra unidad.</p>
                 <Button variant="outline" className="text-destructive" onClick={() => setCancelar(true)}>
                   <Trash2Icon aria-hidden />
                   Cancelar viaje

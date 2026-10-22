@@ -89,7 +89,7 @@ function Seccion({
     >
       <h3
         className={cn(
-          "text-[15px] font-bold tracking-wide uppercase",
+          "text-sm font-bold tracking-wide uppercase",
           alerta ? "flex items-center gap-2 text-warning" : "text-muted-foreground"
         )}
       >
@@ -208,16 +208,16 @@ export function ViajeChofer({
   const anotados = viaje.lista.length
   if (plegado) {
     return (
-      <details className="group rounded-3xl border-2 bg-card text-card-foreground">
-        <summary className="flex cursor-pointer list-none items-start gap-3 rounded-3xl p-4 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+      <details className="group rounded-2xl border-2 bg-card text-card-foreground">
+        <summary className="flex cursor-pointer list-none items-start gap-3 rounded-2xl p-4 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-bold tracking-wide text-muted-foreground uppercase">
               {SENTIDOS[viaje.sentido].largo}
             </span>
-            <span className="block text-lg leading-tight font-bold">
+            <span className="block text-base leading-tight font-bold">
               {titulo}
             </span>
-            <span className="block text-[15px] text-muted-foreground">
+            <span className="block text-sm text-muted-foreground">
               {anotados === 0
                 ? "Nadie anotado"
                 : anotados === 1
@@ -231,7 +231,7 @@ export function ViajeChofer({
             className="mt-6 size-6 shrink-0 transition-transform group-open:rotate-180"
           />
         </summary>
-        <div className="flex flex-col gap-5 px-4 pb-4">
+        <div className="flex flex-col gap-4 px-4 pb-4">
           <p className="text-muted-foreground">{detalle}</p>
           {cuerpo(true)}
         </div>
@@ -243,7 +243,7 @@ export function ViajeChofer({
     <>
       <section
         aria-labelledby={`viaje-${viaje.id}`}
-        className="flex flex-col gap-5 rounded-3xl border-2 border-primary bg-card p-4 text-card-foreground shadow-sm"
+        className="flex flex-col gap-4 rounded-2xl border-2 border-primary bg-card p-4 text-card-foreground shadow-sm"
       >
         <div className="flex flex-col gap-1">
           <div className="flex items-center justify-between gap-3">
@@ -255,7 +255,7 @@ export function ViajeChofer({
           <h2
             id={`viaje-${viaje.id}`}
             className={cn(
-              "text-2xl leading-tight font-bold",
+              "text-lg leading-tight font-bold",
               viaje.estado === "en_parada" && "text-success"
             )}
           >
@@ -332,11 +332,11 @@ export function ViajeChofer({
             {/* R67: avisaron en el camino después de que saliste de Gina. "Voy" la liga a este carro */}
             {esperanEnCamino && esperanEnCamino.length > 0 && (
               <section className="flex flex-col gap-2 rounded-2xl border-2 border-warning bg-warning-muted p-3">
-                <h3 className="flex items-center gap-2 text-[15px] font-bold tracking-wide text-warning uppercase">
+                <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-warning uppercase">
                   <FlagIcon aria-hidden className="size-5 shrink-0" />
                   Espera en el camino <span className="font-normal">({esperanEnCamino.length})</span>
                 </h3>
-                <p className="text-[15px] leading-snug">
+                <p className="text-sm leading-snug">
                   {esperanEnCamino.length === 1 ? "Se anotó" : "Se anotaron"} después de que saliste de Gina. Toca <strong>Voy</strong> si pasas por ahí: los demás
                   choferes ya no paran.
                 </p>

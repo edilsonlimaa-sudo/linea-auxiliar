@@ -70,7 +70,7 @@ export function ElegirLugar({ lugar, error }: { lugar: ReturnType<typeof useLuga
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={`${id}-ayuda${error ? ` ${id}-error` : ""}`}
         />
-        <p id={`${id}-ayuda`} className="text-[15px] text-muted-foreground">
+        <p id={`${id}-ayuda`} className="text-sm text-muted-foreground">
           Calle, casa o negocio de referencia. El chofer lo ve en grande.
         </p>
         {error && (
@@ -86,11 +86,11 @@ export function ElegirLugar({ lugar, error }: { lugar: ReturnType<typeof useLuga
 /** Casilla del GPS (R26): opcional, pero basta sola para quien no sabe explicar dónde está */
 export function CasillaGps({ marcada, onCambiar }: { marcada: boolean; onCambiar: (v: boolean) => void }) {
   return (
-    <label className="flex min-h-13 cursor-pointer items-center gap-3 rounded-2xl bg-muted px-4 py-3 has-focus-visible:ring-[3px] has-focus-visible:ring-ring">
+    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl bg-muted px-4 py-3 has-focus-visible:ring-[3px] has-focus-visible:ring-ring">
       <input type="checkbox" checked={marcada} onChange={(e) => onCambiar(e.target.checked)} className="size-6 shrink-0 accent-primary" />
       <span>
         <span className="block font-bold">Agregar mi ubicación GPS</span>
-        <span className="block text-[15px] text-muted-foreground">El chofer podrá abrir el mapa. Si no sabes explicar dónde estás, con el GPS basta.</span>
+        <span className="block text-sm text-muted-foreground">El chofer podrá abrir el mapa. Si no sabes explicar dónde estás, con el GPS basta.</span>
       </span>
     </label>
   )

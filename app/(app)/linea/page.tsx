@@ -15,10 +15,10 @@ export default async function PaginaLinea() {
   const n = enServicio.length
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <EnVivo />
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">La línea</h1>
+        <h1 className="text-xl leading-tight font-bold">La línea</h1>
         <p className="flex items-center gap-2 text-muted-foreground">
           <span aria-hidden className={n > 0 ? "size-2.5 rounded-full bg-success" : "size-2.5 rounded-full bg-muted-foreground"} />
           {n === 0 ? "Ningún chofer trabajando ahora" : n === 1 ? "1 chofer trabajando ahora" : `${n} choferes trabajando ahora`}

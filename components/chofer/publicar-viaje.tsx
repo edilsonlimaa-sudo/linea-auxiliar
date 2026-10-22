@@ -46,7 +46,7 @@ export function Opcion({
   return (
     <label
       className={cn(
-        "flex min-h-13 cursor-pointer items-center justify-center gap-1.5 rounded-2xl border-2 px-3 py-2 text-center font-bold has-focus-visible:ring-[3px] has-focus-visible:ring-ring",
+        "flex min-h-11 cursor-pointer items-center justify-center gap-1.5 rounded-2xl border-2 px-3 py-2 text-center font-bold has-focus-visible:ring-[3px] has-focus-visible:ring-ring",
         elegida ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted",
         className
       )}
@@ -137,22 +137,22 @@ export function PublicarViaje({
       className="flex flex-col gap-6"
     >
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-lg font-bold">¿Hacia dónde vas?</legend>
+        <legend className="mb-2 text-base font-bold">¿Hacia dónde vas?</legend>
         <div className="grid grid-cols-2 gap-2">
           {(Object.keys(SENTIDOS) as Sentido[]).map((s) => (
             <Opcion key={s} nombre="sentido-opcion" elegida={sentido === s} onElegir={() => setSentido(s)} className="min-h-18 flex-col gap-0">
-              <span className="flex items-center gap-1.5 text-lg">
+              <span className="flex items-center gap-1.5 text-base">
                 {sentido === s && <CheckIcon aria-hidden className="size-5" />}
                 {SENTIDOS[s].corto}
               </span>
             </Opcion>
           ))}
         </div>
-        <p className="text-[15px] text-muted-foreground">Recoges {SENTIDOS[sentido].enRecogida}.</p>
+        <p className="text-sm text-muted-foreground">Recoges {SENTIDOS[sentido].enRecogida}.</p>
       </fieldset>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-lg font-bold">¿Cuántos puestos llevas?</legend>
+        <legend className="mb-2 text-base font-bold">¿Cuántos puestos llevas?</legend>
         <div className="flex items-center gap-3">
           <Button type="button" variant="outline" size="icon-lg" aria-label="Un puesto menos" disabled={puestos <= 1} onClick={() => setPuestos((p) => p - 1)}>
             <MinusIcon aria-hidden />
@@ -167,8 +167,8 @@ export function PublicarViaje({
       </fieldset>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-lg font-bold">{tiempos.pregunta}</legend>
-        {tiempos.ayuda && <p className="-mt-1 text-[15px] text-muted-foreground">{tiempos.ayuda}</p>}
+        <legend className="mb-2 text-base font-bold">{tiempos.pregunta}</legend>
+        {tiempos.ayuda && <p className="-mt-1 text-sm text-muted-foreground">{tiempos.ayuda}</p>}
         <div className="grid grid-cols-3 gap-2">
           {tiempos.yaEstoy && (
             <Opcion nombre="cuando" elegida={cuando === 0} onElegir={() => setCuando(0)} className="col-span-3">
@@ -212,14 +212,14 @@ export function PublicarViaje({
               Llego a las
             </label>
             <Input id={idHora} type="time" value={hora} onChange={(e) => setHora(e.target.value)} autoFocus className="w-40" />
-            <p className="text-[15px] text-muted-foreground">Si esa hora ya pasó hoy, es la de mañana.</p>
+            <p className="text-sm text-muted-foreground">Si esa hora ya pasó hoy, es la de mañana.</p>
           </div>
         )}
       </fieldset>
 
       {/* R61: la vuelta es el sentido contrario con los mismos puestos; solo se pregunta cuándo llega a recoger */}
       <fieldset ref={refVuelta} className="flex scroll-mt-4 flex-col gap-2">
-        <legend className="mb-2 text-lg font-bold">¿Después recoges gente {SENTIDOS[regreso].enRecogida} para volver?</legend>
+        <legend className="mb-2 text-base font-bold">¿Después recoges gente {SENTIDOS[regreso].enRecogida} para volver?</legend>
         <div className="grid grid-cols-2 gap-2">
           <Opcion nombre="vuelta" elegida={!conVuelta} onElegir={() => (setConVuelta(false), setVuelta(null))}>
             Solo ida
@@ -238,7 +238,7 @@ export function PublicarViaje({
                 </Opcion>
               ))}
             </div>
-            <p className="text-[15px] text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               La vuelta ({SENTIDOS[regreso].hacia}, {puestos} {puestos === 1 ? "puesto" : "puestos"}) se publica ya y empieza sola cuando sales.
             </p>
           </div>
@@ -255,7 +255,7 @@ export function PublicarViaje({
         ref={refBarra}
         className={
           enHoja
-            ? "sticky bottom-0 -mx-5 border-t bg-popover px-5 pt-3 pb-5"
+            ? "sticky bottom-0 -mx-5 border-t bg-popover px-4 pt-3 pb-5"
             : "sticky bottom-0 -mx-4 border-t bg-background/95 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur"
         }
       >
@@ -263,7 +263,7 @@ export function PublicarViaje({
           <button
             type="button"
             onClick={mostrarVuelta}
-            className="mb-2 flex min-h-11 w-full items-center gap-1.5 rounded-xl px-1 text-left text-[15px] outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+            className="mb-2 flex min-h-11 w-full items-center gap-1.5 rounded-xl px-1 text-left text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
           >
             <span className="font-bold">{conVuelta ? "Ida y vuelta" : "Solo ida"}</span>
             <span aria-hidden className="text-muted-foreground">

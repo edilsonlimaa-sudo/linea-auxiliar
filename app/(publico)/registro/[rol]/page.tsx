@@ -20,12 +20,12 @@ export default async function PaginaRegistro({ params }: { params: Promise<{ rol
   const r = rol as Rol
 
   return (
-    <div className="flex flex-col gap-5">
-      <Link href="/registro" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-lg font-bold text-primary dark:text-foreground">
+    <div className="flex flex-col gap-4">
+      <Link href="/registro" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-base font-bold text-primary dark:text-foreground">
         <ChevronLeftIcon aria-hidden className="size-6" /> Atrás
       </Link>
       <header>
-        <h1 className="text-[26px] leading-tight font-bold">{ROLES[r].titulo}</h1>
+        <h1 className="text-xl leading-tight font-bold">{ROLES[r].titulo}</h1>
         <p className="mt-1 text-muted-foreground">
           Toma menos de un minuto. El administrador revisará tus datos antes de que puedas{" "}
           {r === "chofer" ? "publicar viajes" : "apartar puesto"}.

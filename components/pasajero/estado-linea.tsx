@@ -8,7 +8,7 @@ export function EstadoLinea({ unidadesEnServicio, aviso }: { unidadesEnServicio?
   return (
     <div className="flex flex-col gap-3">
       {unidadesEnServicio !== undefined && (
-        <p className="flex items-center gap-2 text-[15px] text-muted-foreground">
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <span aria-hidden className={cn("size-2.5 rounded-full", unidadesEnServicio > 0 ? "bg-success" : "bg-muted-foreground")} />
           {unidadesEnServicio === 0
             ? "Ningún chofer trabajando ahora"

@@ -54,7 +54,7 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
       <EnVivo />
       <section aria-labelledby="titulo-ahora" className="flex flex-col gap-4">
         <header className="flex flex-col gap-1">
-          <h1 id="titulo-ahora" className="text-[26px] leading-tight font-bold">
+          <h1 id="titulo-ahora" className="text-xl leading-tight font-bold">
             Lista hacia Valle Grande
           </h1>
           <p className="text-muted-foreground">Centro → Valle Grande, por orden de llegada. Se actualiza sola.</p>
@@ -62,12 +62,12 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl border-2 bg-card px-4 py-3">
-            <p className="text-3xl font-bold tabular-nums">{enGina}</p>
-            <p className="text-[15px] text-muted-foreground">esperando en Gina</p>
+            <p className="text-xl font-bold tabular-nums">{enGina}</p>
+            <p className="text-sm text-muted-foreground">esperando en Gina</p>
           </div>
           <div className="rounded-2xl border-2 bg-card px-4 py-3">
-            <p className="text-3xl font-bold tabular-nums">{enCamino}</p>
-            <p className="text-[15px] text-muted-foreground">en otro lugar del camino</p>
+            <p className="text-xl font-bold tabular-nums">{enCamino}</p>
+            <p className="text-sm text-muted-foreground">en otro lugar del camino</p>
           </div>
         </div>
 
@@ -84,7 +84,7 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
                     {e.nombre}
                     {e.personas > 1 && ` +${e.personas - 1}`}
                   </p>
-                  <p className="flex flex-wrap items-center gap-x-2 text-[15px] text-muted-foreground">
+                  <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
                     <span className={e.enGina ? "" : "font-bold text-primary"}>{e.enGina ? "En Gina" : e.lugar}</span>
                     {/* R62: avisó lejos de Gina */}
                     {e.enGina && e.distanciaM !== null && e.distanciaM > LEJOS_M && (
@@ -106,10 +106,10 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
       <section aria-labelledby="titulo-historial" className="flex flex-col gap-4">
         <header className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 id="titulo-historial" className="text-xl font-bold">
+            <h2 id="titulo-historial" className="text-base font-bold">
               Quién salió de la lista
             </h2>
-            <p className="text-[15px] text-muted-foreground">Por qué salió cada uno y cuánto tiempo esperó.</p>
+            <p className="text-sm text-muted-foreground">Por qué salió cada uno y cuánto tiempo esperó.</p>
           </div>
           <nav aria-label="Período" className="flex gap-1 rounded-full bg-muted p-1">
             {(Object.keys(PERIODOS) as Periodo[]).map((k) => (
@@ -119,7 +119,7 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
                 scroll={false}
                 aria-current={k === periodo ? "page" : undefined}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-[15px] font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
+                  "rounded-full px-3 py-1.5 text-sm font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
                   k === periodo ? "bg-card shadow-sm" : "text-muted-foreground hover:text-foreground"
                 )}
               >
@@ -132,12 +132,12 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
         {porMotivo.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {porMotivo.map(({ m, n }) => (
-              <li key={m} className={cn("rounded-full px-3 py-1 text-[15px] font-bold", MOTIVOS[m].clase)}>
+              <li key={m} className={cn("rounded-full px-3 py-1 text-sm font-bold", MOTIVOS[m].clase)}>
                 {MOTIVOS[m].texto}: {n}
               </li>
             ))}
             {enLaVan > 0 && (
-              <li className="rounded-full bg-warning-muted px-3 py-1 text-[15px] font-bold text-warning">Se fueron en la van: {enLaVan}</li>
+              <li className="rounded-full bg-warning-muted px-3 py-1 text-sm font-bold text-warning">Se fueron en la van: {enLaVan}</li>
             )}
           </ul>
         )}
@@ -155,7 +155,7 @@ export default async function PaginaListaGina({ searchParams }: PageProps<"/admi
                     {h.personas > 1 && ` +${h.personas - 1}`}
                     <span className="font-normal text-muted-foreground"> · {h.enGina ? "en Gina" : h.lugar}</span>
                   </p>
-                  <p className="flex flex-wrap items-center gap-2 text-[15px]">
+                  <p className="flex flex-wrap items-center gap-2 text-sm">
                     <span className={cn("rounded-full px-2 py-0.5 text-sm font-bold", MOTIVOS[h.motivo].clase)}>{h.detalle}</span>
                   </p>
                   <p className="text-sm text-muted-foreground">

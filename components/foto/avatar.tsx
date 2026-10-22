@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 import { iniciales } from "@/lib/viajes"
 
-/** Foto de perfil redonda (R54) o, si no hay, las iniciales. `className` da el tamaño (p. ej. "size-12 text-lg"). */
+/** Foto de perfil redonda (R54) o, si no hay, las iniciales. `className` da el tamaño (p. ej. "size-12 text-base"). */
 export function Avatar({ url, nombre, className }: { url?: string | null; nombre: string; className?: string }) {
   if (url) {
     // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage, ya liviano (R54)

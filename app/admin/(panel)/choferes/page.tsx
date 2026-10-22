@@ -13,9 +13,9 @@ export default async function PaginaChoferes({ searchParams }: PageProps<"/admin
   const { cuentas, error } = await cargarCuentas()
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Choferes</h1>
+        <h1 className="text-xl leading-tight font-bold">Choferes</h1>
         <p className="text-muted-foreground">Revisa la placa, el carro y la foto antes de aprobar.</p>
       </header>
       <ListaCuentas rol="chofer" estado={estadoDeParam(typeof estado === "string" ? estado : undefined)} cuentas={cuentas} error={error} />

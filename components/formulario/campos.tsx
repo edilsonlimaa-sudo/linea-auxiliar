@@ -65,7 +65,7 @@ export function CampoPin({ nuevo = false, ...props }: BaseCampo & { nuevo?: bool
       pattern="\d{6}"
       maxLength={6}
       autoComplete={nuevo ? "new-password" : "current-password"}
-      className="font-mono text-xl tracking-[0.4em]"
+      className="font-mono text-base tracking-[0.4em]"
     />
   )
 }
@@ -101,7 +101,7 @@ function CampoOculto({
           type="button"
           onClick={() => setVisible((v) => !v)}
           aria-pressed={visible}
-          className="flex h-13 shrink-0 items-center gap-1.5 rounded-lg border-2 border-input bg-card px-3 text-base font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+          className="flex h-10 shrink-0 items-center gap-1.5 rounded-lg border-2 border-input bg-card px-3 text-base font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
         >
           {visible ? <EyeOffIcon className="size-5" aria-hidden /> : <EyeIcon className="size-5" aria-hidden />}
           {visible ? "Ocultar" : "Ver"}
@@ -133,7 +133,7 @@ export function CampoSeleccion({
         required
         aria-invalid={Boolean(error) || undefined}
         aria-describedby={cn(ayuda && `${id}-ayuda`, error && `${id}-error`) || undefined}
-        className="h-13 w-full rounded-lg border-2 border-input bg-card px-3 text-lg outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/60 aria-invalid:border-destructive"
+        className="h-10 w-full rounded-lg border-2 border-input bg-card px-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/60 aria-invalid:border-destructive"
       >
         <option value="" disabled>
           Escoge una opción

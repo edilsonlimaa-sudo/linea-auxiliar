@@ -29,10 +29,10 @@ export function TarjetaCuenta({
     <article className="flex flex-col gap-4 rounded-2xl border-2 bg-card p-4">
       <header className="flex items-center gap-4">
         {/* Foto grande: es lo que el admin compara para verificar a la persona (R54) */}
-        <Avatar url={fotoUrl} nombre={c.nombre} className="size-20 text-2xl" />
+        <Avatar url={fotoUrl} nombre={c.nombre} className="size-16 text-lg" />
         <div className="min-w-0">
-          <h3 className="text-xl leading-tight font-bold">{c.nombre}</h3>
-          <p className="text-[15px] text-muted-foreground" title={fechaHora(c.creado_en)}>
+          <h3 className="text-base leading-tight font-bold">{c.nombre}</h3>
+          <p className="text-sm text-muted-foreground" title={fechaHora(c.creado_en)}>
             Se registró {hace(c.creado_en)}
           </p>
         </div>
@@ -66,7 +66,7 @@ export function TarjetaCuenta({
           <>
             <dt className="text-muted-foreground">Placa</dt>
             <dd>
-              <span className="inline-block rounded-md border-2 border-foreground px-2.5 py-0.5 font-mono text-lg font-bold tracking-widest">
+              <span className="inline-block rounded-md border-2 border-foreground px-2.5 py-0.5 font-mono text-base font-bold tracking-widest">
                 {c.placa}
               </span>
             </dd>
@@ -81,7 +81,7 @@ export function TarjetaCuenta({
       </dl>
 
       {faltan.length > 0 && (
-        <p className="flex items-center gap-2 rounded-md bg-warning-muted px-3 py-2 text-[15px] font-bold text-warning">
+        <p className="flex items-center gap-2 rounded-md bg-warning-muted px-3 py-2 text-sm font-bold text-warning">
           <TriangleAlertIcon aria-hidden className="size-5 shrink-0" /> Falta {faltan.join(" y ")}
         </p>
       )}
@@ -117,7 +117,7 @@ export function TarjetaCuenta({
 function LineaActividad({ actividad: a, chofer }: { actividad: Actividad; chofer: boolean }) {
   const viajes = a.viajes === 1 ? "1 viaje" : `${a.viajes} viajes`
   return (
-    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-muted px-3 py-2 text-[15px]">
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-muted px-3 py-2 text-sm">
       {chofer && a.conectado && (
         <span className="inline-flex items-center gap-1.5 font-bold text-success">
           <span aria-hidden className="size-2.5 rounded-full bg-success" /> Conectado ahora

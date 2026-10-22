@@ -37,17 +37,17 @@ export function CalificarViaje({
   return (
     <section
       aria-labelledby="titulo-calificar"
-      className={cn("flex flex-col gap-5", !desdeHistorial && "rounded-3xl border-2 border-primary bg-card p-5 text-card-foreground shadow-sm")}
+      className={cn("flex flex-col gap-4", !desdeHistorial && "rounded-2xl border-2 border-primary bg-card p-4 text-card-foreground shadow-sm")}
     >
       <div className="flex flex-col gap-1">
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[pendiente.sentido].largo} · Viaje terminado</p>
-        <Titulo id="titulo-calificar" className="text-2xl leading-tight font-bold">
+        <Titulo id="titulo-calificar" className="text-lg leading-tight font-bold">
           ¿Cómo te fue con {nombre}?
         </Titulo>
         <p className="text-muted-foreground">Tu calificación ayuda a todos a escoger con confianza.</p>
       </div>
 
-      <form action={enviar} className="flex flex-col gap-5">
+      <form action={enviar} className="flex flex-col gap-4">
         <input type="hidden" name="viaje" value={pendiente.viajeId} />
         <input type="hidden" name="chofer" value={pendiente.choferId} />
         {desdeHistorial && <input type="hidden" name="volver" value={volver} />}
@@ -113,7 +113,7 @@ export function CalificarViaje({
                 name="comentario"
                 maxLength={140}
                 rows={3}
-                className="w-full rounded-lg border-2 border-input bg-card px-4 py-3 text-lg outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/60"
+                className="w-full rounded-lg border-2 border-input bg-card px-4 py-3 text-base outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/60"
               />
             </div>
           </>

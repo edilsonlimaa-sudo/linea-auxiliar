@@ -34,7 +34,7 @@ export function PerfilChofer({ chofer }: { chofer: Chofer }) {
           <span className="flex flex-wrap items-center gap-x-2 font-bold">
             <span className="truncate">{nombreCorto(chofer.nombre)}</span>
             {chofer.estrellas !== null && (
-              <span className="inline-flex items-center gap-0.5 text-[15px]">
+              <span className="inline-flex items-center gap-0.5 text-sm">
                 <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
                 {promedio(chofer.estrellas)}
                 <span className="sr-only"> estrellas</span>
@@ -60,7 +60,7 @@ export function PerfilChofer({ chofer }: { chofer: Chofer }) {
             <SheetTitle>Quién maneja</SheetTitle>
             <SheetDescription className="sr-only">Perfil del chofer y su carro</SheetDescription>
           </SheetHeader>
-          <div className="flex flex-col gap-4 px-5 pb-6">
+          <div className="flex flex-col gap-4 px-4 pb-6">
             <ChoferResumen chofer={chofer} />
             <FotoCarro chofer={chofer} />
           </div>

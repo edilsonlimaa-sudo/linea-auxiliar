@@ -10,7 +10,7 @@ export function Cabecera() {
           {/* eslint-disable-next-line @next/next/no-img-element -- ícono SVG local, no necesita optimización */}
           <img src="/icon.svg" alt="" width={38} height={38} className="size-9.5 rounded-[10px]" />
           <span className="min-w-0">
-            <span className="block text-lg leading-tight font-bold">Línea Auxiliar</span>
+            <span className="block text-base leading-tight font-bold">Línea Auxiliar</span>
             <span className="block text-sm leading-tight opacity-90">Valle Grande</span>
           </span>
         </EnlaceInicio>

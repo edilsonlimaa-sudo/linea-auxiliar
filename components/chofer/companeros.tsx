@@ -43,9 +43,9 @@ export function Companeros({
   const visto = elegido ?? solo
 
   const franja = cn(
-    "flex min-h-14 w-full items-center gap-3 px-4 py-2.5 text-left font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
+    "flex min-h-12 w-full items-center gap-3 px-4 py-2.5 text-left font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
     enCabecera
-      ? "border-t border-header-foreground/15 bg-header-foreground/10 px-5 hover:bg-header-foreground/15 focus-visible:ring-inset"
+      ? "border-t border-header-foreground/15 bg-header-foreground/10 px-4 hover:bg-header-foreground/15 focus-visible:ring-inset"
       : "rounded-2xl border-2 bg-card hover:bg-muted"
   )
   const texto = n === 0 ? "Nadie más está trabajando" : n === 1 ? `${solo!.nombre.split(" ")[0]} también trabaja` : `${n} compañeros trabajando`
@@ -92,7 +92,7 @@ export function Companeros({
                 <SheetTitle>Compañeros en la ruta</SheetTitle>
                 <SheetDescription className="text-base">{texto}. Toca uno para coordinarte.</SheetDescription>
               </SheetHeader>
-              <ul className="flex flex-col gap-2 px-5 pb-6">
+              <ul className="flex flex-col gap-2 px-4 pb-6">
                 {companeros.map((c) => (
                   <li key={c.id}>
                     <button
@@ -106,7 +106,7 @@ export function Companeros({
                           <span className="truncate">{c.nombre}</span>
                           <Estrellas valor={c.estrellas} />
                         </span>
-                        <span className={cn("block text-[15px]", c.actividad === "Disponible" ? "text-muted-foreground" : "font-bold text-primary")}>
+                        <span className={cn("block text-sm", c.actividad === "Disponible" ? "text-muted-foreground" : "font-bold text-primary")}>
                           {c.actividad}
                         </span>
                         {c.placa && <span className="block font-mono text-sm font-bold tracking-wider text-muted-foreground">{c.placa}</span>}
@@ -156,12 +156,12 @@ function Detalle({
           </button>
         )}
         <div className="flex items-center gap-3">
-          <Foto companero={c} className="size-14 text-lg" />
+          <Foto companero={c} className="size-12 text-base" />
           <div className="min-w-0">
             <SheetTitle className="flex flex-wrap items-center gap-x-2">
               {c.nombre} <Estrellas valor={c.estrellas} />
             </SheetTitle>
-            <SheetDescription className="flex flex-wrap items-center gap-x-2 text-[15px]">
+            <SheetDescription className="flex flex-wrap items-center gap-x-2 text-sm">
               {c.placa && <span className="font-mono font-bold tracking-wider text-foreground">{c.placa}</span>}
               {c.unidad && <span>Unidad {c.unidad}</span>}
               {c.aire && (
@@ -174,7 +174,7 @@ function Detalle({
         </div>
       </SheetHeader>
 
-      <div className="flex flex-col gap-4 px-5 pb-6">
+      <div className="flex flex-col gap-4 px-4 pb-6">
         {/* Qué hace ahora y cuántos lleva */}
         <section aria-labelledby="companero-ahora" className="flex flex-col gap-2">
           <h3 id="companero-ahora" className="font-bold">
@@ -201,7 +201,7 @@ function Detalle({
             Próximos viajes
           </h3>
           {proximos.length === 0 ? (
-            <p className="text-[15px] text-muted-foreground">No ha publicado próximos viajes.</p>
+            <p className="text-sm text-muted-foreground">No ha publicado próximos viajes.</p>
           ) : (
             <ul className="flex flex-col gap-2">
               {proximos.map((v) => (
@@ -246,7 +246,7 @@ function Detalle({
 function Ocupacion({ viaje: v }: { viaje: Viaje }) {
   const n = libres(v)
   return (
-    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[15px]">
+    <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
       <Asientos puestos={v.puestos} ocupados={Math.min(v.ocupados, v.puestos)} />
       <span>
         Lleva {Math.min(v.ocupados, v.puestos)} de {v.puestos}
@@ -268,7 +268,7 @@ function Foto({ companero: c, className }: { companero: Companero; className?: s
 function Estrellas({ valor }: { valor: number | null }) {
   if (valor === null) return null
   return (
-    <span className="inline-flex items-center gap-0.5 text-[15px] font-bold">
+    <span className="inline-flex items-center gap-0.5 text-sm font-bold">
       <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
       {promedioTexto(valor)}
       <span className="sr-only"> estrellas</span>

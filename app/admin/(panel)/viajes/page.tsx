@@ -18,10 +18,10 @@ export default async function PaginaViajes() {
   const sinViaje = cuentas.filter((c) => c.rol === "chofer" && c.estado === "aprobado" && c.actividad?.conectado && !conViaje.has(c.id))
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <EnVivo />
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Viajes en curso</h1>
+        <h1 className="text-xl leading-tight font-bold">Viajes en curso</h1>
         <p className="text-muted-foreground">Quién va en cada carro y por dónde va. Se actualiza sola.</p>
         <Link href="/admin/viajes/terminados" className="mt-1 w-fit font-bold text-primary underline underline-offset-4">
           Ver viajes terminados

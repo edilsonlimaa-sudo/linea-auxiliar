@@ -50,8 +50,8 @@ export function PreguntarVuelta({ viaje }: { viaje: Pick<Viaje, "sentido" | "pue
             Si publicas tu vuelta ahora, la gente que espera ahí ya la ve y aparta puesto mientras llegas.
           </SheetDescription>
         </SheetHeader>
-        <fieldset className="flex flex-col gap-2 px-5">
-          <legend className="mb-2 text-lg font-bold">¿Cuándo llegas a recoger {regreso.enRecogida}?</legend>
+        <fieldset className="flex flex-col gap-2 px-4">
+          <legend className="mb-2 text-base font-bold">¿Cuándo llegas a recoger {regreso.enRecogida}?</legend>
           <div className="grid grid-cols-2 gap-2">
             {MINUTOS.map((m) => (
               <Opcion key={m} nombre="vuelta-llega" elegida={minutos === m} onElegir={() => setMinutos(m)}>
@@ -60,7 +60,7 @@ export function PreguntarVuelta({ viaje }: { viaje: Pick<Viaje, "sentido" | "pue
             ))}
           </div>
           {/* Lo que se va a publicar, antes de tocar */}
-          <p className="mt-1 text-[15px] text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Vuelta: {regreso.largo} · {viaje.puestos} {viaje.puestos === 1 ? "puesto" : "puestos"}
           </p>
         </fieldset>

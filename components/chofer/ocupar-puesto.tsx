@@ -44,7 +44,7 @@ export function OcuparPuesto({ viajeId, enRuta }: { viajeId: string; enRuta: boo
                 : "Para alguien que no usa la app. Toma el siguiente puesto libre."}
             </SheetDescription>
           </SheetHeader>
-          <div className="flex flex-col gap-1.5 px-5 pb-2">
+          <div className="flex flex-col gap-1.5 px-4 pb-2">
             <label htmlFor={id} className="font-bold">
               Nombre <span className="font-normal text-muted-foreground">(opcional)</span>
             </label>
@@ -55,7 +55,7 @@ export function OcuparPuesto({ viajeId, enRuta }: { viajeId: string; enRuta: boo
               </p>
             )}
           </div>
-          <SheetFooter className="p-5 pt-3">
+          <SheetFooter className="p-4 pt-3">
             <Button type="submit" variant="signal" size="lg" className="w-full" disabled={pendiente}>
               {pendiente && <Loader2Icon aria-hidden className="animate-spin" />}
               {nombre.trim() ? `Anotar a ${nombre.trim()}` : "Anotar sin nombre"}

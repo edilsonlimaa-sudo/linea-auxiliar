@@ -46,17 +46,17 @@ export function InicioChofer({
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <EnVivo />
-        <section aria-labelledby="titulo-inicio" className="relative overflow-hidden rounded-3xl bg-header text-header-foreground shadow-md">
+        <section aria-labelledby="titulo-inicio" className="relative overflow-hidden rounded-2xl bg-header text-header-foreground shadow-md">
           {/* Franja amarilla de la línea, como en el Inicio del pasajero */}
           <span aria-hidden className="absolute inset-x-0 top-0 h-1.5 bg-signal" />
-          <div className="flex flex-col gap-4 p-5 pt-6">
+          <div className="flex flex-col gap-4 p-4 pt-6">
             <div>
-              <p className="text-[15px] opacity-90">
+              <p className="text-sm opacity-90">
                 {saludo()}, {nombre.split(" ")[0]}
               </p>
-              <h1 id="titulo-inicio" className="text-[28px] leading-tight font-bold">
+              <h1 id="titulo-inicio" className="text-xl leading-tight font-bold">
                 ¿Sales a trabajar?
               </h1>
             </div>
@@ -90,14 +90,14 @@ export function InicioChofer({
       {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} esperanEnCamino={esperanEnCamino} barraFija />}
       {recogida && (
         <>
-          {enRuta && <h2 className="mt-2 text-xl font-bold">Tu siguiente recogida</h2>}
+          {enRuta && <h2 className="mt-2 text-base font-bold">Tu siguiente recogida</h2>}
           <ViajeChofer viaje={recogida} porId={porId} vehiculo={vehiculo} dicenQueSubieron={dicenQueSubieron} barraFija={!enRuta} />
         </>
       )}
 
       {proximos.length > 0 && (
         <section aria-labelledby="titulo-proximos" className="flex flex-col gap-3">
-          <h2 id="titulo-proximos" className="mt-2 text-xl font-bold">
+          <h2 id="titulo-proximos" className="mt-2 text-base font-bold">
             Próximos viajes
           </h2>
           {proximos.map((v) => (

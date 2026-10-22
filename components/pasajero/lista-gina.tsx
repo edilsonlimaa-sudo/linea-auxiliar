@@ -89,10 +89,10 @@ export function ListaGina({
   const [hoja, setHoja] = useState(false)
 
   return (
-    <div className="flex flex-col gap-5">
-      <section aria-labelledby="titulo-lista-tramo" className="flex flex-col gap-3 rounded-3xl border-2 border-primary bg-card p-5">
+    <div className="flex flex-col gap-4">
+      <section aria-labelledby="titulo-lista-tramo" className="flex flex-col gap-3 rounded-2xl border-2 border-primary bg-card p-4">
         <div>
-          <h2 id="titulo-lista-tramo" className="text-2xl leading-tight font-bold">
+          <h2 id="titulo-lista-tramo" className="text-lg leading-tight font-bold">
             Lista hacia Valle Grande
           </h2>
           <p className="text-muted-foreground">
@@ -151,14 +151,14 @@ export function MiLista({
     })
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* 1. Su lugar */}
-      <section aria-labelledby="titulo-mi-lugar" className="flex flex-col gap-1 rounded-3xl border-2 border-primary bg-card p-5 shadow-sm">
+      <section aria-labelledby="titulo-mi-lugar" className="flex flex-col gap-1 rounded-2xl border-2 border-primary bg-card p-4 shadow-sm">
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">Lista hacia Valle Grande</p>
-        <h2 id="titulo-mi-lugar" className="text-2xl leading-tight font-bold">
+        <h2 id="titulo-mi-lugar" className="text-lg leading-tight font-bold">
           {mio.diceQueSubio ? "Avisaste que te montaste" : mio.posicion === 1 ? "Eres el primero" : `Eres el ${mio.posicion}`}
         </h2>
-        <p className="flex items-start gap-1.5 text-lg">
+        <p className="flex items-start gap-1.5 text-base">
           <MapPinIcon aria-hidden className="mt-1 size-5 shrink-0 text-primary" />
           <span>
             {mio.enGina ? "En Gina" : mio.lugar}
@@ -208,7 +208,7 @@ export function MiLista({
               ) : (
                 <strong>Tu lugar vale 45 min</strong>
               )}
-              <span className="block text-[15px] text-muted-foreground">Si sigues esperando, renuévalo cuando quieras.</span>
+              <span className="block text-sm text-muted-foreground">Si sigues esperando, renuévalo cuando quieras.</span>
             </span>
           </p>
           {ahora > 0 && <BarraVence quedan={quedanMin} />}
@@ -258,7 +258,7 @@ function CarrosQueVienen({
   const primeroConPuesto = visibles.find((v) => v.estado !== "en_ruta" && libres(v) > 0)
   return (
     <section aria-labelledby="titulo-carros" className="flex flex-col gap-2">
-      <h2 id="titulo-carros" className="text-xl font-bold">
+      <h2 id="titulo-carros" className="text-base font-bold">
         Carros que vienen
       </h2>
       {visibles.length === 0 ? (
@@ -297,7 +297,7 @@ function FranjaLista({ lista }: { lista: EnListaGina[] }) {
         type="button"
         onClick={() => setAbierta(true)}
         disabled={lista.length === 0}
-        className="flex min-h-16 w-full items-center gap-3 rounded-2xl border-2 bg-card px-4 py-3 text-left outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring disabled:hover:bg-card"
+        className="flex min-h-14 w-full items-center gap-3 rounded-2xl border-2 bg-card px-4 py-3 text-left outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring disabled:hover:bg-card"
       >
         {lista.length > 0 ? (
           <AvatarGroup className="*:data-[slot=avatar]:ring-card">
@@ -314,7 +314,7 @@ function FranjaLista({ lista }: { lista: EnListaGina[] }) {
         )}
         <span className="min-w-0 flex-1 leading-tight">
           <span className="block font-bold">La lista</span>
-          <span className="block text-[15px] text-muted-foreground">
+          <span className="block text-sm text-muted-foreground">
             {lista.length === 0 ? "Nadie se anotó todavía" : `${total === 1 ? "1 persona" : `${total} personas`} · ${resumen(lista)}`}
           </span>
         </span>
@@ -329,7 +329,7 @@ function FranjaLista({ lista }: { lista: EnListaGina[] }) {
               {total === 1 ? "1 persona" : `${total} personas`} por orden de llegada · {resumen(lista)}
             </SheetDescription>
           </SheetHeader>
-          <ol className="flex flex-col gap-1 px-5 pb-6">
+          <ol className="flex flex-col gap-1 px-4 pb-6">
             {lista.map((e) => (
               <FilaLista key={e.id} entrada={e} />
             ))}
@@ -399,7 +399,7 @@ function HojaMeFui({
             Sales de la lista. Si vuelves, te anotas otra vez al final. Tu respuesta nos ayuda a mejorar la línea.
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-2.5 px-5 pb-6">
+        <div className="flex flex-col gap-2.5 px-4 pb-6">
           {MOTIVOS_SALIDA.map((m) => {
             const Icono = ICONO_ME_FUI[m]
             return (
@@ -495,7 +495,7 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
           Hacia Valle Grande, por orden de llegada. Anótate cuando ya estés esperando: así la lista es justa para todos.
         </SheetDescription>
       </SheetHeader>
-      <div className="flex flex-col gap-5 px-5">
+      <div className="flex flex-col gap-4 px-4">
         <fieldset className="flex flex-col gap-2">
           <legend className="mb-2 font-bold">¿Dónde estás?</legend>
           <div className="grid grid-cols-2 gap-2">
@@ -510,11 +510,11 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
             gps.estado !== "listo" && <GpsBoton gps={gps} onLeer={leerGps} texto="Confirmar con mi ubicación" />
           ) : (
             <div className="flex flex-col gap-2">
-              <label htmlFor={idLugar} className="text-[15px] font-bold">
+              <label htmlFor={idLugar} className="text-sm font-bold">
                 Escribe dónde estás
               </label>
               <Input id={idLugar} value={lugar} onChange={(e) => setLugar(e.target.value)} maxLength={60} placeholder="Ej. Plaza del Indio" autoFocus />
-              <p className="text-[15px] text-muted-foreground">El carro te guarda puesto y te recoge al pasar.</p>
+              <p className="text-sm text-muted-foreground">El carro te guarda puesto y te recoge al pasar.</p>
               <GpsBoton gps={gps} onLeer={leerGps} texto="Compartir mi ubicación" />
             </div>
           )}
@@ -529,7 +529,7 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
               </Opcion>
             ))}
           </div>
-          {cuantos > 1 && <p className="text-[15px] text-muted-foreground">Suben juntos: si no caben todos, esperan el siguiente carro sin perder el lugar.</p>}
+          {cuantos > 1 && <p className="text-sm text-muted-foreground">Suben juntos: si no caben todos, esperan el siguiente carro sin perder el lugar.</p>}
         </fieldset>
 
         {lejos && (
@@ -566,14 +566,14 @@ function GpsBoton({
   onLeer: () => void
   texto: string
 }) {
-  if (gps.estado === "listo") return <p className="text-[15px] font-bold text-success">✓ Ubicación lista</p>
+  if (gps.estado === "listo") return <p className="text-sm font-bold text-success">✓ Ubicación lista</p>
   return (
     <div className="flex flex-col gap-1">
       <Button type="button" variant="outline" size="sm" className="self-start" disabled={gps.estado === "buscando"} onClick={onLeer}>
         {gps.estado === "buscando" ? <Loader2Icon aria-hidden className="animate-spin" /> : <MapPinIcon aria-hidden />}
         {texto}
       </Button>
-      {gps.estado === "error" && <p className="text-[15px] text-muted-foreground">No se pudo leer tu ubicación. Puedes seguir igual.</p>}
+      {gps.estado === "error" && <p className="text-sm text-muted-foreground">No se pudo leer tu ubicación. Puedes seguir igual.</p>}
     </div>
   )
 }

@@ -11,9 +11,9 @@ export function CalificacionesChofer({ resumen }: { resumen: ResumenCalificacion
 
   if (cantidad === 0 || promedio === null) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-10 text-center">
         <StarIcon aria-hidden className="size-10 text-muted-foreground" />
-        <p className="text-lg font-bold">Todavía no tienes calificaciones</p>
+        <p className="text-base font-bold">Todavía no tienes calificaciones</p>
         <p className="text-muted-foreground">Al terminar cada viaje, la app les pide a tus pasajeros que te califiquen.</p>
       </div>
     )
@@ -22,7 +22,7 @@ export function CalificacionesChofer({ resumen }: { resumen: ResumenCalificacion
   return (
     <div className="flex flex-col gap-6">
       {/* Resumen */}
-      <section aria-label="Resumen" className="flex flex-col items-center gap-2 rounded-3xl border-2 bg-card p-5 text-center">
+      <section aria-label="Resumen" className="flex flex-col items-center gap-2 rounded-2xl border-2 bg-card p-4 text-center">
         <p className="text-5xl leading-none font-bold">{promedioTexto(promedio)}</p>
         <Estrellas valor={promedio} tamano="size-7" />
         <p className="text-muted-foreground">{cantidad === 1 ? "1 calificación" : `${cantidad} calificaciones`}</p>
@@ -30,7 +30,7 @@ export function CalificacionesChofer({ resumen }: { resumen: ResumenCalificacion
 
       {/* Cuántas de cada estrella */}
       <section aria-labelledby="titulo-estrellas" className="flex flex-col gap-2">
-        <h2 id="titulo-estrellas" className="text-lg font-bold">
+        <h2 id="titulo-estrellas" className="text-base font-bold">
           Cómo te calificaron
         </h2>
         <ul className="flex flex-col gap-1.5">
@@ -55,7 +55,7 @@ export function CalificacionesChofer({ resumen }: { resumen: ResumenCalificacion
       {/* Etiquetas */}
       {etiquetas.length > 0 && (
         <section aria-labelledby="titulo-etiquetas" className="flex flex-col gap-2">
-          <h2 id="titulo-etiquetas" className="text-lg font-bold">
+          <h2 id="titulo-etiquetas" className="text-base font-bold">
             Lo que más destacan
           </h2>
           <ul className="flex flex-wrap gap-2">
@@ -70,10 +70,10 @@ export function CalificacionesChofer({ resumen }: { resumen: ResumenCalificacion
 
       {/* Comentarios recientes */}
       <section aria-labelledby="titulo-recientes" className="flex flex-col gap-2">
-        <h2 id="titulo-recientes" className="text-lg font-bold">
+        <h2 id="titulo-recientes" className="text-base font-bold">
           Recientes
         </h2>
-        <p className="-mt-1 text-[15px] text-muted-foreground">No se muestra quién calificó, para que cada pasajero opine con libertad.</p>
+        <p className="-mt-1 text-sm text-muted-foreground">No se muestra quién calificó, para que cada pasajero opine con libertad.</p>
         <ol className="flex flex-col gap-2">
           {recientes.map((c, i) => (
             <li key={i} className="flex flex-col gap-1.5 rounded-2xl border-2 bg-card p-3">
@@ -85,7 +85,7 @@ export function CalificacionesChofer({ resumen }: { resumen: ResumenCalificacion
                 </span>
               </p>
               {c.comentario && <p>“{c.comentario}”</p>}
-              {c.etiquetas.length > 0 && <p className="text-[15px] text-muted-foreground">{c.etiquetas.join(" · ")}</p>}
+              {c.etiquetas.length > 0 && <p className="text-sm text-muted-foreground">{c.etiquetas.join(" · ")}</p>}
             </li>
           ))}
         </ol>

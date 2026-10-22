@@ -42,7 +42,7 @@ export default async function PaginaEnRevision() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-[26px] leading-tight font-bold">Hola, {nombre}</h1>
+      <h1 className="text-xl leading-tight font-bold">Hola, {nombre}</h1>
 
       {rechazada ? (
         <Alert variant="destructive">
@@ -74,21 +74,21 @@ export default async function PaginaEnRevision() {
           <MessageCircleIcon aria-hidden />
           {rechazada ? "Preguntar al administrador" : "Avisar al administrador"}
         </a>
-        <p className="text-center text-[15px] text-muted-foreground">
+        <p className="text-center text-sm text-muted-foreground">
           Por WhatsApp, al {WHATSAPP_ADMIN_VISIBLE}
         </p>
       </div>
 
       {!rechazada && (
         <section aria-labelledby="titulo-fotos" className="flex flex-col gap-3 rounded-lg border-2 bg-card p-4">
-          <h2 id="titulo-fotos" className="text-lg font-bold">
+          <h2 id="titulo-fotos" className="text-base font-bold">
             {faltan ? (esChofer ? "Agrega tu foto y la de tu carro" : "Agrega tu foto") : "¡Listo! Tus fotos ya están"}
           </h2>
-          <p className="text-[15px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Ayudan a que el administrador te verifique más rápido y a que {esChofer ? "los pasajeros te reconozcan" : "el chofer te reconozca"}.
           </p>
           <div className="flex items-center gap-4">
-            <Avatar url={fotoUrl} nombre={perfil.nombre} className="size-20 text-2xl" />
+            <Avatar url={fotoUrl} nombre={perfil.nombre} className="size-16 text-lg" />
             <SubirFoto tipo="perfil" tieneFoto={Boolean(fotoUrl)} className="flex-1" />
           </div>
           {esChofer && (
@@ -105,7 +105,7 @@ export default async function PaginaEnRevision() {
 
       {!rechazada && (
         <section className="rounded-lg border-2 bg-card p-4">
-          <h2 className="text-lg font-bold">Mientras tanto</h2>
+          <h2 className="text-base font-bold">Mientras tanto</h2>
           <p className="mt-2">Guarda bien tu PIN: lo necesitas para entrar.</p>
         </section>
       )}

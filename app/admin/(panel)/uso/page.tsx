@@ -31,9 +31,9 @@ export default async function PaginaUso({
   const uso = await cargarUso(inicioDelDia(periodo.dias), { conFotos: true })
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Uso de la app</h1>
+        <h1 className="text-xl leading-tight font-bold">Uso de la app</h1>
         <p className="text-muted-foreground">
           Pasajeros llevados en viajes terminados.
         </p>
@@ -60,17 +60,17 @@ export default async function PaginaUso({
         })}
       </nav>
 
-      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
-        <section className="rounded-3xl border-2 bg-card p-4">
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+        <section className="rounded-2xl border-2 bg-card p-4">
           <UsoNumeros uso={uso} />
         </section>
 
         {uso.porChofer.length > 0 && (
           <section
             aria-labelledby="uso-choferes"
-            className="flex flex-col gap-3 rounded-3xl border-2 bg-card p-4"
+            className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4"
           >
-            <h2 id="uso-choferes" className="text-lg font-bold">
+            <h2 id="uso-choferes" className="text-base font-bold">
               Por chofer
             </h2>
             <UsoPorChoferLista choferes={uso.porChofer} />
@@ -79,7 +79,7 @@ export default async function PaginaUso({
       </div>
 
       <section aria-labelledby="uso-pasajeros" className="flex flex-col gap-3">
-        <h2 id="uso-pasajeros" className="text-xl font-bold">
+        <h2 id="uso-pasajeros" className="text-base font-bold">
           Quiénes viajan con su cuenta
         </h2>
         <PasajerosQueUsan pasajeros={uso.pasajeros} />

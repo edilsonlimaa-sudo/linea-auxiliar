@@ -20,7 +20,7 @@ export function BarraAdmin() {
           Menú
         </button>
         <span className="min-w-0 leading-tight">
-          <span className="block truncate text-[17px] font-bold">Línea Auxiliar</span>
+          <span className="block truncate text-[15px] font-bold">Línea Auxiliar</span>
           <span className="block truncate text-sm opacity-90">Administración</span>
         </span>
       </div>

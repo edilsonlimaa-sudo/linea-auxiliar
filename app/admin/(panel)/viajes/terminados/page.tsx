@@ -29,9 +29,9 @@ export default async function PaginaTerminados({ searchParams }: PageProps<"/adm
   const promedio = califs.length ? califs.reduce((n, c) => n + c.estrellas, 0) / califs.length : null
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Viajes terminados</h1>
+        <h1 className="text-xl leading-tight font-bold">Viajes terminados</h1>
       </header>
 
       <nav aria-label="Período" className="flex gap-2">
@@ -70,7 +70,7 @@ export default async function PaginaTerminados({ searchParams }: PageProps<"/adm
           texto={califs.length === 1 ? "1 calificación" : `${califs.length} calificaciones`}
         />
       </div>
-      {viajes.length === 100 && <p className="text-[15px] text-muted-foreground">Se muestran los 100 más recientes.</p>}
+      {viajes.length === 100 && <p className="text-sm text-muted-foreground">Se muestran los 100 más recientes.</p>}
 
       <ViajesChofer viajes={viajes} admin />
     </div>
@@ -80,7 +80,7 @@ export default async function PaginaTerminados({ searchParams }: PageProps<"/adm
 function Total({ valor, texto }: { valor: React.ReactNode; texto: string }) {
   return (
     <div className="flex min-h-24 flex-col justify-between gap-2 rounded-2xl border-2 bg-card p-3">
-      <span className="text-[28px] leading-none font-bold tabular-nums">{valor}</span>
+      <span className="text-xl leading-none font-bold tabular-nums">{valor}</span>
       <span className="text-sm leading-tight text-muted-foreground">{texto}</span>
     </div>
   )

@@ -22,12 +22,12 @@ export function ChoferResumen({ chofer, compacto = false }: { chofer: Chofer; co
   const carro = compacto ? "" : [v?.modelo, v?.color].filter(Boolean).join(" · ")
   return (
     <div className="flex items-center gap-3">
-      <Avatar url={chofer.fotoUrl} nombre={chofer.nombre} className={compacto ? "size-12 text-base" : "size-14 text-lg"} />
+      <Avatar url={chofer.fotoUrl} nombre={chofer.nombre} className={compacto ? "size-12 text-base" : "size-12 text-base"} />
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-x-2 font-bold">
           <span className="truncate">{chofer.nombre}</span>
           {chofer.estrellas !== null ? (
-            <span className="inline-flex items-center gap-0.5 text-[15px]">
+            <span className="inline-flex items-center gap-0.5 text-sm">
               <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
               {chofer.estrellas.toFixed(1).replace(".", ",")}
               <span className="font-normal text-muted-foreground">
@@ -38,7 +38,7 @@ export function ChoferResumen({ chofer, compacto = false }: { chofer: Chofer; co
             <span className="text-sm font-normal text-muted-foreground">Sin calificaciones aún</span>
           )}
         </p>
-        <p className="text-[15px] text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {v?.placa && (
             <span className="mr-2 rounded-md border-2 border-foreground/70 px-1.5 font-mono font-bold tracking-wider text-foreground">
               {v.placa}
@@ -78,7 +78,7 @@ export function FotoCarro({ chofer }: { chofer: Chofer }) {
     <figure className="overflow-hidden rounded-2xl border-2">
       {/* eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage, ya liviano (R54) */}
       <img src={v.fotoUrl} alt={`Carro de ${chofer.nombre}: ${[v.modelo, v.color].filter(Boolean).join(" ")}, placa ${v.placa}`} className="aspect-video w-full bg-muted object-cover" />
-      <figcaption className="bg-muted px-3 py-2 text-[15px]">
+      <figcaption className="bg-muted px-3 py-2 text-sm">
         Busca este carro · placa <span className="font-mono font-bold tracking-wider">{v.placa}</span>
       </figcaption>
     </figure>

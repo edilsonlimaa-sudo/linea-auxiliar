@@ -39,14 +39,14 @@ export function CabeceraInicio({
   const vuelve = choferes.length === 0 ? enPausa.find((c) => c.vuelveEn) : undefined
 
   return (
-    <section aria-labelledby="titulo-hacia" className="relative overflow-hidden rounded-3xl bg-header text-header-foreground shadow-md">
+    <section aria-labelledby="titulo-hacia" className="relative overflow-hidden rounded-2xl bg-header text-header-foreground shadow-md">
       {/* Franja amarilla de la línea, como la barra de arriba */}
       <span aria-hidden className="absolute inset-x-0 top-0 h-1.5 bg-signal" />
 
-      <div className="flex flex-col gap-4 p-5 pt-6">
+      <div className="flex flex-col gap-4 p-4 pt-6">
         <div>
-          <p className="text-[15px] opacity-90">{saludo}</p>
-          <h1 id="titulo-hacia" className="text-[28px] leading-tight font-bold">
+          <p className="text-sm opacity-90">{saludo}</p>
+          <h1 id="titulo-hacia" className="text-xl leading-tight font-bold">
             ¿Hacia dónde vas?
           </h1>
         </div>
@@ -69,7 +69,7 @@ export function CabeceraInicio({
                     : "border-header-foreground/30 bg-header-foreground/10 text-header-foreground hover:bg-header-foreground/20"
                 )}
               >
-                <span className="flex items-center gap-1.5 text-lg leading-tight font-bold">
+                <span className="flex items-center gap-1.5 text-base leading-tight font-bold">
                   {activo && <CheckIcon aria-hidden className="size-5 shrink-0 text-primary" />}
                   {SENTIDOS[s].corto}
                 </span>
@@ -90,7 +90,7 @@ export function CabeceraInicio({
         enPausa={enPausa}
         viajes={viajes}
         sentido={sentido}
-        className="flex min-h-14 w-full items-center gap-3 border-t border-header-foreground/15 bg-header-foreground/10 px-5 py-2.5 text-left font-bold outline-none hover:bg-header-foreground/15 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset"
+        className="flex min-h-12 w-full items-center gap-3 border-t border-header-foreground/15 bg-header-foreground/10 px-4 py-2.5 text-left font-bold outline-none hover:bg-header-foreground/15 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset"
       >
         {choferes.length > 0 ? (
           <AvatarGroup className="*:data-[slot=avatar]:ring-header">

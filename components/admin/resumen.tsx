@@ -166,8 +166,8 @@ function Atencion({
     )
   }
   return (
-    <section aria-labelledby="titulo-atencion" className="flex flex-col gap-3 rounded-3xl border-2 border-signal bg-signal/15 p-4">
-      <h2 id="titulo-atencion" className="flex items-center gap-2 text-lg font-bold">
+    <section aria-labelledby="titulo-atencion" className="flex flex-col gap-3 rounded-2xl border-2 border-signal bg-signal/15 p-4">
+      <h2 id="titulo-atencion" className="flex items-center gap-2 text-base font-bold">
         <TriangleAlertIcon aria-hidden className="size-5" />
         Requiere atención
       </h2>
@@ -176,7 +176,7 @@ function Atencion({
           <li key={i.clave}>
             <Link
               href={i.href}
-              className="flex min-h-14 items-center gap-3 rounded-2xl bg-card px-4 py-2 font-bold hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
+              className="flex min-h-12 items-center gap-3 rounded-2xl bg-card px-4 py-2 font-bold hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none"
             >
               <span className="flex-1">{i.texto}</span>
               {/* En el celular basta la flecha: el texto necesita el ancho */}
@@ -221,7 +221,7 @@ function EnLaRuta({ conectados, enCurso }: { conectados: CuentaConActividad[]; e
                     {f.placa && <span className="font-mono text-sm font-bold tracking-wider text-muted-foreground">{f.placa}</span>}
                   </p>
                   {actual ? (
-                    <p className="text-[15px]">
+                    <p className="text-sm">
                       <span className="font-bold text-primary">
                         {actual.estado === "en_ruta" ? `${ETIQUETA_ESTADO.en_ruta} ${SENTIDOS[actual.sentido].hacia}` : llegada(actual, porViaje).principal}
                       </span>
@@ -231,7 +231,7 @@ function EnLaRuta({ conectados, enCurso }: { conectados: CuentaConActividad[]; e
                       </span>
                     </p>
                   ) : (
-                    <p className="text-[15px] text-muted-foreground">{f.conectado ? "Conectado, sin viaje" : "Desconectado"}</p>
+                    <p className="text-sm text-muted-foreground">{f.conectado ? "Conectado, sin viaje" : "Desconectado"}</p>
                   )}
                 </div>
                 {/* Debajo del nombre, para que no lo aprieten: el mapa y Desconectar (R69) */}
@@ -284,12 +284,12 @@ function EsperandoAhora({
                   <p className="truncate font-bold">
                     {conAcompanantes(e.nombre, e.personas)} <span className="font-normal text-muted-foreground">· {haciaEnFrase(e.sentido)}</span>
                   </p>
-                  <p className="flex items-center gap-1 truncate text-[15px] text-muted-foreground">
+                  <p className="flex items-center gap-1 truncate text-sm text-muted-foreground">
                     <MapPinIcon aria-hidden className="size-4 shrink-0" />
                     {e.lugar ?? "Solo con GPS"}
                   </p>
                 </div>
-                <span className={cn("flex shrink-0 items-center gap-1 text-[15px]", e.minutos >= 20 ? "font-bold text-warning" : "text-muted-foreground")}>
+                <span className={cn("flex shrink-0 items-center gap-1 text-sm", e.minutos >= 20 ? "font-bold text-warning" : "text-muted-foreground")}>
                   <ClockIcon aria-hidden className="size-4" />
                   {hace(e.creado_en)}
                 </span>
@@ -299,7 +299,7 @@ function EsperandoAhora({
         </div>
       )}
       {hoy && hoy.pedidos > 0 && (
-        <p className="flex flex-wrap items-center gap-x-2 text-[15px] text-muted-foreground">
+        <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
           <UserCheckIcon aria-hidden className="size-4" />
           Hoy: {hoy.pedidos} {hoy.pedidos === 1 ? "pedido" : "pedidos"} · {hoy.consiguieron} consiguieron puesto
           {hoy.sin_transporte > 0 && <span className="font-bold text-warning">· {hoy.sin_transporte} sin transporte</span>}
@@ -314,15 +314,15 @@ function EsperandoAhora({
 function Tarjeta({ titulo, enlace, children }: { titulo: string; enlace?: { href: string; texto: string }; children: React.ReactNode }) {
   const id = `titulo-${titulo.toLowerCase().replace(/[^a-záéíóúñ0-9]+/g, "-")}`
   return (
-    <section aria-labelledby={id} className="flex flex-col gap-4 rounded-3xl border-2 bg-card p-4 md:p-5">
+    <section aria-labelledby={id} className="flex flex-col gap-4 rounded-2xl border-2 bg-card p-4 md:p-5">
       <header className="flex items-center justify-between gap-3">
-        <h2 id={id} className="text-lg font-bold">
+        <h2 id={id} className="text-base font-bold">
           {titulo}
         </h2>
         {enlace && (
           <Link
             href={enlace.href}
-            className="inline-flex min-h-11 shrink-0 items-center gap-0.5 rounded-md text-[15px] font-bold text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+            className="inline-flex min-h-11 shrink-0 items-center gap-0.5 rounded-md text-sm font-bold text-primary outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
           >
             {enlace.texto}
             <ChevronRightIcon aria-hidden className="size-5" />
@@ -349,7 +349,7 @@ function Indicador({
 }) {
   const contenido = (
     <>
-      <span className={cn("text-[28px] leading-none font-bold tabular-nums", destacado && "text-success")}>{valor}</span>
+      <span className={cn("text-xl leading-none font-bold tabular-nums", destacado && "text-success")}>{valor}</span>
       <span className="text-sm leading-tight text-muted-foreground">{texto}</span>
     </>
   )

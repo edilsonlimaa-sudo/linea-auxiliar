@@ -26,7 +26,7 @@ export function InterruptorAire({ tiene }: { tiene: boolean }) {
         <SnowflakeIcon aria-hidden className={cn("size-6 shrink-0", valor ? "text-primary" : "text-muted-foreground")} />
         <span className="flex-1">
           <span className="block font-bold">Aire acondicionado</span>
-          <span className="block text-[15px] text-muted-foreground">{valor ? "Los pasajeros ven “Con aire”" : "Tu carro no tiene aire"}</span>
+          <span className="block text-sm text-muted-foreground">{valor ? "Los pasajeros ven “Con aire”" : "Tu carro no tiene aire"}</span>
         </span>
         {pendiente && <Loader2Icon aria-hidden className="size-5 animate-spin" />}
         {/* Interruptor accesible: un checkbox nativo con aspecto de switch */}

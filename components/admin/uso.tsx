@@ -40,7 +40,7 @@ function Leyenda({ conteo }: { conteo: Conteo }) {
   return (
     <ul className="flex flex-col gap-1.5">
       {ENTRADAS.map((e) => (
-        <li key={e.clave} className="flex items-center gap-2 text-[15px]">
+        <li key={e.clave} className="flex items-center gap-2 text-sm">
           <span aria-hidden className={cn("size-3 shrink-0 rounded-sm", e.color)} />
           <span className="flex-1">{e.texto}</span>
           <span className="font-bold tabular-nums">{conteo[e.clave]}</span>
@@ -61,7 +61,7 @@ export function UsoNumeros({ uso, enlace }: { uso: Uso; enlace?: string }) {
       ) : (
         <>
           <p className="flex flex-wrap items-baseline gap-x-2">
-            <span className="text-[28px] leading-none font-bold tabular-nums">{total.porcentajeApp}%</span>
+            <span className="text-xl leading-none font-bold tabular-nums">{total.porcentajeApp}%</span>
             <span className="text-muted-foreground">
               de {total.llevados} {total.llevados === 1 ? "pasajero llevado" : "pasajeros llevados"} usó la app
             </span>
@@ -93,7 +93,7 @@ export function UsoNumeros({ uso, enlace }: { uso: Uso; enlace?: string }) {
 function Tile({ valor, texto }: { valor: number; texto: string }) {
   return (
     <div className="flex min-h-24 flex-col justify-between gap-2 rounded-2xl bg-muted p-3">
-      <span className="text-[28px] leading-none font-bold tabular-nums">{valor}</span>
+      <span className="text-xl leading-none font-bold tabular-nums">{valor}</span>
       <span className="text-sm leading-tight text-muted-foreground">{texto}</span>
     </div>
   )
@@ -111,7 +111,7 @@ export function UsoPorChoferLista({ choferes }: { choferes: UsoPorChofer[] }) {
           <li key={c.chofer_id} className="flex flex-col gap-2 rounded-2xl bg-muted p-3">
             <p className="flex flex-col">
               <span className="font-bold">{c.nombre}</span>
-              <span className="text-[15px] text-muted-foreground">
+              <span className="text-sm text-muted-foreground">
                 {total} {total === 1 ? "pasajero" : "pasajeros"} · {pct(c.app + c.en_camino, total)}% por la app
               </span>
             </p>
@@ -139,10 +139,10 @@ export function PasajerosQueUsan({ pasajeros }: { pasajeros: PasajeroQueUsa[] })
               <span className="truncate font-bold">{p.nombre}</span>
               {p.nuevo && <span className="rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">Nuevo</span>}
             </p>
-            <p className="text-[15px] text-muted-foreground">Último viaje {hace(p.ultimo_viaje)}</p>
+            <p className="text-sm text-muted-foreground">Último viaje {hace(p.ultimo_viaje)}</p>
           </div>
           <span className="text-right">
-            <span className="block text-xl leading-none font-bold tabular-nums">{p.viajes}</span>
+            <span className="block text-base leading-none font-bold tabular-nums">{p.viajes}</span>
             <span className="text-sm text-muted-foreground">{p.viajes === 1 ? "viaje" : "viajes"}</span>
           </span>
         </li>

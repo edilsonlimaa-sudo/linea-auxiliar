@@ -26,7 +26,7 @@ export function AgregarViaje({
   return (
     <Sheet open={abierta} onOpenChange={setAbierta}>
       {primero ? (
-        <SheetTrigger render={<Button variant="signal" size="lg" className="h-18 w-full text-xl" />}>
+        <SheetTrigger render={<Button variant="signal" size="lg" className="h-18 w-full text-base" />}>
           <SendIcon aria-hidden className="size-7" />
           Publicar un viaje
         </SheetTrigger>
@@ -48,7 +48,7 @@ export function AgregarViaje({
           </SheetDescription>
         </SheetHeader>
         {/* key: al reabrir la hoja el formulario empieza limpio */}
-        <div className="px-5">
+        <div className="px-4">
           <PublicarViaje
             key={String(abierta)}
             modo={modo}

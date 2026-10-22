@@ -14,7 +14,7 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactN
   return (
     <div className="flex flex-col gap-0.5">
       <dt className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{etiqueta}</dt>
-      <dd className="text-lg">{children}</dd>
+      <dd className="text-base">{children}</dd>
     </div>
   )
 }
@@ -28,9 +28,9 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
   const esChofer = perfil.rol === "chofer"
 
   return (
-    <div className="flex flex-col gap-5">
-      <article aria-label="Carnet de la Línea Auxiliar" className="overflow-hidden rounded-3xl border-2 border-primary bg-card shadow-sm">
-        <header className="flex items-center justify-between gap-3 border-b-4 border-signal bg-header px-5 py-3 text-header-foreground">
+    <div className="flex flex-col gap-4">
+      <article aria-label="Carnet de la Línea Auxiliar" className="overflow-hidden rounded-2xl border-2 border-primary bg-card shadow-sm">
+        <header className="flex items-center justify-between gap-3 border-b-4 border-signal bg-header px-4 py-3 text-header-foreground">
           <span className="leading-tight">
             <span className="block font-bold">Línea Auxiliar</span>
             <span className="block text-sm opacity-90">Valle Grande</span>
@@ -38,16 +38,16 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
           <span className="rounded-full bg-header-foreground/15 px-3 py-1 text-sm font-bold">{esChofer ? "Chofer" : "Pasajero"}</span>
         </header>
 
-        <div className="flex flex-col gap-5 p-5">
+        <div className="flex flex-col gap-4 p-4">
           <div className="flex items-center gap-4">
-            <Avatar url={fotoUrl} nombre={perfil.nombre} className="size-24 text-3xl" />
+            <Avatar url={fotoUrl} nombre={perfil.nombre} className="size-24 text-xl" />
             <div className="min-w-0">
-              <h1 className="text-2xl leading-tight font-bold">{perfil.nombre}</h1>
+              <h1 className="text-lg leading-tight font-bold">{perfil.nombre}</h1>
               <p className="mt-1 flex items-center gap-1.5 font-bold text-success">
                 <BadgeCheckIcon aria-hidden className="size-5" />
                 Verificado
               </p>
-              {perfil.aprobado_en && <p className="text-[15px] text-muted-foreground">desde el {fechaLarga(perfil.aprobado_en)}</p>}
+              {perfil.aprobado_en && <p className="text-sm text-muted-foreground">desde el {fechaLarga(perfil.aprobado_en)}</p>}
             </div>
           </div>
 
@@ -57,10 +57,10 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
                 // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
                 <img src={fotoCarroUrl} alt="Foto de tu carro" className="aspect-video w-full rounded-xl object-cover" />
               )}
-              <span className="rounded-lg border-[3px] border-foreground bg-card px-4 py-1 font-mono text-3xl font-bold tracking-[0.2em]">
+              <span className="rounded-lg border-[3px] border-foreground bg-card px-4 py-1 font-mono text-xl font-bold tracking-[0.2em]">
                 {vehiculo.placa}
               </span>
-              <span className="text-lg">
+              <span className="text-base">
                 {[vehiculo.modelo, vehiculo.color].filter(Boolean).join(" · ")}
                 {vehiculo.unidad && <strong> · Unidad {vehiculo.unidad}</strong>}
               </span>
@@ -78,11 +78,11 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
 
       {/* Lo que cada uno puede cambiar solo (R53–R55) */}
       <section aria-labelledby="titulo-editar" className="flex flex-col gap-3">
-        <h2 id="titulo-editar" className="text-lg font-bold">
+        <h2 id="titulo-editar" className="text-base font-bold">
           {esChofer ? "Tus fotos y tu carro" : "Tu foto"}
         </h2>
         {!fotoUrl && (
-          <p className="-mt-1 text-[15px] text-muted-foreground">
+          <p className="-mt-1 text-sm text-muted-foreground">
             {esChofer ? "Con tu foto, los pasajeros te reconocen al llegar." : "Con tu foto, el chofer te reconoce al recogerte."}
           </p>
         )}
@@ -110,12 +110,12 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
           ) : (
             <span className="flex-1 font-bold">Todavía sin calificaciones</span>
           )}
-          <span className="text-[15px] text-muted-foreground">Ver</span>
+          <span className="text-sm text-muted-foreground">Ver</span>
           <ChevronRightIcon aria-hidden className="size-5" />
         </Link>
       )}
 
-      <p className="text-[15px] text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         Muéstralo si te lo piden. Para corregir otro dato, pídeselo al administrador de la línea.
       </p>
     </div>

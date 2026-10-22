@@ -228,7 +228,7 @@ export function MapaLinea({ choferes }: { choferes: ChoferEnServicio[] }) {
       <div className="relative isolate">
         <div
           ref={contenedor}
-          className="h-[50svh] w-full overflow-hidden rounded-3xl border-2 bg-muted md:h-[60svh]"
+          className="h-[50svh] w-full overflow-hidden rounded-2xl border-2 bg-muted md:h-[60svh]"
         />
         {listo && conUbicacion.length === 0 && (
           <p className="absolute inset-x-4 top-4 z-[1001] rounded-2xl border-2 bg-card px-4 py-3 text-center font-bold shadow-md">
@@ -264,7 +264,7 @@ export function MapaLinea({ choferes }: { choferes: ChoferEnServicio[] }) {
                     <span className="flex flex-wrap items-center gap-x-2 font-bold">
                       <span className="truncate">{c.nombre}</span>
                       {c.estrellas !== null && (
-                        <span className="inline-flex items-center gap-0.5 text-[15px]">
+                        <span className="inline-flex items-center gap-0.5 text-sm">
                           <StarIcon
                             aria-hidden
                             className="size-4 fill-signal text-signal"
@@ -276,7 +276,7 @@ export function MapaLinea({ choferes }: { choferes: ChoferEnServicio[] }) {
                     </span>
                     <span
                       className={cn(
-                        "block text-[15px]",
+                        "block text-sm",
                         c.actividad === "Disponible"
                           ? "text-muted-foreground"
                           : "font-bold text-primary"

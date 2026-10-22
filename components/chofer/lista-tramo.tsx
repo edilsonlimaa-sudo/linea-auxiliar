@@ -71,7 +71,7 @@ export function ListaTramo({
         type="button"
         onClick={() => setAbierta(true)}
         className={cn(
-          "flex min-h-16 w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring",
+          "flex min-h-14 w-full items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring",
           enGina || dicen.length > 0 ? "border-signal bg-signal/15" : "bg-card"
         )}
       >
@@ -96,7 +96,7 @@ export function ListaTramo({
                 ? "Estás en Gina: abre la lista"
                 : "Lista hacia Valle Grande"}
           </span>
-          <span className="block text-[15px] text-muted-foreground">
+          <span className="block text-sm text-muted-foreground">
             {lista.length === 0
               ? "Nadie esperando ahora"
               : enGina
@@ -117,19 +117,19 @@ export function ListaTramo({
               {lista.length === 0 ? "Nadie esperando ahora." : `${personas(total)} por orden de llegada · ${resumen(lista)}`}
             </SheetDescription>
             {enGina && (
-              <p className="rounded-2xl bg-signal/15 px-3 py-2 text-[15px]">
+              <p className="rounded-2xl bg-signal/15 px-3 py-2 text-sm">
                 <strong>Estás en Gina.</strong> Llama en orden y marca Subió a quien sube. A los de otro lugar se les guarda
                 puesto: los recoges al pasar.
               </p>
             )}
             {enRuta && !enGina && (
-              <p className="rounded-2xl bg-muted px-3 py-2 text-[15px]">
+              <p className="rounded-2xl bg-muted px-3 py-2 text-sm">
                 Vas hacia Valle Grande con {personas(enRuta.libres)} de espacio: toca <strong>Voy</strong> si pasas por alguien del
                 camino (los demás choferes ya no paran ahí) o Subió si ya lo recogiste.
               </p>
             )}
           </SheetHeader>
-          <ol className="flex flex-col gap-2 px-5 pb-6">
+          <ol className="flex flex-col gap-2 px-4 pb-6">
             {lista.map((e) => {
               const p = plan.get(e.id)
               // En Gina: lo que diga el plan. En ruta: solo los de otro lugar del camino, si caben
@@ -240,7 +240,7 @@ export function FilaLista({
         <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-10 text-sm" />
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="text-lg leading-tight font-bold">{e.nombre}</span>
+            <span className="text-base leading-tight font-bold">{e.nombre}</span>
             {e.personas > 1 && <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">+{e.personas - 1}</span>}
             {e.diceQueSubio ? (
               <span className="rounded-full bg-signal px-2 py-0.5 text-sm font-bold text-signal-foreground">Dice que ya se montó</span>
@@ -249,7 +249,7 @@ export function FilaLista({
             )}
           </p>
           {/* Dónde espera (lo que el chofer necesita) y, más chico, desde cuándo */}
-          <p className={cn("text-[15px] leading-snug", e.enGina ? "text-muted-foreground" : "font-bold text-primary")}>
+          <p className={cn("text-sm leading-snug", e.enGina ? "text-muted-foreground" : "font-bold text-primary")}>
             <MapPinIcon aria-hidden className="mr-1 inline size-4 align-[-2px]" />
             {e.enGina ? "En Gina" : e.lugar}
           </p>

@@ -89,7 +89,7 @@ function Formulario({
         e.preventDefault()
         void enviar()
       }}
-      className="flex flex-col gap-5 px-5 pb-6"
+      className="flex flex-col gap-4 px-4 pb-6"
     >
       {personas && (
         <fieldset className="flex flex-col gap-2">
@@ -102,7 +102,7 @@ function Formulario({
                   <label
                     key={n}
                     className={cn(
-                      "flex min-h-13 cursor-pointer items-center justify-center gap-1 rounded-2xl border-2 px-2 text-center font-bold has-focus-visible:ring-[3px] has-focus-visible:ring-ring",
+                      "flex min-h-11 cursor-pointer items-center justify-center gap-1 rounded-2xl border-2 px-2 text-center font-bold has-focus-visible:ring-[3px] has-focus-visible:ring-ring",
                       activo ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted"
                     )}
                   >
@@ -114,7 +114,7 @@ function Formulario({
               })}
             </div>
           )}
-          {personas.nota && <p className="text-[15px] text-muted-foreground">{personas.nota}</p>}
+          {personas.nota && <p className="text-sm text-muted-foreground">{personas.nota}</p>}
         </fieldset>
       )}
       <ElegirLugar lugar={lugar} error={error} />

@@ -13,9 +13,9 @@ export default async function PaginaPasajeros({ searchParams }: PageProps<"/admi
   const { cuentas, error } = await cargarCuentas()
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <header className="flex flex-col gap-1">
-        <h1 className="text-[26px] leading-tight font-bold">Pasajeros</h1>
+        <h1 className="text-xl leading-tight font-bold">Pasajeros</h1>
         <p className="text-muted-foreground">Revisa la foto y los datos antes de aprobar.</p>
       </header>
       <ListaCuentas rol="pasajero" estado={estadoDeParam(typeof estado === "string" ? estado : undefined)} cuentas={cuentas} error={error} />

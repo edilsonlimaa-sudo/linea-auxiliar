@@ -82,15 +82,15 @@ export function MenuLateral({
         <div className="flex items-center gap-3">
           {fotoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
-            <img src={fotoUrl} alt="" className="size-14 shrink-0 rounded-full object-cover ring-2 ring-header-foreground/30" />
+            <img src={fotoUrl} alt="" className="size-12 shrink-0 rounded-full object-cover ring-2 ring-header-foreground/30" />
           ) : (
-            <span aria-hidden className="grid size-14 shrink-0 place-items-center rounded-full bg-header-foreground/15 text-xl font-bold">
+            <span aria-hidden className="grid size-12 shrink-0 place-items-center rounded-full bg-header-foreground/15 text-base font-bold">
               {iniciales(nombre)}
             </span>
           )}
           <div className="min-w-0">
-            <p className="truncate text-lg leading-tight font-bold">{nombre}</p>
-            <p className="flex items-center gap-1 text-[15px] opacity-90">
+            <p className="truncate text-base leading-tight font-bold">{nombre}</p>
+            <p className="flex items-center gap-1 text-sm opacity-90">
               {rol === "chofer" ? "Chofer" : "Pasajero"} · <BadgeCheckIcon aria-hidden className="size-4" /> Verificado
             </p>
           </div>

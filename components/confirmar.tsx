@@ -41,14 +41,14 @@ export function Confirmar({
         <AlertDialog.Backdrop className="fixed inset-0 z-50 bg-black/70 transition-opacity duration-150 data-ending-style:opacity-0 data-starting-style:opacity-0" />
         <AlertDialog.Popup
           className={cn(
-            "fixed z-50 flex flex-col gap-5 bg-popover p-6 text-popover-foreground shadow-lg outline-none transition duration-200",
+            "fixed z-50 flex flex-col gap-4 bg-popover p-6 text-popover-foreground shadow-lg outline-none transition duration-200",
             // Celular: hoja inferior. Pantalla grande: cuadro centrado.
             "inset-x-0 bottom-0 rounded-t-3xl pb-[max(1.5rem,env(safe-area-inset-bottom))] data-ending-style:translate-y-10 data-starting-style:translate-y-10 data-ending-style:opacity-0 data-starting-style:opacity-0",
             "sm:inset-x-auto sm:bottom-auto sm:top-1/2 sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl sm:data-ending-style:translate-y-[-45%] sm:data-starting-style:translate-y-[-45%]"
           )}
         >
           <div className="flex flex-col gap-2">
-            <AlertDialog.Title className="text-xl leading-tight font-bold">{titulo}</AlertDialog.Title>
+            <AlertDialog.Title className="text-base leading-tight font-bold">{titulo}</AlertDialog.Title>
             <AlertDialog.Description className="text-base text-muted-foreground">{descripcion}</AlertDialog.Description>
           </div>
           {error && (

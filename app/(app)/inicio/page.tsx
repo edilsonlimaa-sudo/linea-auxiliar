@@ -124,11 +124,11 @@ function InicioPasajero({
       ) : (
         <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
           <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h2 id="titulo-unidades" className="flex items-center gap-2 text-xl font-bold">
+            <h2 id="titulo-unidades" className="flex items-center gap-2 text-base font-bold">
               Unidades {SENTIDOS[sentido].hacia}
               {unidades.length > 0 && <Badge variant="secondary">{unidades.length}</Badge>}
             </h2>
-            {unidades.length > 1 && <p className="text-[15px] text-muted-foreground">La que recoge primero, arriba</p>}
+            {unidades.length > 1 && <p className="text-sm text-muted-foreground">La que recoge primero, arriba</p>}
           </header>
   
           {unidades.map((v) => (
@@ -136,11 +136,11 @@ function InicioPasajero({
           ))}
   
           {!conPuesto && (
-            <Card className="items-center gap-3 rounded-3xl border-2 border-dashed px-5 text-center shadow-none ring-0">
-              <span aria-hidden className="grid size-14 place-items-center rounded-full bg-muted">
+            <Card className="items-center gap-3 rounded-2xl border-2 border-dashed px-4 text-center shadow-none ring-0">
+              <span aria-hidden className="grid size-12 place-items-center rounded-full bg-muted">
                 <BusIcon className="size-7 text-muted-foreground" />
               </span>
-              <p className="text-lg font-bold">
+              <p className="text-base font-bold">
                 {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
               </p>
               <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
@@ -160,14 +160,14 @@ function CambiarDeUnidad({ datos, miReserva }: { datos: DatosInicioPasajero; miR
   const otras = otrasConPuesto(viajes, miReserva.viaje, porId, miReserva.reserva.personas)
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <EnVivo />
       <Link href="/mi-viaje" className="flex min-h-11 items-center gap-2 self-start font-bold text-primary underline-offset-4 hover:underline">
         <ArrowLeftIcon aria-hidden className="size-5" />
         Volver a mi viaje
       </Link>
       <div>
-        <h1 className="text-[26px] leading-tight font-bold">Cambiarme a otra unidad</h1>
+        <h1 className="text-xl leading-tight font-bold">Cambiarme a otra unidad</h1>
         <p className="text-muted-foreground">
           {SENTIDOS[miReserva.viaje.sentido].largo}. Si apartas en una de estas, dejas la lista de espera de {miReserva.viaje.chofer.nombre}.
         </p>
@@ -184,7 +184,7 @@ function CambiarDeUnidad({ datos, miReserva }: { datos: DatosInicioPasajero; miR
           />
         ))
       ) : (
-        <p className="rounded-3xl border-2 border-dashed px-5 py-8 text-center text-lg font-bold">
+        <p className="rounded-2xl border-2 border-dashed px-4 py-8 text-center text-base font-bold">
           Ahora no hay otra unidad con puesto. Sigues en la lista de espera.
         </p>
       )}

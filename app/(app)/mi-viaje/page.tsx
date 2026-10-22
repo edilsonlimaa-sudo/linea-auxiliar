@@ -31,7 +31,7 @@ export default async function PaginaMiViaje() {
     if (pendiente) return <CalificarViaje pendiente={pendiente} />
     if (!lista.some((e) => e.esMio)) redirect("/inicio")
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         <EnVivo />
         <h1 className="sr-only">Mi viaje</h1>
         {aviso && <EstadoLinea aviso={aviso} />}
@@ -44,7 +44,7 @@ export default async function PaginaMiViaje() {
   const otras = aBordo || tienePuesto(miReserva.hasta, miReserva.viaje) ? [] : otrasConPuesto(viajes, miReserva.viaje, porId, miReserva.reserva.personas)
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {/* A bordo también se refresca: así, al terminar el viaje, aparece la calificación */}
       <EnVivo />
       <h1 className="sr-only">Mi viaje</h1>

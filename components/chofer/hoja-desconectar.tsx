@@ -57,9 +57,9 @@ export function HojaDesconectar({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex flex-col gap-5 px-5">
+        <div className="flex flex-col gap-4 px-4">
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-2 text-lg font-bold">¿Vuelves a trabajar hoy?</legend>
+            <legend className="mb-2 text-base font-bold">¿Vuelves a trabajar hoy?</legend>
             <div className="grid grid-cols-2 gap-2">
               <Opcion nombre="vuelve" elegida={vuelve === true} onElegir={() => setVuelve(true)}>
                 Sí, vuelvo
@@ -72,7 +72,7 @@ export function HojaDesconectar({
 
           {vuelve && (
             <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-lg font-bold">¿En cuánto?</legend>
+              <legend className="mb-2 text-base font-bold">¿En cuánto?</legend>
               <div className="grid grid-cols-3 gap-2">
                 {RAPIDOS.map((r) => (
                   <Opcion key={r.minutos} nombre="cuando-vuelve" elegida={cuando === r.minutos} onElegir={() => setCuando(r.minutos)}>

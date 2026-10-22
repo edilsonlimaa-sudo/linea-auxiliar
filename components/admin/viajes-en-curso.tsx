@@ -19,16 +19,16 @@ export function ViajesEnCurso({ choferes, sinViaje = [] }: { choferes: ChoferEnC
   const conectados = <ConectadosSinViaje choferes={sinViaje} />
   if (choferes.length === 0) {
     return (
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4">
         {conectados}
         <SinViajes />
       </div>
     )
   }
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       {conectados}
-      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
         {choferes.map((c) => (
           <BloqueChofer key={c.id} chofer={c} />
         ))}
@@ -42,7 +42,7 @@ function ConectadosSinViaje({ choferes }: { choferes: CuentaConActividad[] }) {
   if (choferes.length === 0) return null
   return (
     <section aria-labelledby="titulo-sin-viaje" className="flex flex-col gap-2">
-      <h2 id="titulo-sin-viaje" className="text-xl font-bold">
+      <h2 id="titulo-sin-viaje" className="text-base font-bold">
         Conectados sin viaje <span className="font-normal text-muted-foreground">({choferes.length})</span>
       </h2>
       <ul className="grid gap-2 lg:grid-cols-2">
@@ -63,9 +63,9 @@ function ConectadosSinViaje({ choferes }: { choferes: CuentaConActividad[] }) {
 
 function SinViajes() {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+    <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-10 text-center">
       <BusIcon aria-hidden className="size-10 text-muted-foreground" />
-      <p className="text-lg font-bold">No hay viajes en curso ahora</p>
+      <p className="text-base font-bold">No hay viajes en curso ahora</p>
       <p className="text-muted-foreground">Cuando un chofer publique un viaje, aparece aquí con su gente.</p>
     </div>
   )
@@ -74,12 +74,12 @@ function SinViajes() {
 function BloqueChofer({ chofer: c }: { chofer: ChoferEnCurso }) {
   const porId = new Map<string, Viaje>(c.viajes.map((v) => [v.id, v]))
   return (
-    <article className="flex flex-col gap-4 rounded-3xl border-2 bg-card p-4">
+    <article className="flex flex-col gap-4 rounded-2xl border-2 bg-card p-4">
       <header className="flex items-center gap-3">
-        <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-14 text-lg" />
+        <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-12 text-base" />
         <div className="min-w-0 flex-1">
-          <h2 className="truncate text-xl leading-tight font-bold">{c.nombre}</h2>
-          <p className="flex flex-wrap items-center gap-x-2 text-[15px] text-muted-foreground">
+          <h2 className="truncate text-base leading-tight font-bold">{c.nombre}</h2>
+          <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
             {c.placa && <span className="font-mono font-bold tracking-wider text-foreground">{c.placa}</span>}
             {c.unidad && <span>Unidad {c.unidad}</span>}
             {c.carro && <span>{c.carro}</span>}
@@ -130,8 +130,8 @@ function BloqueViaje({ viaje: v, porId, chofer }: { viaje: ViajeEnCurso; porId: 
             {ETIQUETA_ESTADO[v.estado]}
           </span>
         </p>
-        <p className="text-lg leading-tight font-bold">{cuando}</p>
-        <p className="text-[15px] text-muted-foreground">
+        <p className="text-base leading-tight font-bold">{cuando}</p>
+        <p className="text-sm text-muted-foreground">
           {ocupados} de {v.puestos} puestos{espera > 0 && ` · ${espera} en lista de espera`}
         </p>
       </div>
@@ -177,7 +177,7 @@ function Grupo({ titulo, personas, destacado }: { titulo: string; personas: Pers
                   )}
                 </p>
                 {(p.lugar || p.lat !== null) && (
-                  <p className="flex items-start gap-1 text-[15px]">
+                  <p className="flex items-start gap-1 text-sm">
                     <MapPinIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
                     {p.lugar ?? "Solo compartió su GPS"}
                   </p>

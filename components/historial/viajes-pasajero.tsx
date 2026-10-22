@@ -17,9 +17,9 @@ export function ViajesPasajero({ viajes }: { viajes: ViajePasajero[] }) {
 
   if (viajes.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-10 text-center">
         <BusIcon aria-hidden className="size-10 text-muted-foreground" />
-        <p className="text-lg font-bold">Todavía no tienes viajes</p>
+        <p className="text-base font-bold">Todavía no tienes viajes</p>
         <p className="text-muted-foreground">Cuando viajes con la línea, aquí vas a ver cada viaje y su chofer.</p>
         <Link href="/inicio" className={buttonVariants({ className: "mt-2" })}>
           Buscar una unidad
@@ -35,8 +35,8 @@ export function ViajesPasajero({ viajes }: { viajes: ViajePasajero[] }) {
           <li key={v.reservaId} className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
             <div>
               <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[v.sentido].largo}</p>
-              <p className="text-lg leading-tight font-bold">{diaYHora(v.cuando)}</p>
-              {v.seBajoAntes && <p className="text-[15px] text-muted-foreground">Te bajaste antes del final de la ruta</p>}
+              <p className="text-base leading-tight font-bold">{diaYHora(v.cuando)}</p>
+              {v.seBajoAntes && <p className="text-sm text-muted-foreground">Te bajaste antes del final de la ruta</p>}
             </div>
             <p>
               Con <strong>{v.chofer}</strong>
@@ -53,7 +53,7 @@ export function ViajesPasajero({ viajes }: { viajes: ViajePasajero[] }) {
               )}
             </p>
             {v.estrellas !== null ? (
-              <p className="flex items-center gap-2 text-[15px]">
+              <p className="flex items-center gap-2 text-sm">
                 <Estrellas valor={v.estrellas} />
                 <span className="text-muted-foreground">Tu calificación</span>
               </p>

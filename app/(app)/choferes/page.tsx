@@ -13,9 +13,9 @@ export default async function PaginaChoferes() {
   if (perfil.rol !== "pasajero") redirect("/inicio")
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-[26px] leading-tight font-bold">Choferes</h1>
+        <h1 className="text-xl leading-tight font-bold">Choferes</h1>
         <p className="text-muted-foreground">Los choferes verificados de la línea y lo que dicen los pasajeros.</p>
       </div>
       <ChoferesLinea choferes={await cargarChoferes(perfil.id)} />

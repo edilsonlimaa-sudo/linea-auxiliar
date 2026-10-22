@@ -21,17 +21,17 @@ const ENTRADA: Record<PersonaDelViaje["entrada"], string> = {
 export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado[]; admin?: boolean }) {
   if (viajes.length === 0 && admin) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-10 text-center">
         <BusIcon aria-hidden className="size-10 text-muted-foreground" />
-        <p className="text-lg font-bold">No hay viajes terminados en este período</p>
+        <p className="text-base font-bold">No hay viajes terminados en este período</p>
       </div>
     )
   }
   if (viajes.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-10 text-center">
         <BusIcon aria-hidden className="size-10 text-muted-foreground" />
-        <p className="text-lg font-bold">Todavía no terminaste ningún viaje</p>
+        <p className="text-base font-bold">Todavía no terminaste ningún viaje</p>
         <p className="text-muted-foreground">Cuando termines uno, aquí vas a ver a quién llevaste y cómo te calificaron.</p>
         <Link href="/inicio" className={buttonVariants({ className: "mt-2" })}>
           Ir a Inicio
@@ -59,8 +59,8 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                     </span>
                   )}
                   <span className="block text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[v.sentido].largo}</span>
-                  <span className="block text-lg leading-tight font-bold">{v.salida ? diaYHora(v.salida) : "Sin hora de salida"}</span>
-                  <span className="block text-[15px] text-muted-foreground">
+                  <span className="block text-base leading-tight font-bold">{v.salida ? diaYHora(v.salida) : "Sin hora de salida"}</span>
+                  <span className="block text-sm text-muted-foreground">
                     {sumaPersonas(v.llevo) === 1 ? "1 pasajero" : `${sumaPersonas(v.llevo)} pasajeros`}
                     {v.minutos !== null && ` · ${duracion(v.minutos)}`}
                     {promedio !== null && ` · ★ ${promedioTexto(promedio)}`}

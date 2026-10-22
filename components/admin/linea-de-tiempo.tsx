@@ -40,21 +40,21 @@ export function LineaDeTiempo({ eventos }: { eventos: EventoViaje[] }) {
               <span aria-hidden className="relative mt-1.5 size-3 shrink-0 rounded-full bg-primary" />
               <span className="flex flex-1 flex-wrap items-baseline justify-between gap-x-3">
                 <span>
-                  <span className="font-mono text-[15px] tabular-nums">{hora(p.en)}</span>{" "}
+                  <span className="font-mono text-sm tabular-nums">{hora(p.en)}</span>{" "}
                   <span className="font-bold">{ETIQUETA_ESTADO[p.estado]}</span>
                 </span>
-                {p.minutos !== null && <span className="text-[15px] text-muted-foreground">{duracion(p.minutos)}</span>}
+                {p.minutos !== null && <span className="text-sm text-muted-foreground">{duracion(p.minutos)}</span>}
               </span>
             </li>
           ))}
         </ol>
         {atrasos.map((a) => (
-          <p key={a.en} className="text-[15px] font-bold text-warning">
+          <p key={a.en} className="text-sm font-bold text-warning">
             A las {hora(a.en)} avisó que se atrasa: nueva hora {hora(a.nuevaHora)}.
           </p>
         ))}
         {puntualidad && (
-          <p className="text-[15px] text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Prometió llegar a las {hora(puntualidad.prometida)} y llegó a las {hora(puntualidad.llegada)}.
           </p>
         )}

@@ -307,7 +307,7 @@ export function VerEnMapa({
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), !v && setCarro(undefined))}>
       {compacto ? (
-        <SheetTrigger render={<Button variant="outline" size="icon" aria-label={`Ver en el mapa por dónde va ${chofer.split(" ")[0]}`} className="size-13 shrink-0" />}>
+        <SheetTrigger render={<Button variant="outline" size="icon" aria-label={`Ver en el mapa por dónde va ${chofer.split(" ")[0]}`} className="size-10 shrink-0" />}>
           <MapIcon aria-hidden className="size-6" />
         </SheetTrigger>
       ) : (
@@ -333,7 +333,7 @@ export function VerEnMapa({
                       : `Actualizado ${cuando}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
           </SheetDescription>
         </SheetHeader>
-        <div className="flex flex-col gap-3 px-5 pb-6">
+        <div className="flex flex-col gap-3 px-4 pb-6">
           {carro === undefined && (
             <p className="flex items-center gap-2 text-muted-foreground">
               <Loader2Icon aria-hidden className="size-5 animate-spin" /> Cargando…

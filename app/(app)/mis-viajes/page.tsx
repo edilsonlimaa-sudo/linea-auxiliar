@@ -13,9 +13,9 @@ export default async function PaginaMisViajes() {
   const esChofer = perfil.rol === "chofer"
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-[26px] leading-tight font-bold">Mis viajes</h1>
+        <h1 className="text-xl leading-tight font-bold">Mis viajes</h1>
         <p className="text-muted-foreground">{esChofer ? "Tus últimos 20 viajes terminados." : "Los viajes que hiciste con la línea."}</p>
       </div>
       {esChofer ? (

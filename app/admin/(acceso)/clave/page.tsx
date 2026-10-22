@@ -13,13 +13,13 @@ export default async function PaginaClaveAdmin() {
   const obligatoria = perfil.debe_cambiar_clave
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-md flex-col gap-4">
       {!obligatoria && (
-        <Link href="/admin" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-lg font-bold text-primary dark:text-foreground">
+        <Link href="/admin" className="-ml-1 inline-flex w-fit items-center gap-1 py-2 text-base font-bold text-primary dark:text-foreground">
           <ChevronLeftIcon aria-hidden className="size-6" /> Volver al panel
         </Link>
       )}
-      <h1 className="text-[26px] leading-tight font-bold">Cambiar contraseña</h1>
+      <h1 className="text-xl leading-tight font-bold">Cambiar contraseña</h1>
       {obligatoria && (
         <Alert variant="warning">
           <ShieldAlertIcon aria-hidden />

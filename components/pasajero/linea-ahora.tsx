@@ -92,7 +92,7 @@ function Contenido({
     .sort((a, b) => Number(b.vaAMiSentido) - Number(a.vaAMiSentido) || Number(Boolean(b.actual)) - Number(Boolean(a.actual)))
 
   return (
-    <div className="flex flex-col gap-3 px-5 pb-6">
+    <div className="flex flex-col gap-3 px-4 pb-6">
       {situaciones.length === 0 ? (
         <p className="rounded-2xl bg-muted px-4 py-6 text-center text-muted-foreground">Cuando un chofer se conecte, aparece aquí.</p>
       ) : (
@@ -132,7 +132,7 @@ function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; po
           <p className="flex flex-wrap items-center gap-x-2 font-bold">
             <span className="truncate">{c.nombre}</span>
             {c.estrellas !== null && (
-              <span className="inline-flex items-center gap-0.5 text-[15px]">
+              <span className="inline-flex items-center gap-0.5 text-sm">
                 <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
                 {promedioTexto(c.estrellas)}
                 <span className="sr-only"> estrellas</span>
@@ -159,7 +159,7 @@ function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; po
             <Badge variant={actual.sentido === sentido ? "default" : "secondary"}>{SENTIDOS[actual.sentido].corto}</Badge>
             <span className="font-bold">{ahora}</span>
           </p>
-          <p className="flex flex-wrap items-center gap-x-2 text-[15px]">
+          <p className="flex flex-wrap items-center gap-x-2 text-sm">
             <Asientos puestos={actual.puestos} ocupados={Math.min(actual.ocupados, actual.puestos)} />
             <span>
               {Math.min(actual.ocupados, actual.puestos)} de {actual.puestos}
@@ -168,12 +168,12 @@ function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; po
           </p>
         </div>
       ) : (
-        <p className="rounded-xl bg-muted px-3 py-2.5 text-[15px] text-muted-foreground">Disponible, sin viaje publicado</p>
+        <p className="rounded-xl bg-muted px-3 py-2.5 text-sm text-muted-foreground">Disponible, sin viaje publicado</p>
       )}
 
       {/* Qué viene después: la respuesta para quien no ve unidades en su sentido */}
       {despues ? (
-        <p className={cn("flex items-start gap-1.5 text-[15px]", despues.sentido === sentido && "font-bold text-primary")}>
+        <p className={cn("flex items-start gap-1.5 text-sm", despues.sentido === sentido && "font-bold text-primary")}>
           <ArrowRightIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
           <span>
             Después: {llegada(despues, porId).principal.charAt(0).toLowerCase()}
@@ -181,7 +181,7 @@ function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; po
           </span>
         </p>
       ) : (
-        actual && <p className="text-[15px] text-muted-foreground">Sin próximo viaje publicado</p>
+        actual && <p className="text-sm text-muted-foreground">Sin próximo viaje publicado</p>
       )}
     </li>
   )

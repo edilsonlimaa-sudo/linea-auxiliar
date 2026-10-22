@@ -38,7 +38,7 @@ function PasosViaje({ estado }: { estado: EstadoViaje }) {
           </li>
         ))}
       </ol>
-      <p aria-hidden className="text-[15px]">
+      <p aria-hidden className="text-sm">
         <span className="font-bold">
           Paso {actual + 1} de {PASOS.length}: {PASOS[actual]}
         </span>
@@ -103,10 +103,10 @@ export function MiReservaTarjeta({
   const masTitulo = [conCarro && "el carro", lista.length > 0 && `la lista (${lista.length})`].filter(Boolean).join(" y ")
 
   return (
-    <section aria-labelledby="titulo-mi-viaje" className="flex flex-col gap-4 rounded-3xl border-2 border-primary bg-card p-5 text-card-foreground shadow-sm">
+    <section aria-labelledby="titulo-mi-viaje" className="flex flex-col gap-4 rounded-2xl border-2 border-primary bg-card p-4 text-card-foreground shadow-sm">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[viaje.sentido].largo}</p>
-        <h2 id="titulo-mi-viaje" className={cn("text-2xl leading-tight font-bold", confirmado && !reserva.pendiente ? "text-success" : "text-foreground")}>
+        <h2 id="titulo-mi-viaje" className={cn("text-lg leading-tight font-bold", confirmado && !reserva.pendiente ? "text-success" : "text-foreground")}>
           {titulo}
         </h2>
         <p className="text-muted-foreground">{subtitulo}</p>
@@ -116,11 +116,11 @@ export function MiReservaTarjeta({
       {/* Cuándo llega y dónde, en un solo bloque; "Cambiar" al lado del lugar */}
       <div className="rounded-2xl bg-secondary px-4 py-3 text-secondary-foreground">
         {aBordo ? (
-          <p className="text-xl leading-tight font-bold">En ruta {SENTIDOS[viaje.sentido].hacia}</p>
+          <p className="text-base leading-tight font-bold">En ruta {SENTIDOS[viaje.sentido].hacia}</p>
         ) : (
           <>
-            <p className="text-xl leading-tight font-bold">{cuando.principal}</p>
-            {cuando.detalle && <p className="text-[15px] opacity-85">{cuando.detalle}</p>}
+            <p className="text-base leading-tight font-bold">{cuando.principal}</p>
+            {cuando.detalle && <p className="text-sm opacity-85">{cuando.detalle}</p>}
             <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
               <p className="flex min-w-0 items-start gap-1.5">
                 <MapPinIcon aria-hidden className="mt-0.5 size-5 shrink-0" />
@@ -168,7 +168,7 @@ export function MiReservaTarjeta({
 
       {masTitulo && (
         <details className="group rounded-2xl border-2">
-          <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-2 px-4 font-bold focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 px-4 font-bold focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
             Ver {masTitulo}
             <ChevronDownIcon aria-hidden className="size-5 transition-transform group-open:rotate-180" />
           </summary>

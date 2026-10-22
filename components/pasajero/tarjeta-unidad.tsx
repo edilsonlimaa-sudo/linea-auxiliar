@@ -66,7 +66,7 @@ export function TarjetaUnidad({
   return (
     <Card
       size="sm"
-      className={cn("gap-3 rounded-3xl shadow-xs ring-2", destacada ? "ring-primary" : "ring-border", recogiendo && !destacada && "ring-success/60")}
+      className={cn("gap-3 rounded-2xl shadow-xs ring-2", destacada ? "ring-primary" : "ring-border", recogiendo && !destacada && "ring-success/60")}
     >
       {/* La que recoge primero: una franja arriba, la respuesta más útil de la pantalla */}
       {destacada && (
@@ -79,8 +79,8 @@ export function TarjetaUnidad({
         <EtiquetaEstado estado={viaje.estado} porLista={porLista} />
         {/* La ruta siempre a la vista (R39): nadie debe adivinar adónde va el carro */}
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[viaje.sentido].largo}</p>
-        <p className={cn("text-[22px] leading-tight font-bold", recogiendo && "text-success")}>{cuando.principal}</p>
-        {cuando.detalle && <p className="text-[15px] text-muted-foreground">{cuando.detalle}</p>}
+        <p className={cn("text-lg leading-tight font-bold", recogiendo && "text-success")}>{cuando.principal}</p>
+        {cuando.detalle && <p className="text-sm text-muted-foreground">{cuando.detalle}</p>}
       </CardHeader>
 
       <CardContent className="flex flex-col gap-3">
@@ -108,7 +108,7 @@ export function TarjetaUnidad({
           {porLista ? (
             // Hacia Valle Grande se sube por la lista: el carro llama en orden a quienes se anotaron (R64); ya en
             // ruta, recoge a los del camino (R67)
-            <p className="min-h-13 flex-1 rounded-2xl bg-muted px-4 py-3 text-[15px] font-bold text-muted-foreground">
+            <p className="min-h-11 flex-1 rounded-2xl bg-muted px-4 py-3 text-sm font-bold text-muted-foreground">
               {!hayPuesto
                 ? "Va lleno"
                 : enRuta
@@ -128,11 +128,11 @@ export function TarjetaUnidad({
             />
           ) : (
             // Sin lista de espera (R59): lleno no se aparta; "Avísame" está al final de la lista
-            <p className="min-h-13 flex-1 rounded-2xl bg-muted px-4 py-3 text-[15px] font-bold text-muted-foreground">Va lleno: no aparta más puestos</p>
+            <p className="min-h-11 flex-1 rounded-2xl bg-muted px-4 py-3 text-sm font-bold text-muted-foreground">Va lleno: no aparta más puestos</p>
           )}
           <VerEnMapa choferId={viaje.chofer_id} chofer={chofer.nombre} yo={yo} compacto />
         </div>
-        {enRuta && !porLista && <p className="text-[15px] text-muted-foreground">El chofer te confirma si puede pasar por ti.</p>}
+        {enRuta && !porLista && <p className="text-sm text-muted-foreground">El chofer te confirma si puede pasar por ti.</p>}
 
       </CardFooter>
     </Card>
