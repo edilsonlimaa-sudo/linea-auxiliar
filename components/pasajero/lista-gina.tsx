@@ -33,12 +33,12 @@ import { cn } from "@/lib/utils"
 import { iniciales, libres, type Viaje } from "@/lib/viajes"
 
 const LEJOS_M = 300 // más lejos que esto, "¿Ya estás en Gina?" (R62)
-const VALE_MIN = 45 // el aviso vence a los 45 min (R62)
-const AVISAR_ANTES_MIN = 10 // "¿Sigues ahí?" a los 35 de 45 min (R62)
+const VALE_MIN = 30 // el aviso vence a los 30 min (R62; antes 45)
+const AVISAR_ANTES_MIN = 10 // "¿Sigues ahí?" a los 20 de 30 min (R62)
 // "18 min", "menos de 1 min" (el reloj de la pantalla avanza cada 15 s: redondear al más cercano)
 const minutos = (m: number) => (m < 1 ? "menos de 1 min" : `${Math.round(m)} min`)
 
-/** Lo que le queda al lugar, de 45 min a 0; en amarillo los últimos 10 */
+/** Lo que le queda al lugar, de 30 min a 0; en amarillo los últimos 10 */
 function BarraVence({ quedan }: { quedan: number }) {
   const porVencer = quedan <= AVISAR_ANTES_MIN
   return (
@@ -206,7 +206,7 @@ export function MiLista({
                   <strong>Tu lugar vale {minutos(quedanMin)} más</strong> · hasta las {hora(mio.venceEn)}
                 </>
               ) : (
-                <strong>Tu lugar vale 45 min</strong>
+                <strong>Tu lugar vale {VALE_MIN} min</strong>
               )}
               <span className="block text-sm text-muted-foreground">Si sigues esperando, renuévalo cuando quieras.</span>
             </span>
@@ -214,7 +214,7 @@ export function MiLista({
           {ahora > 0 && <BarraVence quedan={quedanMin} />}
           <Button variant="outline" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
             {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
-            Sigo aquí: 45 min más
+            Sigo aquí: {VALE_MIN} min más
           </Button>
         </div>
       )}
