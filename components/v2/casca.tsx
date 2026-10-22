@@ -16,6 +16,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-v2" })
 export function CascaV2({ children }: { children: React.ReactNode }) {
   return (
     <div className={cn("v2 min-h-svh bg-background text-foreground antialiased", inter.variable)}>
+      {/* La fuente también para lo que se abre fuera de la casca (hojas, por portal) */}
+      <style>{`:root { --font-v2: ${inter.style.fontFamily}; }`}</style>
       <BarraSuperior />
       {/* Abajo, lugar para la navegación fija (y el borde seguro del celular) */}
       <main className="mx-auto w-full max-w-lg px-4 pt-4 pb-[calc(5rem+env(safe-area-inset-bottom))]">{children}</main>
