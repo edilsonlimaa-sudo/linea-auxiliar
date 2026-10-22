@@ -1,8 +1,6 @@
-import { InicioV2 } from "@/components/v2/inicio/inicio"
-import { exigirCuentaAprobada } from "@/lib/sesion"
+import { InicioV2 } from "@/components/v2/linea/inicio"
 
-// v2 · Inicio: propuesta con datos de ejemplo (components/v2/inicio/demo.ts). Solo el nombre es de la cuenta
-export default async function InicioPagina() {
-  const perfil = await exigirCuentaAprobada()
-  return <InicioV2 nombre={perfil.nombre.split(" ")[0]} />
+// v2 · Inicio: propuesta "La línea + Me voy" con datos de ejemplo (components/v2/linea/demo.ts)
+export default function InicioPagina() {
+  return <InicioV2 />
 }
