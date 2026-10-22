@@ -433,7 +433,6 @@ export type Database = {
           conectado_en: string | null
           creado_en: string
           debe_cambiar_clave: boolean
-          diseno_v2: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
@@ -447,7 +446,6 @@ export type Database = {
           conectado_en?: string | null
           creado_en?: string
           debe_cambiar_clave?: boolean
-          diseno_v2?: boolean
           estado?: Database["public"]["Enums"]["estado_cuenta"]
           foto_path?: string | null
           id: string
@@ -461,7 +459,6 @@ export type Database = {
           conectado_en?: string | null
           creado_en?: string
           debe_cambiar_clave?: boolean
-          diseno_v2?: boolean
           estado?: Database["public"]["Enums"]["estado_cuenta"]
           foto_path?: string | null
           id?: string
@@ -853,7 +850,6 @@ export type Database = {
           conectado_en: string | null
           creado_en: string
           debe_cambiar_clave: boolean
-          diseno_v2: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
@@ -876,7 +872,6 @@ export type Database = {
           conectado_en: string | null
           creado_en: string
           debe_cambiar_clave: boolean
-          diseno_v2: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
@@ -899,7 +894,6 @@ export type Database = {
           conectado_en: string | null
           creado_en: string
           debe_cambiar_clave: boolean
-          diseno_v2: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string

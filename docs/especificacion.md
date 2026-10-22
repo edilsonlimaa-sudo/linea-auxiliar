@@ -592,12 +592,6 @@ menú (formularios).
 - Cada lista tiene sus pestañas Pendientes / Aprobados / Rechazados y las acciones de R2 (aprobar, rechazar,
   eliminar), WhatsApp y Llamar.
 
-**Diseño nuevo del pasajero (v2, en construcción).** *(Oct. 2026)* Una propuesta nueva del app del pasajero, hecha
-de cero, en sus propias direcciones (**/v2**): preset por defecto de shadcn, navegación abajo (Inicio · Choferes · Mis
-viajes · Perfil), modo oscuro y Salir arriba. Mientras se construye **solo entra la cuenta del dueño** (marcada en la
-base); el app de siempre sigue igual para todos, también para él. Cada pantalla que todavía no se hizo dice "En
-construcción". Las reglas de esta especificación valen igual en la v2.
-
 **Mi viaje del pasajero (página aparte).** Apartar puesto es pasar de *escoger* a *acompañar* el viaje, así
 que tiene su propia página (también es adonde llevan los avisos de §7):
 
