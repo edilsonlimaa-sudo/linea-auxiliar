@@ -18,7 +18,7 @@ export default async function PaginaViajesChofer({ params, searchParams }: PageP
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href={`/admin/choferes/${id}`} className={buttonVariants({ variant: "ghost", className: "self-start" })}>
+      <Link href={`/admin/choferes/${id}`} className={buttonVariants({ variant: "ghost", className: "-ml-4 self-start" })}>
         ← {nombre}
       </Link>
       <h1 className="text-xl leading-tight font-bold">Viajes de {nombre}</h1>

@@ -143,7 +143,7 @@ export function VolverALista({ rol }: { rol: RolCuenta }) {
     router.push(`${base}?q=${encodeURIComponent(q)}`)
   }
   return (
-    <Link href={base} onClick={volver} className={buttonVariants({ variant: "ghost", className: "self-start" })}>
+    <Link href={base} onClick={volver} className={buttonVariants({ variant: "ghost", className: "-ml-4 self-start" })}>
       ← {rol === "chofer" ? "Choferes" : "Pasajeros"}
     </Link>
   )
