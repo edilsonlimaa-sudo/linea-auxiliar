@@ -720,8 +720,10 @@ definitivo, con RLS y funciones, vive en `supabase/migrations/`.
 
 ## 10. Requisitos no funcionales
 
-- **Accesibilidad:** texto base ≥ 17 px; nada menor a 14 px; botones ≥ 52 px de alto (acción principal 60 px);
-  contraste WCAG AA; **nunca texto blanco sobre amarillo**; foco visible.
+- **Accesibilidad:** texto base 15 px; nada menor a 13 px; botones de 40 px de alto (acción principal 44 px; en filas
+  de listas, 32 px); contraste WCAG AA; **nunca texto blanco sobre amarillo**; foco visible. *(Oct. 2026: antes era
+  17 px / 52 px / 60 px; se achicó todo porque ocupaba demasiado la pantalla del celular. Se mantiene la letra Atkinson
+  Hyperlegible.)*
 - **Móvil primero:** pensado para Android de gama baja y datos móviles caros: pantallas livianas, posición del
   chofer como mucho cada 15 s.
 - **Tiempo real:** lo que hace un teléfono aparece en los demás en ~1 s.

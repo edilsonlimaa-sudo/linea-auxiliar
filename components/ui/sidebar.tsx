@@ -488,9 +488,9 @@ const sidebarMenuButtonVariants = cva(
       },
       size: {
         // Ajustado a la especificación: ≥ 52 px de alto y texto 17 px
-        default: "h-13 px-3 text-[17px] [&>svg]:size-6",
-        sm: "h-11 text-base",
-        lg: "h-16 px-3 text-[17px] group-data-[collapsible=icon]:p-0!",
+        default: "h-10 px-3 text-[15px] [&>svg]:size-5",
+        sm: "h-8 text-sm",
+        lg: "h-12 px-3 text-[15px] group-data-[collapsible=icon]:p-0!",
       },
     },
     defaultVariants: {

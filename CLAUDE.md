@@ -28,14 +28,15 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
   - Las acciones que tocan varias filas (salir, cancelar, recoger, aceptar pedido…) son funciones RPC atómicas.
 - **Privacidad:** respetar la tabla "Quién ve qué" de la especificación (teléfonos y cédulas restringidos).
 
-## Diseño y accesibilidad (personas mayores)
+## Diseño y accesibilidad
 
 - Fuente **Atkinson Hyperlegible Next** (`--font-sans`); Mono para placas (`--font-mono`).
-- Texto base 17 px (en `body`), nada menor a 14 px (`text-sm`).
+- Texto base 15 px (en `body`), nada menor a 13 px. *(Oct. 2026: se achicó todo; antes 17 px y botones de 52/60 px.)*
 - Contraste WCAG AA. **Nunca texto blanco sobre amarillo.** Foco siempre visible (anillo amarillo `ring`).
 - Claro por defecto; modo oscuro solo a mano (`next-themes`, clase `.dark`).
-- Estilo shadcn **base-maia** (el más espacioso). Al agregar componentes nuevos, revisar que cumplan las
-  medidas de arriba; si no, ajustarlos como se hizo con `components/ui/button.tsx`.
+- Estilo shadcn **base-maia**, ajustado a estas medidas compactas. Al agregar componentes nuevos, revisar que cumplan
+  las medidas de arriba; si no, ajustarlos como se hizo con `components/ui/button.tsx`. Títulos de pantalla `text-lg`
+  a `text-2xl`, no más.
 
 ### Colores (tokens en `app/globals.css`, nunca colores sueltos en los componentes)
 
@@ -54,10 +55,10 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 
 | Variante / tamaño | Cuándo |
 |---|---|
-| `variant="signal" size="lg"` (60 px) | Acción principal de la pantalla (una sola) |
-| `default` / `outline` / `secondary` (52 px) | Acciones normales |
+| `variant="signal" size="lg"` (44 px) | Acción principal de la pantalla (una sola) |
+| `default` / `outline` / `secondary` (40 px) | Acciones normales |
 | `whatsapp` | Abrir WhatsApp |
-| `size="sm"` (44 px) | Solo dentro de filas de listas ("No vino", "Llamar") |
+| `size="sm"` (32 px) | Solo dentro de filas de listas ("No vino", "Llamar") |
 
 ## Estructura
 
@@ -77,7 +78,7 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 | `components/chofer/compartir-ubicacion.tsx` · `components/pasajero/ver-en-mapa.tsx` | Posición del chofer (R40: hook `useCompartirUbicacion`, watchPosition, cada 15 s o 30 m, Wake Lock) y mapa del pasajero (R41: Leaflet + OSM; con la hoja abierta recibe la posición por Realtime). Cálculos en `lib/mapa.ts` |
 | `lib/datos/historial.ts` · `components/historial/` · `components/carnet.tsx` | Mis viajes (pasajero R51 con "Calificar" después; chofer R50), Mis calificaciones del chofer (R52, sin nombres) y Mi carnet (R53, ambos) |
 | `lib/fotos.ts` · `components/foto/` | Fotos (R54): `firmarFotos(rutas)` da enlaces firmados de 1 h (bucket privado); `<SubirFoto>` achica en el teléfono (1080 px, JPEG), sube **directo a Storage** a la carpeta propia y la acción `guardarFoto` la registra; `<Avatar>` cae a iniciales; `<InterruptorAire>` (R55) |
-| `components/ui/badge.tsx` · `avatar.tsx` | shadcn, ajustados a las medidas del proyecto (Badge: 14 px en negrita, alto 28 px). `AvatarGroup` para iniciales una junto a otra |
+| `components/ui/badge.tsx` · `avatar.tsx` | shadcn, ajustados a las medidas del proyecto (Badge: 13 px en negrita, alto 24 px). `AvatarGroup` para iniciales una junto a otra |
 | `components/confirmar.tsx` | Confirmación propia (hoja inferior en el celular). **Nunca `window.confirm`**. Botones que dicen qué pasa ("Sí, ya no voy" / "No, sigo en el viaje"); el foco empieza en la opción segura |
 | `components/pasajero/` | Inicio del pasajero: `CabeceraInicio` ("¿Hacia dónde vas?" + quiénes trabajan, `cabecera-inicio.tsx`; la franja abre `LineaAhora`: qué hace cada chofer y qué viene después), `MapaLinea` (página La línea), `TarjetaUnidad` con `BotonApartar`, `HojaLugar` (sobre `ElegirLugar` + `CasillaGps`), `MiReservaTarjeta` con `CambiarLugar` |
 

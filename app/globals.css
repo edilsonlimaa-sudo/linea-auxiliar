@@ -170,8 +170,8 @@
     }
   body {
     @apply bg-background text-foreground;
-    /* Texto base 17 px (docs/especificacion.md §10). Se usa px para no agrandar todo el espaciado rem. */
-    font-size: 17px;
+    /* Texto base 15 px (docs/especificacion.md §10). Se usa px para no tocar el espaciado rem. */
+    font-size: 15px;
     line-height: 1.45;
     }
   button:not(:disabled), [role="button"]:not(:disabled) {
