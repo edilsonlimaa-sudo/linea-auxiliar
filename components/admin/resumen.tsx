@@ -1,31 +1,18 @@
-import { CheckCircle2Icon, ChevronRightIcon, ClockIcon, MapPinIcon, StarIcon, TriangleAlertIcon, UserCheckIcon } from "lucide-react"
+import { CheckCircle2Icon, ChevronRightIcon, StarIcon, TriangleAlertIcon } from "lucide-react"
 import Link from "next/link"
 
-import { PorSentido } from "@/components/admin/demanda"
 import { UsoNumeros } from "@/components/admin/uso"
 import { promedioTexto } from "@/components/estrellas"
 import { Avatar } from "@/components/foto/avatar"
 import { DesconectarChofer } from "@/components/admin/acciones-viaje"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
-import type {
-  ChoferEnCurso,
-  CuentaConActividad,
-  DemandaHoy,
-  Esperando,
-  OfertaSentido,
-  Resumen as DatosResumen,
-  RolCuenta,
-  Uso,
-} from "@/lib/datos/admin"
-import { hace } from "@/lib/fechas"
+import type { ChoferEnCurso, CuentaConActividad, Resumen as DatosResumen, RolCuenta, Uso } from "@/lib/datos/admin"
 import { cn } from "@/lib/utils"
-import { conAcompanantes, ETIQUETA_ESTADO, haciaEnFrase, llegada, SENTIDOS, sumaPersonas, type Sentido, type Viaje } from "@/lib/viajes"
-
-const ORDEN: Sentido[] = ["vg_a_centro", "centro_a_vg"]
+import { ETIQUETA_ESTADO, llegada, SENTIDOS, type Viaje } from "@/lib/viajes"
 
 /**
- * Tablero del admin (§8, "Resumen"): indicadores → lo que requiere atención → qué pasa ahora (en la ruta y
- * esperando) → cómo vamos (uso de la app y comunidad). En la computadora, las secciones van en dos columnas.
+ * Tablero del admin (§8, "Resumen"): indicadores → lo que requiere atención → qué pasa ahora (en la ruta) → cómo vamos
+ * (uso de la app y comunidad). En la computadora, las secciones van en dos columnas.
  */
 export function Resumen({
   cuentas,
@@ -33,32 +20,25 @@ export function Resumen({
   pendientes,
   uso,
   enCurso,
-  esperando,
-  oferta,
-  demandaHoy,
+  enLista,
 }: {
   cuentas: CuentaConActividad[]
   resumen: DatosResumen | null
   pendientes: Record<RolCuenta, number>
   uso: Uso
   enCurso: ChoferEnCurso[]
-  esperando: Esperando[]
-  oferta: Record<Sentido, OfertaSentido>
-  demandaHoy: DemandaHoy | null
+  enLista: number // personas en la Lista a Valle Grande ahora
 }) {
   const conectados = cuentas.filter((c) => c.rol === "chofer" && c.estado === "aprobado" && c.actividad?.conectado)
   const aprobados = (rol: RolCuenta) => cuentas.filter((c) => c.rol === rol && c.estado === "aprobado").length
 
   return (
     <div className="flex flex-col gap-6">
-      <Indicadores conectados={conectados.length} resumen={resumen} esperando={sumaPersonas(esperando)} />
+      <Indicadores conectados={conectados.length} resumen={resumen} enLista={enLista} />
 
-      <Atencion pendientes={pendientes} esperando={esperando} oferta={oferta} />
+      <Atencion pendientes={pendientes} />
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-        <EnLaRuta conectados={conectados} enCurso={enCurso} />
-        <EsperandoAhora esperando={esperando} oferta={oferta} hoy={demandaHoy} />
-      </div>
+      <EnLaRuta conectados={conectados} enCurso={enCurso} />
 
       <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
         <Tarjeta titulo="Uso de la app · 7 días">
@@ -78,12 +58,12 @@ export function Resumen({
 
 // ---------- 1. Indicadores ----------
 
-function Indicadores({ conectados, resumen, esperando }: { conectados: number; resumen: DatosResumen | null; esperando: number }) {
+function Indicadores({ conectados, resumen, enLista }: { conectados: number; resumen: DatosResumen | null; enLista: number }) {
   return (
     <section aria-label="Indicadores" className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
       <Indicador valor={conectados} texto={conectados === 1 ? "chofer conectado" : "choferes conectados"} href="/admin/viajes" destacado={conectados > 0} borde />
       <Indicador valor={resumen?.viajes_en_curso ?? 0} texto={resumen?.viajes_en_curso === 1 ? "viaje en curso" : "viajes en curso"} href="/admin/viajes" borde />
-      <Indicador valor={esperando} texto={esperando === 1 ? "pasajero esperando" : "pasajeros esperando"} href="/admin/demanda" borde />
+      <Indicador valor={enLista} texto="en la lista a Valle Grande" href="/admin/lista-gina" borde />
       <Indicador
         valor={resumen?.viajes_hoy ?? 0}
         texto={resumen?.viajes_hoy === 1 ? "viaje terminado hoy" : "viajes terminados hoy"}
@@ -121,15 +101,7 @@ function Indicadores({ conectados, resumen, esperando }: { conectados: number; r
 
 // ---------- 2. Requiere atención ----------
 
-function Atencion({
-  pendientes,
-  esperando,
-  oferta,
-}: {
-  pendientes: Record<RolCuenta, number>
-  esperando: Esperando[]
-  oferta: Record<Sentido, OfertaSentido>
-}) {
+function Atencion({ pendientes }: { pendientes: Record<RolCuenta, number> }) {
   const items: { clave: string; texto: string; href: string; accion: string }[] = []
   if (pendientes.chofer > 0)
     items.push({
@@ -145,23 +117,12 @@ function Atencion({
       href: "/admin/aprobar?rol=pasajero",
       accion: "Revisar",
     })
-  for (const s of ORDEN) {
-    const esperan = sumaPersonas(esperando.filter((e) => e.sentido === s))
-    const libres = oferta[s].puestosLibres
-    if (esperan > libres)
-      items.push({
-        clave: s,
-        texto: `Falta transporte ${haciaEnFrase(s)}: ${esperan} ${esperan === 1 ? "espera" : "esperan"}, ${libres} ${libres === 1 ? "puesto libre" : "puestos libres"}`,
-        href: "/admin/demanda",
-        accion: "Ver demanda",
-      })
-  }
 
   if (items.length === 0) {
     return (
       <p className="flex items-center gap-2.5 rounded-2xl border-2 bg-success-muted px-4 py-3 font-bold text-success">
         <CheckCircle2Icon aria-hidden className="size-6 shrink-0" />
-        Todo en orden: nadie espera aprobación y el transporte alcanza
+        Todo en orden: nadie espera aprobación
       </p>
     )
   }
@@ -248,62 +209,6 @@ function EnLaRuta({ conectados, enCurso }: { conectados: CuentaConActividad[]; e
             )
           })}
         </ul>
-      )}
-    </Tarjeta>
-  )
-}
-
-// ---------- 4. Esperando ahora ----------
-
-function EsperandoAhora({
-  esperando,
-  oferta,
-  hoy,
-}: {
-  esperando: Esperando[]
-  oferta: Record<Sentido, OfertaSentido>
-  hoy: DemandaHoy | null
-}) {
-  // admin_demanda ya viene ordenada: primero quien lleva más tiempo
-  const primeros = esperando.slice(0, 3)
-  return (
-    <Tarjeta titulo="Esperando ahora" enlace={{ href: "/admin/demanda", texto: "Demanda" }}>
-      <div className="grid gap-3 sm:grid-cols-2">
-        {ORDEN.map((s) => (
-          <PorSentido key={s} sentido={s} esperan={sumaPersonas(esperando.filter((e) => e.sentido === s))} oferta={oferta[s]} />
-        ))}
-      </div>
-      {primeros.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <h3 className="font-bold">Llevan más tiempo esperando</h3>
-          <ul className="flex flex-col gap-2">
-            {primeros.map((e) => (
-              <li key={e.id} className="flex items-center gap-3 rounded-2xl bg-muted px-3 py-2">
-                <Avatar url={e.fotoUrl} nombre={e.nombre} className="size-10" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-bold">
-                    {conAcompanantes(e.nombre, e.personas)} <span className="font-normal text-muted-foreground">· {haciaEnFrase(e.sentido)}</span>
-                  </p>
-                  <p className="flex items-center gap-1 truncate text-sm text-muted-foreground">
-                    <MapPinIcon aria-hidden className="size-4 shrink-0" />
-                    {e.lugar ?? "Solo con GPS"}
-                  </p>
-                </div>
-                <span className={cn("flex shrink-0 items-center gap-1 text-sm", e.minutos >= 20 ? "font-bold text-warning" : "text-muted-foreground")}>
-                  <ClockIcon aria-hidden className="size-4" />
-                  {hace(e.creado_en)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-      {hoy && hoy.pedidos > 0 && (
-        <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
-          <UserCheckIcon aria-hidden className="size-4" />
-          Hoy: {hoy.pedidos} {hoy.pedidos === 1 ? "pedido" : "pedidos"} · {hoy.consiguieron} consiguieron puesto
-          {hoy.sin_transporte > 0 && <span className="font-bold text-warning">· {hoy.sin_transporte} sin transporte</span>}
-        </p>
       )}
     </Tarjeta>
   )

@@ -554,7 +554,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** ("¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **La línea** (mapa con todos los choferes y quién trabaja) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Demanda** · **Viajes terminados**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros**) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros**) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
@@ -569,28 +569,27 @@ lo primero es *qué necesita de mí*, después *qué pasa ahora* y al final *có
 
 **Menú lateral** (fijo en la computadora; en el celular, un cajón que abre el botón "Menú"), agrupado por tema:
 - **Resumen** (el tablero).
-- **Operación:** Viajes en curso · Demanda · Viajes terminados.
-- **Personas:** Choferes · Pasajeros.
+- **Operación:** Viajes en curso · Lista a Valle Grande. *(Oct. 2026: **Demanda** sale del menú mientras "Avísame" esté
+  suspendido, R31: sin esperas, estaba siempre vacía. **Viajes terminados** también sale del menú, pero la página
+  sigue: se llega desde los indicadores del Resumen y desde Viajes en curso; lo de cada chofer está en su detalle.)*
+- **Personas:** Por aprobar · Choferes · Pasajeros.
 - **Análisis:** Uso de la app · Calificaciones.
 - Abajo: Cambiar contraseña · Modo oscuro/claro · Salir del panel.
 
-Cada entrada muestra su contador: cuentas por aprobar en amarillo (piden acción); viajes en curso y personas esperando
-en gris (informan). **Celular primero, también en la computadora:** en el celular una sola columna; desde tablet el
+Cada entrada muestra su contador: cuentas por aprobar en amarillo (piden acción); viajes en curso y personas en la
+Lista a Valle Grande en gris (informan). **Celular primero, también en la computadora:** en el celular una sola columna; desde tablet el
 contenido usa el ancho de la pantalla (hasta ~1150 px) con grillas. Entrar y cambiar la contraseña siguen angostos y sin
 menú (formularios).
 
 - **Resumen** (se actualiza solo, §4), en orden:
-  1. **Indicadores:** choferes conectados · viajes en curso · pasajeros esperando · viajes terminados hoy · pasajeros
+  1. **Indicadores:** choferes conectados · viajes en curso · en la Lista a Valle Grande · viajes terminados hoy · pasajeros
      llevados hoy · ★ de los últimos 7 días. Cada uno lleva a su página.
-  2. **Requiere atención** (solo si hay algo): cuentas por aprobar (choferes y pasajeros, cada una a su lista) y cada
-     sentido donde **falta transporte** (esperan más que los puestos libres), con enlace a Demanda. Sin nada:
-     "Todo en orden".
+  2. **Requiere atención** (solo si hay algo): cuentas por aprobar (choferes y pasajeros, cada una a Por aprobar). Sin
+     nada: "Todo en orden".
   3. **En la ruta ahora:** cada chofer conectado con qué está haciendo (estado y sentido de su viaje actual, puestos
      ocupados; "Conectado, sin viaje" si no tiene) y **Ver en el mapa** (R41, "Dónde está X"). Enlace a Viajes en curso.
      El mapa también está en su tarjeta de Choferes mientras está conectado.
-  4. **Esperando ahora:** por sentido, cuántos esperan contra los puestos libres; las 3 personas que más llevan
-     esperando; y la demanda de hoy (pedidos, consiguieron puesto, se fueron sin transporte). Enlace a Demanda.
-  5. **Uso de la app (últimos 7 días)**, de los pasajeros llevados en viajes terminados (subió o se bajó antes):
+  4. **Uso de la app (últimos 7 días)**, de los pasajeros llevados en viajes terminados (subió o se bajó antes):
      - **Cómo entraron al carro:** por la app (apartó puesto), por la app en el camino (R28) o **anotados a mano**
        por el chofer (R36), con el % que usó la app y una barra.
      - **Pasajeros identificados:** cuántas personas distintas viajaron con su cuenta, cuántas **repiten** (2 o más
@@ -599,7 +598,7 @@ menú (formularios).
        comparación **por chofer** (app / en el camino / a mano, para ver quién todavía anota mucho a mano) y la
        **lista de pasajeros identificados**: foto, nombre, viajes en el período, último viaje y "Nuevo" si su primer
        viaje fue en el período. Primero quien más viaja.
-  6. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
+  5. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
 - **Calificaciones** (Análisis): todas las calificaciones de la línea, la más reciente primero, con **quién calificó**
   (a diferencia del chofer, R52). Filtros: **período** (7 días · 30 días · Todo), **chofer** y **nota** (Todas · Solo
   bajas, de 1 a 3 ★). Arriba, para lo filtrado: ★ promedio, cantidad, cuántas hay de cada nota y las etiquetas más
@@ -622,7 +621,7 @@ menú (formularios).
   - **Cancelado** (en rojo): chofer y placa, sentido, a qué hora se canceló, quién y por qué (R72), hasta dónde llegó ("Antes de llegar a
     recoger" / "Avisó que llegaba" / "Después de llegar a recoger"), quiénes tenían puesto y lo perdieron.
   - Los dos, con su línea de tiempo (R56).
-- **Demanda** (para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
+- **Demanda** (fuera del menú mientras "Avísame" esté suspendido, R31; la página sigue en `/admin/demanda`; para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
   1. **Por sentido** (Al Centro / A Valle Grande): cuántos esperan, cuántas unidades aceptan pasajeros con cuántos
      puestos libres, y si **falta transporte** (esperan más que los puestos libres) o está cubierto.
   2. **Quién espera**, por sentido y primero quien lleva más tiempo: foto, nombre, "espera hace N min" (en

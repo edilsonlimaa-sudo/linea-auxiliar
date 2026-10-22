@@ -4,7 +4,8 @@ import type { Metadata } from "next"
 import { Resumen } from "@/components/admin/resumen"
 import { EnVivo } from "@/components/en-vivo"
 import { Alert, AlertTitle } from "@/components/ui/alert"
-import { cargarCuentas, cargarDemanda, cargarResumen, cargarUso, cargarViajesEnCurso, pendientesPorRol } from "@/lib/datos/admin"
+import { cargarCuentas, cargarResumen, cargarUso, cargarViajesEnCurso, pendientesPorRol } from "@/lib/datos/admin"
+import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { hoyEnPalabras, inicioDelDia } from "@/lib/fechas"
 import { exigirAdmin } from "@/lib/sesion"
 
@@ -14,11 +15,11 @@ export const metadata: Metadata = { title: "Administración · Línea Auxiliar" 
 export default async function PanelAdmin({ searchParams }: PageProps<"/admin">) {
   await exigirAdmin()
   const { clave } = await searchParams
-  const [{ cuentas }, resumen, uso, demanda, { choferes }] = await Promise.all([
+  const [{ cuentas }, resumen, uso, lista, { choferes }] = await Promise.all([
     cargarCuentas(),
     cargarResumen(),
     cargarUso(inicioDelDia(6)),
-    cargarDemanda(),
+    cargarListaGina(),
     cargarViajesEnCurso(),
   ])
 
@@ -43,9 +44,7 @@ export default async function PanelAdmin({ searchParams }: PageProps<"/admin">) 
         pendientes={pendientesPorRol(cuentas)}
         uso={uso}
         enCurso={choferes}
-        esperando={demanda.esperando}
-        oferta={demanda.oferta}
-        demandaHoy={demanda.hoy}
+        enLista={lista.reduce((n, e) => n + e.personas, 0)}
       />
     </div>
   )
