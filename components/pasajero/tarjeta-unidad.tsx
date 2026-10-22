@@ -1,17 +1,15 @@
-import { ChevronDownIcon, ClockIcon, SnowflakeIcon, SparklesIcon, StarIcon } from "lucide-react"
+import { ClockIcon, SparklesIcon } from "lucide-react"
 
-import { promedioTexto } from "@/components/estrellas"
 import { Asientos } from "@/components/pasajero/asientos"
 import { BotonApartar } from "@/components/pasajero/boton-apartar"
-import { ChoferResumen } from "@/components/pasajero/chofer-resumen"
+import { PerfilChofer } from "@/components/pasajero/perfil-chofer"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import type { ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import type { Punto } from "@/lib/mapa"
 import { cn } from "@/lib/utils"
-import { cabe, iniciales, libres, llegada, nombreCorto, SENTIDOS, type Viaje } from "@/lib/viajes"
+import { cabe, libres, llegada, SENTIDOS, type Viaje } from "@/lib/viajes"
 
 /**
  * El estado como etiqueta (§8), solo cuando dice algo que el título no dice: que es el próximo viaje del chofer o
@@ -39,7 +37,6 @@ export function TarjetaUnidad({
   porId,
   reservaAnterior,
   yo = null,
-  recientes = [],
   lugarInicial,
   personas = 1,
   destacada = false,
@@ -49,7 +46,6 @@ export function TarjetaUnidad({
   porId: Map<string, Viaje>
   reservaAnterior?: string | null
   yo?: Punto | null // GPS del pasajero (de su espera), para la distancia en el mapa
-  recientes?: string[] // lugares recientes para la hoja de lugar (R25)
   lugarInicial?: string | null // el de su espera, si estaba esperando (R27)
   personas?: number // cuántos van, si ya lo dijo al esperar (R57); si no, se pregunta al apartar
   destacada?: boolean
@@ -102,34 +98,8 @@ export function TarjetaUnidad({
           )}
         </div>
 
-        {/* 3. ¿Quién maneja? */}
-        <div className="flex items-center gap-3 rounded-2xl bg-muted px-3 py-2">
-          <Avatar className="size-11">
-            {chofer.fotoUrl && <AvatarImage src={chofer.fotoUrl} alt="" />}
-            <AvatarFallback className="bg-secondary font-bold text-secondary-foreground">{iniciales(chofer.nombre)}</AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 flex-1">
-            <p className="flex flex-wrap items-center gap-x-2 font-bold">
-              <span className="truncate">{nombreCorto(chofer.nombre)}</span>
-              {chofer.estrellas !== null && (
-                <span className="inline-flex items-center gap-0.5 text-[15px]">
-                  <StarIcon aria-hidden className="size-4 fill-signal text-signal" />
-                  {promedioTexto(chofer.estrellas)}
-                  <span className="sr-only"> estrellas</span>
-                </span>
-              )}
-            </p>
-            <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
-              {chofer.vehiculo?.placa && <span className="font-mono font-bold tracking-wider text-foreground">{chofer.vehiculo.placa}</span>}
-              {chofer.vehiculo?.unidad && <span>Unidad {chofer.vehiculo.unidad}</span>}
-              {chofer.vehiculo?.aire_acondicionado && (
-                <span className="inline-flex items-center gap-1">
-                  <SnowflakeIcon aria-hidden className="size-3.5" /> Aire
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
+        {/* 3. ¿Quién maneja? Una sola vez: al tocarlo, su perfil y el carro */}
+        <PerfilChofer chofer={chofer} />
       </CardContent>
 
       {/* 4. La acción, con el mapa al lado */}
@@ -151,7 +121,6 @@ export function TarjetaUnidad({
               texto={textoBoton}
               variante="default"
               reservaAnterior={reservaAnterior}
-              recientes={recientes}
               lugarInicial={lugarInicial}
               personas={Math.min(personas, maxPersonas)}
               maxPersonas={maxPersonas}
@@ -165,16 +134,6 @@ export function TarjetaUnidad({
         </div>
         {enRuta && !porLista && <p className="text-[15px] text-muted-foreground">El chofer te confirma si puede pasar por ti.</p>}
 
-        {/* Lo demás, a pedido */}
-        <details className="group">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-1 rounded-xl font-bold text-primary focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-            Ver chofer y carro
-            <ChevronDownIcon aria-hidden className="size-5 transition-transform group-open:rotate-180" />
-          </summary>
-          <div className="pt-2">
-            <ChoferResumen chofer={chofer} />
-          </div>
-        </details>
       </CardFooter>
     </Card>
   )

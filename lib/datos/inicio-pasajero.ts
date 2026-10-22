@@ -55,7 +55,6 @@ export type DatosInicioPasajero = {
   porId: Map<string, Viaje>
   miReserva: MiReserva | null
   miEspera: Espera | null
-  lugaresRecientes: string[] // R25
   // "Lo de siempre" (§8): su último pedido, para repetirlo de un toque. conGps: lo pidió con GPS (se vuelve a leer)
   ultimoPedido: { sentido: Viaje["sentido"]; lugar: string | null; conGps: boolean } | null
   aviso: { texto: string; creado_en: string } | null
@@ -146,8 +145,17 @@ export async function cargarCalificacionPendiente(pasajeroId: string): Promise<C
 /** ¿Tiene un viaje en curso o por calificar? Decide si el menú muestra "Mi viaje" e Inicio lo lleva allá. */
 export async function tieneViajeEnCurso(pasajeroId: string): Promise<boolean> {
   const supabase = await crearClienteServidor()
-  const { data } = await consultarReservaEnCurso(supabase, pasajeroId)
-  return data !== null || (await cargarCalificacionPendiente(pasajeroId)) !== null
+  const [{ data }, { count }] = await Promise.all([
+    consultarReservaEnCurso(supabase, pasajeroId),
+    // Anotado en la lista hacia Valle Grande (§5.17)
+    supabase
+      .from("lista_gina")
+      .select("id", { count: "exact", head: true })
+      .eq("pasajero_id", pasajeroId)
+      .eq("estado", "esperando")
+      .gt("vence_en", new Date().toISOString()),
+  ])
+  return data !== null || (count ?? 0) > 0 || (await cargarCalificacionPendiente(pasajeroId)) !== null
 }
 
 export type AvisoDeCierre = { reservaId: string; motivo: "salio_lleno" | "cancelo" | "cerrado" | "rechazo" | "no_llego"; chofer: string }
@@ -199,7 +207,7 @@ function ultimoPedido(
 export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosInicioPasajero> {
   const supabase = await crearClienteServidor()
 
-  const [viajesRes, reservaRes, esperaRes, recientesRes, avisoRes, enServicioRes, ultEsperaRes, ultReservaRes, pausaRes] = await Promise.all([
+  const [viajesRes, reservaRes, esperaRes, avisoRes, enServicioRes, ultEsperaRes, ultReservaRes, pausaRes] = await Promise.all([
     supabase
       .from("viajes")
       .select("*, chofer:perfiles!viajes_chofer_id_fkey(id, nombre, foto_path, vehiculo:vehiculos(unidad, placa, modelo, color, foto_path, aire_acondicionado))")
@@ -212,7 +220,6 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       .eq("estado", "esperando")
       .gt("creado_en", new Date(Date.now() - 2 * 3_600_000).toISOString())
       .maybeSingle(),
-    supabase.rpc("mis_lugares_recientes"),
     supabase
       .from("avisos")
       .select("texto, creado_en")
@@ -313,7 +320,6 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
     porId,
     miReserva,
     miEspera: esperaRes.data ?? null,
-    lugaresRecientes: (recientesRes.data ?? []).map((f) => f.lugar),
     aviso: avisoRes.data ?? null,
     unidadesEnServicio: conectados.length,
     enServicio: conectados

@@ -167,6 +167,17 @@ export const enEspera = (v: Viaje) => Math.max(0, v.ocupados - v.puestos)
 export const aceptaReservas = (v: Viaje) => ABIERTOS.includes(v.estado) || (v.estado === "en_ruta" && libres(v) > 0)
 
 /** Orden para el pasajero: primero los que aceptan, con puestos libres y que llegan antes (R16) */
+/**
+ * Los carros de la lista hacia Valle Grande (§5.17): los que todavía no salieron de Gina y, ya en ruta, solo los
+ * que llevan puesto (pueden recoger en el camino, R67). En el orden del pasajero.
+ */
+export function carrosHaciaValle<T extends Viaje>(viajes: T[], porId: Map<string, Viaje>): T[] {
+  return ordenarParaPasajero(
+    viajes.filter((v) => v.sentido === "centro_a_vg" && (v.estado !== "en_ruta" || libres(v) > 0)),
+    porId
+  )
+}
+
 export function ordenarParaPasajero<T extends Viaje>(viajes: T[], porId: Map<string, Viaje>, ahora = Date.now()): T[] {
   return [...viajes].sort(
     (a, b) =>

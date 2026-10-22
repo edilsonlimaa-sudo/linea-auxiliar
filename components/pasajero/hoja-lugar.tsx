@@ -13,15 +13,13 @@ export type OpcionPersonas = { max: number; inicial?: number; nota?: string }
 
 /**
  * "¿Dónde te recogemos?" (R25–R27): se pregunta recién al apartar o al pedir "Avísame cuando haya una".
- * Con `personas`, empieza por "¿Cuántos van?" (R57). Lugares recientes de un toque (el último ya escogido), otro
- * escrito y GPS opcional. El texto del botón puede depender de cuántos van ("Apartar 3 puestos").
+ * Con `personas`, empieza por "¿Cuántos van?" (R57). Dónde está (texto) y GPS opcional. El texto del botón puede depender de cuántos van ("Apartar 3 puestos").
  */
 export function HojaLugar({
   abierta,
   onCambiar,
   titulo,
   descripcion,
-  recientes,
   lugarInicial,
   textoBoton,
   personas,
@@ -32,7 +30,6 @@ export function HojaLugar({
   onCambiar: (abierta: boolean) => void
   titulo: string
   descripcion: string
-  recientes: string[]
   lugarInicial?: string | null
   textoBoton: string | ((personas: number) => string)
   personas?: OpcionPersonas
@@ -46,21 +43,19 @@ export function HojaLugar({
           <SheetTitle>{titulo}</SheetTitle>
           <SheetDescription className="text-base">{descripcion}</SheetDescription>
         </SheetHeader>
-        {/* key: al abrir de nuevo empieza con el lugar más reciente */}
-        {abierta && <Formulario recientes={recientes} lugarInicial={lugarInicial} textoBoton={textoBoton} personas={personas} onEnviar={onEnviar} />}
+        {/* Se monta al abrir: cada vez empieza limpio (o con el lugar inicial) */}
+        {abierta && <Formulario lugarInicial={lugarInicial} textoBoton={textoBoton} personas={personas} onEnviar={onEnviar} />}
       </SheetContent>
     </Sheet>
   )
 }
 
 function Formulario({
-  recientes,
   lugarInicial,
   textoBoton,
   personas,
   onEnviar,
 }: {
-  recientes: string[]
   lugarInicial?: string | null
   textoBoton: string | ((personas: number) => string)
   personas?: OpcionPersonas
@@ -68,7 +63,7 @@ function Formulario({
 }) {
   const max = Math.max(1, Math.min(4, personas?.max ?? 1))
   const [cuantos, setCuantos] = useState(Math.min(personas?.inicial ?? 1, max))
-  const lugar = useLugar(recientes, lugarInicial)
+  const lugar = useLugar(lugarInicial)
   const [gps, setGps] = useGpsRecordado()
   const [error, setError] = useState<string>()
   const [buscandoGps, setBuscandoGps] = useState(false)

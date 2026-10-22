@@ -19,7 +19,6 @@ export function BotonApartar({
   texto,
   variante = "default",
   reservaAnterior,
-  recientes = [],
   lugarInicial,
   personas = 1,
   maxPersonas = 1,
@@ -29,7 +28,6 @@ export function BotonApartar({
   texto: string
   variante?: "default" | "outline"
   reservaAnterior?: string | null
-  recientes?: string[]
   lugarInicial?: string | null // el de su espera, si estaba esperando
   personas?: number // cuántos van, si ya lo dijo (su espera); la hoja lo pregunta de nuevo (R57)
   maxPersonas?: number // hasta cuántos ofrece la hoja: los puestos libres (máx. 4)
@@ -79,7 +77,6 @@ export function BotonApartar({
           onCambiar={setHoja}
           titulo="¿Dónde te recogemos?"
           descripcion="El chofer lo ve en grande al llegar."
-          recientes={recientes}
           lugarInicial={lugarInicial}
           textoBoton={(n) => (n > 1 && texto === "Apartar puesto" ? `Apartar ${n} puestos` : texto)}
           personas={{

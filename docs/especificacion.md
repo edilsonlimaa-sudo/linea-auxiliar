@@ -63,7 +63,7 @@ Una persona tiene un solo rol. El admin se asigna a mano en la base de datos.
 | Tiempo real | El navegador se suscribe **directo a Supabase Realtime** con la sesión de la persona (RLS decide qué le llega) y, al haber un cambio, vuelve a pedir la pantalla al servidor. Los **datos y las acciones siguen pasando por el servidor** de Next. Respaldo: cada 60 s y al volver a la app. (No por el servidor: en hosting serverless una conexión abierta por teléfono no escala) |
 | Hosting | Por decidir (Vercel Pro o Cloudflare). Nada debe atarnos a uno |
 | WhatsApp | Sigue siendo el puente con quien no tiene la app: mensajes listos para el grupo y para el chofer |
-| Dónde recoger | **Texto libre + GPS opcional, sin paradas registradas.** Así se coordina hoy en el grupo ("estoy en la entrada de Las Cayenas"); una lista fija obliga a escoger la parada "más cercana" y el chofer va al sitio equivocado, y además habría que mantenerla. Para no hacer escribir siempre, la app ofrece los lugares recientes de la persona (R25) |
+| Dónde recoger | **Texto libre + GPS opcional, sin paradas registradas.** Así se coordina hoy en el grupo ("estoy en la entrada de Las Cayenas"); una lista fija obliga a escoger la parada "más cercana" y el chofer va al sitio equivocado, y además habría que mantenerla |
 
 ## 5. Reglas de negocio
 
@@ -237,9 +237,9 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 ### 5.6 Dónde recoger al pasajero
 
 - **R25.** Al **apartar puesto** (o al pedir "Avísame cuando haya una", R31), el pasajero **escribe dónde está** (texto libre, máx. 60 caracteres,
-  ej. "Entrada de Las Cayenas"). Eso es lo principal y lo que el chofer ve en grande. Para no escribir cada vez, la app
-  ofrece sus **3 lugares más recientes** (de sus reservas y esperas anteriores) como opciones de un toque, con
-  el último ya escogido.
+  ej. "Entrada de Las Cayenas"). Eso es lo principal y lo que el chofer ve en grande. *(Oct. 2026: sin los lugares
+  recientes de un toque; la hoja muestra **solo el campo de texto** y el GPS. Al cambiar el lugar en Mi viaje, el
+  campo empieza con el lugar actual.)*
 - **R26 [servidor].** El **GPS es opcional**: casilla "📍 Agregar también mi GPS" (se recuerda la elección). Si
   lo agrega, el chofer tiene **Cómo llegar** (Google Maps) y **Waze**. Quien no sabe explicar dónde está
   puede mandar **solo su GPS**. Hace falta al menos uno: lugar escrito o GPS.
@@ -381,8 +381,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   - **Dónde se ponen:** mientras la cuenta está en revisión (la pantalla lo pide: ayuda a que la aprueben) y
     siempre en **Mi carnet** ("Cambiar foto"). Con la cámara o de la galería.
   - **Livianas:** la app la achica en el teléfono antes de subirla (máx. 1080 px, JPEG): datos móviles caros (§10).
-  - **Dónde se ven:** la del chofer en las unidades y en Mi viaje; **la del carro en Mi viaje**, para reconocerlo
-    al llegar; la de cada pasajero en la lista del chofer; ambas en el panel del admin y en el carnet. Sin foto,
+  - **Dónde se ven:** la del chofer en las unidades y en Mi viaje; **la del carro en Mi viaje** (plegada, a un
+    toque: "Ver el carro"), para reconocerlo al llegar; la de cada pasajero en la lista del chofer; ambas en el panel del admin y en el carnet. Sin foto,
     las iniciales.
   - **[servidor]** Bucket privado: cada uno sube solo a su carpeta; las ven solo usuarios con sesión, con
     enlaces firmados que vencen en 1 h.
@@ -410,17 +410,20 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     toque: **Me fui en la van** (el transporte autorizado, que no usa el app), **En otro carro o taxi**, **Me cansé de
     esperar**, **Cambié de planes** u **Otra razón**. Sirve para medir cuánta gente se pierde y por qué (sobre todo
     por la van). El motivo lo ven solo el admin y los choferes (`lista_gina_privado`), no los demás pasajeros.
-  - **"Me monté en un carro de la línea" [servidor].** Montarse **no es** "Me fui": lo marca el chofer con **Subió**.
-    Por si alguien se confunde (o se lo pidieron mal), la hoja de Me fui empieza con esa opción, aparte y destacada:
-    **no saca de la lista**; deja a la persona marcada "dice que se montó" (y su lugar vale al menos 30 min más).
-    Ella ve "Avisaste que te montaste: el chofer te marca Subió". Los choferes en Gina o en ruta hacia Valle Grande
-    la ven destacada en la lista ("Dice que ya se montó") con **Subió** a mano, **aunque ya hayan salido de Gina**
-    y aunque no le tocara en el plan (si cabe en el carro).
+  - **"Me monté en un carro de la línea" — retirada** *(Oct. 2026)*. La hoja de Me fui ya no la ofrece: solo dice
+    cómo se va. Montarse sigue sin ser "Me fui": lo marca el chofer con **Subió**, y Salir de Gina avisa si nadie está
+    marcado (R66). La base conserva `me_monte` y la marca "dice que se montó" (el chofer la ve destacada con
+    **Subió** a mano, aunque ya haya salido de Gina) para quien la tenga de antes; nadie nuevo la recibe.
 - **R63. Una sola lista, por orden de llegada [servidor].** El orden lo pone el reloj del servidor. Todos ven
   la misma lista: **nombre corto, cuántos van, dónde está** (Gina o el lugar escrito) y su posición ("Eres el 5").
   Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
   - **El pasajero la ve igual, en una franja** ("La lista · 21 personas · 15 en Gina · 6 en otro lugar") que abre la
     lista completa en una hoja, con la suya destacada; su lugar en grande va arriba ("Eres el 11").
+  - **Anotado, va a Mi viaje** *(Oct. 2026)*: como quien aparta puesto, al anotarse pasa a **Mi viaje** (Inicio lo
+    lleva ahí mientras siga en la lista, y el menú muestra "Mi viaje" de primero), sin el "¿Hacia dónde vas?". En orden
+    de lo que necesita: **su lugar** ("Eres el 3 · en Gina · Antes que tú: 2 personas") → "¿Sigues ahí?" si está por
+    vencer → **Carros que vienen** (lo más útil: cuándo pasa el próximo y con cuántos puestos) → cuánto vale su lugar
+    y **Sigo aquí** → la lista → **Me fui**. Al salir de la lista (Me fui, venció o subió) vuelve a Inicio o a su viaje.
   - **Los choferes la ven siempre, fuera de sus viajes**: es del tramo, no de un carro. En su Inicio, una franja
     "Lista hacia Valle Grande" (caras, cuántos y dónde: "En Gina: 4 · En otro lugar: 1") abre la **lista completa** en
     una hoja: posición, nombre, cuántos van, **dónde espera**, desde cuándo, teléfono (si está conectado) y "Cómo
@@ -594,9 +597,11 @@ que tiene su propia página (también es adonde llevan los avisos de §7):
 
 - Al confirmar el puesto, la app abre **Mi viaje**. Mientras haya una reserva activa, **Inicio lleva a Mi viaje**
   (evita apartar otro carro por error) y el menú muestra "Mi viaje" de primero.
-- Contenido, en orden: ¿tengo puesto? (puesto N de M, turno en lista de espera o pedido pendiente) → cuándo
-  llega → dónde me recoge → avance del viaje → **✋ Ya estoy en el sitio** → chofer y carro → Llamar / WhatsApp
-  → lista del carro → **Ya no voy**. Después: mapa en vivo (R41).
+- Contenido, en orden y **compacto, para que quepa en la pantalla del celular** *(Oct. 2026, limpio como "Vas a
+  bordo")*: ¿tengo puesto? (puesto N de M, turno en lista de espera o pedido pendiente) → cuándo llega y dónde me
+  recoge, con **Cambiar** al lado → **✋ Ya estoy en el sitio** → el chofer en una línea (foto, nombre, ★, placa) con
+  el **mapa en vivo** (R41) como ícono → Llamar / WhatsApp → avance del viaje → **a pedido**, plegado: la foto del
+  carro y la lista del carro → **Ya no voy**.
 - En lista de espera: **Cambiarme a otra unidad** (R22) abre las unidades del mismo sentido con puestos libres.
 - **Mi viaje dura todo el viaje, no solo la espera.** El viaje está *en curso* para el pasajero mientras su
   reserva está activa **o** va a bordo de un carro en ruta. A bordo: "Vas a bordo · En ruta hacia el Centro",
@@ -630,7 +635,8 @@ recién al apartar (R27, R57). Una pregunta, una respuesta, una acción:
 3. **Cada unidad, una tarjeta** corta y fácil de comparar: el **estado** como etiqueta ("Recogiendo ahora", "Próximo
    viaje", "En ruta"), **cuándo recoge** en grande, **puestos** con etiqueta ("2 libres" / "Lleno"), **quién maneja**
    (foto, nombre, ★, placa) y **Apartar puesto** (o pedir en el camino; lleno, sin botón, R59) con el **mapa** al lado
-   (R41). La primera con puesto lleva **"Recoge primero"**. Foto del carro y aire, al abrir "Ver chofer y carro".
+   (R41). La primera con puesto lleva **"Recoge primero"**. El chofer aparece **una sola vez**: tocarlo abre su
+   perfil en una hoja (foto, nombre completo, ★, placa, carro, aire y foto del carro).
    Al apartar sube la hoja "¿Dónde te recogemos?" (R27, con ¿Cuántos van?, R57) → Mi viaje.
 4. **Sin unidades** de ese sentido, o todas llenas: una tarjeta que lo dice ("Ahora no hay unidades al Centro" /
    "Todas van llenas por ahora") y que la pantalla se actualiza sola. Sin "Avísame" por ahora (R31 suspendida).

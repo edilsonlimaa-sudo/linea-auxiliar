@@ -2,7 +2,7 @@ import { ChevronDownIcon, MapPinIcon, MessageCircleIcon, PhoneIcon } from "lucid
 
 import { BotonYaLlegue, BotonYaNoVoy } from "@/components/pasajero/acciones-reserva"
 import { CambiarLugar } from "@/components/pasajero/cambiar-lugar"
-import { ChoferResumen, FotoCarro } from "@/components/pasajero/chofer-resumen"
+import { ChoferResumen, DetalleCarro, FotoCarro } from "@/components/pasajero/chofer-resumen"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { buttonVariants } from "@/components/ui/button"
 import type { MiReserva } from "@/lib/datos/inicio-pasajero"
@@ -21,14 +21,13 @@ const PASO_DE: Record<EstadoViaje, number> = {
 }
 
 /**
- * Avance del viaje: barras para verlo de un vistazo y una sola etiqueta legible (cuatro etiquetas no caben
- * en un celular con letra grande).
+ * Avance del viaje: barras para verlo de un vistazo y una sola etiqueta legible, en una línea (cuatro etiquetas no
+ * caben en un celular con letra grande).
  */
 function PasosViaje({ estado }: { estado: EstadoViaje }) {
   const actual = PASO_DE[estado]
-  const siguiente = PASOS[actual + 1]
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       <ol className="grid grid-cols-4 gap-1.5" aria-label="Avance del viaje">
         {PASOS.map((paso, i) => (
           <li key={paso} aria-current={i === actual ? "step" : undefined} className={cn("h-2.5 rounded-full", i <= actual ? "bg-primary" : "bg-muted")}>
@@ -39,29 +38,27 @@ function PasosViaje({ estado }: { estado: EstadoViaje }) {
           </li>
         ))}
       </ol>
-      <p aria-hidden className="flex flex-wrap items-baseline gap-x-2">
+      <p aria-hidden className="text-[15px]">
         <span className="font-bold">
           Paso {actual + 1} de {PASOS.length}: {PASOS[actual]}
         </span>
-        {siguiente && <span className="text-[15px] text-muted-foreground">Después: {siguiente}</span>}
       </p>
     </div>
   )
 }
 
 /**
- * "Tu viaje": todo lo que el pasajero necesita mientras espera el carro, en orden de importancia:
- * ¿tengo puesto? → ¿cuándo llega? → ¿dónde? → ¿quién? → acciones.
+ * "Tu viaje": todo lo que el pasajero necesita mientras espera el carro, en orden de importancia y compacto para que
+ * quepa en la pantalla (§8): ¿tengo puesto? → ¿cuándo llega y dónde? → ¿quién? (con el mapa) → acciones. La foto del
+ * carro y la lista, a pedido.
  */
 export function MiReservaTarjeta({
   datos,
   porId,
   cambiarme,
-  recientes = [],
 }: {
   datos: MiReserva
   porId: Map<string, Viaje>
-  recientes?: string[] // para "Cambiar dónde me recogen" (R27)
   cambiarme?: React.ReactNode // en lista de espera: botón para cambiarse de unidad (R22), justo bajo el estado
 }) {
   const { reserva, viaje, desde, hasta, turno, lista, telefonoChofer } = datos
@@ -99,8 +96,14 @@ export function MiReservaTarjeta({
     subtitulo = cambiarme ? "Si alguien libera su puesto, subes solo. O cámbiate a una unidad con puesto:" : "Si alguien libera su puesto, subes solo."
   }
 
+  // A pedido: la foto del carro (mientras viene, para reconocerlo, R54) y la lista del carro
+  const v = viaje.chofer.vehiculo
+  const conFoto = !aBordo && Boolean(v?.fotoUrl)
+  const conCarro = conFoto || Boolean(v?.modelo || v?.color || v?.aire_acondicionado)
+  const masTitulo = [conCarro && "el carro", lista.length > 0 && `la lista (${lista.length})`].filter(Boolean).join(" y ")
+
   return (
-    <section aria-labelledby="titulo-mi-viaje" className="flex flex-col gap-5 rounded-3xl border-2 border-primary bg-card p-5 text-card-foreground shadow-sm">
+    <section aria-labelledby="titulo-mi-viaje" className="flex flex-col gap-4 rounded-3xl border-2 border-primary bg-card p-5 text-card-foreground shadow-sm">
       <div className="flex flex-col gap-1">
         <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">{SENTIDOS[viaje.sentido].largo}</p>
         <h2 id="titulo-mi-viaje" className={cn("text-2xl leading-tight font-bold", confirmado && !reserva.pendiente ? "text-success" : "text-foreground")}>
@@ -110,44 +113,43 @@ export function MiReservaTarjeta({
         {cambiarme && <div className="mt-2">{cambiarme}</div>}
       </div>
 
-      <div className="rounded-2xl bg-secondary p-4 text-secondary-foreground">
+      {/* Cuándo llega y dónde, en un solo bloque; "Cambiar" al lado del lugar */}
+      <div className="rounded-2xl bg-secondary px-4 py-3 text-secondary-foreground">
         {aBordo ? (
           <p className="text-xl leading-tight font-bold">En ruta {SENTIDOS[viaje.sentido].hacia}</p>
         ) : (
           <>
             <p className="text-xl leading-tight font-bold">{cuando.principal}</p>
             {cuando.detalle && <p className="text-[15px] opacity-85">{cuando.detalle}</p>}
-            <p className="mt-2 flex items-start gap-1.5">
-              <MapPinIcon aria-hidden className="mt-0.5 size-5 shrink-0" />
-              <span>
-                Te recoge en <strong>{lugar}</strong>
-              </span>
-            </p>
-            {reserva.estado === "activa" && (
-              <div className="mt-2">
-                <CambiarLugar reservaId={reserva.id} recientes={recientes} lugarActual={reserva.lugar} />
-              </div>
-            )}
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+              <p className="flex min-w-0 items-start gap-1.5">
+                <MapPinIcon aria-hidden className="mt-0.5 size-5 shrink-0" />
+                <span>
+                  Te recoge en <strong>{lugar}</strong>
+                </span>
+              </p>
+              {reserva.estado === "activa" && <CambiarLugar reservaId={reserva.id} lugarActual={reserva.lugar} compacto />}
+            </div>
           </>
         )}
       </div>
 
-      {/* Mientras viene a buscarlo: por dónde viene el carro (R41). A bordo ya no hace falta */}
-      {!aBordo && (
-        <VerEnMapa
-          choferId={viaje.chofer_id}
-          chofer={viaje.chofer.nombre}
-          yo={reserva.lat !== null && reserva.lng !== null ? { lat: reserva.lat, lng: reserva.lng } : null}
-        />
-      )}
-
-      <PasosViaje estado={viaje.estado} />
-
       {confirmado && !aBordo && !reserva.pendiente && viaje.estado !== "en_ruta" && <BotonYaLlegue reservaId={reserva.id} listo={reserva.listo} />}
 
-      <ChoferResumen chofer={viaje.chofer} />
-      {/* Mientras viene: la foto del carro ayuda a reconocerlo (R54) */}
-      {!aBordo && <FotoCarro chofer={viaje.chofer} />}
+      {/* El chofer en una línea; el mapa en vivo (R41), como ícono mientras viene a buscarlo */}
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <ChoferResumen chofer={viaje.chofer} compacto />
+        </div>
+        {!aBordo && (
+          <VerEnMapa
+            choferId={viaje.chofer_id}
+            chofer={viaje.chofer.nombre}
+            yo={reserva.lat !== null && reserva.lng !== null ? { lat: reserva.lat, lng: reserva.lng } : null}
+            compacto
+          />
+        )}
+      </div>
 
       {telefono && (
         <div className="grid grid-cols-2 gap-2.5">
@@ -162,29 +164,37 @@ export function MiReservaTarjeta({
         </div>
       )}
 
-      {lista.length > 0 && (
+      <PasosViaje estado={viaje.estado} />
+
+      {masTitulo && (
         <details className="group rounded-2xl border-2">
-          <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-2 px-4 font-bold [&::-webkit-details-marker]:hidden">
-            Ver la lista del carro ({lista.length})
+          <summary className="flex min-h-13 cursor-pointer list-none items-center justify-between gap-2 px-4 font-bold focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
+            Ver {masTitulo}
             <ChevronDownIcon aria-hidden className="size-5 transition-transform group-open:rotate-180" />
           </summary>
-          <ol className="flex flex-col gap-1 px-2 pb-3">
-            {lista.map((f) => (
-              <li
-                key={f.posicion}
-                className={cn("flex items-center gap-3 rounded-xl px-2 py-2", f.es_mio && "bg-signal/20 font-bold")}
-              >
-                <span className={cn("grid h-8 min-w-8 shrink-0 place-items-center rounded-full px-1.5 text-sm font-bold", f.confirmado ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                  {f.personas > 1 ? `${f.desde}–${f.hasta}` : f.desde}
-                </span>
-                <span className="flex-1">
-                  {conAcompanantes(f.nombre_corto ?? "Pasajero", f.personas)}
-                  {f.es_mio && " (tú)"}
-                </span>
-                <span className="text-sm text-muted-foreground">{f.confirmado ? (f.listo ? "Ya está en el sitio" : "Con puesto") : "En espera"}</span>
-              </li>
-            ))}
-          </ol>
+          <div className="flex flex-col gap-3 px-2 pt-1 pb-3">
+            <DetalleCarro chofer={viaje.chofer} />
+            {conFoto && <FotoCarro chofer={viaje.chofer} />}
+            {lista.length > 0 && (
+              <ol className="flex flex-col gap-1">
+                {lista.map((f) => (
+                  <li
+                    key={f.posicion}
+                    className={cn("flex items-center gap-3 rounded-xl px-2 py-2", f.es_mio && "bg-signal/20 font-bold")}
+                  >
+                    <span className={cn("grid h-8 min-w-8 shrink-0 place-items-center rounded-full px-1.5 text-sm font-bold", f.confirmado ? "bg-primary text-primary-foreground" : "bg-muted")}>
+                      {f.personas > 1 ? `${f.desde}–${f.hasta}` : f.desde}
+                    </span>
+                    <span className="flex-1">
+                      {conAcompanantes(f.nombre_corto ?? "Pasajero", f.personas)}
+                      {f.es_mio && " (tú)"}
+                    </span>
+                    <span className="text-sm text-muted-foreground">{f.confirmado ? (f.listo ? "Ya está en el sitio" : "Con puesto") : "En espera"}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
         </details>
       )}
 

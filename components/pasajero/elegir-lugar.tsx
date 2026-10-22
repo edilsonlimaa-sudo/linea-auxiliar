@@ -1,10 +1,8 @@
 "use client"
 
-import { CheckIcon, HistoryIcon } from "lucide-react"
 import { useId, useState, useSyncExternalStore } from "react"
 
 import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
 
 const CLAVE_GPS = "linea-auxiliar:agregar-gps"
 const leerGps = () => {
@@ -42,60 +40,30 @@ export function obtenerUbicacion(): Promise<{ lat: number; lng: number } | null>
   )
 }
 
-const OTRO = Symbol("otro")
-
 /**
- * Estado del "¿Dónde estás?" (R25): un lugar reciente escogido con un toque u otro escrito a mano.
- * Empieza con el lugar inicial (p. ej. el de la espera, R27) o con el más reciente.
+ * Estado del "¿Dónde estás?" (R25): solo el texto escrito. Empieza con el lugar inicial (p. ej. el lugar actual al
+ * cambiarlo en Mi viaje, R27) o vacío.
  */
-export function useLugar(recientes: string[], inicial?: string | null) {
-  const primero = inicial ?? recientes[0]
-  const [elegido, setElegido] = useState<string | typeof OTRO>(primero && recientes.includes(primero) ? primero : OTRO)
-  const [escrito, setEscrito] = useState(primero && !recientes.includes(primero) ? primero : "")
-  const valor = (elegido === OTRO ? escrito : elegido).trim()
-  return { recientes, elegido, escrito, valor, elegir: setElegido, escribir: (t: string) => (setEscrito(t), setElegido(OTRO)) }
+export function useLugar(inicial?: string | null) {
+  const [escrito, escribir] = useState(inicial ?? "")
+  return { escrito, valor: escrito.trim(), escribir }
 }
 
-/** Lugares recientes (un toque) + campo de texto libre. El chofer ve este texto en grande. */
+/** El campo "¿Dónde estás?": texto libre. El chofer ve este texto en grande. */
 export function ElegirLugar({ lugar, error }: { lugar: ReturnType<typeof useLugar>; error?: string }) {
   const id = useId()
-  const { recientes, elegido, escrito, elegir, escribir } = lugar
-  const hayRecientes = recientes.length > 0
+  const { escrito, escribir } = lugar
 
   return (
     <div className="flex flex-col gap-3">
-      {hayRecientes && (
-        <fieldset className="flex flex-col gap-2">
-          <legend className="mb-2 font-bold">¿Dónde estás?</legend>
-          {recientes.map((r) => {
-            const activo = elegido === r
-            return (
-              <label
-                key={r}
-                className={cn(
-                  "flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 bg-card px-4 py-2.5 transition-colors has-focus-visible:ring-[3px] has-focus-visible:ring-ring",
-                  activo ? "border-primary bg-secondary" : "border-border hover:bg-muted"
-                )}
-              >
-                <input type="radio" name="lugar-reciente" checked={activo} onChange={() => elegir(r)} className="sr-only" />
-                <span aria-hidden className={cn("grid size-9 shrink-0 place-items-center rounded-full", activo ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                  {activo ? <CheckIcon className="size-5" /> : <HistoryIcon className="size-5" />}
-                </span>
-                <span className="min-w-0 font-bold">{r}</span>
-              </label>
-            )
-          })}
-        </fieldset>
-      )}
       <div className="flex flex-col gap-1.5">
         <label htmlFor={id} className="font-bold">
-          {hayRecientes ? "U otro lugar" : "¿Dónde estás?"}
+          ¿Dónde estás?
         </label>
         <Input
           id={id}
           value={escrito}
           onChange={(e) => escribir(e.target.value)}
-          onFocus={() => escribir(escrito)}
           maxLength={60}
           placeholder="Ej.: entrada de Las Cayenas"
           autoComplete="off"

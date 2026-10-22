@@ -13,13 +13,16 @@ export function ChipAire() {
   )
 }
 
-/** Quién maneja: foto (R54), nombre, reputación y el carro (placa en grande para reconocerlo en la calle) */
-export function ChoferResumen({ chofer }: { chofer: Chofer }) {
+/**
+ * Quién maneja: foto (R54), nombre, reputación y el carro (placa en grande para reconocerlo en la calle).
+ * compacto (Mi viaje): solo placa y unidad; el modelo, el color y el aire van a pedido (DetalleCarro).
+ */
+export function ChoferResumen({ chofer, compacto = false }: { chofer: Chofer; compacto?: boolean }) {
   const v = chofer.vehiculo
-  const carro = [v?.modelo, v?.color].filter(Boolean).join(" · ")
+  const carro = compacto ? "" : [v?.modelo, v?.color].filter(Boolean).join(" · ")
   return (
     <div className="flex items-center gap-3">
-      <Avatar url={chofer.fotoUrl} nombre={chofer.nombre} className="size-14 text-lg" />
+      <Avatar url={chofer.fotoUrl} nombre={chofer.nombre} className={compacto ? "size-12 text-base" : "size-14 text-lg"} />
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-x-2 font-bold">
           <span className="truncate">{chofer.nombre}</span>
@@ -42,15 +45,28 @@ export function ChoferResumen({ chofer }: { chofer: Chofer }) {
             </span>
           )}
           {carro}
-          {v?.unidad && ` · Unidad ${v.unidad}`}
+          {v?.unidad && `${carro ? " · " : ""}Unidad ${v.unidad}`}
         </p>
-        {v?.aire_acondicionado && (
+        {v?.aire_acondicionado && !compacto && (
           <p className="mt-1">
             <ChipAire />
           </p>
         )}
       </div>
     </div>
+  )
+}
+
+/** El carro en palabras (modelo, color, aire), para lo que se abre a pedido en Mi viaje */
+export function DetalleCarro({ chofer }: { chofer: Chofer }) {
+  const v = chofer.vehiculo
+  const carro = [v?.modelo, v?.color].filter(Boolean).join(" · ")
+  if (!carro && !v?.aire_acondicionado) return null
+  return (
+    <p className="flex flex-wrap items-center gap-2 px-2">
+      {carro && <span className="font-bold">{carro}</span>}
+      {v?.aire_acondicionado && <ChipAire />}
+    </p>
   )
 }
 

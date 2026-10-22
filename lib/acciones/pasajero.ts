@@ -175,7 +175,7 @@ export async function estoyEnLista(d: {
   personas: number
   distanciaM: number | null
 }): Promise<Resultado> {
-  return llamarLista((s) =>
+  const r = await llamarLista((s) =>
     s.rpc("estoy_en_lista", {
       p_en_gina: d.enGina,
       ...(d.lugar ? { p_lugar: d.lugar } : {}),
@@ -184,16 +184,14 @@ export async function estoyEnLista(d: {
       ...(d.distanciaM !== null ? { p_distancia_m: Math.round(d.distanciaM) } : {}),
     })
   )
+  // Anotado, su viaje es Mi viaje (§5.17)
+  if (r.ok) redirect("/mi-viaje")
+  return r
 }
 
 /** "Sí, sigo aquí" (R62) */
 export async function sigoEnLista(): Promise<Resultado> {
   return llamarLista((s) => s.rpc("sigo_en_lista"))
-}
-
-/** "Me monté en un carro de la línea" (R62): no sale de la lista; el chofer lo marca Subió */
-export async function meMonte(): Promise<Resultado> {
-  return llamarLista((s) => s.rpc("me_monte"))
 }
 
 /** "Me fui" (R62), con cómo se va (en la van, en otro carro…) */

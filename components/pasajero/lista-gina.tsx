@@ -23,7 +23,7 @@ import { Avatar as AvatarUi, AvatarFallback, AvatarGroup, AvatarGroupCount, Avat
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { estoyEnLista, meFui, meMonte, sigoEnLista, type Resultado } from "@/lib/acciones/pasajero"
+import { estoyEnLista, meFui, sigoEnLista, type Resultado } from "@/lib/acciones/pasajero"
 import type { ChoferEnPausa, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import type { EnListaGina } from "@/lib/datos/lista-gina"
 import { hace, hora } from "@/lib/fechas"
@@ -61,10 +61,19 @@ function BarraVence({ quedan }: { quedan: number }) {
 const personas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
 const suma = (l: EnListaGina[]) => l.reduce((n, e) => n + e.personas, 0)
 
+/** Reloj de la pantalla, cada 15 s: en el servidor no hay hora (0), así no cambia al hidratar */
+function useAhora() {
+  const suscribir = useCallback((avisar: () => void) => {
+    const id = setInterval(avisar, 15_000)
+    return () => clearInterval(id)
+  }, [])
+  return useSyncExternalStore(suscribir, () => Math.floor(Date.now() / 15_000) * 15_000, () => 0)
+}
+
 /**
- * Centro → Valle Grande (docs/especificacion.md §5.17): no se aparta puesto; se anota en la lista del tramo, por orden
- * de llegada, diciendo dónde está ("En Gina", lo principal, o el lugar que escribe). Con aviso: su lugar en grande,
- * los carros que vienen, la lista de todos y "Me fui".
+ * Centro → Valle Grande en Inicio (docs/especificacion.md §5.17), para quien todavía no se anotó: no se aparta puesto;
+ * se anota en la lista del tramo, por orden de llegada, diciendo dónde está ("En Gina", lo principal, o el lugar que
+ * escribe). Al anotarse pasa a Mi viaje (MiLista).
  */
 export function ListaGina({
   lista,
@@ -77,59 +86,195 @@ export function ListaGina({
   porId: Map<string, Viaje>
   enPausa: ChoferEnPausa[]
 }) {
-  const mio = lista.find((e) => e.esMio) ?? null
-  // Los que ya salieron de Gina no le sirven a quien espera en Gina; a quien espera en el camino, sí (R67)
-  const visibles = mio?.enGina ? carros.filter((v) => v.estado !== "en_ruta") : carros
-  // El primero que pasa por Gina con puesto se destaca, como en las unidades (ya vienen ordenadas)
-  const primeroConPuesto = visibles.find((v) => v.estado !== "en_ruta" && libres(v) > 0)
   const [hoja, setHoja] = useState(false)
 
   return (
     <div className="flex flex-col gap-5">
-      {mio ? (
-        <MiLugar mio={mio} lista={lista} />
-      ) : (
-        <section aria-labelledby="titulo-lista-tramo" className="flex flex-col gap-3 rounded-3xl border-2 border-primary bg-card p-5">
-          <div>
-            <h2 id="titulo-lista-tramo" className="text-2xl leading-tight font-bold">
-              Lista hacia Valle Grande
-            </h2>
-            <p className="text-muted-foreground">
-              Anótate cuando ya estés esperando y di dónde estás: quien se anota primero, sube primero.
-            </p>
-          </div>
-          <Button variant="signal" size="lg" className="w-full" onClick={() => setHoja(true)}>
-            <HandIcon aria-hidden />
-            Anotarme en la lista
-          </Button>
-        </section>
-      )}
+      <section aria-labelledby="titulo-lista-tramo" className="flex flex-col gap-3 rounded-3xl border-2 border-primary bg-card p-5">
+        <div>
+          <h2 id="titulo-lista-tramo" className="text-2xl leading-tight font-bold">
+            Lista hacia Valle Grande
+          </h2>
+          <p className="text-muted-foreground">
+            Anótate cuando ya estés esperando y di dónde estás: quien se anota primero, sube primero.
+          </p>
+        </div>
+        <Button variant="signal" size="lg" className="w-full" onClick={() => setHoja(true)}>
+          <HandIcon aria-hidden />
+          Anotarme en la lista
+        </Button>
+      </section>
 
       {/* La lista, igual para todos (R63): una franja que abre la lista completa, como la del chofer */}
       <FranjaLista lista={lista} />
-
-      {/* Los carros del tramo: cuándo pasan por Gina y con cuántos puestos */}
-      <section aria-labelledby="titulo-carros" className="flex flex-col gap-2">
-        <h2 id="titulo-carros" className="text-xl font-bold">
-          Carros que vienen
-        </h2>
-        {visibles.length === 0 ? (
-          <div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed px-4 py-4">
-            <p className="text-muted-foreground">Ningún carro va hacia Valle Grande ahora. Esta pantalla se actualiza sola.</p>
-            <QuienVuelve choferes={enPausa} className="border-t pt-3" />
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {/* El mismo cartón de las unidades, sin apartar: cuándo pasa por Gina, puestos, chofer, mapa */}
-            {visibles.map((v) => (
-              <TarjetaUnidad key={v.id} viaje={v} porId={porId} porLista destacada={v.id === primeroConPuesto?.id} />
-            ))}
-          </div>
-        )}
-      </section>
+      <CarrosQueVienen carros={carros} porId={porId} enPausa={enPausa} mio={null} />
 
       <HojaAviso abierta={hoja} onCerrar={() => setHoja(false)} />
     </div>
+  )
+}
+
+/**
+ * Mi viaje de quien está en la lista hacia Valle Grande (§5.17), en orden de lo que necesita: su lugar → "¿Sigues
+ * ahí?" si está por vencer → los carros que vienen (lo más útil) → cuánto vale su lugar → la lista → "Me fui".
+ */
+export function MiLista({
+  lista,
+  carros,
+  porId,
+  enPausa,
+}: {
+  lista: EnListaGina[]
+  carros: ViajeConChofer[]
+  porId: Map<string, Viaje>
+  enPausa: ChoferEnPausa[]
+}) {
+  const mio = lista.find((e) => e.esMio) ?? null
+  const [confirmar, setConfirmar] = useState(false)
+  const [pendiente, iniciar] = useTransition()
+  const [error, setError] = useState<string>()
+  const ahora = useAhora()
+  if (!mio) return null
+
+  const antes = suma(lista.filter((e) => e.posicion < mio.posicion))
+  const quedanMin = ahora > 0 ? Math.max(0, (new Date(mio.venceEn).getTime() - ahora) / 60_000) : VALE_MIN
+  const porVencer = ahora > 0 && quedanMin <= AVISAR_ANTES_MIN
+  // Ya montado (avisó "Me monté"), el tiempo del lugar no hace falta
+  const conTiempo = !mio.diceQueSubio
+
+  const ejecutar = (accion: () => Promise<Resultado>, alTerminar?: () => void) =>
+    iniciar(async () => {
+      setError(undefined)
+      const r = await accion()
+      setError(r.error)
+      if (r.ok) alTerminar?.()
+    })
+
+  return (
+    <div className="flex flex-col gap-5">
+      {/* 1. Su lugar */}
+      <section aria-labelledby="titulo-mi-lugar" className="flex flex-col gap-1 rounded-3xl border-2 border-primary bg-card p-5 shadow-sm">
+        <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">Lista hacia Valle Grande</p>
+        <h2 id="titulo-mi-lugar" className="text-2xl leading-tight font-bold">
+          {mio.diceQueSubio ? "Avisaste que te montaste" : mio.posicion === 1 ? "Eres el primero" : `Eres el ${mio.posicion}`}
+        </h2>
+        <p className="flex items-start gap-1.5 text-lg">
+          <MapPinIcon aria-hidden className="mt-1 size-5 shrink-0 text-primary" />
+          <span>
+            {mio.enGina ? "En Gina" : mio.lugar}
+            {mio.personas > 1 && ` · van ${mio.personas}`}
+          </span>
+        </p>
+        <p className="text-muted-foreground">
+          {mio.diceQueSubio ? (
+            "El chofer te marca Subió en su lista. Si no pasa en un rato, recuérdaselo."
+          ) : (
+            <>
+              {antes === 0 ? "Nadie antes que tú." : `Antes que tú: ${personas(antes)}.`}
+              {!mio.enGina && " El carro te guarda puesto y te recoge al pasar."}
+            </>
+          )}
+        </p>
+      </section>
+
+      {/* 2. Por vencer: lo urgente va antes que los carros */}
+      {conTiempo && porVencer && (
+        <div role="alert" className="flex flex-col gap-3 rounded-2xl border-2 border-warning/50 bg-warning-muted p-4">
+          <p className="flex items-start gap-2 font-bold">
+            <TriangleAlertIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
+            ¿Sigues ahí? Si no respondes, a las {hora(mio.venceEn)} sales de la lista.
+          </p>
+          <BarraVence quedan={quedanMin} />
+          <Button size="lg" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
+            {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
+            Sí, sigo aquí
+          </Button>
+        </div>
+      )}
+
+      {/* 3. Lo más útil: cuándo pasa el próximo carro y con cuántos puestos */}
+      <CarrosQueVienen carros={carros} porId={porId} enPausa={enPausa} mio={mio} />
+
+      {/* 4. Cuánto vale el lugar (R62), con "Sigo aquí" cuando quiera */}
+      {conTiempo && !porVencer && (
+        <div className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
+          <p className="flex items-start gap-2">
+            <TimerIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
+            <span>
+              {ahora > 0 ? (
+                <>
+                  <strong>Tu lugar vale {minutos(quedanMin)} más</strong> · hasta las {hora(mio.venceEn)}
+                </>
+              ) : (
+                <strong>Tu lugar vale 45 min</strong>
+              )}
+              <span className="block text-[15px] text-muted-foreground">Si sigues esperando, renuévalo cuando quieras.</span>
+            </span>
+          </p>
+          {ahora > 0 && <BarraVence quedan={quedanMin} />}
+          <Button variant="outline" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
+            {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
+            Sigo aquí: 45 min más
+          </Button>
+        </div>
+      )}
+
+      {/* 5. La lista de todos y 6. Me fui */}
+      <FranjaLista lista={lista} />
+      {error && !confirmar && (
+        <p role="alert" className="font-bold text-destructive">
+          {error}
+        </p>
+      )}
+      <Button variant="outline" className="text-destructive" onClick={() => setConfirmar(true)}>
+        Me fui
+      </Button>
+      <HojaMeFui
+        abierta={confirmar}
+        onCambiar={setConfirmar}
+        pendiente={pendiente}
+        error={error}
+        onMotivo={(m) => ejecutar(() => meFui(m), () => setConfirmar(false))}
+      />
+    </div>
+  )
+}
+
+/** Los carros del tramo: cuándo pasan por Gina y con cuántos puestos (y los que ya salieron con puesto, R67) */
+function CarrosQueVienen({
+  carros,
+  porId,
+  enPausa,
+  mio,
+}: {
+  carros: ViajeConChofer[]
+  porId: Map<string, Viaje>
+  enPausa: ChoferEnPausa[]
+  mio: EnListaGina | null
+}) {
+  // Los que ya salieron de Gina no le sirven a quien espera en Gina; a quien espera en el camino, sí (R67)
+  const visibles = mio?.enGina ? carros.filter((v) => v.estado !== "en_ruta") : carros
+  // El primero que pasa por Gina con puesto se destaca, como en las unidades (ya vienen ordenadas)
+  const primeroConPuesto = visibles.find((v) => v.estado !== "en_ruta" && libres(v) > 0)
+  return (
+    <section aria-labelledby="titulo-carros" className="flex flex-col gap-2">
+      <h2 id="titulo-carros" className="text-xl font-bold">
+        Carros que vienen
+      </h2>
+      {visibles.length === 0 ? (
+        <div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed px-4 py-4">
+          <p className="text-muted-foreground">Ningún carro va hacia Valle Grande ahora. Esta pantalla se actualiza sola.</p>
+          <QuienVuelve choferes={enPausa} className="border-t pt-3" />
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {/* El mismo cartón de las unidades, sin apartar: cuándo pasa por Gina, puestos, chofer, mapa */}
+          {visibles.map((v) => (
+            <TarjetaUnidad key={v.id} viaje={v} porId={porId} porLista destacada={v.id === primeroConPuesto?.id} />
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 
@@ -219,112 +364,6 @@ function FilaLista({ entrada: e }: { entrada: EnListaGina }) {
   )
 }
 
-/** Con aviso: su lugar en grande, "¿Sigues ahí?" cuando va a vencer y "Me fui" (R62) */
-function MiLugar({ mio, lista }: { mio: EnListaGina; lista: EnListaGina[] }) {
-  const [confirmar, setConfirmar] = useState(false)
-  const [pendiente, iniciar] = useTransition()
-  const [error, setError] = useState<string>()
-  const antes = suma(lista.filter((e) => e.posicion < mio.posicion))
-
-  // Reloj: en el servidor no hay hora (0), así no cambia al hidratar
-  const suscribir = useCallback((avisar: () => void) => {
-    const id = setInterval(avisar, 15_000)
-    return () => clearInterval(id)
-  }, [])
-  const ahora = useSyncExternalStore(suscribir, () => Math.floor(Date.now() / 15_000) * 15_000, () => 0)
-  const quedanMin = ahora > 0 ? Math.max(0, (new Date(mio.venceEn).getTime() - ahora) / 60_000) : VALE_MIN
-  const porVencer = ahora > 0 && quedanMin <= AVISAR_ANTES_MIN
-
-  const ejecutar = (accion: () => Promise<Resultado>, alTerminar?: () => void) =>
-    iniciar(async () => {
-      setError(undefined)
-      const r = await accion()
-      setError(r.error)
-      if (r.ok) alTerminar?.()
-    })
-
-  return (
-    <>
-      <section aria-labelledby="titulo-mi-lugar" className="relative overflow-hidden rounded-3xl bg-header text-header-foreground shadow-md">
-        <span aria-hidden className="absolute inset-x-0 top-0 h-1.5 bg-signal" />
-        <div className="flex flex-col gap-1 p-5 pt-6">
-          <p className="text-sm font-bold tracking-wide uppercase opacity-90">Centro → Valle Grande</p>
-          <h2 id="titulo-mi-lugar" className="text-[32px] leading-tight font-bold">
-            {mio.diceQueSubio ? "Avisaste que te montaste" : mio.posicion === 1 ? "Eres el primero" : `Eres el ${mio.posicion}`}
-          </h2>
-          <p className="text-lg">
-            {mio.enGina ? "en Gina" : <>en {mio.lugar}</>}
-            {mio.personas > 1 && ` · van ${mio.personas}`}
-          </p>
-          <p className="text-[15px] opacity-90">
-            {mio.diceQueSubio ? (
-              "El chofer te marca Subió en su lista. Si no pasa en un rato, recuérdaselo."
-            ) : (
-              <>
-                {antes === 0 ? "Nadie antes que tú." : `Antes que tú: ${personas(antes)}.`}
-                {!mio.enGina && " El carro te guarda puesto y te recoge al pasar."}
-              </>
-            )}
-          </p>
-        </div>
-      </section>
-
-      {/* Cuánto vale el lugar (R62), siempre a la vista; a los 35 min se vuelve "¿Sigues ahí?" */}
-      {mio.diceQueSubio ? null : porVencer ? (
-        <div role="alert" className="flex flex-col gap-3 rounded-2xl border-2 border-warning/50 bg-warning-muted p-4">
-          <p className="flex items-start gap-2 font-bold">
-            <TriangleAlertIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
-            ¿Sigues ahí? Si no respondes, a las {hora(mio.venceEn)} sales de la lista.
-          </p>
-          <BarraVence quedan={quedanMin} />
-          <Button size="lg" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
-            {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
-            Sí, sigo aquí
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
-          <p className="flex items-start gap-2">
-            <TimerIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
-            <span>
-              {ahora > 0 ? (
-                <>
-                  <strong>Tu lugar vale {minutos(quedanMin)} más</strong> · hasta las {hora(mio.venceEn)}
-                </>
-              ) : (
-                <strong>Tu lugar vale 45 min</strong>
-              )}
-              <span className="block text-[15px] text-muted-foreground">Si sigues esperando, renuévalo cuando quieras.</span>
-            </span>
-          </p>
-          {ahora > 0 && <BarraVence quedan={quedanMin} />}
-          <Button variant="outline" disabled={pendiente} onClick={() => ejecutar(sigoEnLista)}>
-            {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
-            Sigo aquí: 45 min más
-          </Button>
-        </div>
-      )}
-
-      {error && !confirmar && (
-        <p role="alert" className="font-bold text-destructive">
-          {error}
-        </p>
-      )}
-      <Button variant="outline" className="text-destructive" onClick={() => setConfirmar(true)}>
-        Me fui
-      </Button>
-      <HojaMeFui
-        abierta={confirmar}
-        onCambiar={setConfirmar}
-        pendiente={pendiente}
-        error={error}
-        onMotivo={(m) => ejecutar(() => meFui(m), () => setConfirmar(false))}
-        onMeMonte={mio.diceQueSubio ? undefined : () => ejecutar(meMonte, () => setConfirmar(false))}
-      />
-    </>
-  )
-}
-
 const ICONO_ME_FUI: Record<MotivoMeFui, typeof BusIcon> = {
   van: BusIcon,
   otro_carro: CarFrontIcon,
@@ -335,8 +374,7 @@ const ICONO_ME_FUI: Record<MotivoMeFui, typeof BusIcon> = {
 
 /**
  * "Me fui" (R62): sale de la lista diciendo cómo se va, en un toque (cada opción confirma). Sirve para medir cuánta
- * gente se lleva la van. Arriba y aparte, "Me monté en un carro de la línea": montarse no es irse (lo marca el
- * chofer), pero hubo quien tocó "Me fui" al montarse. Seguir esperando es lo seguro: recibe el foco al abrir.
+ * gente se lleva la van. Seguir esperando es lo seguro: recibe el foco al abrir.
  */
 function HojaMeFui({
   abierta,
@@ -344,45 +382,24 @@ function HojaMeFui({
   pendiente,
   error,
   onMotivo,
-  onMeMonte,
 }: {
   abierta: boolean
   onCambiar: (abierta: boolean) => void
   pendiente: boolean
   error?: string
   onMotivo: (m: MotivoMeFui) => void
-  onMeMonte?: () => void // sin esto (ya avisó que se montó), no se ofrece
 }) {
-  const [escogido, setEscogido] = useState<MotivoMeFui | "monte">()
+  const [escogido, setEscogido] = useState<MotivoMeFui>()
   return (
     <Sheet open={abierta} onOpenChange={(v) => !pendiente && onCambiar(v)}>
       <SheetContent side="bottom" className="mx-auto max-h-[90svh] max-w-2xl overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>¿Qué pasó?</SheetTitle>
-          <SheetDescription className="sr-only">Si te montaste en un carro de la línea, o cómo te vas sin ella</SheetDescription>
+          <SheetTitle>¿Cómo te vas?</SheetTitle>
+          <SheetDescription className="text-base">
+            Sales de la lista. Si vuelves, te anotas otra vez al final. Tu respuesta nos ayuda a mejorar la línea.
+          </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-2.5 px-5 pb-6">
-          {onMeMonte && (
-            <div className="mb-3 flex flex-col gap-2 rounded-2xl bg-secondary p-3">
-              <Button
-                size="lg"
-                className="w-full"
-                disabled={pendiente}
-                onClick={() => {
-                  setEscogido("monte")
-                  onMeMonte()
-                }}
-              >
-                {pendiente && escogido === "monte" ? <Loader2Icon aria-hidden className="animate-spin" /> : <CarFrontIcon aria-hidden />}
-                Me monté en un carro de la línea
-              </Button>
-              <p className="text-[15px] text-secondary-foreground">No sales de la lista: el chofer te marca Subió.</p>
-            </div>
-          )}
-          <p className="font-bold">Me voy sin la línea</p>
-          <p className="-mt-1.5 text-[15px] text-muted-foreground">
-            Sales de la lista. Si vuelves, te anotas otra vez al final. Tu respuesta nos ayuda a mejorar la línea.
-          </p>
           {MOTIVOS_SALIDA.map((m) => {
             const Icono = ICONO_ME_FUI[m]
             return (

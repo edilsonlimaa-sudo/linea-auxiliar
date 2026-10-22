@@ -27,6 +27,7 @@ import { cargarListaGina, type EnListaGina } from "@/lib/datos/lista-gina"
 import { exigirCuentaAprobada, type Perfil } from "@/lib/sesion"
 import {
   aceptaReservas,
+  carrosHaciaValle,
   haciaEnFrase,
   libres,
   ordenarParaPasajero,
@@ -63,10 +64,9 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
     cargarAvisoDeCierre(perfil.id),
     cargarListaGina(),
   ])
-  if (pendiente) redirect("/mi-viaje")
-  // Si está en la Lista de Gina, Inicio abre en Centro → Valle Grande (R62)
-  const sentido = sentidoDeHacia(hacia) ?? (lista.some((e) => e.esMio) ? "centro_a_vg" : null)
-  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentido} lista={lista} />
+  // Anotado en la lista hacia Valle Grande: como quien aparta puesto, su viaje es Mi viaje (§5.17)
+  if (pendiente || lista.some((e) => e.esMio)) redirect("/mi-viaje")
+  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} lista={lista} />
 }
 
 /**
@@ -87,7 +87,7 @@ function InicioPasajero({
   hacia: Sentido | null
   lista: EnListaGina[]
 }) {
-  const { viajes, porId, lugaresRecientes, aviso, enServicio, enPausa } = datos
+  const { viajes, porId, aviso, enServicio, enPausa } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
   // Empieza en el sentido sugerido por la hora y dónde vive. Cambiarlo es un toque.
   const sentido = hacia ?? sentidoSugerido(perfil.urbanismo)
@@ -117,11 +117,7 @@ function InicioPasajero({
       {sentido === "centro_a_vg" ? (
         <ListaGina
           lista={lista}
-          carros={ordenarParaPasajero(
-            // Los que ya salieron de Gina solo si llevan puesto: pueden recoger en el camino (R67)
-            viajes.filter((v) => v.sentido === "centro_a_vg" && (v.estado !== "en_ruta" || libres(v) > 0)),
-            porId
-          )}
+          carros={carrosHaciaValle(viajes, porId)}
           porId={porId}
           enPausa={enPausa}
         />
@@ -136,7 +132,7 @@ function InicioPasajero({
           </header>
   
           {unidades.map((v) => (
-            <TarjetaUnidad key={v.id} viaje={v} porId={porId} recientes={lugaresRecientes} destacada={v.id === primeraConPuesto?.id} />
+            <TarjetaUnidad key={v.id} viaje={v} porId={porId} destacada={v.id === primeraConPuesto?.id} />
           ))}
   
           {!conPuesto && (

@@ -7,21 +7,26 @@ import { HojaLugar } from "@/components/pasajero/hoja-lugar"
 import { Button } from "@/components/ui/button"
 import { cambiarLugar } from "@/lib/acciones/pasajero"
 
-/** "Cambiar" junto a "Te recoge en …" (R27): misma hoja de lugar que al apartar */
-export function CambiarLugar({ reservaId, recientes, lugarActual }: { reservaId: string; recientes: string[]; lugarActual: string | null }) {
+/** "Cambiar" junto a "Te recoge en …" (R27): misma hoja de lugar que al apartar. compacto: solo "Cambiar" */
+export function CambiarLugar({ reservaId, lugarActual, compacto = false }: { reservaId: string; lugarActual: string | null; compacto?: boolean }) {
   const [hoja, setHoja] = useState(false)
   return (
     <>
-      <Button variant="outline" size="sm" className="self-start" onClick={() => setHoja(true)}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="self-start"
+        aria-label={compacto ? "Cambiar dónde me recogen" : undefined}
+        onClick={() => setHoja(true)}
+      >
         <PencilIcon aria-hidden />
-        Cambiar dónde me recogen
+        {compacto ? "Cambiar" : "Cambiar dónde me recogen"}
       </Button>
       <HojaLugar
         abierta={hoja}
         onCambiar={setHoja}
         titulo="¿Dónde te recogemos?"
         descripcion="El chofer ve el lugar nuevo enseguida."
-        recientes={recientes}
         lugarInicial={lugarActual}
         textoBoton="Guardar"
         onEnviar={async (datos) => {
