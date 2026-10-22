@@ -98,13 +98,14 @@ export function VistaChofer({ detalle: d }: { detalle: DetalleChofer }) {
   const estrellas = c.actividad?.estrellas != null && Number(c.actividad.calificaciones) > 0 ? Number(c.actividad.estrellas) : null
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      {/* En pantalla grande, lado a lado y con la misma altura: la foto del carro ocupa lo que sobra (no estira la tarjeta) */}
+      <div className="grid gap-4 lg:grid-cols-2">
         <Cabecera cuenta={c} conectado={conectado} />
         <section className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
           <h2 className="font-bold">El carro</h2>
           {c.fotoCarroUrl ? (
             // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)
-            <img src={c.fotoCarroUrl} alt={`Carro de ${c.nombre}`} className="aspect-video w-full rounded-xl object-cover" />
+            <img src={c.fotoCarroUrl} alt={`Carro de ${c.nombre}`} className="aspect-video w-full rounded-xl object-cover lg:aspect-auto lg:min-h-32 lg:grow lg:basis-0" />
           ) : (
             <p className="rounded-xl bg-warning-muted px-3 py-2 text-sm font-bold text-warning">Sin foto del carro</p>
           )}
