@@ -13,6 +13,7 @@ import {
   MoonIcon,
   StarIcon,
   SunIcon,
+  UserCheckIcon,
   UsersIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -39,7 +40,7 @@ import { salirAdmin } from "@/lib/acciones/admin"
 import { cn } from "@/lib/utils"
 
 /** Contadores del menú: los que piden acción (aprobar) van en amarillo; los que informan, en gris */
-export type ContadoresAdmin = { choferes: number; pasajeros: number; enCurso: number; esperando: number; listaGina: number }
+export type ContadoresAdmin = { porAprobar: number; enCurso: number; esperando: number; listaGina: number }
 
 type Destino = { href: string; titulo: string; icono: LucideIcon; contador?: keyof ContadoresAdmin; accion?: boolean }
 
@@ -58,8 +59,9 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
   {
     titulo: "Personas",
     destinos: [
-      { href: "/admin/choferes", titulo: "Choferes", icono: CarFrontIcon, contador: "choferes", accion: true },
-      { href: "/admin/pasajeros", titulo: "Pasajeros", icono: UsersIcon, contador: "pasajeros", accion: true },
+      { href: "/admin/aprobar", titulo: "Por aprobar", icono: UserCheckIcon, contador: "porAprobar", accion: true },
+      { href: "/admin/choferes", titulo: "Choferes", icono: CarFrontIcon },
+      { href: "/admin/pasajeros", titulo: "Pasajeros", icono: UsersIcon },
     ],
   },
   {
@@ -80,6 +82,11 @@ export function MenuAdmin({ contadores }: { contadores: ContadoresAdmin }) {
   const montado = useSyncExternalStore(suscribirse, () => true, () => false)
   const oscuro = montado && resolvedTheme === "dark"
   const cerrar = () => setOpenMobile(false)
+  // Activo: el destino más largo que contiene la ruta (el detalle de un chofer marca "Choferes"; Viajes terminados no
+  // marca también Viajes en curso)
+  const activoHref = GRUPOS.flatMap((g) => g.destinos.map((d) => d.href))
+    .filter((h) => ruta === h || (h !== "/admin" && ruta.startsWith(`${h}/`)))
+    .sort((a, b) => b.length - a.length)[0]
 
   return (
     <Sidebar>
@@ -101,7 +108,7 @@ export function MenuAdmin({ contadores }: { contadores: ContadoresAdmin }) {
             <SidebarGroupContent>
               <SidebarMenu className="gap-1">
                 {g.destinos.map(({ href, titulo, icono: Icono, contador, accion }) => {
-                  const activo = ruta === href
+                  const activo = href === activoHref
                   const n = contador ? contadores[contador] : 0
                   return (
                     <SidebarMenuItem key={href}>

@@ -100,7 +100,7 @@ marca "Se bajó" (R38), Mi viaje muestra la calificación pendiente (12 h, `Cali
 en vivo (`EnVivo`, respaldo cada 60 s).
 
 Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pasajero o chofer?) → `/registro/[pasajero|chofer]` ·
-`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/linea` (La línea) · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin/clave` · panel: `/admin` (Resumen), `/admin/viajes`, `/admin/viajes/terminados`, `/admin/demanda`, `/admin/choferes`, `/admin/pasajeros`, `/admin/uso`, `/admin/calificaciones` (todas, con quién calificó; filtros de período, chofer y nota; datos en `lib/datos/calificaciones-admin.ts`).
+`/entrar` (redirige a `/`) · `/en-revision` · `/inicio` (pasajero: escoger unidad; chofer: Mi viaje) · `/mi-viaje` · `/linea` (La línea) · `/mis-viajes` y `/carnet` (ambos roles) · `/calificaciones` (chofer) · `/choferes` (pasajero, R46) · `/admin/entrar` · `/admin/clave` · panel: `/admin` (Resumen), `/admin/viajes`, `/admin/viajes/terminados`, `/admin/demanda`, `/admin/aprobar` (Por aprobar: pendientes y rechazados de los dos roles, `ListaPorAprobar` + `TarjetaCuenta`), `/admin/choferes` y `/admin/pasajeros` (aprobados con búsqueda `?q=`, `ListaPersonas`) con su detalle `/admin/choferes/[id]` y `/admin/pasajeros/[id]` (`components/admin/detalle-persona.tsx`, datos en `lib/datos/personas-admin.ts`), `/admin/uso`, `/admin/calificaciones` (todas, con quién calificó; filtros de período, chofer y nota; datos en `lib/datos/calificaciones-admin.ts`).
 
 ### Administración
 

@@ -16,8 +16,7 @@ export default async function LayoutPanel({ children }: { children: React.ReactN
     <SidebarProvider defaultOpen>
       <MenuAdmin
         contadores={{
-          choferes: pendientes.chofer,
-          pasajeros: pendientes.pasajero,
+          porAprobar: pendientes.chofer + pendientes.pasajero,
           enCurso: resumen?.viajes_en_curso ?? 0,
           esperando: resumen?.pasajeros_esperando ?? 0,
           listaGina: lista.reduce((n, e) => n + e.personas, 0),

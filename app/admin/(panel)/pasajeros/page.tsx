@@ -1,24 +1,22 @@
 import type { Metadata } from "next"
 
-import { ListaCuentas, estadoDeParam } from "@/components/admin/lista-cuentas"
-import { cargarCuentas } from "@/lib/datos/admin"
+import { ListaPersonas } from "@/components/admin/lista-personas"
+import { cargarPersonas } from "@/lib/datos/personas-admin"
 import { exigirAdmin } from "@/lib/sesion"
 
 export const metadata: Metadata = { title: "Pasajeros · Administración · Línea Auxiliar" }
 
-// Pasajeros del panel (§8)
+// Pasajeros del panel (§8): los aprobados, con búsqueda; cada uno abre su detalle. Aprobar va en Por aprobar
 export default async function PaginaPasajeros({ searchParams }: PageProps<"/admin/pasajeros">) {
   await exigirAdmin()
-  const { estado } = await searchParams
-  const { cuentas, error } = await cargarCuentas()
+  const { q } = await searchParams
+  const busqueda = typeof q === "string" ? q.trim().slice(0, 60) : ""
+  const { personas, total, error } = await cargarPersonas("pasajero", busqueda)
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl leading-tight font-bold">Pasajeros</h1>
-        <p className="text-muted-foreground">Revisa la foto y los datos antes de aprobar.</p>
-      </header>
-      <ListaCuentas rol="pasajero" estado={estadoDeParam(typeof estado === "string" ? estado : undefined)} cuentas={cuentas} error={error} />
+      <h1 className="text-xl leading-tight font-bold">Pasajeros</h1>
+      <ListaPersonas rol="pasajero" personas={personas} total={total} busqueda={busqueda} error={error} />
     </div>
   )
 }

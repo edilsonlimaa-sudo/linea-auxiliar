@@ -4,6 +4,7 @@ import { DesconectarChofer } from "@/components/admin/acciones-viaje"
 import { BotonDecision } from "@/components/admin/boton-decision"
 import { BotonEliminar } from "@/components/admin/boton-eliminar"
 import { promedioTexto } from "@/components/estrellas"
+import { Badge } from "@/components/ui/badge"
 import { Avatar } from "@/components/foto/avatar"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import type { Actividad, CuentaConActividad } from "@/lib/datos/admin"
@@ -16,10 +17,12 @@ export function TarjetaCuenta({
   cuenta: c,
   fotoUrl,
   fotoCarroUrl,
+  conRol = false,
 }: {
   cuenta: CuentaConActividad
   fotoUrl: string | null
   fotoCarroUrl: string | null
+  conRol?: boolean // en Por aprobar, donde se mezclan choferes y pasajeros
 }) {
   const chofer = c.rol === "chofer"
   const faltan = [!c.foto_path && "foto de perfil", chofer && !c.foto_carro_path && "foto del carro"].filter(Boolean)
@@ -31,6 +34,7 @@ export function TarjetaCuenta({
         {/* Foto grande: es lo que el admin compara para verificar a la persona (R54) */}
         <Avatar url={fotoUrl} nombre={c.nombre} className="size-16 text-lg" />
         <div className="min-w-0">
+          {conRol && <Badge variant={chofer ? "default" : "secondary"}>{chofer ? "Chofer" : "Pasajero"}</Badge>}
           <h3 className="text-base leading-tight font-bold">{c.nombre}</h3>
           <p className="text-sm text-muted-foreground" title={fechaHora(c.creado_en)}>
             Se registró {hace(c.creado_en)}

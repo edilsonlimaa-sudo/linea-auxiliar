@@ -66,8 +66,8 @@ export function Resumen({
         </Tarjeta>
         <Tarjeta titulo="Comunidad">
           <div className="grid grid-cols-3 gap-2">
-            <Indicador valor={aprobados("chofer")} texto="choferes aprobados" href="/admin/choferes?estado=aprobado" />
-            <Indicador valor={aprobados("pasajero")} texto="pasajeros aprobados" href="/admin/pasajeros?estado=aprobado" />
+            <Indicador valor={aprobados("chofer")} texto="choferes aprobados" href="/admin/choferes" />
+            <Indicador valor={aprobados("pasajero")} texto="pasajeros aprobados" href="/admin/pasajeros" />
             <Indicador valor={resumen?.registros_7d ?? 0} texto={resumen?.registros_7d === 1 ? "registro en 7 días" : "registros en 7 días"} />
           </div>
         </Tarjeta>
@@ -135,14 +135,14 @@ function Atencion({
     items.push({
       clave: "choferes",
       texto: pendientes.chofer === 1 ? "1 chofer espera tu aprobación" : `${pendientes.chofer} choferes esperan tu aprobación`,
-      href: "/admin/choferes?estado=pendiente",
+      href: "/admin/aprobar?rol=chofer",
       accion: "Revisar",
     })
   if (pendientes.pasajero > 0)
     items.push({
       clave: "pasajeros",
       texto: pendientes.pasajero === 1 ? "1 pasajero espera tu aprobación" : `${pendientes.pasajero} pasajeros esperan tu aprobación`,
-      href: "/admin/pasajeros?estado=pendiente",
+      href: "/admin/aprobar?rol=pasajero",
       accion: "Revisar",
     })
   for (const s of ORDEN) {

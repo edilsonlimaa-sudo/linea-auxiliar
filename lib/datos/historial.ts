@@ -121,6 +121,13 @@ export async function cargarViajesChofer(choferId: string): Promise<ViajeTermina
   return cargarTerminados({ choferId, limite: 20, admin: false })
 }
 
+/** Detalle del chofer en el panel: sus últimos 20 viajes cerrados (terminados y cancelados) */
+export async function cargarViajesDeChoferAdmin(choferId: string): Promise<ViajeTerminado[]> {
+  const viajes = await cargarTerminados({ choferId, estados: ["finalizado", "cancelado"], limite: 20, admin: true })
+  // Sin el chofer en cada tarjeta: ya está arriba en el detalle
+  return viajes.map((v) => ({ ...v, chofer: undefined }))
+}
+
 export type FiltroCerrados = "terminados" | "cancelados" | "todos"
 export const POR_PAGINA = 50
 

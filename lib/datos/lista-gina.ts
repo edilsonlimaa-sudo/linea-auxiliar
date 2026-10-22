@@ -75,7 +75,7 @@ const corto = (nombre: string | null | undefined) => (nombre ? nombreCorto(nombr
  * Las salidas de la lista desde `desde` (hasta `hasta`), la más reciente primero. Quien estaba en el camino queda
  * "en_carro" al ligarse a un carro: su motivo final sale de su reserva (subió, no estaba, canceló…).
  */
-export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date): Promise<SalidaLista[]> {
+export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date, pasajeroId?: string): Promise<SalidaLista[]> {
   const supabase = await crearClienteServidor()
   let consulta = supabase
     .from("lista_gina")
@@ -87,6 +87,7 @@ export async function cargarHistorialListaAdmin(desde: Date, hasta?: Date): Prom
     .order("cerrada_en", { ascending: false, nullsFirst: false })
     .limit(300)
   if (hasta) consulta = consulta.lt("creada_en", hasta.toISOString())
+  if (pasajeroId) consulta = consulta.eq("pasajero_id", pasajeroId) // detalle del pasajero en el panel
   const { data } = await consulta
   const fotos = await firmarFotos((data ?? []).map((e) => e.pasajero?.foto_path))
 

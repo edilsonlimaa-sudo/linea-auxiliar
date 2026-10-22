@@ -551,7 +551,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** ("¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **La línea** (mapa con todos los choferes y quién trabaja) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Demanda** · **Viajes terminados**) · Personas (**Choferes** · **Pasajeros**, cada uno con Pendientes / Aprobados / Rechazados) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Demanda** · **Viajes terminados**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros**) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
@@ -627,11 +627,25 @@ menú (formularios).
      WhatsApp y Llamar. Solo esperas activas de las últimas 2 h (R35).
   3. **Hoy** (hora de Caracas): pedidos, cuántos consiguieron puesto, cuántos se fueron sin transporte (la
      espera venció), cuántos cancelaron y la espera promedio hasta conseguir puesto.
-- **Choferes:** la tarjeta destaca el carro (foto, placa, unidad, aire) y su actividad: conectado ahora, viajes
-  terminados, ★ promedio y último viaje.
-- **Pasajeros:** la tarjeta destaca la foto y dónde vive, y su actividad: viajes hechos y último viaje.
-- Cada lista tiene sus pestañas Pendientes / Aprobados / Rechazados y las acciones de R2 (aprobar, rechazar,
-  eliminar), WhatsApp y Llamar.
+- **Por aprobar** *(Oct. 2026: la aprobación sale de Choferes y Pasajeros)*: las cuentas nuevas de los dos roles, con
+  pestañas **Pendientes** (con su número en amarillo en el menú) y **Rechazados**, y filtro **Todos · Choferes ·
+  Pasajeros**. Cada tarjeta trae lo necesario para verificar (R2, R5): fotos (del chofer, también la del carro),
+  teléfono, cédula, dónde vive, placa, unidad, carro y aire; WhatsApp y Llamar; **Aprobar**, **Rechazar** y, en
+  rechazados, **Eliminar**.
+- **Choferes** y **Pasajeros**: la **lista de los aprobados**, con **búsqueda** (nombre, teléfono, cédula; en choferes
+  también placa y unidad; en pasajeros, dónde vive), sin importar tildes ni mayúsculas. Una fila corta por persona:
+  foto, nombre y lo que la distingue (chofer: placa, ● conectado, ★ y viajes; pasajero: dónde vive y viajes) y su
+  último viaje. Los choferes conectados van primero; después, quien viajó más reciente. Tocar la fila abre el
+  **detalle**.
+- **Detalle del chofer:** foto, nombre, conectado ahora, teléfono (WhatsApp y Llamar), cédula y desde cuándo está; el
+  carro (foto, placa, unidad, modelo, color, aire); números: viajes terminados, cancelados, pasajeros llevados y ★
+  promedio; **Ver en el mapa** y **Desconectar** si está conectado (R69); sus **últimos 20 viajes** (terminados y
+  cancelados, como en Viajes terminados) y sus **últimas calificaciones** con quién calificó. Abajo, **Rechazar**
+  (quitarle el acceso).
+- **Detalle del pasajero:** foto, nombre, dónde vive, teléfono (WhatsApp y Llamar), cédula y desde cuándo está;
+  números: viajes hechos, reservas que canceló, veces que no llegó y calificaciones que dio; sus **últimas 30
+  reservas** (cuándo, sentido, chofer y cómo terminó: viajó, se bajó antes, canceló, no llegó, el chofer canceló…) y
+  sus veces en la **Lista hacia Valle Grande** (cómo terminó y por qué se fue). Abajo, **Rechazar**.
 
 **Mi viaje del pasajero (página aparte).** Apartar puesto es pasar de *escoger* a *acompañar* el viaje, así
 que tiene su propia página (también es adonde llevan los avisos de §7):
