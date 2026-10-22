@@ -24,7 +24,7 @@ export function Navegacion({ conViaje }: { conViaje: boolean }) {
   return (
     <nav
       aria-label="Principal"
-      className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="v2 fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 text-foreground antialiased pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
       <ul className="mx-auto flex max-w-lg">
         {destinos.map(({ href, titulo, icono: Icono }) => {

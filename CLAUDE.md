@@ -69,7 +69,9 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 - **Nunca importar `components/v2/ui` fuera de la v2 ni `components/ui` en lo nuevo de la v2.** Motorista, admin y el
   pasajero de siempre no se tocan.
 - **Quién la ve:** solo las cuentas con `perfiles.diseno_v2` (se marca a mano en la base; nadie se marca solo).
-  `app/(app)/layout.tsx` les da `CascaV2`; las pantallas que todavía no tienen versión v2 se ven dentro tal cual.
+  `app/(app)/layout.tsx` les da `CascaV2`, que **no muestra nada del diseño de siempre**: una pantalla sin versión v2
+  muestra "En construcción" (`EnConstruccion`) y la vieja ni se arma.
+  Nunca meter una pantalla vieja en la casca v2: el tema (`.v2`) cubre toda la casca y la dejaría mitad vieja, mitad nueva.
   Para agregar el kit: el CLI de shadcn instala donde dice `components.json`; se cambia por un momento `style` a
   `base-nova` y `aliases.ui` a `@/components/v2/ui`, y se deja como estaba (revisar que `cn` venga de `@/lib/utils`).
 

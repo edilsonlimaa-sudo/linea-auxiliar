@@ -15,7 +15,8 @@ export default async function LayoutApp({ children }: { children: React.ReactNod
     rol === "pasajero" ? tieneViajeEnCurso(perfil.id) : false,
     firmarFotos([perfil.foto_path]),
   ])
-  if (rol === "pasajero" && perfil.diseno_v2) return <CascaV2 conViaje={conViaje}>{children}</CascaV2>
+  // v2: nada del diseño de siempre (las pantallas viejas no se arman); cada pantalla nueva llegará por su cuenta
+  if (rol === "pasajero" && perfil.diseno_v2) return <CascaV2 conViaje={conViaje} />
   const fotoUrl = perfil.foto_path ? (fotos.get(perfil.foto_path) ?? null) : null
 
   return (

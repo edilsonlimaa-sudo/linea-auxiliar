@@ -16,7 +16,7 @@ export function BarraSuperior() {
   const oscuro = montado && resolvedTheme === "dark"
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/95 backdrop-blur">
+    <header className="v2 sticky top-0 z-20 border-b bg-background/95 text-foreground antialiased backdrop-blur">
       <div className="mx-auto flex h-14 max-w-lg items-center gap-2 px-4">
         <span className="flex min-w-0 flex-1 items-center gap-2">
           {/* eslint-disable-next-line @next/next/no-img-element -- ícono SVG local */}
