@@ -783,7 +783,9 @@ export type Database = {
           atraso_en: string | null
           chofer_id: string
           creado_en: string
+          despues: string | null
           despues_de: string | null
+          despues_vuelve_en: string | null
           estado: Database["public"]["Enums"]["estado_viaje"]
           estado_en: string
           eta_min: number
@@ -799,7 +801,9 @@ export type Database = {
           atraso_en?: string | null
           chofer_id: string
           creado_en?: string
+          despues?: string | null
           despues_de?: string | null
+          despues_vuelve_en?: string | null
           estado: Database["public"]["Enums"]["estado_viaje"]
           estado_en?: string
           eta_min?: number
@@ -815,7 +819,9 @@ export type Database = {
           atraso_en?: string | null
           chofer_id?: string
           creado_en?: string
+          despues?: string | null
           despues_de?: string | null
+          despues_vuelve_en?: string | null
           estado?: Database["public"]["Enums"]["estado_viaje"]
           estado_en?: string
           eta_min?: number
@@ -953,7 +959,9 @@ export type Database = {
           atraso_en: string | null
           chofer_id: string
           creado_en: string
+          despues: string | null
           despues_de: string | null
+          despues_vuelve_en: string | null
           estado: Database["public"]["Enums"]["estado_viaje"]
           estado_en: string
           eta_min: number
@@ -1186,6 +1194,10 @@ export type Database = {
           p_tipo: Database["public"]["Enums"]["tipo_alerta"]
         }
         Returns: string
+      }
+      decir_despues: {
+        Args: { p_despues: string; p_viaje: string; p_vuelve_en?: string }
+        Returns: undefined
       }
       demanda_por_sentido: {
         Args: never

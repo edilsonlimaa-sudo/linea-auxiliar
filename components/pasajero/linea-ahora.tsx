@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import type { ChoferEnPausa, ChoferEnServicio, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
+import { textoVuelta } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
 import { haciaEnFrase, iniciales, libres, llegada, SENTIDOS, type Sentido, type Viaje } from "@/lib/viajes"
 
@@ -180,6 +181,11 @@ function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; po
             {llegada(despues, porId).principal.slice(1)} ({haciaEnFrase(despues.sentido)})
           </span>
         </p>
+      ) : actual?.despues === "pausa" ? (
+        // R73: lo que avisó al salir
+        <p className="text-sm">Después hace una pausa: {textoVuelta(actual.despues_vuelve_en)}</p>
+      ) : actual?.despues === "ultimo" ? (
+        <p className="text-sm">Es su último viaje de hoy</p>
       ) : (
         actual && <p className="text-sm text-muted-foreground">Sin próximo viaje publicado</p>
       )}

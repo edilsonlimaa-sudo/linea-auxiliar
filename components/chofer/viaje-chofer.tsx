@@ -1,6 +1,7 @@
 import { ChevronDownIcon, FlagIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BarraAccion } from "@/components/chofer/barra-accion"
+import { DespuesDelViaje } from "@/components/chofer/despues-del-viaje"
 import { FilaPasajero } from "@/components/chofer/fila-pasajero"
 import { MeAtraso } from "@/components/chofer/me-atraso"
 import { FilaLista } from "@/components/chofer/lista-tramo"
@@ -208,6 +209,8 @@ export function ViajeChofer({
       salioEn={viaje.estado_en}
       destino={SENTIDOS[contrario(viaje.sentido)].enRecogida} // "en el Centro" / "en Valle Grande"
       sinVuelta={sinVuelta}
+      // R73: sin decir qué hace después, Terminar abre la pregunta
+      faltaDespues={enRuta && sinVuelta && viaje.despues !== "pausa" && viaje.despues !== "ultimo"}
     />
   )
 
@@ -272,6 +275,8 @@ export function ViajeChofer({
         <PasosViaje estado={viaje.estado} />
         {/* R70: una hora nueva si se atrasa (en amarillo si ya pasó la que dijo) */}
         {viaje.estado === "en_camino" && <MeAtraso viajeId={viaje.id} estadoEn={viaje.estado_en} etaMin={viaje.eta_min} />}
+        {/* R73: en ruta sin otro viaje publicado, qué hace después */}
+        {enRuta && sinVuelta && <DespuesDelViaje viaje={viaje} />}
         {recogerEnCamino.length > 0 && (
           <p
             role="status"

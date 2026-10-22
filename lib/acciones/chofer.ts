@@ -41,6 +41,23 @@ export async function desconectarme(vuelta: { minutos: number } | { hora: string
   return rpc((s) => s.rpc("desconectar", vuelveEn ? { p_vuelve_en: vuelveEn.toISOString() } : {}))
 }
 
+/**
+ * R73: qué hace después del viaje en ruta: una pausa (vuelve en unos minutos o a una hora, como R60) o su último viaje.
+ * La vuelta no se avisa: se publica (publicarVuelta) y la base lo marca sola.
+ */
+export async function decirDespues(viajeId: string, despues: { minutos: number } | { hora: string } | "ultimo"): Promise<Resultado> {
+  if (despues === "ultimo") return rpc((s) => s.rpc("decir_despues", { p_viaje: viajeId, p_despues: "ultimo" }))
+  let vuelveEn: Date | null
+  if ("minutos" in despues) {
+    if (!Number.isInteger(despues.minutos) || despues.minutos < 5 || despues.minutos > 720) return { error: "Escoge en cuánto vuelves." }
+    vuelveEn = new Date(Date.now() + despues.minutos * 60_000)
+  } else {
+    vuelveEn = horaDeCaracas(despues.hora)
+    if (!vuelveEn) return { error: "Escribe la hora en que vuelves." }
+  }
+  return rpc((s) => s.rpc("decir_despues", { p_viaje: viajeId, p_despues: "pausa", p_vuelve_en: vuelveEn.toISOString() }))
+}
+
 // "14:30" en Caracas (UTC-4, sin horario de verano) → instante. Si esa hora ya pasó hoy, es la de mañana (R10).
 function horaDeCaracas(hhmm: string): Date | null {
   const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm)

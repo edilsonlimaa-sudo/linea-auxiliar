@@ -155,8 +155,25 @@ puede ocultar botones, pero nunca es la única barrera.
     Valle Grande?**", con lo que gana ("Si publicas tu vuelta ahora, la gente que espera ahí ya la ve y aparta puesto
     mientras llegas"), "¿Cuándo llegas a recoger en …?" (20, 30, 45 min, 1 hora) y lo que se publicará ("Vuelta:
     Centro → Valle Grande · 4 puestos"). **Sí, publicar mi vuelta** la publica `en_camino` (como "Agregar otro viaje" en
-    ruta, R11/R13); cerrar la hoja o **No, por ahora no** no hace nada y no se vuelve a preguntar. Se pregunta
+    ruta, R11/R13). *(Desde R73 ya no hay "No, por ahora no": la hoja pregunta qué hace después.)* Se pregunta
     todavía parado, nunca con el carro andando. Si ya tenía la vuelta publicada, no aparece.
+- **R73. ¿Qué haces después? (obligatorio).** *(Oct. 2026: choferes salían sin publicar la vuelta y el pasajero no sabía
+  si iban a volver.)* Reemplaza el "No, por ahora no" de R61. Al salir (`en_ruta`) **sin otro viaje publicado**, en los dos
+  sentidos, la hoja pregunta **"¿Qué haces después de este viaje?"** con tres respuestas:
+  - **Sigo trabajando: publico mi vuelta** → "¿Cuándo llegas a recoger en …?" (20, 30, 45 min, 1 hora), como en R61.
+  - **Hago una pausa** → "¿A qué hora vuelves?" (30 min, 1 hora, 2 horas o **a una hora**, como R60).
+  - **Es mi último viaje de hoy.**
+  - Cerrar la hoja no responde: el viaje en ruta muestra en amarillo **"Avisa qué haces después: tus pasajeros lo ven"**
+    con el botón para responder, y **Terminar viaje** abre la misma pregunta mientras no responda (en la app; si el
+    viaje se termina solo al llegar a la siguiente recogida, R13, ya publicó). Ya respondido, el viaje dice "Después:
+    pausa, vuelves como a las 4:30" / "Es tu último viaje de hoy", con **Cambiar**.
+  - **[servidor]** Se guarda en el viaje (`despues`: pausa con su hora, o último). Publicar cualquier viaje mientras va
+    en ruta lo cambia a **vuelta** (cambió de idea). Al **terminar** el viaje con pausa o último, y sin otro viaje
+    abierto, queda **desconectado** con la pausa de R60 (vuelve a las… / terminó por hoy).
+  - Los pasajeros lo ven en **La línea ahora**: en vez de "Sin próximo viaje publicado", "Después hace una pausa:
+    vuelve como a las 4:30" o "Es su último viaje de hoy". Al terminar, como cualquier pausa (R60).
+  - En el panel (**Viajes terminados**), cada viaje dice qué avisó: publicó la vuelta, pausa hasta tal hora o último
+    del día.
 - **R71. Terminar viaje, sin apuro.** *(Oct. 2026: choferes terminaban el viaje a 1 min de salir, por el mismo botón
   donde acababan de tocar Salir o creyendo que hacía falta para publicar la vuelta; sus pasajeros quedaban calificando
   con el carro andando y él se veía libre.)* **Terminar viaje** sigue siendo la acción principal en ruta, pero:

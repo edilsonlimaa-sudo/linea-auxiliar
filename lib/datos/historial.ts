@@ -103,7 +103,10 @@ export type ViajeTerminado = {
   chofer?: { nombre: string; placa: string | null } // solo en el panel del admin
   eventos?: EventoViaje[] // cronómetro (R56), solo en el panel del admin
   cierre?: Cierre | null // quién lo cerró y por qué (R72), solo en el panel del admin
+  despues?: { tipo: "vuelta" | "pausa" | "ultimo"; vuelveEn: string | null } | null // qué avisó al salir (R73), solo admin
 }
+
+const esDespues = (d: string | null): d is "vuelta" | "pausa" | "ultimo" => d === "vuelta" || d === "pausa" || d === "ultimo"
 
 export type Cierre = { por: CerradoPor; motivo: MotivoCancelar | null; detalle: string | null }
 
@@ -224,7 +227,7 @@ async function cargarTerminados({
   let consulta = supabase
     .from("viajes")
     // cierre (R72): RLS deja leer solo al admin y al chofer del viaje
-    .select("id, estado, estado_en, sentido, puestos, salida_en, llegada_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa)), cierre:viaje_cierres(por, motivo, detalle)")
+    .select("id, estado, estado_en, sentido, puestos, salida_en, llegada_en, despues, despues_vuelve_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa)), cierre:viaje_cierres(por, motivo, detalle)")
     .in("estado", estados)
   if (choferId) consulta = consulta.eq("chofer_id", choferId)
   // estado_en: la hora en que se cerró (al terminar es la llegada)
@@ -280,7 +283,7 @@ async function cargarTerminados({
       calificaciones: (califsRes.data ?? [])
         .filter((c) => c.viaje_id === v.id)
         .map((c) => ({ estrellas: c.estrellas, comentario: c.comentario, ...(admin && c.pasajero ? { autor: c.pasajero.nombre } : {}) })),
-      ...(admin ? { eventos: eventos.get(v.id) ?? [], cierre: aCierre(v.cierre) } : {}),
+      ...(admin ? { eventos: eventos.get(v.id) ?? [], cierre: aCierre(v.cierre), despues: esDespues(v.despues) ? { tipo: v.despues, vuelveEn: v.despues_vuelve_en } : null } : {}),
       ...(admin && v.chofer ? { chofer: { nombre: v.chofer.nombre, placa: unoSolo(v.chofer.vehiculo)?.placa ?? null } } : {}),
     }
   })

@@ -30,6 +30,7 @@ export function BarraAccion({
   salioEn,
   destino,
   sinVuelta = false,
+  faltaDespues = false,
 }: {
   viajeId: string
   estado: EstadoViaje
@@ -42,6 +43,7 @@ export function BarraAccion({
   salioEn?: string // en ruta: cuándo salió (estado_en), para no terminar a los pocos minutos (R71)
   destino?: string // en ruta: dónde deja a la gente, en frase ("en Valle Grande")
   sinVuelta?: boolean // en ruta sin otro viaje publicado: se aclara que no hace falta terminar para publicarla (R71)
+  faltaDespues?: boolean // en ruta sin decir qué hace después: Terminar abre esa pregunta primero (R73)
 }) {
   const router = useRouter()
   const { ejecutar, pendiente, error } = useAccion()
@@ -93,6 +95,7 @@ export function BarraAccion({
   } else if (estado === "en_ruta") {
     // R71: terminar a los pocos minutos de salir casi siempre es un toque sin querer o para publicar la vuelta
     const terminar = () => {
+      if (faltaDespues) return router.replace("/inicio?vuelta=1", { scroll: false })
       const min = salioEn ? (Date.now() - new Date(salioEn).getTime()) / 60_000 : Infinity
       if (min < MIN_EN_RUTA) setHaceMin(Math.max(0, Math.floor(min)))
       else avanzar("finalizado")

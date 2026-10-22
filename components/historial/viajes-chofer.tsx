@@ -25,6 +25,14 @@ function hastaDonde(eventos: EventoViaje[] | undefined): string | null {
   return "Antes de llegar a recoger"
 }
 
+/** Qué avisó al salir que haría después (R73) */
+function textoDespues(d: ViajeTerminado["despues"]): string | null {
+  if (!d) return null
+  if (d.tipo === "vuelta") return "Después: publicó la vuelta."
+  if (d.tipo === "ultimo") return "Después: avisó que era su último viaje del día."
+  return `Después: avisó una pausa${d.vuelveEn ? ` hasta las ${hora(d.vuelveEn)}` : ""}.`
+}
+
 /** Quién lo cerró y por qué (R72): "Lo canceló el chofer · Quería cambiar la hora" */
 function quienYPorQue(c: Cierre | null | undefined): string | null {
   if (!c) return null
@@ -131,6 +139,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                   {v.salida && v.llegada && (
                     <p className="text-muted-foreground">
                       Salió a las {hora(v.salida)} y llegó a las {hora(v.llegada)}.{porQue && ` ${porQue}.`}
+                      {textoDespues(v.despues) && ` ${textoDespues(v.despues)}`}
                     </p>
                   )}
                   {/* Cronómetro (R56): solo el admin lo recibe */}
