@@ -121,9 +121,9 @@ export async function cargarViajesChofer(choferId: string): Promise<ViajeTermina
   return cargarTerminados({ choferId, limite: 20, admin: false })
 }
 
-/** Detalle del chofer en el panel: sus últimos 20 viajes cerrados (terminados y cancelados) */
-export async function cargarViajesDeChoferAdmin(choferId: string): Promise<ViajeTerminado[]> {
-  const viajes = await cargarTerminados({ choferId, estados: ["finalizado", "cancelado"], limite: 20, admin: true })
+/** Detalle del chofer en el panel: sus últimos viajes cerrados (terminados y cancelados); todos, en su página de viajes */
+export async function cargarViajesDeChoferAdmin(choferId: string, limite = 5): Promise<ViajeTerminado[]> {
+  const viajes = await cargarTerminados({ choferId, estados: ["finalizado", "cancelado"], limite, admin: true })
   // Sin el chofer en cada tarjeta: ya está arriba en el detalle
   return viajes.map((v) => ({ ...v, chofer: undefined }))
 }
@@ -154,32 +154,40 @@ export async function cargarViajesCerradosAdmin({
   desde,
   filtro,
   pagina,
+  choferId,
 }: {
   desde: Date | null
   filtro: FiltroCerrados
   pagina: number
+  choferId?: string // en el detalle del chofer: solo los suyos
 }): Promise<{ viajes: ViajeTerminado[]; hayMas: boolean; totales: TotalesCerrados }> {
   const [viajes, totales] = await Promise.all([
-    cargarTerminados({ desde: desde ?? undefined, estados: ESTADOS_DE[filtro], desdeFila: (pagina - 1) * POR_PAGINA, limite: POR_PAGINA + 1, admin: true }),
-    cargarTotalesCerrados(desde),
+    cargarTerminados({ choferId, desde: desde ?? undefined, estados: ESTADOS_DE[filtro], desdeFila: (pagina - 1) * POR_PAGINA, limite: POR_PAGINA + 1, admin: true }),
+    cargarTotalesCerrados(desde, choferId),
   ])
   return { viajes: viajes.slice(0, POR_PAGINA), hayMas: viajes.length > POR_PAGINA, totales }
 }
 
-async function cargarTotalesCerrados(desde: Date | null): Promise<TotalesCerrados> {
+async function cargarTotalesCerrados(desde: Date | null, choferId?: string): Promise<TotalesCerrados> {
   const supabase = await crearClienteServidor()
   const contar = (estado: "finalizado" | "cancelado") => {
     let q = supabase.from("viajes").select("id", { count: "exact", head: true }).eq("estado", estado)
     if (desde) q = q.gte("estado_en", desde.toISOString())
+    if (choferId) q = q.eq("chofer_id", choferId)
     return q
   }
   let llevados = supabase
     .from("reservas")
-    .select("personas, viaje:viajes!inner(estado, estado_en)")
+    .select("personas, viaje:viajes!inner(estado, estado_en, chofer_id)")
     .in("estado", ["subio", "bajo"])
     .eq("viaje.estado", "finalizado")
   let califs = supabase.from("calificaciones").select("estrellas, viaje:viajes!inner(estado_en)")
   let cierres = supabase.from("viajes").select("cierre:viaje_cierres(por, motivo, detalle)").eq("estado", "cancelado")
+  if (choferId) {
+    llevados = llevados.eq("viaje.chofer_id", choferId)
+    califs = califs.eq("chofer_id", choferId)
+    cierres = cierres.eq("chofer_id", choferId)
+  }
   if (desde) {
     llevados = llevados.gte("viaje.estado_en", desde.toISOString())
     califs = califs.gte("viaje.estado_en", desde.toISOString())

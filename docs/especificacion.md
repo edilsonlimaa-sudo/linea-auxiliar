@@ -640,8 +640,10 @@ menú (formularios).
   **detalle**.
 - **Detalle del chofer:** foto, nombre, conectado ahora, teléfono (WhatsApp y Llamar), cédula y desde cuándo está; el
   carro (foto, placa, unidad, modelo, color, aire); números: viajes terminados, cancelados, pasajeros llevados y ★
-  promedio; **Ver en el mapa** y **Desconectar** si está conectado (R69); sus **últimos 20 viajes** (terminados y
-  cancelados, como en Viajes terminados) y sus **últimas calificaciones** con quién calificó. Abajo, **Rechazar**
+  promedio; **Ver en el mapa** y **Desconectar** si está conectado (R69); sus **últimos 5 viajes** (terminados y
+  cancelados, como en Viajes terminados) y sus **últimas 5 calificaciones** con quién calificó; cada lista termina en
+  **Ver todos sus viajes (N)** / **Ver todas sus calificaciones (N)**, que abren su página dentro del detalle con
+  los mismos filtros que Viajes terminados (por defecto Todos · Todo) y Calificaciones (período y nota). Abajo, **Rechazar**
   (quitarle el acceso).
 - **Detalle del pasajero:** foto, nombre, dónde vive, teléfono (WhatsApp y Llamar), cédula y desde cuándo está;
   números: viajes hechos, reservas que canceló, veces que no llegó y calificaciones que dio; sus **últimas 30

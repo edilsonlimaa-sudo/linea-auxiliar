@@ -1,4 +1,5 @@
-import { MessageCircleIcon, PhoneIcon, SnowflakeIcon } from "lucide-react"
+import { ChevronRightIcon, MessageCircleIcon, PhoneIcon, SnowflakeIcon } from "lucide-react"
+import Link from "next/link"
 
 import { DesconectarChofer } from "@/components/admin/acciones-viaje"
 import { BotonDecision } from "@/components/admin/boton-decision"
@@ -132,13 +133,20 @@ export function VistaChofer({ detalle: d }: { detalle: DetalleChofer }) {
           { valor: d.terminados, texto: d.terminados === 1 ? "viaje terminado" : "viajes terminados" },
           { valor: d.cancelados, texto: d.cancelados === 1 ? "cancelado" : "cancelados" },
           { valor: d.llevados, texto: d.llevados === 1 ? "pasajero llevado" : "pasajeros llevados" },
-          { valor: estrellas !== null ? `★ ${promedioTexto(estrellas)}` : "—", texto: `${c.actividad?.calificaciones ?? 0} calificaciones` },
+          { valor: estrellas !== null ? `★ ${promedioTexto(estrellas)}` : "—", texto: Number(c.actividad?.calificaciones ?? 0) === 1 ? "1 calificación" : `${c.actividad?.calificaciones ?? 0} calificaciones` },
         ]}
       />
 
       <section className="flex flex-col gap-3">
         <h2 className="text-base font-bold">Últimos viajes</h2>
-        <ViajesChofer viajes={d.viajes} admin />
+        {d.viajes.length === 0 ? (
+          <p className="text-muted-foreground">Todavía no tiene viajes cerrados.</p>
+        ) : (
+          <ViajesChofer viajes={d.viajes} admin />
+        )}
+        {d.terminados + d.cancelados > d.viajes.length && (
+          <VerTodo href={`/admin/choferes/${c.id}/viajes`}>Ver todos sus viajes ({d.terminados + d.cancelados})</VerTodo>
+        )}
       </section>
 
       <section className="flex flex-col gap-2">
@@ -158,10 +166,26 @@ export function VistaChofer({ detalle: d }: { detalle: DetalleChofer }) {
             ))}
           </ul>
         )}
+        {Number(c.actividad?.calificaciones ?? 0) > d.calificaciones.length && (
+          <VerTodo href={`/admin/choferes/${c.id}/calificaciones`}>Ver todas sus calificaciones ({c.actividad?.calificaciones})</VerTodo>
+        )}
       </section>
 
       <Rechazar cuenta={c} />
     </div>
+  )
+}
+
+/** "Ver todos sus viajes (32)": la lista completa, en su página dentro del detalle */
+function VerTodo({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      className="flex min-h-11 items-center justify-between gap-2 rounded-2xl border-2 bg-card px-4 font-bold text-primary outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
+    >
+      {children}
+      <ChevronRightIcon aria-hidden className="size-5 shrink-0" />
+    </Link>
   )
 }
 

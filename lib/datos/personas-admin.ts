@@ -35,6 +35,14 @@ export async function cargarPersonas(rol: RolCuenta): Promise<{ personas: FilaPe
   }
 }
 
+/** El nombre del chofer, para las páginas de sus viajes y calificaciones (null si no existe) */
+export async function cargarNombreChofer(id: string): Promise<string | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase.from("perfiles").select("nombre").eq("id", id).eq("rol", "chofer").maybeSingle()
+  return data?.nombre ?? null
+}
+
 async function cargarCuenta(id: string, rol: RolCuenta) {
   const { cuentas } = await cargarCuentas()
   const cuenta = cuentas.find((c) => c.id === id && c.rol === rol)
@@ -79,7 +87,7 @@ export async function cargarDetalleChofer(id: string): Promise<DetalleChofer | n
       .select("estrellas, comentario, creado_en, pasajero:perfiles!calificaciones_pasajero_id_fkey(nombre)")
       .eq("chofer_id", id)
       .order("creado_en", { ascending: false })
-      .limit(10),
+      .limit(5),
   ])
   return {
     cuenta,
