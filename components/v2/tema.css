@@ -1,6 +1,6 @@
 /*
  * Tema del diseño nuevo del pasajero (v2): el preset por defecto de shadcn (estilo nova, color neutral, Inter, radio
- * por defecto). Vale solo dentro de .v2 (la casca de la v2, donde no entra nada del diseño de siempre): pasajeros
+ * por defecto). Vale solo dentro de .v2 (la casca de la v2, en /v2, donde no entra nada del diseño de siempre): pasajeros
  * con el diseño de siempre, choferes y el panel siguen con los tokens de app/globals.css. Así nunca se mezclan.
  */
 .v2 {

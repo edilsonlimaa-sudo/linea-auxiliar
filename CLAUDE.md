@@ -61,17 +61,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS 4 · shadcn/ui
 
 ### Diseño nuevo del pasajero (v2, en construcción)
 
-- **Aislado del todo:** solo la presentación. Reglas, base, `lib/acciones`, `lib/datos` y `lib/viajes` son los mismos.
-  Todo lo de la v2 vive en `components/v2`: su casca (`casca.tsx`: barra arriba y navegación abajo), su **kit shadcn
+- **Un app aparte, hecho de cero, en `/v2`** (`app/v2`: Inicio en `/v2`, `/v2/choferes`, `/v2/mis-viajes`, `/v2/perfil`).
+  El app de siempre (`app/(app)`, mismas URLs) no cambia para nadie. Solo la presentación es aparte: reglas, base,
+  `lib/acciones`, `lib/datos` y `lib/viajes` son los mismos. Todo lo de la v2 vive en `components/v2`: su casca (`casca.tsx`: barra arriba y navegación abajo), su **kit shadcn
   propio** (`components/v2/ui`, preset por defecto: estilo base-nova, color neutral, Inter, radio por defecto) y su tema
   (`tema.css`, tokens solo dentro de `.v2`). Las reglas de diseño de arriba (Atkinson, 17 px, botones de 60/52/44 px,
   tokens de Línea Auxiliar) **no** valen en la v2: ahí manda el preset de shadcn, accesibilidad incluida.
 - **Nunca importar `components/v2/ui` fuera de la v2 ni `components/ui` en lo nuevo de la v2.** Motorista, admin y el
   pasajero de siempre no se tocan.
-- **Quién la ve:** solo las cuentas con `perfiles.diseno_v2` (se marca a mano en la base; nadie se marca solo).
-  `app/(app)/layout.tsx` les da `CascaV2`, que **no muestra nada del diseño de siempre**: una pantalla sin versión v2
-  muestra "En construcción" (`EnConstruccion`) y la vieja ni se arma.
-  Nunca meter una pantalla vieja en la casca v2: el tema (`.v2`) cubre toda la casca y la dejaría mitad vieja, mitad nueva.
+- **Quién entra:** solo los pasajeros con `perfiles.diseno_v2` (se marca a mano en la base; nadie se marca solo); a los
+  demás `app/v2/layout.tsx` los manda a `/inicio`. La marca no cambia el app de siempre: solo abre `/v2`.
+  Una pantalla que todavía no se hizo muestra "En construcción" (`EnConstruccion`). Nunca meter una pantalla vieja en
+  la v2: el tema (`.v2`) cubre toda la casca y la dejaría mitad vieja, mitad nueva. Los enlaces y redirecciones del
+  app de siempre (p. ej. las acciones que mandan a `/mi-viaje`) no son de la v2: lo suyo se hace de cero.
   Para agregar el kit: el CLI de shadcn instala donde dice `components.json`; se cambia por un momento `style` a
   `base-nova` y `aliases.ui` a `@/components/v2/ui`, y se deja como estaba (revisar que `cn` venga de `@/lib/utils`).
 

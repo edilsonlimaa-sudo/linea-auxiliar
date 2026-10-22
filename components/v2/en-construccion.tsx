@@ -6,15 +6,13 @@ import { usePathname } from "next/navigation"
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/v2/ui/card"
 
 const TITULOS: Record<string, string> = {
-  "/inicio": "Inicio",
-  "/mi-viaje": "Mi viaje",
-  "/choferes": "Choferes",
-  "/mis-viajes": "Mis viajes",
-  "/carnet": "Perfil",
-  "/linea": "La línea",
+  "/v2": "Inicio",
+  "/v2/choferes": "Choferes",
+  "/v2/mis-viajes": "Mis viajes",
+  "/v2/perfil": "Perfil",
 }
 
-/** Lo que muestra la v2 en una pantalla que todavía no tiene su versión nueva: nada del diseño de siempre */
+/** Lo que muestra una pantalla de la v2 que todavía no se hizo */
 export function EnConstruccion() {
   const ruta = usePathname()
   const titulo = TITULOS[ruta] ?? "Esta pantalla"
