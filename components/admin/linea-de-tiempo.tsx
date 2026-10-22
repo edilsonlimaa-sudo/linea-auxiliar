@@ -10,7 +10,7 @@ import { duracion, ETIQUETA_ESTADO, type EventoViaje, lineaDeTiempo } from "@/li
  */
 export function LineaDeTiempo({ eventos }: { eventos: EventoViaje[] }) {
   if (eventos.length === 0) return null
-  const { pasos, puntualidad } = lineaDeTiempo(eventos)
+  const { pasos, puntualidad, atrasos } = lineaDeTiempo(eventos)
 
   return (
     <details className="group rounded-xl bg-muted">
@@ -48,6 +48,11 @@ export function LineaDeTiempo({ eventos }: { eventos: EventoViaje[] }) {
             </li>
           ))}
         </ol>
+        {atrasos.map((a) => (
+          <p key={a.en} className="text-[15px] font-bold text-warning">
+            A las {hora(a.en)} avisó que se atrasa: nueva hora {hora(a.nuevaHora)}.
+          </p>
+        ))}
         {puntualidad && (
           <p className="text-[15px] text-muted-foreground">
             Prometió llegar a las {hora(puntualidad.prometida)} y llegó a las {hora(puntualidad.llegada)}.

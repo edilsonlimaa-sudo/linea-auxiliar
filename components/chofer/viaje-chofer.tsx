@@ -2,6 +2,7 @@ import { ChevronDownIcon, FlagIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BarraAccion } from "@/components/chofer/barra-accion"
 import { FilaPasajero } from "@/components/chofer/fila-pasajero"
+import { MeAtraso } from "@/components/chofer/me-atraso"
 import { FilaLista } from "@/components/chofer/lista-tramo"
 import { MasOpciones } from "@/components/chofer/mas-opciones"
 import { OcuparPuesto } from "@/components/chofer/ocupar-puesto"
@@ -263,6 +264,8 @@ export function ViajeChofer({
           <p className="text-muted-foreground">{detalle}</p>
         </div>
         <PasosViaje estado={viaje.estado} />
+        {/* R70: una hora nueva si se atrasa (en amarillo si ya pasó la que dijo) */}
+        {viaje.estado === "en_camino" && <MeAtraso viajeId={viaje.id} estadoEn={viaje.estado_en} etaMin={viaje.eta_min} />}
         {recogerEnCamino.length > 0 && (
           <p
             role="status"

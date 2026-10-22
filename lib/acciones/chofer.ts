@@ -126,6 +126,11 @@ export async function voyPorEl(entradaId: string, viajeId: string) {
   return rpc((s) => s.rpc("voy_por_el", { p_entrada: entradaId, p_viaje: viajeId }))
 }
 
+/** "Me atraso" (R70): mientras va a recoger, llega en `minutos` desde ahora */
+export async function meAtraso(viajeId: string, minutos: number) {
+  return rpc((s) => s.rpc("me_atraso", { p_viaje: viajeId, p_minutos: minutos }))
+}
+
 /** "No vino" (R21, R29) */
 export async function marcarNoVino(reservaId: string) {
   return rpc((s) => s.rpc("marcar_no_vino", { p_reserva: reservaId }))

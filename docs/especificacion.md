@@ -294,6 +294,16 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   Grande en cualquier momento". Encadenado: "Próximo viaje · Recoge en Valle Grande a las HH:MM (en ~1 h 10 min, al
   terminar su viaje actual)" = minutos hasta que el viaje anterior recoge + trayecto de vuelta, o la hora fija si es
   mayor. Duraciones ≥ 60 min se muestran en horas.
+- **R70. "Me atraso": una hora nueva [servidor].** *(Oct. 2026: que el pasajero vea siempre una previsión real.)*
+  Mientras va a recoger (`en_camino`), el chofer puede tocar **Me atraso** y escoger en cuánto llega ahora, con un
+  toque: 5, 10, 15, 20, 30, 45 min o 1 hora (cada opción muestra la hora: "15 min · a las 5:40").
+  - **Si pasa la hora que dijo**, su viaje lo avisa en amarillo ("Ya pasó la hora que dijiste: tus pasajeros ven «en
+    cualquier momento». Dales una hora nueva") con el botón **Me atraso** a mano. Antes de esa hora el botón está,
+    más discreto.
+  - El pasajero ve la hora nueva ("Recoge en Valle Grande en ~15 min · a las 5:40 · avisó que se atrasa"). Los viajes
+    encadenados se corren solos.
+  - La **puntualidad** (R56) sigue comparando con lo **primero** que prometió; la línea de tiempo del panel muestra
+    cada aviso de atraso con su hora nueva.
 
 ### 5.11 Ubicación del chofer (mapa en vivo)
 

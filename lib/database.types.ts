@@ -713,6 +713,7 @@ export type Database = {
       }
       viaje_eventos: {
         Row: {
+          atraso: boolean
           en: string
           estado: Database["public"]["Enums"]["estado_viaje"]
           eta_min: number | null
@@ -720,6 +721,7 @@ export type Database = {
           viaje_id: string
         }
         Insert: {
+          atraso?: boolean
           en?: string
           estado: Database["public"]["Enums"]["estado_viaje"]
           eta_min?: number | null
@@ -727,6 +729,7 @@ export type Database = {
           viaje_id: string
         }
         Update: {
+          atraso?: boolean
           en?: string
           estado?: Database["public"]["Enums"]["estado_viaje"]
           eta_min?: number | null
@@ -745,6 +748,7 @@ export type Database = {
       }
       viajes: {
         Row: {
+          atraso_en: string | null
           chofer_id: string
           creado_en: string
           despues_de: string | null
@@ -760,6 +764,7 @@ export type Database = {
           sentido: Database["public"]["Enums"]["sentido"]
         }
         Insert: {
+          atraso_en?: string | null
           chofer_id: string
           creado_en?: string
           despues_de?: string | null
@@ -775,6 +780,7 @@ export type Database = {
           sentido: Database["public"]["Enums"]["sentido"]
         }
         Update: {
+          atraso_en?: string | null
           chofer_id?: string
           creado_en?: string
           despues_de?: string | null
@@ -912,6 +918,7 @@ export type Database = {
       _mi_viaje: {
         Args: { p_viaje: string }
         Returns: {
+          atraso_en: string | null
           chofer_id: string
           creado_en: string
           despues_de: string | null
@@ -1297,6 +1304,10 @@ export type Database = {
       marcar_no_vino: { Args: { p_reserva: string }; Returns: undefined }
       marcar_se_bajo: { Args: { p_reserva: string }; Returns: undefined }
       marcar_subio: { Args: { p_reserva: string }; Returns: undefined }
+      me_atraso: {
+        Args: { p_minutos: number; p_viaje: string }
+        Returns: undefined
+      }
       me_fui: { Args: { p_motivo?: string }; Returns: undefined }
       me_monte: { Args: never; Returns: undefined }
       mis_datos_privados: {

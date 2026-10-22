@@ -94,6 +94,10 @@ export function llegada(v: Viaje, porId: Map<string, Viaje>, ahora = Date.now())
   }
   // Pasó el tiempo que dijo el chofer y todavía no avisó que llega
   if (m < 1) return { principal: `Recoge ${enRecogida} en cualquier momento` }
+  // R70: dio una hora nueva
+  if (v.estado === "en_camino" && v.atraso_en) {
+    return { principal: `Recoge ${enRecogida} en ~${duracion(m)}`, detalle: `a las ${hora} · avisó que se atrasa` }
+  }
   return { principal: `Recoge ${enRecogida} en ~${duracion(m)}`, detalle: `a las ${hora}` }
 }
 
@@ -110,8 +114,11 @@ export function estadoParaChofer(v: Viaje, porId: Map<string, Viaje>, ahora = Da
     case "en_camino": {
       const m = minutosPara(v, porId, ahora)
       return m >= 1
-        ? { titulo: `Vas a recoger ${enRecogida}`, detalle: `Dijiste que llegas en ~${duracion(m)} (a las ${horaAnunciada(v)})` }
-        : { titulo: `Vas a recoger ${enRecogida}`, detalle: `Ya pasó la hora que dijiste (${horaAnunciada(v)}). Avisa cuando estés llegando.` }
+        ? {
+            titulo: `Vas a recoger ${enRecogida}`,
+            detalle: `${v.atraso_en ? "Avisaste que te atrasas: llegas" : "Dijiste que llegas"} en ~${duracion(m)} (a las ${horaAnunciada(v)})`,
+          }
+        : { titulo: `Vas a recoger ${enRecogida}`, detalle: "Avisa cuando estés llegando" } // el aviso amarillo (R70) dice que pasó su hora
     }
     case "llegando":
       return { titulo: `Llegando a recoger ${enRecogida}`, detalle: "Tus pasajeros saben que llegas en 2 o 3 minutos" }
@@ -225,7 +232,7 @@ export function iniciales(nombre: string): string {
 }
 
 /** Un cambio de estado del viaje con su hora (R56) */
-export type EventoViaje = { estado: EstadoViaje; etaMin: number | null; en: string }
+export type EventoViaje = { estado: EstadoViaje; etaMin: number | null; en: string; atraso?: boolean } // atraso: "Me atraso" (R70)
 
 // Hasta 3 min después de lo prometido todavía es "a tiempo" (R56)
 const TOLERANCIA_MIN = 3
@@ -238,8 +245,17 @@ const TOLERANCIA_MIN = 3
 export function lineaDeTiempo(eventos: EventoViaje[]): {
   pasos: { estado: EstadoViaje; en: string; minutos: number | null }[]
   puntualidad: { prometida: string; llegada: string; tardeMin: number; aTiempo: boolean } | null
+  atrasos: { en: string; nuevaHora: string }[] // cada "Me atraso" (R70), con la hora nueva que dio
 } {
-  const ordenados = [...eventos].sort((a, b) => new Date(a.en).getTime() - new Date(b.en).getTime())
+  const porHora = [...eventos].sort((a, b) => new Date(a.en).getTime() - new Date(b.en).getTime())
+  // La hora nueva de un aviso: desde que salió a recoger (el en_camino anterior) + lo que prometió ahora
+  const atrasos = porHora.flatMap((e) => {
+    if (!e.atraso || e.etaMin === null) return []
+    const salida = porHora.filter((x) => x.estado === "en_camino" && !x.atraso && new Date(x.en) <= new Date(e.en)).at(-1)
+    return salida ? [{ en: e.en, nuevaHora: new Date(new Date(salida.en).getTime() + e.etaMin * MIN).toISOString() }] : []
+  })
+  // Los avisos no son cambios de estado: la puntualidad sigue contra lo primero que prometió (R70)
+  const ordenados = porHora.filter((e) => !e.atraso)
   const pasos = ordenados.map((e, i) => {
     const siguiente = ordenados[i + 1]
     return {
@@ -252,12 +268,13 @@ export function lineaDeTiempo(eventos: EventoViaje[]): {
   const salida = ordenados.find((e) => e.estado === "en_camino" && e.etaMin !== null)
   const despues = salida ? ordenados.filter((e) => new Date(e.en) >= new Date(salida.en)) : []
   const llego = despues.find((e) => e.estado === "en_parada") ?? despues.find((e) => e.estado === "llegando")
-  if (!salida || !llego || salida.etaMin === null) return { pasos, puntualidad: null }
+  if (!salida || !llego || salida.etaMin === null) return { pasos, puntualidad: null, atrasos }
   const prometida = new Date(new Date(salida.en).getTime() + salida.etaMin * MIN)
   const tardeMin = Math.round((new Date(llego.en).getTime() - prometida.getTime()) / MIN)
   return {
     pasos,
     puntualidad: { prometida: prometida.toISOString(), llegada: llego.en, tardeMin, aTiempo: tardeMin <= TOLERANCIA_MIN },
+    atrasos,
   }
 }
 

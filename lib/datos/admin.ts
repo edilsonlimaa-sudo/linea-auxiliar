@@ -194,10 +194,10 @@ export async function cargarEventos(ids: string[]): Promise<Map<string, EventoVi
   const porViaje = new Map<string, EventoViaje[]>()
   if (ids.length === 0) return porViaje
   const supabase = await crearClienteServidor()
-  const { data } = await supabase.from("viaje_eventos").select("viaje_id, estado, eta_min, en").in("viaje_id", ids).order("en")
+  const { data } = await supabase.from("viaje_eventos").select("viaje_id, estado, eta_min, en, atraso").in("viaje_id", ids).order("en")
   for (const e of data ?? []) {
     const lista = porViaje.get(e.viaje_id) ?? []
-    lista.push({ estado: e.estado, etaMin: e.eta_min, en: e.en })
+    lista.push({ estado: e.estado, etaMin: e.eta_min, en: e.en, atraso: e.atraso })
     porViaje.set(e.viaje_id, lista)
   }
   return porViaje
