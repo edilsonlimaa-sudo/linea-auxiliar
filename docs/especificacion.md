@@ -582,11 +582,15 @@ menú (formularios).
   **A bordo**, **Por recoger** (con dónde y "✋ ya está en el sitio"), **Pedidos en el camino** y **Lista de espera**.
   Cada persona con nombre completo, dónde la recogen, WhatsApp y Llamar. El admin no cambia listas, pero puede
   **Cerrar** un viaje y **Desconectar** al chofer (R69).
-- **Viajes terminados**: los
-  viajes finalizados de toda la línea, del más reciente al más viejo, con filtro **Hoy · 7 días · 30 días**
-  (máx. 100). Arriba, el total del período: viajes, pasajeros llevados y ★ promedio. Cada viaje, plegado como en
-  Mis viajes del chofer (R50): chofer y placa, sentido, salida y llegada, duración, a quién llevó (nombre completo y
-  cómo entró), quién no vino y sus calificaciones. A diferencia del chofer (R52), el admin sí ve quién calificó.
+- **Viajes terminados**: **todos** los viajes cerrados de la línea, del más reciente al más viejo (por la hora en
+  que se cerraron), con dos filtros: **Terminados · Cancelados · Todos** y **Hoy · 7 días · 30 días · Todo**. Se
+  muestran de 50 en 50 (**Ver más**). Arriba, los totales del período: terminados, cancelados, pasajeros llevados y ★
+  promedio. Cada viaje, plegado como en Mis viajes del chofer (R50):
+  - **Terminado:** chofer y placa, sentido, salida y llegada, duración, a quién llevó (nombre completo y cómo entró),
+    quién no vino y sus calificaciones. A diferencia del chofer (R52), el admin sí ve quién calificó.
+  - **Cancelado** (en rojo): chofer y placa, sentido, a qué hora se canceló y hasta dónde llegó ("Antes de llegar a
+    recoger" / "Avisó que llegaba" / "Después de llegar a recoger"), quiénes tenían puesto y lo perdieron.
+  - Los dos, con su línea de tiempo (R56).
 - **Demanda** (para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
   1. **Por sentido** (Al Centro / A Valle Grande): cuántos esperan, cuántas unidades aceptan pasajeros con cuántos
      puestos libres, y si **falta transporte** (esperan más que los puestos libres) o está cubierto.

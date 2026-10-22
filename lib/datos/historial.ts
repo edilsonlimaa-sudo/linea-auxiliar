@@ -88,6 +88,8 @@ export type PersonaDelViaje = {
 
 export type ViajeTerminado = {
   id: string
+  estado: "finalizado" | "cancelado"
+  cerrado: string // cuándo terminó o se canceló
   sentido: Sentido
   salida: string | null
   llegada: string | null
@@ -95,6 +97,7 @@ export type ViajeTerminado = {
   puestos: number
   llevo: PersonaDelViaje[]
   noVinieron: string[]
+  perdieron: string[] // cancelado: quiénes tenían puesto y lo perdieron (solo en el panel del admin)
   calificaciones: { estrellas: number; comentario: string | null; autor?: string }[]
   chofer?: { nombre: string; placa: string | null } // solo en el panel del admin
   eventos?: EventoViaje[] // cronómetro (R56), solo en el panel del admin
@@ -105,30 +108,91 @@ export async function cargarViajesChofer(choferId: string): Promise<ViajeTermina
   return cargarTerminados({ choferId, limite: 20, admin: false })
 }
 
-/** Viajes terminados de toda la línea desde una fecha, para el panel (§8): nombres completos y quién calificó */
-export async function cargarViajesTerminadosAdmin(desde: Date): Promise<ViajeTerminado[]> {
-  return cargarTerminados({ desde, limite: 100, admin: true })
+export type FiltroCerrados = "terminados" | "cancelados" | "todos"
+export const POR_PAGINA = 50
+
+const ESTADOS_DE: Record<FiltroCerrados, ("finalizado" | "cancelado")[]> = {
+  terminados: ["finalizado"],
+  cancelados: ["cancelado"],
+  todos: ["finalizado", "cancelado"],
+}
+
+export type TotalesCerrados = { terminados: number; cancelados: number; pasajeros: number; promedio: number | null; calificaciones: number }
+
+/**
+ * Viajes cerrados de toda la línea para el panel (§8): terminados, cancelados o todos, desde una fecha (o todos), de
+ * 50 en 50 (`pagina` desde 1). Nombres completos y quién calificó. Los totales son del período entero.
+ */
+export async function cargarViajesCerradosAdmin({
+  desde,
+  filtro,
+  pagina,
+}: {
+  desde: Date | null
+  filtro: FiltroCerrados
+  pagina: number
+}): Promise<{ viajes: ViajeTerminado[]; hayMas: boolean; totales: TotalesCerrados }> {
+  const [viajes, totales] = await Promise.all([
+    cargarTerminados({ desde: desde ?? undefined, estados: ESTADOS_DE[filtro], desdeFila: (pagina - 1) * POR_PAGINA, limite: POR_PAGINA + 1, admin: true }),
+    cargarTotalesCerrados(desde),
+  ])
+  return { viajes: viajes.slice(0, POR_PAGINA), hayMas: viajes.length > POR_PAGINA, totales }
+}
+
+async function cargarTotalesCerrados(desde: Date | null): Promise<TotalesCerrados> {
+  const supabase = await crearClienteServidor()
+  const contar = (estado: "finalizado" | "cancelado") => {
+    let q = supabase.from("viajes").select("id", { count: "exact", head: true }).eq("estado", estado)
+    if (desde) q = q.gte("estado_en", desde.toISOString())
+    return q
+  }
+  let llevados = supabase
+    .from("reservas")
+    .select("personas, viaje:viajes!inner(estado, estado_en)")
+    .in("estado", ["subio", "bajo"])
+    .eq("viaje.estado", "finalizado")
+  let califs = supabase.from("calificaciones").select("estrellas, viaje:viajes!inner(estado_en)")
+  if (desde) {
+    llevados = llevados.gte("viaje.estado_en", desde.toISOString())
+    califs = califs.gte("viaje.estado_en", desde.toISOString())
+  }
+  const [terminados, cancelados, personas, estrellas] = await Promise.all([contar("finalizado"), contar("cancelado"), llevados, califs])
+  const notas = (estrellas.data ?? []).map((c) => c.estrellas)
+  return {
+    terminados: terminados.count ?? 0,
+    cancelados: cancelados.count ?? 0,
+    pasajeros: (personas.data ?? []).reduce((n, r) => n + r.personas, 0),
+    promedio: notas.length ? notas.reduce((n, e) => n + e, 0) / notas.length : null,
+    calificaciones: notas.length,
+  }
 }
 
 async function cargarTerminados({
   choferId,
   desde,
+  estados = ["finalizado"],
+  desdeFila = 0,
   limite,
   admin,
 }: {
   choferId?: string
   desde?: Date
+  estados?: ("finalizado" | "cancelado")[]
+  desdeFila?: number
   limite: number
   admin: boolean
 }): Promise<ViajeTerminado[]> {
   const supabase = await crearClienteServidor()
   let consulta = supabase
     .from("viajes")
-    .select("id, sentido, puestos, salida_en, llegada_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa))")
-    .eq("estado", "finalizado")
+    .select("id, estado, estado_en, sentido, puestos, salida_en, llegada_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa))")
+    .in("estado", estados)
   if (choferId) consulta = consulta.eq("chofer_id", choferId)
-  if (desde) consulta = consulta.gte("llegada_en", desde.toISOString())
-  const { data: viajes } = await consulta.order("llegada_en", { ascending: false }).limit(limite)
+  // estado_en: la hora en que se cerró (al terminar es la llegada)
+  if (desde) consulta = consulta.gte("estado_en", desde.toISOString())
+  const { data: viajes } = await consulta
+    .order("estado_en", { ascending: false })
+    .range(desdeFila, desdeFila + limite - 1)
   const ids = (viajes ?? []).map((v) => v.id)
   if (ids.length === 0) return []
 
@@ -138,7 +202,8 @@ async function cargarTerminados({
       .from("reservas")
       .select("viaje_id, estado, nombre, en_camino, personas, pasajero:perfiles!reservas_pasajero_id_fkey(nombre)")
       .in("viaje_id", ids)
-      .in("estado", ["subio", "bajo", "no_llego"])
+      // sin_puesto: en un viaje cancelado, quien perdió su puesto (R24)
+      .in("estado", ["subio", "bajo", "no_llego", "sin_puesto"])
       .order("creado_en"),
     supabase
       .from("calificaciones")
@@ -152,15 +217,18 @@ async function cargarTerminados({
     // El chofer ve el nombre corto; el admin, el completo
     const nombre = (r: (typeof deEste)[number]) =>
       r.pasajero ? (admin ? r.pasajero.nombre : nombreCorto(r.pasajero.nombre)) : (r.nombre ?? "Pasajero sin app")
+    const cancelado = v.estado === "cancelado"
     return {
       id: v.id,
+      estado: cancelado ? "cancelado" : "finalizado",
+      cerrado: v.estado_en,
       sentido: v.sentido,
       salida: v.salida_en,
       llegada: v.llegada_en,
       minutos: v.salida_en && v.llegada_en ? Math.round((new Date(v.llegada_en).getTime() - new Date(v.salida_en).getTime()) / 60_000) : null,
       puestos: v.puestos,
-      llevo: deEste
-        .filter((r) => r.estado !== "no_llego")
+      // Un viaje cancelado no llevó a nadie (quien subió en Gina vuelve a la lista, R69)
+      llevo: (cancelado ? [] : deEste.filter((r) => r.estado === "subio" || r.estado === "bajo"))
         .map((r) => ({
           nombre: nombre(r),
           personas: r.personas,
@@ -168,6 +236,7 @@ async function cargarTerminados({
           seBajoAntes: r.estado === "bajo",
         })),
       noVinieron: deEste.filter((r) => r.estado === "no_llego").map(nombre),
+      perdieron: admin && cancelado ? deEste.filter((r) => r.estado === "sin_puesto").map(nombre) : [],
       // El chofer no sabe quién lo calificó (R52); el admin sí
       calificaciones: (califsRes.data ?? [])
         .filter((c) => c.viaje_id === v.id)
