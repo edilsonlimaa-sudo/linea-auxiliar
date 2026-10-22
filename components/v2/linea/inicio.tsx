@@ -20,8 +20,8 @@ const sugerido = (): Sentido => (new Date().getHours() < 12 ? "centro" : "valle"
 const libresTexto = (n: number) => (n === 0 ? "lleno" : n === 1 ? "1 libre" : `${n} libres`)
 
 /**
- * Propuesta "La línea + Me voy" (v2). La home es el corredor dibujado (Valle Grande · Gina · Centro) con los carros
- * andando sobre él y "Tú"; abajo, una sola acción: "Me voy". El sistema escoge el carro (o te anota en la lista de
+ * Propuesta "La línea + Me voy" (v2). La home es la línea dibujada entre los dos barrios (Valle Grande y el Centro, con
+ * su parada Gina), con los carros andando sobre ella y "Tú"; abajo, una sola acción: "Me voy". El sistema escoge el carro (o te anota en la lista de
  * Gina): el pasajero no tiene que saber las dos reglas. Al irse, la misma pantalla sigue su carro hasta que llega.
  * Escoger un carro a mano queda a un toque, tocándolo en la línea. Datos de ejemplo: components/v2/linea/demo.ts.
  */
@@ -37,6 +37,8 @@ export function InicioV2() {
   const [personas, setPersonas] = useState(1)
 
   const tramo = TRAMOS[sentido]
+  // Al Centro el carro termina en Gina (el terminal del Centro)
+  const llegaA = tramo.destino === "Centro" ? "Gina" : tramo.destino
   const enLinea = vacio ? [] : carros
   const mejor = enLinea.find((c) => c.libres >= personas) ?? null
   const miCarro = enLinea.find((c) => c.id === miCarroId) ?? null
@@ -172,7 +174,7 @@ export function InicioV2() {
           <>
             <p className="flex items-center gap-2 font-medium">
               <span className="size-2 animate-pulse rounded-full bg-emerald-500" />
-              {miCarro ? `${miCarro.chofer.nombre} llegó` : "Tu carro llegó a Gina"}
+{miCarro ? `${miCarro.chofer.nombre} llegó` : "Tu carro está en Gina"}
             </p>
             <p className="text-sm text-muted-foreground">
               Busca la placa {miCarro?.chofer.placa ?? enLinea[0]?.chofer.placa}. El chofer te marca al subir.
@@ -185,7 +187,7 @@ export function InicioV2() {
 
         {(etapa === "abordo" || etapa === "llegaste") && (
           <>
-            <p className="font-medium">{etapa === "abordo" ? `A bordo hacia ${tramo.destino}` : `Llegaste a ${tramo.destino}`}</p>
+            <p className="font-medium">{etapa === "abordo" ? `A bordo hacia ${llegaA}` : `Llegaste a ${llegaA}`}</p>
             <p className="text-sm text-muted-foreground">
               {etapa === "abordo" ? "Te avisamos al llegar. Puedes bajarte antes: avísale al chofer." : "¿Cómo te fue? Califica en un toque."}
             </p>
@@ -281,8 +283,9 @@ export function InicioV2() {
 }
 
 /**
- * El corredor dibujado: paradas a la izquierda, la vía en el medio y, a la derecha, cada carro con cuánto le falta
- * para llegar a ti y sus puestos. "Tú" marca dónde esperas (o, a bordo, por dónde vas).
+ * La línea dibujada: los dos barrios como tramos sombreados de la vía (ahí se recoge o se deja a cada uno) y Gina como
+ * parada; entre los barrios, solo el camino. A la derecha, cada carro con cuánto le falta para llegar a ti y sus
+ * puestos. "Tú" marca dónde esperas (o, a bordo, por dónde vas).
  */
 function Linea({
   tramo,
@@ -312,10 +315,38 @@ function Linea({
         />
       )}
 
+      {tramo.barrios.map((b) => (
+        <div key={b.nombre}>
+          <div
+            className="absolute left-28 w-3 -translate-x-1/2 rounded-full bg-muted-foreground/20"
+            style={{ top: pct(b.desde), height: pct(b.hasta - b.desde) }}
+          />
+          <span
+            className="absolute left-0 w-28 -translate-y-1/2 pr-6 text-right text-sm leading-tight font-semibold"
+            style={{ top: pct((b.desde + b.hasta) / 2) }}
+          >
+            {b.nombre}
+            <span className="block text-[10px] font-normal tracking-wide text-muted-foreground uppercase">Barrio</span>
+          </span>
+        </div>
+      ))}
+
       {tramo.paradas.map((p) => (
         <div key={p.nombre} className="absolute left-0 flex w-28 -translate-y-1/2 items-center justify-end gap-2 pr-6" style={{ top: pct(p.pos) }}>
-          <span className="text-right text-xs leading-tight font-medium text-muted-foreground">{p.nombre}</span>
-          <span className="absolute -right-1.5 size-3 rounded-full border-2 border-background bg-muted-foreground" />
+          <span
+            className={cn(
+              "text-right text-xs leading-tight",
+              p.referencia ? "text-muted-foreground/70" : "font-medium text-foreground"
+            )}
+          >
+            {p.nombre}
+          </span>
+          <span
+            className={cn(
+              "absolute rounded-full border-2 border-background",
+              p.referencia ? "-right-1 size-2 bg-muted-foreground/50" : "-right-2 size-4 bg-foreground"
+            )}
+          />
         </div>
       ))}
 
