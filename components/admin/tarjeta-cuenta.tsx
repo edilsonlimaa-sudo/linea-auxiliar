@@ -1,5 +1,6 @@
 import { MessageCircleIcon, PhoneIcon, StarIcon, TriangleAlertIcon } from "lucide-react"
 
+import { DesconectarChofer } from "@/components/admin/acciones-viaje"
 import { BotonDecision } from "@/components/admin/boton-decision"
 import { BotonEliminar } from "@/components/admin/boton-eliminar"
 import { promedioTexto } from "@/components/estrellas"
@@ -38,7 +39,12 @@ export function TarjetaCuenta({
       </header>
 
       {c.estado === "aprobado" && c.actividad && <LineaActividad actividad={c.actividad} chofer={chofer} />}
-      {chofer && c.estado === "aprobado" && c.actividad?.conectado && <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin />}
+      {chofer && c.estado === "aprobado" && c.actividad?.conectado && (
+        <div className="flex flex-wrap gap-2">
+          <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin className="flex-1" />
+          <DesconectarChofer choferId={c.id} chofer={c.nombre} className="h-auto min-h-11" />
+        </div>
+      )}
 
       {chofer && fotoCarroUrl && (
         // eslint-disable-next-line @next/next/no-img-element -- enlace firmado de Supabase Storage (R54)

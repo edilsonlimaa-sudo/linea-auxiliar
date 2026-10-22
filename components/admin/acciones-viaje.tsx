@@ -6,6 +6,7 @@ import { useState, useTransition } from "react"
 import { Confirmar } from "@/components/confirmar"
 import { Button } from "@/components/ui/button"
 import { cerrarViajeAdmin, desconectarChoferAdmin } from "@/lib/acciones/admin"
+import { cn } from "@/lib/utils"
 
 /** Lo que hace el admin con su propia mano: confirma, espera y muestra el error si lo hay */
 function useAccionAdmin(accion: () => Promise<{ error?: string }>) {
@@ -60,11 +61,26 @@ export function CerrarViaje({ viajeId, chofer, enRuta, haciaValle }: { viajeId: 
 }
 
 /** Desconectar a un chofer (R69): cierra todos sus viajes abiertos, también el que va en ruta, y "terminó por hoy" */
-export function DesconectarChofer({ choferId, chofer, viajesAbiertos }: { choferId: string; chofer: string; viajesAbiertos: number }) {
+export function DesconectarChofer({
+  choferId,
+  chofer,
+  viajesAbiertos,
+  className,
+}: {
+  choferId: string
+  chofer: string
+  viajesAbiertos?: number // sin dato: el texto no dice cuántos
+  className?: string
+}) {
   const a = useAccionAdmin(() => desconectarChoferAdmin(choferId))
   return (
     <>
-      <Button variant="outline" size="sm" className="border-destructive text-destructive hover:bg-destructive/10" onClick={a.abrir}>
+      <Button
+        variant="outline"
+        size="sm"
+        className={cn("border-destructive text-destructive hover:bg-destructive/10", className)}
+        onClick={a.abrir}
+      >
         <PowerOffIcon aria-hidden />
         Desconectar
       </Button>
@@ -74,9 +90,11 @@ export function DesconectarChofer({ choferId, chofer, viajesAbiertos }: { chofer
         titulo={`¿Desconectar a ${chofer}?`}
         descripcion={
           <>
-            {viajesAbiertos === 0
-              ? "Queda desconectado."
-              : `Se ${viajesAbiertos === 1 ? "cierra su viaje abierto" : `cierran sus ${viajesAbiertos} viajes abiertos`} (el que va en ruta se termina) y queda desconectado.`}{" "}
+            {viajesAbiertos === undefined
+              ? "Queda desconectado y, si tiene viajes abiertos, se cierran (el que va en ruta se termina)."
+              : viajesAbiertos === 0
+                ? "Queda desconectado."
+                : `Se ${viajesAbiertos === 1 ? "cierra su viaje abierto" : `cierran sus ${viajesAbiertos} viajes abiertos`} (el que va en ruta se termina) y queda desconectado.`}{" "}
             Los pasajeros ven que terminó por hoy. Quien estaba en la lista hacia Valle Grande vuelve a su mismo lugar.
           </>
         }

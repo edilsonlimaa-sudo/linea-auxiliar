@@ -5,6 +5,7 @@ import { PorSentido } from "@/components/admin/demanda"
 import { UsoNumeros } from "@/components/admin/uso"
 import { promedioTexto } from "@/components/estrellas"
 import { Avatar } from "@/components/foto/avatar"
+import { DesconectarChofer } from "@/components/admin/acciones-viaje"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import type {
   ChoferEnCurso,
@@ -233,7 +234,16 @@ function EnLaRuta({ conectados, enCurso }: { conectados: CuentaConActividad[]; e
                     <p className="text-[15px] text-muted-foreground">{f.conectado ? "Conectado, sin viaje" : "Desconectado"}</p>
                   )}
                 </div>
-                {f.conectado && <VerEnMapa choferId={f.id} chofer={f.nombre} yo={null} admin className="shrink-0" />}
+                {/* Debajo del nombre, para que no lo aprieten: el mapa y Desconectar (R69) */}
+                <div className="grid w-full grid-cols-2 gap-2">
+                  {f.conectado && <VerEnMapa choferId={f.id} chofer={f.nombre} yo={null} admin className="w-full min-w-0" />}
+                  <DesconectarChofer
+                    choferId={f.id}
+                    chofer={f.nombre}
+                    viajesAbiertos={f.chofer?.viajes.length ?? 0}
+                    className={cn("h-auto min-h-11 w-full min-w-0", !f.conectado && "col-span-2")}
+                  />
+                </div>
               </li>
             )
           })}

@@ -5,7 +5,7 @@ import { LineaDeTiempo } from "@/components/admin/linea-de-tiempo"
 import { Avatar } from "@/components/foto/avatar"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { buttonVariants } from "@/components/ui/button"
-import type { ChoferEnCurso, PersonaEnViaje, ViajeEnCurso } from "@/lib/datos/admin"
+import type { ChoferEnCurso, CuentaConActividad, PersonaEnViaje, ViajeEnCurso } from "@/lib/datos/admin"
 import { hora } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
 import { conAcompanantes, enEspera, ETIQUETA_ESTADO, llegada, SENTIDOS, type Viaje } from "@/lib/viajes"
@@ -15,21 +15,58 @@ import { conAcompanantes, enEspera, ETIQUETA_ESTADO, llegada, SENTIDOS, type Via
  * a bordo, por recoger, pedidos en el camino y lista de espera. El admin no cambia listas, pero puede cerrar un
  * viaje o desconectar al chofer (R69).
  */
-export function ViajesEnCurso({ choferes }: { choferes: ChoferEnCurso[] }) {
+export function ViajesEnCurso({ choferes, sinViaje = [] }: { choferes: ChoferEnCurso[]; sinViaje?: CuentaConActividad[] }) {
+  const conectados = <ConectadosSinViaje choferes={sinViaje} />
   if (choferes.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
-        <BusIcon aria-hidden className="size-10 text-muted-foreground" />
-        <p className="text-lg font-bold">No hay viajes en curso ahora</p>
-        <p className="text-muted-foreground">Cuando un chofer publique un viaje, aparece aquí con su gente.</p>
+      <div className="flex flex-col gap-5">
+        {conectados}
+        <SinViajes />
       </div>
     )
   }
   return (
-    <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
-      {choferes.map((c) => (
-        <BloqueChofer key={c.id} chofer={c} />
-      ))}
+    <div className="flex flex-col gap-5">
+      {conectados}
+      <div className="grid gap-5 lg:grid-cols-2 lg:items-start">
+        {choferes.map((c) => (
+          <BloqueChofer key={c.id} chofer={c} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** Conectados sin viaje abierto (R69): por si alguno quedó conectado sin trabajar y hay que desconectarlo */
+function ConectadosSinViaje({ choferes }: { choferes: CuentaConActividad[] }) {
+  if (choferes.length === 0) return null
+  return (
+    <section aria-labelledby="titulo-sin-viaje" className="flex flex-col gap-2">
+      <h2 id="titulo-sin-viaje" className="text-xl font-bold">
+        Conectados sin viaje <span className="font-normal text-muted-foreground">({choferes.length})</span>
+      </h2>
+      <ul className="grid gap-2 lg:grid-cols-2">
+        {choferes.map((c) => (
+          <li key={c.id} className="flex flex-wrap items-center gap-3 rounded-2xl border-2 bg-card px-3 py-2.5">
+            <span aria-hidden className="size-2.5 shrink-0 rounded-full bg-success" />
+            <span className="min-w-0 flex-1">
+              <span className="block truncate font-bold">{c.nombre}</span>
+              {c.placa && <span className="font-mono text-sm font-bold tracking-wider text-muted-foreground">{c.placa}</span>}
+            </span>
+            <DesconectarChofer choferId={c.id} chofer={c.nombre} viajesAbiertos={0} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function SinViajes() {
+  return (
+    <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed px-5 py-10 text-center">
+      <BusIcon aria-hidden className="size-10 text-muted-foreground" />
+      <p className="text-lg font-bold">No hay viajes en curso ahora</p>
+      <p className="text-muted-foreground">Cuando un chofer publique un viaje, aparece aquí con su gente.</p>
     </div>
   )
 }

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { ViajesEnCurso } from "@/components/admin/viajes-en-curso"
 import { EnVivo } from "@/components/en-vivo"
 import { Alert, AlertTitle } from "@/components/ui/alert"
-import { cargarViajesEnCurso } from "@/lib/datos/admin"
+import { cargarCuentas, cargarViajesEnCurso } from "@/lib/datos/admin"
 import { exigirAdmin } from "@/lib/sesion"
 
 export const metadata: Metadata = { title: "Viajes en curso · Administración · Línea Auxiliar" }
@@ -12,7 +12,10 @@ export const metadata: Metadata = { title: "Viajes en curso · Administración �
 // Viajes en curso (§8): se abre desde el Resumen. Se actualiza sola (EnVivo).
 export default async function PaginaViajes() {
   await exigirAdmin()
-  const { choferes, error } = await cargarViajesEnCurso()
+  const [{ choferes, error }, { cuentas }] = await Promise.all([cargarViajesEnCurso(), cargarCuentas()])
+  // Conectados sin viaje abierto: también se pueden desconectar (R69)
+  const conViaje = new Set(choferes.map((c) => c.id))
+  const sinViaje = cuentas.filter((c) => c.rol === "chofer" && c.estado === "aprobado" && c.actividad?.conectado && !conViaje.has(c.id))
 
   return (
     <div className="flex flex-col gap-5">
@@ -29,7 +32,7 @@ export default async function PaginaViajes() {
           <AlertTitle>No pudimos cargar los viajes: {error}</AlertTitle>
         </Alert>
       ) : (
-        <ViajesEnCurso choferes={choferes} />
+        <ViajesEnCurso choferes={choferes} sinViaje={sinViaje} />
       )}
     </div>
   )
