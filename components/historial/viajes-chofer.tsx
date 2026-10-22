@@ -5,8 +5,9 @@ import { LineaDeTiempo } from "@/components/admin/linea-de-tiempo"
 import { Estrellas, promedioTexto } from "@/components/estrellas"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
-import type { PersonaDelViaje, ViajeTerminado } from "@/lib/datos/historial"
+import type { Cierre, PersonaDelViaje, ViajeTerminado } from "@/lib/datos/historial"
 import { diaYHora, hora } from "@/lib/fechas"
+import { DETALLE_CANCELAR, QUIEN_CERRO } from "@/lib/motivos-cancelar"
 import { cn } from "@/lib/utils"
 import { conAcompanantes, duracion, type EventoViaje, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
@@ -22,6 +23,12 @@ function hastaDonde(eventos: EventoViaje[] | undefined): string | null {
   if (eventos.some((e) => e.estado === "en_parada")) return "Después de llegar a recoger"
   if (eventos.some((e) => e.estado === "llegando")) return "Avisó que llegaba"
   return "Antes de llegar a recoger"
+}
+
+/** Quién lo cerró y por qué (R72): "Lo canceló el chofer · Quería cambiar la hora" */
+function quienYPorQue(c: Cierre | null | undefined): string | null {
+  if (!c) return null
+  return [QUIEN_CERRO[c.por], c.motivo && DETALLE_CANCELAR[c.motivo]].filter(Boolean).join(" · ")
 }
 
 /**
@@ -60,6 +67,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
         const comentarios = admin ? v.calificaciones : v.calificaciones.filter((c) => c.comentario)
         const cancelado = v.estado === "cancelado"
         const donde = cancelado ? hastaDonde(v.eventos) : null
+        const porQue = quienYPorQue(v.cierre)
         return (
           <li key={v.id}>
             <details className={cn("group rounded-2xl border-2 bg-card", cancelado && "border-destructive/40")}>
@@ -80,6 +88,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                         </Badge>
                         {diaYHora(v.cerrado)}
                       </span>
+                      {porQue && <span className="block text-sm font-bold">{porQue}</span>}
                       <span className="block text-sm text-muted-foreground">
                         {[donde, v.perdieron.length > 0 && (v.perdieron.length === 1 ? "1 perdió su puesto" : `${v.perdieron.length} perdieron su puesto`)]
                           .filter(Boolean)
@@ -102,7 +111,13 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
 
               {cancelado ? (
                 <div className="flex flex-col gap-4 px-4 pb-4">
-                  <p className="text-muted-foreground">Se canceló a las {hora(v.cerrado)}.</p>
+                  <p className="text-muted-foreground">
+                    Se canceló a las {hora(v.cerrado)}.{" "}
+                    {porQue ? `${porQue}.` : "No se guardó quién ni por qué (antes del 22 de octubre)."}
+                  </p>
+                  {v.cierre?.detalle && (
+                    <blockquote className="rounded-xl border-l-4 border-destructive bg-muted px-3 py-2">“{v.cierre.detalle}”</blockquote>
+                  )}
                   {v.eventos && <LineaDeTiempo eventos={v.eventos} />}
                   <section className="flex flex-col gap-1">
                     <h3 className="font-bold">Perdieron su puesto</h3>
@@ -115,7 +130,7 @@ export function ViajesChofer({ viajes, admin = false }: { viajes: ViajeTerminado
                 <div className="flex flex-col gap-4 px-4 pb-4">
                   {v.salida && v.llegada && (
                     <p className="text-muted-foreground">
-                      Salió a las {hora(v.salida)} y llegó a las {hora(v.llegada)}.
+                      Salió a las {hora(v.salida)} y llegó a las {hora(v.llegada)}.{porQue && ` ${porQue}.`}
                     </p>
                   )}
                   {/* Cronómetro (R56): solo el admin lo recibe */}

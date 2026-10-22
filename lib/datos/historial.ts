@@ -4,6 +4,7 @@ import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { cargarEventos } from "@/lib/datos/admin"
+import { type CerradoPor, DETALLE_CANCELAR, esMotivoCancelar, type MotivoCancelar, QUIEN_CERRO } from "@/lib/motivos-cancelar"
 import { type EventoViaje, nombreCorto, type Sentido } from "@/lib/viajes"
 
 type Perfil = Database["public"]["Tables"]["perfiles"]["Row"]
@@ -101,6 +102,15 @@ export type ViajeTerminado = {
   calificaciones: { estrellas: number; comentario: string | null; autor?: string }[]
   chofer?: { nombre: string; placa: string | null } // solo en el panel del admin
   eventos?: EventoViaje[] // cronómetro (R56), solo en el panel del admin
+  cierre?: Cierre | null // quién lo cerró y por qué (R72), solo en el panel del admin
+}
+
+export type Cierre = { por: CerradoPor; motivo: MotivoCancelar | null; detalle: string | null }
+
+type FilaCierre = { por: string; motivo: string | null; detalle: string | null }
+const aCierre = (c: FilaCierre | FilaCierre[] | null | undefined): Cierre | null => {
+  const fila = unoSolo(c)
+  return fila ? { por: fila.por as CerradoPor, motivo: esMotivoCancelar(fila.motivo) ? fila.motivo : null, detalle: fila.detalle } : null
 }
 
 /** Los últimos 20 viajes terminados del chofer, con quién llevó y cómo le fue */
@@ -117,7 +127,14 @@ const ESTADOS_DE: Record<FiltroCerrados, ("finalizado" | "cancelado")[]> = {
   todos: ["finalizado", "cancelado"],
 }
 
-export type TotalesCerrados = { terminados: number; cancelados: number; pasajeros: number; promedio: number | null; calificaciones: number }
+export type TotalesCerrados = {
+  terminados: number
+  cancelados: number
+  pasajeros: number
+  promedio: number | null
+  calificaciones: number
+  porQue: { texto: string; veces: number }[] // por qué se cancelaron (R72), de más a menos
+}
 
 /**
  * Viajes cerrados de toda la línea para el panel (§8): terminados, cancelados o todos, desde una fecha (o todos), de
@@ -152,11 +169,24 @@ async function cargarTotalesCerrados(desde: Date | null): Promise<TotalesCerrado
     .in("estado", ["subio", "bajo"])
     .eq("viaje.estado", "finalizado")
   let califs = supabase.from("calificaciones").select("estrellas, viaje:viajes!inner(estado_en)")
+  let cierres = supabase.from("viajes").select("cierre:viaje_cierres(por, motivo, detalle)").eq("estado", "cancelado")
   if (desde) {
     llevados = llevados.gte("viaje.estado_en", desde.toISOString())
     califs = califs.gte("viaje.estado_en", desde.toISOString())
+    cierres = cierres.gte("estado_en", desde.toISOString())
   }
-  const [terminados, cancelados, personas, estrellas] = await Promise.all([contar("finalizado"), contar("cancelado"), llevados, califs])
+  const [terminados, cancelados, personas, estrellas, motivos] = await Promise.all([
+    contar("finalizado"),
+    contar("cancelado"),
+    llevados,
+    califs,
+    cierres,
+  ])
+  const veces = new Map<string, number>()
+  for (const v of motivos.data ?? []) {
+    const texto = textoCierre(aCierre(v.cierre))
+    veces.set(texto, (veces.get(texto) ?? 0) + 1)
+  }
   const notas = (estrellas.data ?? []).map((c) => c.estrellas)
   return {
     terminados: terminados.count ?? 0,
@@ -164,7 +194,15 @@ async function cargarTotalesCerrados(desde: Date | null): Promise<TotalesCerrado
     pasajeros: (personas.data ?? []).reduce((n, r) => n + r.personas, 0),
     promedio: notas.length ? notas.reduce((n, e) => n + e, 0) / notas.length : null,
     calificaciones: notas.length,
+    porQue: [...veces].map(([texto, n]) => ({ texto, veces: n })).sort((a, b) => b.veces - a.veces),
   }
+}
+
+/** Por qué se cerró, en una frase: el motivo del chofer, o quién lo cerró; antes del 22/10 no se guardaba */
+export function textoCierre(c: Cierre | null | undefined): string {
+  if (!c) return "Sin registro"
+  if (c.motivo) return DETALLE_CANCELAR[c.motivo]
+  return QUIEN_CERRO[c.por] ?? "Sin registro"
 }
 
 async function cargarTerminados({
@@ -185,7 +223,8 @@ async function cargarTerminados({
   const supabase = await crearClienteServidor()
   let consulta = supabase
     .from("viajes")
-    .select("id, estado, estado_en, sentido, puestos, salida_en, llegada_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa))")
+    // cierre (R72): RLS deja leer solo al admin y al chofer del viaje
+    .select("id, estado, estado_en, sentido, puestos, salida_en, llegada_en, chofer:perfiles(nombre, vehiculo:vehiculos(placa)), cierre:viaje_cierres(por, motivo, detalle)")
     .in("estado", estados)
   if (choferId) consulta = consulta.eq("chofer_id", choferId)
   // estado_en: la hora en que se cerró (al terminar es la llegada)
@@ -241,7 +280,7 @@ async function cargarTerminados({
       calificaciones: (califsRes.data ?? [])
         .filter((c) => c.viaje_id === v.id)
         .map((c) => ({ estrellas: c.estrellas, comentario: c.comentario, ...(admin && c.pasajero ? { autor: c.pasajero.nombre } : {}) })),
-      ...(admin ? { eventos: eventos.get(v.id) ?? [] } : {}),
+      ...(admin ? { eventos: eventos.get(v.id) ?? [], cierre: aCierre(v.cierre) } : {}),
       ...(admin && v.chofer ? { chofer: { nombre: v.chofer.nombre, placa: unoSolo(v.chofer.vehiculo)?.placa ?? null } } : {}),
     }
   })

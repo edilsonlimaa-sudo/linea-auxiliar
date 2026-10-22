@@ -72,6 +72,23 @@ export default async function PaginaTerminados({ searchParams }: PageProps<"/adm
         />
       </div>
 
+      {/* R72: por qué se cancelan, para entender a los choferes */}
+      {estado.id !== "terminados" && totales.porQue.length > 0 && (
+        <section aria-labelledby="titulo-porque" className="flex flex-col gap-2 rounded-2xl border-2 bg-card p-4">
+          <h2 id="titulo-porque" className="font-bold">
+            Por qué se cancelaron
+          </h2>
+          <ul className="flex flex-col gap-1">
+            {totales.porQue.map((m) => (
+              <li key={m.texto} className="flex items-baseline justify-between gap-3">
+                <span>{m.texto}</span>
+                <span className="font-bold tabular-nums">{m.veces}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <ViajesChofer viajes={viajes} admin />
 
       {(pagina > 1 || hayMas) && (

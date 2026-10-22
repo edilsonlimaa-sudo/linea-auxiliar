@@ -1,21 +1,34 @@
 "use client"
 
-import { EllipsisIcon, Loader2Icon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { useState } from "react"
+import { EllipsisIcon, LightbulbIcon, Loader2Icon, MinusIcon, PlusIcon, Trash2Icon } from "lucide-react"
+import { useId, useState } from "react"
 
+import { Opcion } from "@/components/chofer/publicar-viaje"
 import { useAccion } from "@/components/chofer/use-accion"
-import { Confirmar } from "@/components/confirmar"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Input } from "@/components/ui/input"
+import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { cambiarPuestos, cancelarViaje } from "@/lib/acciones/chofer"
+import { MOTIVOS_CANCELAR, type MotivoCancelar, OPCION_CANCELAR } from "@/lib/motivos-cancelar"
 
-/** Lo que se usa poco va aquí, lejos de los botones del día a día: cambiar puestos y cancelar el viaje (R24) */
-export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: string; puestos: number; ocupados: number; enRuta: boolean }) {
+/** Lo que se usa poco va aquí, lejos de los botones del día a día: cambiar puestos y cancelar el viaje (R24, R72) */
+export function MasOpciones({
+  viajeId,
+  puestos,
+  ocupados,
+  enRuta,
+  enCamino = false,
+}: {
+  viajeId: string
+  puestos: number
+  ocupados: number
+  enRuta: boolean
+  enCamino?: boolean // va a recoger: "cambiar la hora" se hace con Me atraso (R70)
+}) {
   const [abierta, setAbierta] = useState(false)
   const [nuevos, setNuevos] = useState(puestos)
   const [cancelar, setCancelar] = useState(false)
   const puestosAccion = useAccion()
-  const cancelarAccion = useAccion()
   const minimo = enRuta ? Math.max(1, ocupados) : 1
 
   return (
@@ -73,23 +86,111 @@ export function MasOpciones({ viajeId, puestos, ocupados, enRuta }: { viajeId: s
         </SheetContent>
       </Sheet>
 
-      <Confirmar
-        abierto={cancelar}
-        onCambiar={setCancelar}
-        titulo="¿Cancelar este viaje?"
-        descripcion={
-          ocupados === 0
+      <Sheet open={cancelar} onOpenChange={setCancelar}>
+        <SheetContent side="bottom" className="mx-auto max-h-[90svh] max-w-2xl overflow-y-auto">
+          {/* Se monta al abrir: cada vez empieza sin motivo escogido */}
+          {cancelar && (
+            <HojaCancelar
+              viajeId={viajeId}
+              ocupados={ocupados}
+              enCamino={enCamino}
+              onVolver={() => setCancelar(false)}
+              onListo={() => (setCancelar(false), setAbierta(false))}
+            />
+          )}
+        </SheetContent>
+      </Sheet>
+    </>
+  )
+}
+
+/**
+ * R72: por qué cancela, con un toque. Dos motivos tienen otra salida sin que nadie pierda su puesto (cambiar la hora
+ * con Me atraso; los puestos se cambian en la misma hoja), pero puede cancelar igual.
+ */
+function HojaCancelar({
+  viajeId,
+  ocupados,
+  enCamino,
+  onVolver,
+  onListo,
+}: {
+  viajeId: string
+  ocupados: number
+  enCamino: boolean
+  onVolver: () => void
+  onListo: () => void
+}) {
+  const [motivo, setMotivo] = useState<MotivoCancelar>()
+  const [detalle, setDetalle] = useState("")
+  const { ejecutar, pendiente, error } = useAccion()
+  const idDetalle = useId()
+  const sugerencia =
+    motivo === "cambiar_hora" && enCamino
+      ? { texto: "Usa «Me atraso» en tu viaje: das una hora nueva y nadie pierde su puesto.", boton: "Volver y usar Me atraso", alTocar: onListo }
+      : motivo === "me_equivoque"
+        ? { texto: "Si son los puestos, cámbialos en «Puestos del carro»: nadie pierde su lugar.", boton: "Volver a los puestos", alTocar: onVolver }
+        : null
+
+  return (
+    <>
+      <SheetHeader>
+        <SheetTitle>¿Por qué cancelas?</SheetTitle>
+        <SheetDescription className="text-base">
+          {ocupados === 0
             ? "Nadie ha apartado todavía."
             : ocupados === 1
               ? "La persona anotada tendrá que escoger otra unidad."
-              : `Las ${ocupados} personas anotadas tendrán que escoger otra unidad.`
-        }
-        confirmar="Sí, cancelar el viaje"
-        cancelar="No, volver"
-        ocupado={cancelarAccion.pendiente}
-        error={cancelarAccion.error}
-        onConfirmar={() => cancelarAccion.ejecutar(() => cancelarViaje(viajeId), () => (setCancelar(false), setAbierta(false)))}
-      />
+              : `Las ${ocupados} personas anotadas tendrán que escoger otra unidad.`}
+        </SheetDescription>
+      </SheetHeader>
+      <fieldset className="flex flex-col gap-2 px-4">
+        <legend className="sr-only">Motivo</legend>
+        {MOTIVOS_CANCELAR.map((m) => (
+          <Opcion key={m} nombre="motivo-cancelar" elegida={motivo === m} onElegir={() => setMotivo(m)} className="justify-start text-left">
+            {OPCION_CANCELAR[m]}
+          </Opcion>
+        ))}
+        {motivo === "otra" && (
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={idDetalle} className="font-bold">
+              ¿Qué pasó? <span className="font-normal text-muted-foreground">(opcional)</span>
+            </label>
+            <Input id={idDetalle} value={detalle} maxLength={120} onChange={(e) => setDetalle(e.target.value)} />
+          </div>
+        )}
+        {sugerencia && (
+          <div role="status" className="flex flex-col gap-2 rounded-2xl bg-warning-muted p-3">
+            <p className="flex items-start gap-2">
+              <LightbulbIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
+              {sugerencia.texto}
+            </p>
+            <Button variant="outline" className="w-full" onClick={sugerencia.alTocar}>
+              {sugerencia.boton}
+            </Button>
+          </div>
+        )}
+      </fieldset>
+      <SheetFooter>
+        {error && (
+          <p role="alert" className="font-bold text-destructive">
+            {error}
+          </p>
+        )}
+        <Button
+          variant="destructive"
+          size="lg"
+          className="w-full"
+          disabled={!motivo || pendiente}
+          onClick={() => motivo && ejecutar(() => cancelarViaje(viajeId, motivo, detalle), onListo)}
+        >
+          {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <Trash2Icon aria-hidden />}
+          {sugerencia ? "Cancelar igual" : "Cancelar el viaje"}
+        </Button>
+        <Button variant="secondary" size="lg" className="w-full" disabled={pendiente} autoFocus onClick={onVolver}>
+          No, volver
+        </Button>
+      </SheetFooter>
     </>
   )
 }

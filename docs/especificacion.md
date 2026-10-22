@@ -242,6 +242,17 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
   puestos libres.
 - **R23.** El pasajero puede tocar **✋ Ya estoy en el sitio** y el chofer lo ve en su lista.
 - **R24.** Si el chofer cancela el viaje, todos los anotados pasan a `sin_puesto` con aviso.
+- **R72. Por qué se cancela [servidor].** *(Oct. 2026: los choferes cancelaban mucho y no se sabía por qué.)*
+  - Al cancelar, el chofer escoge **por qué**, con un toque: **Quiero cambiar la hora** · **Me equivoqué al publicar**
+    · **No había nadie para recoger** · **Se llenó por fuera de la app** · **Problema con el carro** · **Terminé por hoy
+    / no puedo seguir** · **Otra razón** (con un campo opcional, máx. 120). El motivo es obligatorio en la app.
+  - Dos motivos tienen otra salida, sin cancelar: con **Quiero cambiar la hora**, si va a recoger (`en_camino`), se
+    sugiere **Me atraso** (R70: nadie pierde su puesto); con **Me equivoqué al publicar**, que los puestos se cambian
+    arriba en la misma hoja. Puede cancelar igual.
+  - Todo cierre que no sea el normal guarda **quién** lo hizo: el chofer al cancelar, el chofer al desconectarse (R8),
+    el admin al cerrar el viaje o al desconectar al chofer (R69).
+  - Solo lo ven el **admin** y el chofer de ese viaje. En **Viajes terminados** (§8) cada cancelado dice quién y por qué,
+    y con el filtro **Cancelados** arriba se cuentan los motivos del período.
 
 ### 5.6 Dónde recoger al pasajero
 
@@ -588,7 +599,7 @@ menú (formularios).
   promedio. Cada viaje, plegado como en Mis viajes del chofer (R50):
   - **Terminado:** chofer y placa, sentido, salida y llegada, duración, a quién llevó (nombre completo y cómo entró),
     quién no vino y sus calificaciones. A diferencia del chofer (R52), el admin sí ve quién calificó.
-  - **Cancelado** (en rojo): chofer y placa, sentido, a qué hora se canceló y hasta dónde llegó ("Antes de llegar a
+  - **Cancelado** (en rojo): chofer y placa, sentido, a qué hora se canceló, quién y por qué (R72), hasta dónde llegó ("Antes de llegar a
     recoger" / "Avisó que llegaba" / "Después de llegar a recoger"), quiénes tenían puesto y lo perdieron.
   - Los dos, con su línea de tiempo (R56).
 - **Demanda** (para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):

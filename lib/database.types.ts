@@ -711,6 +711,38 @@ export type Database = {
           },
         ]
       }
+      viaje_cierres: {
+        Row: {
+          detalle: string | null
+          en: string
+          motivo: string | null
+          por: string
+          viaje_id: string
+        }
+        Insert: {
+          detalle?: string | null
+          en?: string
+          motivo?: string | null
+          por: string
+          viaje_id: string
+        }
+        Update: {
+          detalle?: string | null
+          en?: string
+          motivo?: string | null
+          por?: string
+          viaje_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viaje_cierres_viaje_id_fkey"
+            columns: ["viaje_id"]
+            isOneToOne: true
+            referencedRelation: "viajes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       viaje_eventos: {
         Row: {
           atraso: boolean
@@ -950,6 +982,15 @@ export type Database = {
         }[]
       }
       _promover: { Args: { p_chofer: string }; Returns: undefined }
+      _registrar_cierre: {
+        Args: {
+          p_detalle?: string
+          p_motivo?: string
+          p_por: string
+          p_viaje: string
+        }
+        Returns: undefined
+      }
       _reserva: {
         Args: { p_reserva: string }
         Returns: {
@@ -1118,7 +1159,10 @@ export type Database = {
       }
       cancelar_espera: { Args: never; Returns: undefined }
       cancelar_reserva: { Args: { p_reserva: string }; Returns: undefined }
-      cancelar_viaje: { Args: { p_viaje: string }; Returns: undefined }
+      cancelar_viaje: {
+        Args: { p_detalle?: string; p_motivo?: string; p_viaje: string }
+        Returns: undefined
+      }
       choferes_en_pausa: {
         Args: never
         Returns: {

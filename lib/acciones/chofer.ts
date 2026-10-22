@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 
 import type { Database } from "@/lib/database.types"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
+import { esMotivoCancelar, type MotivoCancelar } from "@/lib/motivos-cancelar"
 import { contrario } from "@/lib/viajes"
 
 // Acciones del chofer. Todas pasan por las funciones RPC (reglas en el servidor); los errores ya vienen en español.
@@ -103,8 +104,12 @@ export async function avanzarViaje(viajeId: string, estado: EstadoViaje) {
   return rpc((s) => s.rpc("avanzar_viaje", { p_viaje: viajeId, p_estado: estado }))
 }
 
-export async function cancelarViaje(viajeId: string) {
-  return rpc((s) => s.rpc("cancelar_viaje", { p_viaje: viajeId }))
+/** Cancelar con su motivo (R24, R72); el detalle solo con "otra razón" */
+export async function cancelarViaje(viajeId: string, motivo: MotivoCancelar, detalle?: string) {
+  if (!esMotivoCancelar(motivo)) return { error: "Escoge por qué cancelas." }
+  const texto = detalle?.trim() ?? ""
+  if (texto.length > 120) return { error: "Escribe el motivo en menos de 120 letras." }
+  return rpc((s) => s.rpc("cancelar_viaje", { p_viaje: viajeId, p_motivo: motivo, ...(motivo === "otra" && texto ? { p_detalle: texto } : {}) }))
 }
 
 export async function cambiarPuestos(viajeId: string, puestos: number) {

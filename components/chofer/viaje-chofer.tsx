@@ -402,6 +402,7 @@ export function ViajeChofer({
             puestos={viaje.puestos}
             ocupados={viaje.ocupados}
             enRuta={enRuta}
+            enCamino={viaje.estado === "en_camino"}
           />
         </div>
       </>
