@@ -500,7 +500,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** ("¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **La línea** (mapa con todos los choferes y quién trabaja) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Demanda** · **Viajes terminados**) · Personas (**Choferes** · **Pasajeros**, cada uno con Pendientes / Aprobados / Rechazados) · Análisis (**Uso de la app**) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Demanda** · **Viajes terminados**) · Personas (**Choferes** · **Pasajeros**, cada uno con Pendientes / Aprobados / Rechazados) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
@@ -517,7 +517,7 @@ lo primero es *qué necesita de mí*, después *qué pasa ahora* y al final *có
 - **Resumen** (el tablero).
 - **Operación:** Viajes en curso · Demanda · Viajes terminados.
 - **Personas:** Choferes · Pasajeros.
-- **Análisis:** Uso de la app.
+- **Análisis:** Uso de la app · Calificaciones.
 - Abajo: Cambiar contraseña · Modo oscuro/claro · Salir del panel.
 
 Cada entrada muestra su contador: cuentas por aprobar en amarillo (piden acción); viajes en curso y personas esperando
@@ -546,6 +546,12 @@ menú (formularios).
        **lista de pasajeros identificados**: foto, nombre, viajes en el período, último viaje y "Nuevo" si su primer
        viaje fue en el período. Primero quien más viaja.
   6. **Comunidad:** choferes y pasajeros aprobados, y cuántos se registraron en los últimos 7 días.
+- **Calificaciones** (Análisis): todas las calificaciones de la línea, la más reciente primero, con **quién calificó**
+  (a diferencia del chofer, R52). Filtros: **período** (7 días · 30 días · Todo), **chofer** y **nota** (Todas · Solo
+  bajas, de 1 a 3 ★). Arriba, para lo filtrado: ★ promedio, cantidad, cuántas hay de cada nota y las etiquetas más
+  dichas. Sin chofer escogido, **Por chofer**: cada uno con su ★ promedio, cuántas y cuántas bajas (primero el de
+  promedio más bajo, para ver a quién hay que hablarle); tocar uno filtra por él. Cada calificación: estrellas,
+  chofer, pasajero (foto y nombre), cuándo, sentido del viaje, etiquetas y comentario.
 - **Viajes en curso** (se actualiza sola): un bloque por chofer
   con viajes abiertos, primero quien va en ruta. Arriba el chofer (foto, nombre, placa, unidad, conectado) y
   **Ver en el mapa** (R41). Por cada viaje: sentido, estado ("En ruta hacia el Centro, salió a las 7:40" /

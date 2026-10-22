@@ -11,6 +11,7 @@ import {
   ListOrderedIcon,
   LogOutIcon,
   MoonIcon,
+  StarIcon,
   SunIcon,
   UsersIcon,
   type LucideIcon,
@@ -61,7 +62,13 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
       { href: "/admin/pasajeros", titulo: "Pasajeros", icono: UsersIcon, contador: "pasajeros", accion: true },
     ],
   },
-  { titulo: "Análisis", destinos: [{ href: "/admin/uso", titulo: "Uso de la app", icono: BarChart3Icon }] },
+  {
+    titulo: "Análisis",
+    destinos: [
+      { href: "/admin/uso", titulo: "Uso de la app", icono: BarChart3Icon },
+      { href: "/admin/calificaciones", titulo: "Calificaciones", icono: StarIcon },
+    ],
+  },
 ]
 
 const suscribirse = () => () => {}
