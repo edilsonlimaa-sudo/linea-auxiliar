@@ -23,6 +23,7 @@ export function Confirmar({
   ocupado = false,
   error,
   variante = "destructive",
+  destacarCancelar = false,
 }: {
   abierto: boolean
   onCambiar: (abierto: boolean) => void
@@ -34,6 +35,7 @@ export function Confirmar({
   ocupado?: boolean
   error?: string
   variante?: "destructive" | "signal" // signal: confirmar algo que no es una pérdida (p. ej. salir con pasajeros)
+  destacarCancelar?: boolean // lo esperado es no confirmar (p. ej. terminar a 1 min de salir): cancelar va con el color
 }) {
   return (
     <AlertDialog.Root open={abierto} onOpenChange={(v) => !ocupado && onCambiar(v)}>
@@ -57,12 +59,12 @@ export function Confirmar({
             </p>
           )}
           <div className="flex flex-col gap-2.5">
-            <Button variant={variante} size="lg" className="w-full" disabled={ocupado} onClick={onConfirmar}>
+            <Button variant={destacarCancelar ? "outline" : variante} size="lg" className="w-full" disabled={ocupado} onClick={onConfirmar}>
               {ocupado && <Loader2Icon aria-hidden className="animate-spin" />}
               {confirmar}
             </Button>
             {/* Cerrar es lo seguro: recibe el foco al abrir para que un toque o Enter por reflejo no confirme */}
-            <AlertDialog.Close render={<Button variant="outline" size="lg" className="w-full" disabled={ocupado} autoFocus />}>
+            <AlertDialog.Close render={<Button variant={destacarCancelar ? variante : "outline"} size="lg" className="w-full" disabled={ocupado} autoFocus />}>
               {cancelar}
             </AlertDialog.Close>
           </div>

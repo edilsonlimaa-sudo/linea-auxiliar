@@ -177,6 +177,7 @@ export function BarraAccion({
         confirmar="Sí, terminar"
         variante="signal"
         cancelar="No, sigo en ruta"
+        destacarCancelar // R71: lo normal a los pocos minutos es seguir en ruta
         ocupado={pendiente}
         error={error}
         onConfirmar={() => avanzar("finalizado", () => setHaceMin(null))}

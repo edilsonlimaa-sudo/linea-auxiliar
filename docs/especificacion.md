@@ -161,7 +161,7 @@ puede ocultar botones, pero nunca es la única barrera.
   donde acababan de tocar Salir o creyendo que hacía falta para publicar la vuelta; sus pasajeros quedaban calificando
   con el carro andando y él se veía libre.)* **Terminar viaje** sigue siendo la acción principal en ruta, pero:
   - Si lo toca antes de **10 min** desde que salió, se confirma: "Saliste hace 1 minuto. ¿Ya dejaste a todos en …?" →
-    **Sí, terminar** · **No, sigo en ruta** (el foco en la opción segura). La confirmación recuerda que no hace falta
+    **Sí, terminar** · **No, sigo en ruta** (la opción segura en amarillo y con el foco). La confirmación recuerda que no hace falta
     terminar para publicar la vuelta. Después de 10 min termina directo.
   - Debajo del botón, una línea lo aclara: "No hace falta terminar para publicar tu vuelta: este viaje se termina solo
     al tocar Ya llegué en tu próxima recogida" (R13). Con la vuelta ya publicada: "Este viaje se termina solo al tocar
