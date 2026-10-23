@@ -421,8 +421,11 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   - **Dónde se ven:** la del chofer en las unidades y en Mi viaje; **la del carro en Mi viaje** (plegada, a un
     toque: "Ver el carro"), para reconocerlo al llegar; la de cada pasajero en la lista del chofer; ambas en el panel del admin y en el carnet. Sin foto,
     las iniciales.
-  - **[servidor]** Bucket privado: cada uno sube solo a su carpeta; las ven solo usuarios con sesión, con
-    enlaces firmados que vencen en 1 h.
+  - **[servidor]** Bucket privado: cada uno sube solo a su carpeta; las ven solo usuarios con sesión.
+  - **Una dirección fija por foto** *(Oct. 2026: el tráfico de Storage pasaba el plan gratis)*: la app las sirve en
+    `/foto/<carpeta>/<archivo>`, que pide sesión y deja al teléfono guardarla (privada, sin vencer: el nombre del
+    archivo cambia cuando la persona cambia la foto). Antes eran enlaces firmados de 1 h que cambiaban en cada
+    actualización de la pantalla, y el teléfono volvía a bajar todas las fotos cada vez.
 - **R55. Aire acondicionado.** El chofer indica si su carro tiene aire (al registrarse y en Mi carnet). Los
   pasajeros lo ven en cada unidad y en Mi viaje ("❄️ Con aire").
 
