@@ -608,13 +608,23 @@ menú (formularios).
   dichas. Sin chofer escogido, **Por chofer**: cada uno con su ★ promedio, cuántas y cuántas bajas (primero el de
   promedio más bajo, para ver a quién hay que hablarle); tocar uno filtra por él. Cada calificación: estrellas,
   chofer, pasajero (foto y nombre), cuándo, sentido del viaje, etiquetas y comentario.
-- **Viajes en curso** (se actualiza sola): un bloque por chofer
-  con viajes abiertos, primero quien va en ruta. Arriba el chofer (foto, nombre, placa, unidad, conectado) y
-  **Ver en el mapa** (R41). Por cada viaje: sentido, estado ("En ruta hacia el Centro, salió a las 7:40" /
-  "Recoge en Valle Grande en ~5 min" / "Próximo viaje"), puestos ocupados de cuántos, y la gente separada en
-  **A bordo**, **Por recoger** (con dónde y "✋ ya está en el sitio"), **Pedidos en el camino** y **Lista de espera**.
-  Cada persona con nombre completo, dónde la recogen, WhatsApp y Llamar. El admin no cambia listas, pero puede
-  **Cerrar** un viaje y **Desconectar** al chofer (R69).
+- **Viajes en curso** (se actualiza sola) *(Oct. 2026: antes un bloque por chofer; ahora mira los viajes)*:
+  - **Una columna por sentido** (Hacia el Centro · Hacia Valle Grande; en el celular, una debajo de la otra). Arriba
+    de cada una, la oferta: cuántos viajes, puestos libres, a qué hora recoge el próximo y, hacia Valle Grande,
+    cuántas personas hay en la lista de Gina.
+  - **Orden por el momento del viaje**, lo que pasa ahora primero: Recogiendo → Llegando → En camino a recoger (por
+    la hora en que recoge) → Próximos viajes → En ruta (por la hora de salida). **Lo que pide atención sube arriba**
+    de su columna, con un aviso amarillo: pasó su hora y no avisó (más de 3 min, R56; con "Me atraso", contra la
+    hora nueva) · recogiendo hace 15 min o más · en ruta hace más de 60 min ("¿olvidó terminar?") · pedido en el
+    camino sin responder.
+  - **Cada viaje, una tarjeta corta:** estado y sentido; el tiempo que importa (cuándo recoge y qué prometió, o
+    hace cuánto salió); los puestos dibujados ("3 de 4 · 1 libre"); el chofer en una línea (foto, nombre, placa,
+    ★, que abre su detalle) con **Ver en el mapa** (R41) y WhatsApp/Llamar; **Ver pasajeros (N)** y la línea de
+    tiempo plegados (al abrir, la gente separada en A bordo, Por recoger con "✋ ya está en el sitio", Pedidos en
+    el camino y Lista de espera, cada una con dónde, WhatsApp y Llamar); y **Cerrar viaje** (R69).
+  - Al final, **Conectados sin viaje** (con Desconectar, R69) y **En pausa**: quién dijo que vuelve y a qué hora
+    (R60), en amarillo quien ya pasó su hora, y quién terminó por hoy. Desconectar a un chofer con viajes se hace
+    desde su detalle.
 - **Viajes terminados**: **todos** los viajes cerrados de la línea, del más reciente al más viejo (por la hora en
   que se cerraron), con dos filtros: **Terminados · Cancelados · Todos** y **Hoy · 7 días · 30 días · Todo**. Se
   muestran de 50 en 50 (**Ver más**). Arriba, los totales del período: terminados, cancelados, pasajeros llevados y ★

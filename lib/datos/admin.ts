@@ -189,6 +189,28 @@ export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]
   return { choferes, error: null }
 }
 
+export type PausaAbierta = { choferId: string; nombre: string; fotoUrl: string | null; desde: string; vuelveEn: string | null }
+
+/** Choferes en pausa ahora (R60), de hoy: quién dijo que vuelve y a qué hora, y quién terminó por hoy (Viajes en curso) */
+export async function cargarPausasAbiertas(desde: Date): Promise<PausaAbierta[]> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase
+    .from("pausas")
+    .select("chofer_id, inicio, vuelve_en, chofer:perfiles!pausas_chofer_id_fkey(nombre, foto_path, conectado_en)")
+    .is("cerrada_en", null)
+    .gte("inicio", desde.toISOString())
+    .order("vuelve_en", { ascending: true, nullsFirst: false })
+  const filas = (data ?? []).filter((p) => !p.chofer?.conectado_en)
+  const fotos = await firmarFotos(filas.map((p) => p.chofer?.foto_path))
+  return filas.map((p) => ({
+    choferId: p.chofer_id,
+    nombre: p.chofer?.nombre ?? "Chofer",
+    fotoUrl: p.chofer?.foto_path ? (fotos.get(p.chofer.foto_path) ?? null) : null,
+    desde: p.inicio,
+    vuelveEn: p.vuelve_en,
+  }))
+}
+
 /** Cronómetro de cada viaje (R56): solo el admin puede leerlo */
 export async function cargarEventos(ids: string[]): Promise<Map<string, EventoViaje[]>> {
   const porViaje = new Map<string, EventoViaje[]>()
