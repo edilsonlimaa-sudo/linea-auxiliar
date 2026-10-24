@@ -25,7 +25,15 @@ type Pregunta = {
  * Una persona en la lista del carro (vista del chofer). Lo más grande: el puesto y DÓNDE recogerla (R25).
  * Las acciones cambian según el estado del viaje: antes de salir "No vino"; en ruta, pedidos y "Se bajó".
  */
-export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoViaje: EstadoViaje }) {
+export function FilaPasajero({
+  fila,
+  estadoViaje,
+  compacta = false,
+}: {
+  fila: FilaChofer
+  estadoViaje: EstadoViaje
+  compacta?: boolean // en el viaje en ruta abierto (R75): una sola línea
+}) {
   const { ejecutar, pendiente, error } = useAccion()
   const [pregunta, setPregunta] = useState<Pregunta | null>(null)
   const enRuta = estadoViaje === "en_ruta"
@@ -45,6 +53,122 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
       confirmar: "Sí, no vino",
       accion: () => marcarNoVino(fila.id),
     })
+
+  const acciones = (
+    <>
+      {fila.pendiente && (
+        <>
+          <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, true))}>
+            {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CheckIcon aria-hidden />}
+            Voy
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, false))}>
+            <XIcon aria-hidden />
+            Sigo, no puedo
+          </Button>
+        </>
+      )}
+      {enRuta && fila.estado === "activa" && !fila.pendiente && (
+        <>
+          <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => marcarSubio(fila.id))}>
+            <CheckIcon aria-hidden />
+            Subió
+          </Button>
+          <Button size="sm" variant="outline" className="flex-1 text-destructive" disabled={pendiente} onClick={noVino}>
+            <UserXIcon aria-hidden />
+            No vino
+          </Button>
+        </>
+      )}
+      {enRuta && fila.estado === "subio" && (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={pendiente}
+          onClick={() =>
+            confirmarY({
+              titulo: `¿${quien} se bajó?`,
+              // Para el pasajero su viaje termina aquí y se le pide calificar (R38, R45): por eso se confirma
+              descripcion: fila.conApp
+                ? "Su puesto queda libre y para esa persona el viaje termina: la app le pedirá que te califique."
+                : "Su puesto queda libre.",
+              confirmar: "Sí, se bajó",
+              variante: "signal",
+              accion: () => marcarSeBajo(fila.id),
+            })
+          }
+        >
+          Se bajó
+        </Button>
+      )}
+      {/* Quien ya subió por la Lista de Gina (R64) no tiene "No vino" */}
+      {recogiendo && fila.conApp && fila.confirmado && !fila.pendiente && fila.estado === "activa" && (
+        <Button size="sm" variant="ghost" className="-ml-2 text-destructive" disabled={pendiente} onClick={noVino}>
+          <UserXIcon aria-hidden />
+          No vino
+        </Button>
+      )}
+      {!enRuta && !fila.conApp && (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={pendiente}
+          onClick={() =>
+            confirmarY({
+              titulo: `¿Quitar a ${quien}?`,
+              descripcion: "Lo anotaste tú a mano. Su puesto queda libre.",
+              confirmar: "Sí, quitar",
+              accion: () => quitarAnotado(fila.id),
+            })
+          }
+        >
+          <XIcon aria-hidden />
+          Quitar
+        </Button>
+      )}
+    </>
+  )
+
+  const confirmacion = pregunta && (
+    <Confirmar
+      abierto
+      onCambiar={(v) => !v && setPregunta(null)}
+      titulo={pregunta.titulo}
+      descripcion={pregunta.descripcion}
+      confirmar={pregunta.confirmar}
+      variante={pregunta.variante}
+      cancelar="No, volver"
+      ocupado={pendiente}
+      error={error}
+      onConfirmar={() => ejecutar(pregunta.accion, () => setPregunta(null))}
+    />
+  )
+
+  // En el viaje en ruta abierto (R75): una línea, nombre (o lugar) · dónde · la acción del momento
+  if (compacta) {
+    return (
+      <li className={cn("flex flex-col gap-1 border-b py-2 last:border-b-0", fila.pendiente && "text-destructive")}>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <p className="min-w-0 flex-1 basis-36 leading-snug">
+            <span className="font-bold">{fila.personas > 1 ? `${quien} +${fila.personas - 1}` : quien}</span>
+            {fila.pendiente && <span className="font-bold"> · pide que pases</span>}
+            {!porLugar && fila.lugar && <span className="text-sm text-muted-foreground"> · {fila.lugar}</span>}
+            {!fila.conApp && <span className="text-sm text-muted-foreground"> · sin app</span>}
+          </p>
+          <span className="flex shrink-0 items-center gap-2">
+            {acciones}
+            {(telefono || gps) && <Contacto fila={fila} telefono={telefono} gps={gps} />}
+          </span>
+        </div>
+        {error && !pregunta && (
+          <p role="alert" className="text-sm font-bold text-destructive">
+            {error}
+          </p>
+        )}
+        {confirmacion}
+      </li>
+    )
+  }
 
   return (
     <li
@@ -85,78 +209,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
       </div>
 
       {/* Acciones sobre la reserva */}
-      <div className="flex flex-wrap gap-2 empty:hidden">
-        {fila.pendiente && (
-          <>
-            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, true))}>
-              {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CheckIcon aria-hidden />}
-              Voy
-            </Button>
-            <Button size="sm" variant="outline" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => responderPedido(fila.id, false))}>
-              <XIcon aria-hidden />
-              Sigo, no puedo
-            </Button>
-          </>
-        )}
-        {enRuta && fila.estado === "activa" && !fila.pendiente && (
-          <>
-            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => marcarSubio(fila.id))}>
-              <CheckIcon aria-hidden />
-              Subió
-            </Button>
-            <Button size="sm" variant="outline" className="flex-1 text-destructive" disabled={pendiente} onClick={noVino}>
-              <UserXIcon aria-hidden />
-              No vino
-            </Button>
-          </>
-        )}
-        {enRuta && fila.estado === "subio" && (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={pendiente}
-            onClick={() =>
-              confirmarY({
-                titulo: `¿${quien} se bajó?`,
-                // Para el pasajero su viaje termina aquí y se le pide calificar (R38, R45): por eso se confirma
-                descripcion: fila.conApp
-                  ? "Su puesto queda libre y para esa persona el viaje termina: la app le pedirá que te califique."
-                  : "Su puesto queda libre.",
-                confirmar: "Sí, se bajó",
-                variante: "signal",
-                accion: () => marcarSeBajo(fila.id),
-              })
-            }
-          >
-            Se bajó
-          </Button>
-        )}
-        {/* Quien ya subió por la Lista de Gina (R64) no tiene "No vino" */}
-        {recogiendo && fila.conApp && fila.confirmado && !fila.pendiente && fila.estado === "activa" && (
-          <Button size="sm" variant="ghost" className="-ml-2 text-destructive" disabled={pendiente} onClick={noVino}>
-            <UserXIcon aria-hidden />
-            No vino
-          </Button>
-        )}
-        {!enRuta && !fila.conApp && (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={pendiente}
-            onClick={() =>
-              confirmarY({
-                titulo: `¿Quitar a ${quien}?`,
-                descripcion: "Lo anotaste tú a mano. Su puesto queda libre.",
-                confirmar: "Sí, quitar",
-                accion: () => quitarAnotado(fila.id),
-              })
-            }
-          >
-            <XIcon aria-hidden />
-            Quitar
-          </Button>
-        )}
-      </div>
+      <div className="flex flex-wrap gap-2 empty:hidden">{acciones}</div>
 
       {error && !pregunta && (
         <p role="alert" className="font-bold text-destructive">
@@ -164,20 +217,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
         </p>
       )}
 
-      {pregunta && (
-        <Confirmar
-          abierto
-          onCambiar={(v) => !v && setPregunta(null)}
-          titulo={pregunta.titulo}
-          descripcion={pregunta.descripcion}
-          confirmar={pregunta.confirmar}
-          variante={pregunta.variante}
-          cancelar="No, volver"
-          ocupado={pendiente}
-          error={error}
-          onConfirmar={() => ejecutar(pregunta.accion, () => setPregunta(null))}
-        />
-      )}
+      {confirmacion}
     </li>
   )
 }

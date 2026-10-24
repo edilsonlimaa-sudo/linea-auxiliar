@@ -1,22 +1,18 @@
 import { ChevronDownIcon, FlagIcon, TriangleAlertIcon } from "lucide-react"
 
 import { BarraAccion } from "@/components/chofer/barra-accion"
-import { DespuesDelViaje } from "@/components/chofer/despues-del-viaje"
 import { FilaPasajero } from "@/components/chofer/fila-pasajero"
 import { MeAtraso } from "@/components/chofer/me-atraso"
-import { FilaLista } from "@/components/chofer/lista-tramo"
 import { MasOpciones } from "@/components/chofer/mas-opciones"
 import { OcuparPuesto } from "@/components/chofer/ocupar-puesto"
 import { Asientos } from "@/components/pasajero/asientos"
 import type {
-  EntradaTramo,
   FilaChofer,
   ViajeChofer as Viaje,
 } from "@/lib/datos/inicio-chofer"
 import { cn } from "@/lib/utils"
 import {
   conAcompanantes,
-  contrario,
   enEspera,
   estadoParaChofer,
   libres,
@@ -149,18 +145,14 @@ export function ViajeChofer({
   vehiculo,
   barraFija = false,
   plegado = false,
-  esperanEnCamino,
   dicenQueSubieron = [],
-  sinVuelta = false,
 }: {
   viaje: Viaje
   porId: Map<string, ViajeBase>
   vehiculo: { unidad: string | null; placa: string } | null
   barraFija?: boolean
   plegado?: boolean
-  esperanEnCamino?: EntradaTramo[] // R67: en ruta hacia Valle Grande, de la lista del tramo, sin carro y caben
   dicenQueSubieron?: string[] // R62: en Gina, quienes avisaron que se montaron y no están marcados Subió
-  sinVuelta?: boolean // en ruta sin otro viaje publicado (R71)
 }) {
   const { titulo, detalle: detalleBase } = estadoParaChofer(viaje, porId)
   // En ruta, "a bordo" son los que subieron: a quien falta recoger en el camino se lo cuenta aparte
@@ -206,11 +198,6 @@ export function ViajeChofer({
       avisoSalida={avisoSalida}
       mensajeGrupo={mensajeGrupo(viaje, vehiculo)}
       fija={barraFija}
-      salioEn={viaje.estado_en}
-      destino={SENTIDOS[contrario(viaje.sentido)].enRecogida} // "en el Centro" / "en Valle Grande"
-      sinVuelta={sinVuelta}
-      // R73: sin decir qué hace después, Terminar abre la pregunta
-      faltaDespues={enRuta && sinVuelta && viaje.despues !== "pausa" && viaje.despues !== "ultimo"}
     />
   )
 
@@ -276,7 +263,6 @@ export function ViajeChofer({
         {/* R70: una hora nueva si se atrasa (en amarillo si ya pasó la que dijo) */}
         {viaje.estado === "en_camino" && <MeAtraso viajeId={viaje.id} estadoEn={viaje.estado_en} etaMin={viaje.eta_min} />}
         {/* R73: en ruta sin otro viaje publicado, qué hace después */}
-        {enRuta && sinVuelta && <DespuesDelViaje viaje={viaje} />}
         {recogerEnCamino.length > 0 && (
           <p
             role="status"
@@ -340,24 +326,6 @@ export function ViajeChofer({
               filas={viaje.lista.filter((f) => f.pendiente)}
               estado={viaje.estado}
             />
-            {/* R67: avisaron en el camino después de que saliste de Gina. "Voy" la liga a este carro */}
-            {esperanEnCamino && esperanEnCamino.length > 0 && (
-              <section className="flex flex-col gap-2 rounded-2xl border-2 border-warning bg-warning-muted p-3">
-                <h3 className="flex items-center gap-2 text-sm font-bold tracking-wide text-warning uppercase">
-                  <FlagIcon aria-hidden className="size-5 shrink-0" />
-                  Espera en el camino <span className="font-normal">({esperanEnCamino.length})</span>
-                </h3>
-                <p className="text-sm leading-snug">
-                  {esperanEnCamino.length === 1 ? "Se anotó" : "Se anotaron"} después de que saliste de Gina. Toca <strong>Voy</strong> si pasas por ahí: los demás
-                  choferes ya no paran.
-                </p>
-                <ol className="flex flex-col gap-2">
-                  {esperanEnCamino.map((e) => (
-                    <FilaLista key={e.id} entrada={e} viajeId={viaje.id} puedeIr puedeSubir conNoEstaba compacta />
-                  ))}
-                </ol>
-              </section>
-            )}
             {/* Lo que no se puede olvidar: a quién recoger en el camino, en amarillo y arriba */}
             <Seccion
               titulo="Recoge en el camino"

@@ -20,7 +20,7 @@ const PAUSAS = [
 ]
 const texto = (m: number) => (m === 60 ? "1 hora" : `${m} min`)
 
-type Respuesta = "vuelta" | "pausa" | "ultimo"
+export type Respuesta = "vuelta" | "pausa" | "ultimo"
 
 /**
  * R73 (antes R61): en ruta y sin otro viaje publicado, "¿Qué haces después de este viaje?" → publico mi vuelta (cuándo
@@ -28,10 +28,16 @@ type Respuesta = "vuelta" | "pausa" | "ultimo"
  * cerrar la hoja no responde y el viaje lo sigue pidiendo (DespuesDelViaje, y Terminar viaje abre esta hoja).
  * Llega abierta por ?vuelta=1 (al salir, el viaje cambia de lugar en la pantalla y un estado local se perdería).
  */
-export function PreguntarVuelta({ viaje }: { viaje: Pick<Viaje, "id" | "sentido" | "puestos" | "ocupados" | "despues"> }) {
+export function PreguntarVuelta({
+  viaje,
+  inicial = null,
+}: {
+  viaje: Pick<Viaje, "id" | "sentido" | "puestos" | "ocupados" | "despues">
+  inicial?: Respuesta | null // la respuesta ya escogida al abrirla desde el foco (R75)
+}) {
   const router = useRouter()
   const [abierta, setAbierta] = useState(true)
-  const [respuesta, setRespuesta] = useState<Respuesta | null>(null)
+  const [respuesta, setRespuesta] = useState<Respuesta | null>(inicial)
   const [minutos, setMinutos] = useState<number | null>(null)
   const [pausa, setPausa] = useState<number | "hora" | null>(null)
   const [hora, setHora] = useState("")

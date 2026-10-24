@@ -45,8 +45,9 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
   // Inicio del chofer: demanda y publicar; con viaje abierto, su gestión (docs/especificacion.md §8)
   if (perfil.rol === "chofer") {
     const datos = await cargarInicioChofer(perfil.id, perfil.conectado_en !== null)
-    const { vuelta } = await searchParams
-    return <InicioChofer nombre={perfil.nombre} datos={datos} preguntarVuelta={vuelta === "1"} />
+    const { vuelta, r } = await searchParams
+    const respuesta = r === "vuelta" || r === "pausa" || r === "ultimo" ? r : null
+    return <InicioChofer nombre={perfil.nombre} datos={datos} preguntarVuelta={vuelta === "1"} respuesta={respuesta} />
   }
 
   const { cambiar, hacia } = await searchParams

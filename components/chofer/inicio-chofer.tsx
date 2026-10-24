@@ -2,7 +2,9 @@ import { AgregarViaje } from "@/components/chofer/agregar-viaje"
 import { Companeros } from "@/components/chofer/companeros"
 import { EstadoEnCabecera, EstadoServicio } from "@/components/chofer/conexion"
 import { ListaTramo } from "@/components/chofer/lista-tramo"
-import { PreguntarVuelta } from "@/components/chofer/preguntar-vuelta"
+import { DespuesFoco } from "@/components/chofer/despues-foco"
+import { EnRutaCompacto } from "@/components/chofer/en-ruta-compacto"
+import { PreguntarVuelta, type Respuesta } from "@/components/chofer/preguntar-vuelta"
 import { ViajeChofer } from "@/components/chofer/viaje-chofer"
 import { EnVivo } from "@/components/en-vivo"
 import type { DatosInicioChofer } from "@/lib/datos/inicio-chofer"
@@ -19,10 +21,12 @@ export function InicioChofer({
   nombre,
   datos,
   preguntarVuelta = false,
+  respuesta = null,
 }: {
   nombre: string
   datos: DatosInicioChofer
   preguntarVuelta?: boolean // recién salió (?vuelta=1): preguntar por la vuelta (R61)
+  respuesta?: Respuesta | null // desde el foco "¿Qué haces después?" (R75): la hoja abre con esta respuesta
 }) {
   const { conectado, enRuta, recogida, proximos, companeros, viajesCompaneros, ultimo, vehiculo } = datos
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
@@ -81,18 +85,26 @@ export function InicioChofer({
     <div className="flex flex-col gap-4">
       <EnVivo />
       <h1 className="sr-only">Inicio</h1>
+      {/* R75: el viaje en ruta, compacto y pegado arriba; se abre en su lugar */}
+      {enRuta && (
+        <EnRutaCompacto
+          viaje={enRuta}
+          esperanEnCamino={esperanEnCamino}
+          sinVuelta={abiertos.length === 1}
+          faltaDespues={abiertos.length === 1 && enRuta.despues !== "pausa" && enRuta.despues !== "ultimo"}
+        />
+      )}
       {/* Conexión y ubicación (R40) en una línea: solo crece si el GPS falla */}
       <EstadoServicio conectado={conectado} viajesAbiertos={publicados} />
       {lista}
-      {/* R61: solo si va en ruta sin otro viaje publicado (con la vuelta ya publicada no se pregunta) */}
-      {preguntarVuelta && enRuta && abiertos.length === 1 && <PreguntarVuelta viaje={enRuta} />}
+      {/* R61/R73: solo si va en ruta sin otro viaje publicado (con la vuelta ya publicada no se pregunta) */}
+      {preguntarVuelta && enRuta && abiertos.length === 1 && <PreguntarVuelta viaje={enRuta} inicial={respuesta} />}
 
-      {enRuta && <ViajeChofer viaje={enRuta} porId={porId} vehiculo={vehiculo} esperanEnCamino={esperanEnCamino} sinVuelta={abiertos.length === 1} barraFija />}
-      {recogida && (
-        <>
-          {enRuta && <h2 className="mt-2 text-base font-bold">Tu siguiente recogida</h2>}
-          <ViajeChofer viaje={recogida} porId={porId} vehiculo={vehiculo} dicenQueSubieron={dicenQueSubieron} barraFija={!enRuta} />
-        </>
+      {/* El foco: el próximo viaje con su acción pegada abajo; en ruta sin próximo, qué hace después (R75) */}
+      {recogida ? (
+        <ViajeChofer viaje={recogida} porId={porId} vehiculo={vehiculo} dicenQueSubieron={dicenQueSubieron} barraFija />
+      ) : (
+        enRuta && abiertos.length === 1 && <DespuesFoco viaje={enRuta} />
       )}
 
       {proximos.length > 0 && (
