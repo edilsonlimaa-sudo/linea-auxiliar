@@ -432,9 +432,11 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   - **Quién lo ve:** el pasajero con reserva activa o a bordo en un viaje de ese chofer, y hasta **3 h** después de
     bajarse o de terminar el viaje; el admin y el propio chofer. Nadie más (lleva la cédula).
   - **Dónde:** en **Mi viaje** (a bordo, a la vista; esperando el carro, plegado: "Pago Móvil del chofer") y en
-    **"¿Cómo te fue?"** al terminar. Cada dato con **Copiar** (el banco como código "0102", el teléfono solo con números
-    "04141234567", la cédula "V12345678") y **Copiar todo** (los tres, uno por línea), con "Copiado" al tocar, listos
-    para pegar en la app del banco.
+    **"¿Cómo te fue?"** al terminar. **Copiar todo** es la acción principal, arriba y grande: los tres datos, uno por
+    línea, para usar el **Pegar** de las apps de los bancos (en Venezuela llenan todos los campos de una vez).
+    *(Oct. 2026: antes cada dato tenía su botón grande; es lo menos usado.)* Debajo, cada dato con un **Copiar** chico
+    (el banco como código "0102", el teléfono solo con números "04141234567", la cédula "V12345678"), por si la app no
+    pega todo junto. "Copiado" al tocar.
   - La app no cobra ni registra pagos: solo muestra los datos.
 - **R55. Aire acondicionado.** El chofer indica si su carro tiene aire (al registrarse y en Mi carnet). Los
   pasajeros lo ven en cada unidad y en Mi viaje ("❄️ Con aire").

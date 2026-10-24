@@ -27,8 +27,8 @@ async function copiar(texto: string): Promise<boolean> {
 }
 
 /**
- * El Pago Móvil del chofer para el pasajero (R74): banco, teléfono y cédula, cada uno con Copiar, y Copiar todo, para
- * pegarlos en la app del banco sin preguntar. A bordo va abierto; esperando el carro, plegado.
+ * El Pago Móvil del chofer para el pasajero (R74): Copiar todo, grande y arriba (las apps de los bancos lo pegan de una
+ * vez), y debajo cada dato con su Copiar chico. A bordo va abierto; esperando el carro, plegado.
  */
 export function PagoMovilChofer({ datos, chofer, plegado = false }: { datos: DatosPagoMovil; chofer: string; plegado?: boolean }) {
   const [copiado, setCopiado] = useState<string | null>(null)
@@ -46,21 +46,26 @@ export function PagoMovilChofer({ datos, chofer, plegado = false }: { datos: Dat
   ]
   const titulo = `Pago Móvil de ${chofer.split(" ")[0]}`
 
+  // Copiar todo primero: las apps de los bancos lo pegan en todos los campos de una vez (R74)
   const contenido = (
-    <div className="flex flex-col gap-2">
-      <ul className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
+      <Button size="lg" onClick={() => tocar("todo", textoPagoMovil(datos))} className={cn("w-full", copiado === "todo" && "bg-success text-success-foreground hover:bg-success")}>
+        {copiado === "todo" ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}
+        {copiado === "todo" ? "Copiado: pégalo en tu banco" : "Copiar todo"}
+      </Button>
+      <ul className="flex flex-col divide-y rounded-xl bg-muted">
         {filas.map((f) => (
-          <li key={f.clave} className="flex items-center gap-3 rounded-xl bg-muted px-3 py-2">
+          <li key={f.clave} className="flex items-center gap-3 px-3 py-1.5">
             <span className="min-w-0 flex-1">
               <span className="block text-sm text-muted-foreground">{f.etiqueta}</span>
-              <span className="block truncate font-mono text-base font-bold tracking-wide">{f.valor}</span>
+              <span className="block truncate font-mono text-base font-bold">{f.valor}</span>
             </span>
             <Button
-              variant="outline"
+              variant="ghost"
               size="sm"
               onClick={() => tocar(f.clave, f.copia)}
               aria-label={`Copiar ${f.etiqueta.toLowerCase()}`}
-              className={cn(copiado === f.clave && "border-success text-success")}
+              className={cn("text-primary", copiado === f.clave && "text-success")}
             >
               {copiado === f.clave ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}
               {copiado === f.clave ? "Copiado" : "Copiar"}
@@ -68,10 +73,6 @@ export function PagoMovilChofer({ datos, chofer, plegado = false }: { datos: Dat
           </li>
         ))}
       </ul>
-      <Button variant="secondary" onClick={() => tocar("todo", textoPagoMovil(datos))} className={cn(copiado === "todo" && "text-success")}>
-        {copiado === "todo" ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}
-        {copiado === "todo" ? "Copiado" : "Copiar todo"}
-      </Button>
       {/* Para lectores de pantalla: avisa al copiar */}
       <p aria-live="polite" className="sr-only">
         {copiado ? "Copiado" : ""}
