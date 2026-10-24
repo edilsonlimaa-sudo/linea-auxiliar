@@ -157,7 +157,9 @@ function ColumnaSentido({
           {viajes.length === 1 ? "1 viaje" : `${viajes.length} viajes`} · {puestosLibres === 1 ? "1 puesto libre" : `${puestosLibres} puestos libres`}
           {recogiendo
             ? ` · recogiendo ahora ${SENTIDOS[sentido].enRecogida}`
-            : proximo !== undefined
+            : proximo !== undefined && proximo < 1
+              ? " · el próximo ya pasó su hora"
+              : proximo !== undefined
               ? ` · el próximo recoge a las ${hora(new Date(ahora + proximo * MIN).toISOString())}`
               : " · nadie va a recoger"}
         </p>
