@@ -10,6 +10,7 @@ import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { CabeceraInicio, sentidoDeHacia } from "@/components/pasajero/cabecera-inicio"
 import { ListaGina } from "@/components/pasajero/lista-gina"
 import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
+import { PanelSentido, SentidoInicio } from "@/components/pasajero/sentido-inicio"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -90,68 +91,81 @@ function InicioPasajero({
 }) {
   const { viajes, porId, aviso, enServicio, enPausa } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
-  // Empieza en el sentido sugerido por la hora y dónde vive. Cambiarlo es un toque.
+  // Empieza en el sentido sugerido por la hora y dónde vive. Cambiarlo es un toque, sin recargar: los dos van aquí
   const sentido = hacia ?? sentidoSugerido(perfil.urbanismo)
-  const unidades = disponibles.filter((v) => v.sentido === sentido)
   const cuantas = Object.fromEntries(
     (Object.keys(SENTIDOS) as Sentido[]).map((s) => [s, disponibles.filter((v) => v.sentido === s).length])
   ) as Record<Sentido, number>
+
+  return (
+    <SentidoInicio inicial={sentido}>
+      <div className="flex flex-col gap-6">
+        <EnVivo />
+        {cierre && <AvisoCierre aviso={cierre} />}
+        <CabeceraInicio
+          saludo={`${saludo()}, ${perfil.nombre.split(" ")[0]}`}
+          unidades={cuantas}
+          choferes={enServicio}
+          enPausa={enPausa}
+          viajes={viajes}
+        />
+        {aviso && <EstadoLinea aviso={aviso} />}
+
+        {/* Centro → Valle Grande: no se aparta, se espera en la Lista de Gina (§5.17) */}
+        <PanelSentido sentido="centro_a_vg">
+          <ListaGina lista={lista} carros={carrosHaciaValle(viajes, porId)} porId={porId} enPausa={enPausa} />
+        </PanelSentido>
+        <PanelSentido sentido="vg_a_centro">
+          <UnidadesHacia sentido="vg_a_centro" unidades={disponibles.filter((v) => v.sentido === "vg_a_centro")} porId={porId} enPausa={enPausa} />
+        </PanelSentido>
+      </div>
+    </SentidoInicio>
+  )
+}
+
+/** Las unidades de un sentido, la que recoge primero destacada (R16); sin unidad con puesto, lo dice */
+function UnidadesHacia({
+  sentido,
+  unidades,
+  porId,
+  enPausa,
+}: {
+  sentido: Sentido
+  unidades: DatosInicioPasajero["viajes"]
+  porId: DatosInicioPasajero["porId"]
+  enPausa: DatosInicioPasajero["enPausa"]
+}) {
   // ¿Cuántos van? se pregunta al apartar (R57). La primera con puesto (ya vienen ordenadas, R16) se destaca
   const primeraConPuesto = unidades.find((v) => libres(v) > 0 && v.estado !== "en_ruta")
   const conPuesto = unidades.some((v) => libres(v) > 0)
-
   return (
-    <div className="flex flex-col gap-6">
-      <EnVivo />
-      {cierre && <AvisoCierre aviso={cierre} />}
-      <CabeceraInicio
-        saludo={`${saludo()}, ${perfil.nombre.split(" ")[0]}`}
-        sentido={sentido}
-        unidades={cuantas}
-        choferes={enServicio}
-        enPausa={enPausa}
-        viajes={viajes}
-      />
-      {aviso && <EstadoLinea aviso={aviso} />}
+    <section aria-labelledby={`titulo-unidades-${sentido}`} className="flex flex-col gap-3">
+      <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <h2 id={`titulo-unidades-${sentido}`} className="flex items-center gap-2 text-base font-bold">
+          Unidades {SENTIDOS[sentido].hacia}
+          {unidades.length > 0 && <Badge variant="secondary">{unidades.length}</Badge>}
+        </h2>
+        {unidades.length > 1 && <p className="text-sm text-muted-foreground">La que recoge primero, arriba</p>}
+      </header>
 
-      {/* Centro → Valle Grande: no se aparta, se espera en la Lista de Gina (§5.17) */}
-      {sentido === "centro_a_vg" ? (
-        <ListaGina
-          lista={lista}
-          carros={carrosHaciaValle(viajes, porId)}
-          porId={porId}
-          enPausa={enPausa}
-        />
-      ) : (
-        <section aria-labelledby="titulo-unidades" className="flex flex-col gap-3">
-          <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-            <h2 id="titulo-unidades" className="flex items-center gap-2 text-base font-bold">
-              Unidades {SENTIDOS[sentido].hacia}
-              {unidades.length > 0 && <Badge variant="secondary">{unidades.length}</Badge>}
-            </h2>
-            {unidades.length > 1 && <p className="text-sm text-muted-foreground">La que recoge primero, arriba</p>}
-          </header>
-  
-          {unidades.map((v) => (
-            <TarjetaUnidad key={v.id} viaje={v} porId={porId} destacada={v.id === primeraConPuesto?.id} />
-          ))}
-  
-          {!conPuesto && (
-            <Card className="items-center gap-3 rounded-2xl border-2 border-dashed px-4 text-center shadow-none ring-0">
-              <span aria-hidden className="grid size-12 place-items-center rounded-full bg-muted">
-                <BusIcon className="size-7 text-muted-foreground" />
-              </span>
-              <p className="text-base font-bold">
-                {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
-              </p>
-              <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
-              {/* R60: si alguien dijo que vuelve, se dice aquí: es donde más ayuda */}
-              <QuienVuelve choferes={enPausa} className="w-full border-t pt-3" />
-            </Card>
-          )}
-        </section>
+      {unidades.map((v) => (
+        <TarjetaUnidad key={v.id} viaje={v} porId={porId} destacada={v.id === primeraConPuesto?.id} />
+      ))}
+
+      {!conPuesto && (
+        <Card className="items-center gap-3 rounded-2xl border-2 border-dashed px-4 text-center shadow-none ring-0">
+          <span aria-hidden className="grid size-12 place-items-center rounded-full bg-muted">
+            <BusIcon className="size-7 text-muted-foreground" />
+          </span>
+          <p className="text-base font-bold">
+            {unidades.length === 0 ? `Ahora no hay unidades ${haciaEnFrase(sentido)}` : "Todas van llenas por ahora"}
+          </p>
+          <p className="text-muted-foreground">Esta pantalla se actualiza sola: la unidad aparece aquí apenas salga.</p>
+          {/* R60: si alguien dijo que vuelve, se dice aquí: es donde más ayuda */}
+          <QuienVuelve choferes={enPausa} className="w-full border-t pt-3" />
+        </Card>
       )}
-    </div>
+    </section>
   )
 }
 

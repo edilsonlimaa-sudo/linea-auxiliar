@@ -1,33 +1,29 @@
-import { CheckIcon, ChevronRightIcon } from "lucide-react"
-import Link from "next/link"
+import { ChevronRightIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage } from "@/components/ui/avatar"
 import { LineaAhora } from "@/components/pasajero/linea-ahora"
-import { Badge } from "@/components/ui/badge"
+import { SelectorSentido } from "@/components/pasajero/sentido-inicio"
 import type { ChoferEnPausa, ChoferEnServicio, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import { textoVuelta } from "@/lib/fechas"
-import { cn } from "@/lib/utils"
-import { iniciales, SENTIDOS, type Sentido } from "@/lib/viajes"
+import { iniciales, type Sentido } from "@/lib/viajes"
 
-// El sentido va en la dirección (?hacia=centro): así sobrevive al refresco en vivo y a volver atrás
-export const HACIA: Record<Sentido, string> = { vg_a_centro: "centro", centro_a_vg: "valle" }
+// ?hacia=centro|valle → el sentido (lo pone SentidoInicio al cambiar)
 export const sentidoDeHacia = (valor: unknown): Sentido | null =>
   valor === "centro" ? "vg_a_centro" : valor === "valle" ? "centro_a_vg" : null
 
 /**
  * El bloque principal de Inicio (docs/especificacion.md §8): la pregunta de la pantalla, "¿Hacia dónde vas?", con los
- * dos sentidos ahí mismo, y abajo quiénes trabajan ahora (sus caras): tocarla abre "La línea ahora".
+ * dos sentidos ahí mismo (cambiar es instantáneo, SentidoInicio), y abajo quiénes trabajan ahora (sus caras): tocarla abre
+ * "La línea ahora".
  */
 export function CabeceraInicio({
   saludo,
-  sentido,
   unidades,
   choferes,
   enPausa,
   viajes,
 }: {
   saludo: string
-  sentido: Sentido
   unidades: Record<Sentido, number>
   choferes: ChoferEnServicio[]
   enPausa: ChoferEnPausa[] // R60
@@ -51,37 +47,7 @@ export function CabeceraInicio({
           </h1>
         </div>
 
-        <nav aria-label="Sentido" className="grid grid-cols-2 gap-2">
-          {(Object.keys(SENTIDOS) as Sentido[]).map((s) => {
-            const activo = s === sentido
-            const n = unidades[s]
-            return (
-              <Link
-                key={s}
-                href={`/inicio?hacia=${HACIA[s]}`}
-                replace
-                scroll={false}
-                aria-current={activo ? "page" : undefined}
-                className={cn(
-                  "flex min-h-20 flex-col justify-between gap-1 rounded-2xl border-2 p-3 outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
-                  activo
-                    ? "border-signal bg-card text-card-foreground shadow-md"
-                    : "border-header-foreground/30 bg-header-foreground/10 text-header-foreground hover:bg-header-foreground/20"
-                )}
-              >
-                <span className="flex items-center gap-1.5 text-base leading-tight font-bold">
-                  {activo && <CheckIcon aria-hidden className="size-5 shrink-0 text-primary" />}
-                  {SENTIDOS[s].corto}
-                </span>
-                {activo ? (
-                  <Badge variant={n > 0 ? "success" : "secondary"}>{n === 0 ? "Sin unidades" : n === 1 ? "1 unidad" : `${n} unidades`}</Badge>
-                ) : (
-                  <span className="text-sm opacity-90">{n === 0 ? "Sin unidades" : n === 1 ? "1 unidad" : `${n} unidades`}</span>
-                )}
-              </Link>
-            )
-          })}
-        </nav>
+        <SelectorSentido unidades={unidades} />
       </div>
 
       {/* ¿Está trabajando la línea? En una franja, con las caras; al tocarla, qué hace cada chofer */}
@@ -89,7 +55,6 @@ export function CabeceraInicio({
         choferes={choferes}
         enPausa={enPausa}
         viajes={viajes}
-        sentido={sentido}
         className="flex min-h-12 w-full items-center gap-3 border-t border-header-foreground/15 bg-header-foreground/10 px-4 py-2.5 text-left font-bold outline-none hover:bg-header-foreground/15 focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:ring-inset"
       >
         {choferes.length > 0 ? (

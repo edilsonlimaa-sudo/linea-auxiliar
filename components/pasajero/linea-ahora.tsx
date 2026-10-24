@@ -6,6 +6,7 @@ import { useState } from "react"
 import { promedioTexto } from "@/components/estrellas"
 import { Asientos } from "@/components/pasajero/asientos"
 import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
+import { useSentido } from "@/components/pasajero/sentido-inicio"
 import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -34,18 +35,19 @@ export function LineaAhora({
   choferes,
   enPausa = [],
   viajes,
-  sentido,
+  sentido: sentidoFijo,
   className,
   children,
 }: {
   choferes: ChoferEnServicio[]
   enPausa?: ChoferEnPausa[] // R60: desconectados que dijeron si vuelven
   viajes: ViajeConChofer[]
-  sentido: Sentido
+  sentido?: Sentido // en Inicio sale del sentido escogido (SentidoInicio)
   className?: string
   children: React.ReactNode
 }) {
   const [abierta, setAbierta] = useState(false)
+  const sentido = useSentido(sentidoFijo)
 
   return (
     <>

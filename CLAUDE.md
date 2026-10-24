@@ -88,7 +88,7 @@ llevar el foco al primer error).
 
 Pasajero (especificación §8 "Inicio del pasajero"): **mirar primero, comprometerse después**. Inicio: saludo →
 una línea "N choferes trabajando · Ver la línea" (lleva a **`/linea`**: mapa con todos los choferes y quién trabaja, `MapaLinea`) → **¿Hacia dónde vas?**
-(`CabeceraInicio`, el sentido va en `?hacia=centro|valle`) → las unidades de ese sentido (`TarjetaUnidad`, corta: el chofer aparece una vez y al tocarlo `PerfilChofer` abre su perfil y el carro en una hoja).
+(`CabeceraInicio`; los dos sentidos se cargan juntos y `SentidoInicio` / `SelectorSentido` / `PanelSentido` alternan en el teléfono, sin recargar, guardando `?hacia=centro|valle` con replaceState) → las unidades de ese sentido (`TarjetaUnidad`, corta: el chofer aparece una vez y al tocarlo `PerfilChofer` abre su perfil y el carro en una hoja).
 El lugar se pregunta **recién al apartar**: `BotonApartar` abre `HojaLugar` ("¿Dónde te recogemos?", solo texto +
 GPS; sin lugares recientes) y llama `apartarPuesto(viajeId, datos)`; al cambiarse de unidad (R22) no pregunta y usa el lugar de la reserva.
 Sin unidad con puesto, la pantalla lo dice. **"Avísame" y la página Esperando están suspendidos** (R31): el pasajero solo ve unidades y pide puesto; las funciones de la base (`marcar_espera`, `esperan_conmigo`) siguen ahí para volver a activarlos. En Mi viaje,

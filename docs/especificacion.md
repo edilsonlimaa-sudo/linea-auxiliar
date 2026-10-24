@@ -715,7 +715,9 @@ recién al apartar (R27, R57). Una pregunta, una respuesta, una acción:
 
 1. **Bloque principal** (azul de la línea, como Esperando): el saludo chico y la pregunta en grande **¿Hacia dónde
    vas?**, con los dos sentidos ahí mismo (Al Centro / A Valle Grande, cada uno con cuántas unidades van). Empieza en el
-   sentido sugerido por la hora y dónde vive; cambiarlo es un toque. Abajo, una franja con **las caras de quienes
+   sentido sugerido por la hora y dónde vive; cambiarlo es un toque y **es instantáneo**: los dos sentidos se cargan
+   juntos y el teléfono solo muestra el escogido, sin volver a pedir la página *(Oct. 2026)*. El sentido queda en la
+   dirección (`?hacia=`) para el refresco en vivo y para volver atrás. Abajo, una franja con **las caras de quienes
    trabajan** y "2 choferes trabajando · Cómo está la línea ›" (o "Ningún chofer trabajando ahora"). Más el aviso del
    día. Tocar la franja abre **La línea ahora** (hoja): la toca casi siempre quien **no ve unidades en su sentido** y
    quiere entender la situación. Por cada chofer conectado: foto, nombre, ★, placa y ❄️; **qué hace ahora** (sentido
