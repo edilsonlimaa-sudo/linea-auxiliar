@@ -269,30 +269,33 @@ function TarjetaViaje({
         {espera > 0 && <span className="text-muted-foreground">· {espera} en lista de espera</span>}
       </p>
 
-      {/* 3. Quién maneja, en una línea: abre su detalle */}
-      <div className="flex flex-wrap items-center gap-2 border-t pt-3">
-        <Link
-          href={`/admin/choferes/${c.id}`}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-xl outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring"
-        >
-          <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-9 text-sm" />
-          <span className="min-w-0">
-            <span className="flex items-center gap-1.5 font-bold">
-              <span aria-hidden className={cn("size-2 shrink-0 rounded-full", c.conectado ? "bg-success" : "bg-muted-foreground")} />
-              <span className="truncate">{c.nombre}</span>
+      {/* 3. Quién maneja: su línea (abre su detalle) con el mapa al lado; WhatsApp y Llamar debajo, para que el nombre
+          no quede apretado en el celular */}
+      <div className="flex flex-col gap-2 border-t pt-3">
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/choferes/${c.id}`}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-xl outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring"
+          >
+            <Avatar url={c.fotoUrl} nombre={c.nombre} className="size-9 text-sm" />
+            <span className="min-w-0">
+              <span className="flex items-center gap-1.5 font-bold">
+                <span aria-hidden className={cn("size-2 shrink-0 rounded-full", c.conectado ? "bg-success" : "bg-muted-foreground")} />
+                <span className="truncate">{c.nombre}</span>
+              </span>
+              <span className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+                {c.placa && <span className="font-mono font-bold tracking-wider text-foreground">{c.placa}</span>}
+                {estrellas !== null && (
+                  <span className="inline-flex items-center gap-0.5">
+                    <StarIcon aria-hidden className="size-3.5 fill-signal text-signal" />
+                    {promedioTexto(estrellas)}
+                  </span>
+                )}
+              </span>
             </span>
-            <span className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
-              {c.placa && <span className="font-mono font-bold tracking-wider text-foreground">{c.placa}</span>}
-              {estrellas !== null && (
-                <span className="inline-flex items-center gap-0.5">
-                  <StarIcon aria-hidden className="size-3.5 fill-signal text-signal" />
-                  {promedioTexto(estrellas)}
-                </span>
-              )}
-            </span>
-          </span>
-        </Link>
-        {c.conectado && <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin compacto />}
+          </Link>
+          {c.conectado && <VerEnMapa choferId={c.id} chofer={c.nombre} yo={null} admin compacto />}
+        </div>
         <Contacto telefono={c.telefono} />
       </div>
 
