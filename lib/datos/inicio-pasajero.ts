@@ -1,5 +1,6 @@
 import "server-only"
 
+import type { DatosPagoMovil } from "@/lib/bancos"
 import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
@@ -347,4 +348,14 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       vuelveEn: p.vuelve_en,
     })),
   }
+}
+
+/**
+ * El Pago Móvil del chofer (R74), si este pasajero puede verlo: con reserva o a bordo en un viaje suyo, o hasta 3 h
+ * después de bajarse o de terminar el viaje (lo decide la base). Si no lo registró, null.
+ */
+export async function cargarPagoMovilDe(choferId: string): Promise<DatosPagoMovil | null> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase.rpc("pago_movil_de", { p_chofer: choferId })
+  return data?.[0] ?? null
 }

@@ -4,12 +4,13 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 
 import { EnVivo } from "@/components/en-vivo"
+import { PagoMovilChofer } from "@/components/pago-movil/pago-movil-chofer"
 import { CalificarViaje } from "@/components/pasajero/calificar-viaje"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { MiLista } from "@/components/pasajero/lista-gina"
 import { MiReservaTarjeta } from "@/components/pasajero/mi-reserva"
 import { buttonVariants } from "@/components/ui/button"
-import { cargarCalificacionPendiente, cargarInicioPasajero } from "@/lib/datos/inicio-pasajero"
+import { cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { carrosHaciaValle, otrasConPuesto, tienePuesto } from "@/lib/viajes"
@@ -28,7 +29,16 @@ export default async function PaginaMiViaje() {
   const { miReserva, viajes, porId, aviso, enPausa } = await cargarInicioPasajero(perfil.id)
   if (!miReserva) {
     const [pendiente, lista] = await Promise.all([cargarCalificacionPendiente(perfil.id), cargarListaGina()])
-    if (pendiente) return <CalificarViaje pendiente={pendiente} />
+    if (pendiente) {
+      // Recién terminado: también el Pago Móvil, por si todavía no le pagó (R74)
+      const pago = await cargarPagoMovilDe(pendiente.choferId)
+      return (
+        <div className="flex flex-col gap-4">
+          <CalificarViaje pendiente={pendiente} />
+          {pago && <PagoMovilChofer datos={pago} chofer={pendiente.chofer} />}
+        </div>
+      )
+    }
     if (!lista.some((e) => e.esMio)) redirect("/inicio")
     return (
       <div className="flex flex-col gap-4">
@@ -41,6 +51,7 @@ export default async function PaginaMiViaje() {
   }
 
   const aBordo = miReserva.reserva.estado === "subio"
+  const pago = await cargarPagoMovilDe(miReserva.viaje.chofer_id)
   const otras = aBordo || tienePuesto(miReserva.hasta, miReserva.viaje) ? [] : otrasConPuesto(viajes, miReserva.viaje, porId, miReserva.reserva.personas)
 
   return (
@@ -63,6 +74,8 @@ export default async function PaginaMiViaje() {
           )
         }
       />
+      {/* R74: a bordo, a la vista; esperando el carro, plegado */}
+      {pago && <PagoMovilChofer datos={pago} chofer={miReserva.viaje.chofer.nombre} plegado={!aBordo} />}
     </div>
   )
 }

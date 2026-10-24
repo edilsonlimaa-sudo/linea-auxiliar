@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation"
 import { z } from "zod"
 
+import { leerPagoMovil } from "@/lib/bancos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { correoDeTelefono, normalizarTelefono, telefonoValido } from "@/lib/telefono"
 
@@ -54,7 +55,7 @@ const registro = z
 const entrada = z.object({ telefono, pin })
 
 // Campos que se devuelven para volver a llenar el formulario si hay error (nunca el PIN)
-const camposVisibles = ["nombre", "telefono", "cedula", "urbanismo", "placa", "unidad", "modelo", "color", "aire"]
+const camposVisibles = ["nombre", "telefono", "cedula", "urbanismo", "placa", "unidad", "modelo", "color", "aire", "pmBanco", "pmTelefono", "pmCedula"]
 
 function valoresVisibles(formData: FormData) {
   return Object.fromEntries(camposVisibles.map((c) => [c, String(formData.get(c) ?? "")]))
@@ -74,7 +75,11 @@ export async function registrarse(anterior: EstadoFormulario, formData: FormData
   const valores = valoresVisibles(formData)
   const datos = Object.fromEntries(formData)
   const resultado = registro.safeParse(datos)
-  if (!resultado.success) return { errores: erroresDe(resultado.error), valores, intento }
+  // Pago Móvil del chofer (R74): opcional; si escribió algo, los tres datos
+  const pm = datos.rol === "chofer" ? leerPagoMovil(datos, true) : { datos: null, errores: {} }
+  if (!resultado.success || Object.keys(pm.errores).length) {
+    return { errores: { ...(resultado.success ? {} : erroresDe(resultado.error)), ...pm.errores }, valores, intento }
+  }
 
   const d = resultado.data
   const supabase = await crearClienteServidor()
@@ -96,6 +101,7 @@ export async function registrarse(anterior: EstadoFormulario, formData: FormData
               modelo: d.modelo || undefined,
               color: d.color || undefined,
               aire: d.aire ? "true" : "false",
+              ...(pm.datos ? { pm_banco: pm.datos.banco, pm_telefono: pm.datos.telefono, pm_cedula: pm.datos.cedula } : {}),
             }),
       },
     },

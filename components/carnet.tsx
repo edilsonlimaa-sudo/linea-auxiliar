@@ -5,6 +5,7 @@ import { Estrellas, promedioTexto } from "@/components/estrellas"
 import { Avatar } from "@/components/foto/avatar"
 import { InterruptorAire } from "@/components/foto/interruptor-aire"
 import { SubirFoto } from "@/components/foto/subir-foto"
+import { EditarPagoMovil } from "@/components/pago-movil/editar-pago-movil"
 import { ChipAire } from "@/components/pasajero/chofer-resumen"
 import type { Carnet } from "@/lib/datos/historial"
 import { fechaLarga } from "@/lib/fechas"
@@ -24,7 +25,7 @@ function Dato({ etiqueta, children }: { etiqueta: string; children: React.ReactN
  * (franja de la línea, nombre grande, verificado) y para el chofer destaca la placa.
  */
 export function CarnetVista({ carnet }: { carnet: Carnet }) {
-  const { perfil, telefono, cedula, vehiculo, estrellas, fotoUrl, fotoCarroUrl } = carnet
+  const { perfil, telefono, cedula, vehiculo, estrellas, fotoUrl, fotoCarroUrl, pagoMovil } = carnet
   const esChofer = perfil.rol === "chofer"
 
   return (
@@ -94,6 +95,9 @@ export function CarnetVista({ carnet }: { carnet: Carnet }) {
           </>
         )}
       </section>
+
+      {/* R74: para que los pasajeros paguen sin preguntar */}
+      {esChofer && <EditarPagoMovil actual={pagoMovil} telefono={telefono} cedula={cedula} />}
 
       {esChofer && (
         <Link

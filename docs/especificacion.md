@@ -426,6 +426,16 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
     `/foto/<carpeta>/<archivo>`, que pide sesión y deja al teléfono guardarla (privada, sin vencer: el nombre del
     archivo cambia cuando la persona cambia la foto). Antes eran enlaces firmados de 1 h que cambiaban en cada
     actualización de la pantalla, y el teléfono volvía a bajar todas las fotos cada vez.
+- **R74. Pago Móvil del chofer [servidor].** *(Oct. 2026: los pasajeros preguntaban los datos en cada viaje.)*
+  - El chofer registra en **Mi carnet** su Pago Móvil: **banco** (de la lista de bancos, con su código), **teléfono** y
+    **cédula** (la app sugiere los suyos). Es opcional; lo cambia o lo quita cuando quiera.
+  - **Quién lo ve:** el pasajero con reserva activa o a bordo en un viaje de ese chofer, y hasta **3 h** después de
+    bajarse o de terminar el viaje; el admin y el propio chofer. Nadie más (lleva la cédula).
+  - **Dónde:** en **Mi viaje** (a bordo, a la vista; esperando el carro, plegado: "Pago Móvil del chofer") y en
+    **"¿Cómo te fue?"** al terminar. Cada dato con **Copiar** (el banco como código "0102", el teléfono solo con números
+    "04141234567", la cédula "V12345678") y **Copiar todo** (los tres, uno por línea), con "Copiado" al tocar, listos
+    para pegar en la app del banco.
+  - La app no cobra ni registra pagos: solo muestra los datos.
 - **R55. Aire acondicionado.** El chofer indica si su carro tiene aire (al registrarse y en Mi carnet). Los
   pasajeros lo ven en cada unidad y en Mi viaje ("❄️ Con aire").
 

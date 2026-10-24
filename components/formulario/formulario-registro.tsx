@@ -6,7 +6,8 @@ import { useActionState } from "react"
 import { CampoPin, CampoTexto, useEnfocarError } from "@/components/formulario/campos"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
-import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field"
+import { CamposPagoMovil, POR_QUE_PAGO_MOVIL } from "@/components/pago-movil/campos-pago-movil"
+import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field"
 import { registrarse, type EstadoFormulario } from "@/lib/acciones/cuenta"
 
 const inicial: EstadoFormulario = {}
@@ -89,6 +90,17 @@ export function FormularioRegistro({ rol }: { rol: "pasajero" | "chofer" }) {
               <input type="checkbox" name="aire" value="si" defaultChecked={v.aire === "si"} className="size-6 shrink-0 accent-primary" />
               <span className="font-bold">Mi carro tiene aire acondicionado</span>
             </label>
+          </FieldGroup>
+        </FieldSet>
+      )}
+
+      {/* R74: opcional, con el porqué a la vista */}
+      {rol === "chofer" && (
+        <FieldSet>
+          <FieldLegend>Tu Pago Móvil (opcional)</FieldLegend>
+          <FieldDescription>{POR_QUE_PAGO_MOVIL}</FieldDescription>
+          <FieldGroup>
+            <CamposPagoMovil valores={v} errores={e} opcional />
           </FieldGroup>
         </FieldSet>
       )}

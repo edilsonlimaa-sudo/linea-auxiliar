@@ -338,6 +338,38 @@ export type Database = {
           },
         ]
       }
+      pago_movil: {
+        Row: {
+          actualizado_en: string
+          banco: string
+          cedula: string
+          chofer_id: string
+          telefono: string
+        }
+        Insert: {
+          actualizado_en?: string
+          banco: string
+          cedula: string
+          chofer_id: string
+          telefono: string
+        }
+        Update: {
+          actualizado_en?: string
+          banco?: string
+          cedula?: string
+          chofer_id?: string
+          telefono?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pago_movil_chofer_id_fkey"
+            columns: ["chofer_id"]
+            isOneToOne: true
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       paradas: {
         Row: {
           activa: boolean
@@ -1284,6 +1316,10 @@ export type Database = {
           posicion: number
         }[]
       }
+      guardar_pago_movil: {
+        Args: { p_banco: string; p_cedula: string; p_telefono: string }
+        Returns: undefined
+      }
       guardar_parada: {
         Args: {
           p_id: string
@@ -1394,6 +1430,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      pago_movil_de: {
+        Args: { p_chofer: string }
+        Returns: {
+          banco: string
+          cedula: string
+          telefono: string
+        }[]
+      }
       plan_de_gina: {
         Args: { p_viaje: string }
         Returns: {
@@ -1424,6 +1468,7 @@ export type Database = {
       }
       puede_ver_telefono: { Args: { p_objetivo: string }; Returns: boolean }
       quitar_anotado: { Args: { p_reserva: string }; Returns: undefined }
+      quitar_pago_movil: { Args: never; Returns: undefined }
       reservar: {
         Args: {
           p_lat?: number

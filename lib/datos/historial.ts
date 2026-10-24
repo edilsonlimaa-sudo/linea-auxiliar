@@ -1,6 +1,7 @@
 import "server-only"
 
 import type { Database } from "@/lib/database.types"
+import type { DatosPagoMovil } from "@/lib/bancos"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { cargarEventos } from "@/lib/datos/admin"
@@ -359,15 +360,17 @@ export type Carnet = {
   estrellas: { promedio: number; cantidad: number } | null
   fotoUrl: string | null // R54
   fotoCarroUrl: string | null
+  pagoMovil: DatosPagoMovil | null // R74, solo el chofer
 }
 
 export async function cargarCarnet(perfil: Perfil): Promise<Carnet> {
   const supabase = await crearClienteServidor()
   const esChofer = perfil.rol === "chofer"
-  const [privados, vehiculo, califs] = await Promise.all([
+  const [privados, vehiculo, califs, pagoMovil] = await Promise.all([
     supabase.rpc("mis_datos_privados").maybeSingle(),
     esChofer ? supabase.from("vehiculos").select("unidad, placa, modelo, color, foto_path, aire_acondicionado").eq("chofer_id", perfil.id).maybeSingle() : null,
     esChofer ? supabase.from("calificaciones").select("estrellas").eq("chofer_id", perfil.id) : null,
+    esChofer ? supabase.from("pago_movil").select("banco, telefono, cedula").eq("chofer_id", perfil.id).maybeSingle() : null,
   ])
   const lista = califs?.data ?? []
   const fotos = await firmarFotos([perfil.foto_path, vehiculo?.data?.foto_path])
@@ -379,6 +382,7 @@ export async function cargarCarnet(perfil: Perfil): Promise<Carnet> {
     estrellas: lista.length ? { promedio: lista.reduce((s, c) => s + c.estrellas, 0) / lista.length, cantidad: lista.length } : null,
     fotoUrl: perfil.foto_path ? (fotos.get(perfil.foto_path) ?? null) : null,
     fotoCarroUrl: vehiculo?.data?.foto_path ? (fotos.get(vehiculo.data.foto_path) ?? null) : null,
+    pagoMovil: pagoMovil?.data ?? null,
   }
 }
 
