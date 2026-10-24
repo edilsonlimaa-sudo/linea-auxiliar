@@ -22,6 +22,7 @@ import {
   libres,
   llegada,
   minutosPara,
+  nombreCorto,
   type Sentido,
   SENTIDOS,
   type Viaje,
@@ -73,6 +74,7 @@ export function ViajesEnCurso({
   enListaGina = 0,
   estrellas = new Map(),
   ahora,
+  soloChofer = null,
 }: {
   choferes: ChoferEnCurso[]
   sinViaje?: CuentaConActividad[]
@@ -80,12 +82,16 @@ export function ViajesEnCurso({
   enListaGina?: number // personas en la lista hacia Valle Grande
   estrellas?: Map<string, number | null>
   ahora: number
+  soloChofer?: string | null // filtro por chofer (?chofer=): sus viajes; la oferta de cada columna sigue siendo la de la línea
 }) {
   const todos: ViajeConChofer[] = choferes.flatMap((c) => c.viajes.map((viaje) => ({ viaje, chofer: c })))
   const porId = new Map<string, Viaje>(todos.map(({ viaje }) => [viaje.id, viaje]))
 
+  const filtro = soloChofer && choferes.some((c) => c.id === soloChofer) ? soloChofer : null
+
   return (
     <div className="flex flex-col gap-6">
+      {choferes.length > 1 && <FiltroChofer choferes={choferes} activo={filtro} />}
       {todos.length === 0 ? (
         <SinViajes />
       ) : (
@@ -95,6 +101,7 @@ export function ViajesEnCurso({
               key={s}
               sentido={s}
               viajes={todos.filter(({ viaje }) => viaje.sentido === s)}
+              soloChofer={filtro}
               porId={porId}
               enListaGina={s === "centro_a_vg" ? enListaGina : null}
               estrellas={estrellas}
@@ -111,9 +118,41 @@ export function ViajesEnCurso({
   )
 }
 
+/** Todos · cada chofer con viajes abiertos (nombre corto y cuántos): un toque deja solo los suyos */
+function FiltroChofer({ choferes, activo }: { choferes: ChoferEnCurso[]; activo: string | null }) {
+  const total = choferes.reduce((n, c) => n + c.viajes.length, 0)
+  const opciones = [
+    { id: null, texto: "Todos", n: total },
+    ...[...choferes].sort((a, b) => a.nombre.localeCompare(b.nombre)).map((c) => ({ id: c.id, texto: nombreCorto(c.nombre), n: c.viajes.length })),
+  ]
+  return (
+    <nav aria-label="Filtrar por chofer" className="flex flex-wrap gap-2">
+      {opciones.map((o) => {
+        const esActivo = o.id === activo
+        return (
+          <Link
+            key={o.id ?? "todos"}
+            href={o.id ? `/admin/viajes?chofer=${o.id}` : "/admin/viajes"}
+            scroll={false}
+            aria-current={esActivo ? "page" : undefined}
+            className={cn(
+              "flex min-h-10 items-center gap-1.5 rounded-full border-2 px-4 font-bold outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
+              esActivo ? "border-primary bg-primary text-primary-foreground" : "bg-card text-muted-foreground hover:bg-muted"
+            )}
+          >
+            {o.texto}
+            <span className="font-normal tabular-nums">{o.n}</span>
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
 function ColumnaSentido({
   sentido,
   viajes,
+  soloChofer,
   porId,
   enListaGina,
   estrellas,
@@ -121,6 +160,7 @@ function ColumnaSentido({
 }: {
   sentido: Sentido
   viajes: ViajeConChofer[]
+  soloChofer: string | null
   porId: Map<string, Viaje>
   enListaGina: number | null
   estrellas: Map<string, number | null>
@@ -130,7 +170,7 @@ function ColumnaSentido({
   // Dentro de cada etapa: recogiendo, el que lleva más; por recoger, el que recoge antes; en ruta, el que salió antes
   const clave = (v: ViajeEnCurso) =>
     v.estado === "en_parada" ? new Date(v.estado_en).getTime() : v.estado === "en_ruta" ? new Date(v.salida_en ?? v.estado_en).getTime() : minutosPara(v, porId, ahora)
-  const ordenados = [...viajes].sort(
+  const ordenados = viajes.filter(({ chofer }) => !soloChofer || chofer.id === soloChofer).sort(
     (a, b) =>
       Number(Boolean(conAviso.get(b.viaje.id))) - Number(Boolean(conAviso.get(a.viaje.id))) ||
       (ETAPA[a.viaje.estado] ?? 9) - (ETAPA[b.viaje.estado] ?? 9) ||
@@ -170,7 +210,9 @@ function ColumnaSentido({
         )}
       </header>
       {ordenados.length === 0 ? (
-        <p className="rounded-2xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">Ningún viaje en este sentido.</p>
+        <p className="rounded-2xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">
+          {soloChofer ? "Este chofer no tiene viajes en este sentido." : "Ningún viaje en este sentido."}
+        </p>
       ) : (
         ordenados.map(({ viaje, chofer }) => (
           <TarjetaViaje

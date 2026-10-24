@@ -15,8 +15,9 @@ export const metadata: Metadata = { title: "Viajes en curso · Administración �
 const instante = () => Date.now()
 
 // Viajes en curso (§8): los viajes de la línea por sentido y momento. Se actualiza sola (EnVivo).
-export default async function PaginaViajes() {
+export default async function PaginaViajes({ searchParams }: PageProps<"/admin/viajes">) {
   await exigirAdmin()
+  const { chofer } = await searchParams
   const [{ choferes, error }, { cuentas }, lista, pausas] = await Promise.all([
     cargarViajesEnCurso(),
     cargarCuentas(),
@@ -53,6 +54,7 @@ export default async function PaginaViajes() {
           enListaGina={lista.reduce((n, e) => n + e.personas, 0)}
           estrellas={estrellas}
           ahora={ahora}
+          soloChofer={typeof chofer === "string" ? chofer : null}
         />
       )}
     </div>

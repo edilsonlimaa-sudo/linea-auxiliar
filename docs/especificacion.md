@@ -627,6 +627,9 @@ menú (formularios).
   - **Una columna por sentido** (Hacia el Centro · Hacia Valle Grande; en el celular, una debajo de la otra). Arriba
     de cada una, la oferta: cuántos viajes, puestos libres, a qué hora recoge el próximo y, hacia Valle Grande,
     cuántas personas hay en la lista de Gina.
+  - **Filtro por chofer**, arriba: **Todos** y cada chofer con viajes abiertos (nombre corto y cuántos viajes). Con uno
+    escogido, las columnas muestran solo sus viajes; la oferta de arriba de cada columna sigue siendo la de toda la
+    línea. Queda en la dirección (`?chofer=`).
   - **Orden por el momento del viaje**, lo que pasa ahora primero: Recogiendo → Llegando → En camino a recoger (por
     la hora en que recoge) → Próximos viajes → En ruta (por la hora de salida). **Lo que pide atención sube arriba**
     de su columna, con un aviso amarillo: pasó su hora y no avisó (más de 3 min, R56; con "Me atraso", contra la
