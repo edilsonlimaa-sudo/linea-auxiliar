@@ -159,8 +159,15 @@ export async function marcarNoVino(reservaId: string) {
 }
 
 /** "➕ Ocupar puesto" para quien no usa la app (R36–R37) */
-export async function ocuparPuesto(viajeId: string, nombre: string) {
-  return rpc((s) => s.rpc("ocupar_puesto", { p_viaje: viajeId, p_nombre: nombre.trim() || undefined }))
+/** Anotar a mano a quien no usa la app (R36): dónde recogerlo y cuántos van; el nombre, opcional */
+export async function ocuparPuesto(viajeId: string, datos: { lugar: string; nombre: string; personas: number }) {
+  const lugar = datos.lugar.trim()
+  const nombre = datos.nombre.trim()
+  if (lugar.length > 60) return { error: "Escribe el lugar más corto (máximo 60 letras)." }
+  if (!Number.isInteger(datos.personas) || datos.personas < 1 || datos.personas > 4) return { error: "Escoge cuántos van." }
+  return rpc((s) =>
+    s.rpc("ocupar_puesto", { p_viaje: viajeId, p_lugar: lugar || undefined, p_nombre: nombre || undefined, p_personas: datos.personas })
+  )
 }
 
 export async function quitarAnotado(reservaId: string) {

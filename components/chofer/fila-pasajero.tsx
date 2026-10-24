@@ -33,10 +33,14 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
   const telefono = fila.telefono?.replace(/\D/g, "")
   const gps = fila.lat !== null && fila.lng !== null ? `${fila.lat},${fila.lng}` : null
 
+  // Anotado a mano sin nombre (R36): se reconoce por dónde se recoge
+  const porLugar = !fila.conApp && fila.nombre === "Pasajero sin app" && Boolean(fila.lugar)
+  const quien = porLugar ? (fila.lugar ?? fila.nombre) : fila.nombre
+
   const confirmarY = (p: Pregunta) => setPregunta(p)
   const noVino = () =>
     confirmarY({
-      titulo: `¿${fila.nombre} no vino?`,
+      titulo: `¿${quien} no vino?`,
       descripcion: fila.confirmado && !enRuta ? "Su puesto pasa a la siguiente persona de la lista." : "Se libera su puesto.",
       confirmar: "Sí, no vino",
       accion: () => marcarNoVino(fila.id),
@@ -56,12 +60,12 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
         <Puesto fila={fila} activo={fila.confirmado || enRuta} />
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
-            <span className="text-base leading-tight font-bold">{fila.nombre}</span>
+            <span className="text-base leading-tight font-bold">{quien}</span>
             {/* Con acompañantes (R57): se ve de lejos cuántos suben */}
             {fila.personas > 1 && (
               <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">+{fila.personas - 1}</span>
             )}
-            {!fila.conApp && fila.nombre !== "Pasajero sin app" && <span className="rounded-full bg-muted px-2 py-0.5 text-sm">Sin app</span>}
+            {!fila.conApp && (fila.nombre !== "Pasajero sin app" || porLugar) && <span className="rounded-full bg-muted px-2 py-0.5 text-sm">Sin app</span>}
             {fila.listo && fila.conApp && !enRuta && (
               <span className="inline-flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">
                 <HandIcon aria-hidden className="size-4" />
@@ -69,7 +73,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
               </span>
             )}
           </p>
-          {(fila.lugar || gps) && (
+          {(fila.lugar || gps) && !porLugar && (
             <p className="mt-0.5 flex items-start gap-1 leading-snug">
               <MapPinIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
               <span>{fila.lugar ?? "Solo compartió su GPS"}</span>
@@ -113,7 +117,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
             disabled={pendiente}
             onClick={() =>
               confirmarY({
-                titulo: `¿${fila.nombre} se bajó?`,
+                titulo: `¿${quien} se bajó?`,
                 // Para el pasajero su viaje termina aquí y se le pide calificar (R38, R45): por eso se confirma
                 descripcion: fila.conApp
                   ? "Su puesto queda libre y para esa persona el viaje termina: la app le pedirá que te califique."
@@ -141,7 +145,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
             disabled={pendiente}
             onClick={() =>
               confirmarY({
-                titulo: `¿Quitar a ${fila.nombre}?`,
+                titulo: `¿Quitar a ${quien}?`,
                 descripcion: "Lo anotaste tú a mano. Su puesto queda libre.",
                 confirmar: "Sí, quitar",
                 accion: () => quitarAnotado(fila.id),

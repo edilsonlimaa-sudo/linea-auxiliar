@@ -244,7 +244,7 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
   - Si no hay puestos para todos, busca otra unidad o pide "Avísame" (R59). Pedir en el camino (R28) también exige
     puestos para todos.
   - El chofer ve **"Carmen R. +2"** y sus puestos ("Puestos 2–4"); "No vino" y "Se bajó" valen para todo el grupo.
-    Al anotar a mano (R36) sigue siendo de a uno.
+    Al anotar a mano (R36) también se dice cuántos van.
   - La espera (R31) también dice cuántos van; la demanda que ven los choferes y el admin cuenta **personas**.
   - Al cambiarse de unidad (R22) se lleva el mismo número de personas.
 - **R58.** *(Eliminada en oct. 2026.)* Apartar ya no es una solicitud que el chofer confirma: **al apartar, el
@@ -315,8 +315,11 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 
 ### 5.9 Puestos manuales (quien no usa la app)
 
-- **R36.** **➕ Ocupar puesto** en cualquier viaje del chofer (recogida actual, en ruta o próximo). Nombre
-  opcional ("Pasajero sin app").
+- **R36.** **➕ Ocupar puesto** en cualquier viaje del chofer (recogida actual, en ruta o próximo). Pregunta primero
+  **¿Dónde lo recoges?** (el lugar, máx. 60) y **cuántos van** (1–4, R57); el **nombre** es opcional, debajo. Nada es
+  obligatorio: un toque basta. *(Oct. 2026: los choferes escribían el lugar en el campo del nombre, "Entrada
+  Frailejones"; lo que necesitan es saber dónde recoger, no cómo se llama.)* En la lista del chofer, quien se anotó
+  sin nombre se ve por su lugar, con "Sin app".
 - **R37 [servidor].** El anotado a mano entra en el **siguiente puesto libre**, y solo si hay uno (R59): antes de
   salir o en ruta ("Subió en el camino").
 - **R38.** **Se bajó** libera un puesto en ruta y **termina el viaje de esa persona**: para ella cuenta como

@@ -1419,7 +1419,12 @@ export type Database = {
       nombre_corto: { Args: { p_nombre: string }; Returns: string }
       normalizar_telefono: { Args: { p_telefono: string }; Returns: string }
       ocupar_puesto: {
-        Args: { p_nombre?: string; p_viaje: string }
+        Args: {
+          p_lugar?: string
+          p_nombre?: string
+          p_personas?: number
+          p_viaje: string
+        }
         Returns: string
       }
       omitir_calificacion: { Args: { p_reserva: string }; Returns: undefined }
