@@ -3,7 +3,7 @@
 --   choferes: Pedro ...61, Luisa ...62 · pasajera: Rosa ...71
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(13);
+select plan(15);
 
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
 returns void language plpgsql as $$
@@ -46,6 +46,19 @@ select results_eq(
   $$ values ('Pedro Mata'::text, true), ('Luisa Gómez'::text, false) $$,
   'R60: el pasajero ve quién vuelve (con hora) y quién terminó por hoy');
 select is((select count(*)::int from public.pausas), 0, 'R60: la tabla de pausas no es visible para el pasajero');
+
+-- Luisa cambia de idea: vuelve, pero sin decir la hora
+select pg_temp.como('00000000-0000-4000-a000-000000000062');
+select public.desconectar(p_vuelve => true);
+select pg_temp.como('00000000-0000-4000-a000-000000000071');
+select results_eq(
+  $$ select nombre, vuelve_en is null, sin_hora from public.choferes_en_pausa() where chofer_id::text like '00000000-0000-4000-a000-00000000006_' $$,
+  $$ values ('Pedro Mata'::text, false, false), ('Luisa Gómez'::text, true, true) $$,
+  'R60: la hora es opcional: vuelve sin hora ("vuelve más tarde")');
+select pg_temp.como('00000000-0000-4000-a000-000000000062');
+select public.desconectar();
+select is((select sin_hora from public.pausas where chofer_id = auth.uid() and cerrada_en is null), false,
+  'R60: sin argumento sigue siendo terminó por hoy');
 
 -- Pedro vuelve: al conectarse la pausa se cierra sola y deja de verse
 select pg_temp.como('00000000-0000-4000-a000-000000000061');

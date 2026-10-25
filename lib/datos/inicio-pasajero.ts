@@ -49,7 +49,7 @@ export type ChoferEnServicio = {
 }
 
 /** Chofer desconectado que dijo si vuelve hoy (R60). vuelveEn null = terminó por hoy */
-export type ChoferEnPausa = { id: string; nombre: string; fotoUrl: string | null; vuelveEn: string | null }
+export type ChoferEnPausa = { id: string; nombre: string; fotoUrl: string | null; vuelveEn: string | null; sinHora: boolean }
 
 export type DatosInicioPasajero = {
   viajes: ViajeConChofer[]
@@ -346,6 +346,7 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       nombre: p.nombre,
       fotoUrl: p.foto_path ? (fotos.get(p.foto_path) ?? null) : null,
       vuelveEn: p.vuelve_en,
+      sinHora: p.sin_hora,
     })),
   }
 }

@@ -189,14 +189,14 @@ export async function cargarViajesEnCurso(): Promise<{ choferes: ChoferEnCurso[]
   return { choferes, error: null }
 }
 
-export type PausaAbierta = { choferId: string; nombre: string; fotoUrl: string | null; desde: string; vuelveEn: string | null }
+export type PausaAbierta = { choferId: string; nombre: string; fotoUrl: string | null; desde: string; vuelveEn: string | null; sinHora: boolean }
 
 /** Choferes en pausa ahora (R60), de hoy: quién dijo que vuelve y a qué hora, y quién terminó por hoy (Viajes en curso) */
 export async function cargarPausasAbiertas(desde: Date): Promise<PausaAbierta[]> {
   const supabase = await crearClienteServidor()
   const { data } = await supabase
     .from("pausas")
-    .select("chofer_id, inicio, vuelve_en, chofer:perfiles!pausas_chofer_id_fkey(nombre, foto_path, conectado_en)")
+    .select("chofer_id, inicio, vuelve_en, sin_hora, chofer:perfiles!pausas_chofer_id_fkey(nombre, foto_path, conectado_en)")
     .is("cerrada_en", null)
     .gte("inicio", desde.toISOString())
     .order("vuelve_en", { ascending: true, nullsFirst: false })
@@ -208,6 +208,7 @@ export async function cargarPausasAbiertas(desde: Date): Promise<PausaAbierta[]>
     fotoUrl: p.chofer?.foto_path ? (fotos.get(p.chofer.foto_path) ?? null) : null,
     desde: p.inicio,
     vuelveEn: p.vuelve_en,
+    sinHora: p.sin_hora,
   }))
 }
 

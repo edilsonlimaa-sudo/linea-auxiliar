@@ -409,7 +409,9 @@ function EnPausa({ pausas, ahora }: { pausas: PausaAbierta[]; ahora: number }) {
                 <span className={cn("flex items-center gap-1 text-sm", vencida ? "font-bold text-warning" : "text-muted-foreground")}>
                   <CoffeeIcon aria-hidden className="size-4 shrink-0" />
                   {p.vuelveEn === null
-                    ? "Terminó por hoy"
+                    ? p.sinHora
+                      ? "Vuelve más tarde (sin hora)"
+                      : "Terminó por hoy"
                     : vencida
                       ? `Dijo que volvía a las ${hora(p.vuelveEn)} · pasó hace ${duracion(tarde ?? 0)}`
                       : textoVuelta(p.vuelveEn, new Date(ahora)).replace(/^v/, "V")}

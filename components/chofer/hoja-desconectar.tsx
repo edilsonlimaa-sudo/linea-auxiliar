@@ -17,8 +17,9 @@ const RAPIDOS = [
 ]
 
 /**
- * Desconectarse (R6, R8) diciendo si vuelve hoy (R60): "¿Vuelves a trabajar hoy?" → Sí, vuelvo (30 min, 1 hora,
- * 2 horas o a una hora) · No, terminé por hoy. Dos toques, sin escribir; los pasajeros ven a qué hora vuelve.
+ * Desconectarse (R6, R8) diciendo si vuelve hoy (R60): "¿Vuelves a trabajar hoy?" → Sí, vuelvo (y, si quiere, en
+ * cuánto: 30 min, 1 hora, 2 horas o a una hora) · No, terminé por hoy. La hora es opcional: prometerla y no cumplirla
+ * es peor que no decirla; sin hora los pasajeros ven "vuelve más tarde".
  * Si cancela viajes, lo dice aquí mismo antes del botón (en vez de una segunda confirmación).
  */
 export function HojaDesconectar({
@@ -39,11 +40,11 @@ export function HojaDesconectar({
   const idHora = useId()
 
   const limpiar = () => (setVuelve(null), setCuando(null), setHora(""))
-  const listo = vuelve === false || (vuelve === true && (typeof cuando === "number" || (cuando === "hora" && hora !== "")))
+  const listo = vuelve === false || (vuelve === true && (cuando !== "hora" || hora !== ""))
 
   const desconectar = () =>
     ejecutar(
-      () => desconectarme(vuelve ? (cuando === "hora" ? { hora } : { minutos: cuando as number }) : null),
+      () => desconectarme(!vuelve ? null : cuando === "hora" ? { hora } : typeof cuando === "number" ? { minutos: cuando } : "sin_hora"),
       () => (onCambiar(false), limpiar())
     )
 
@@ -72,14 +73,16 @@ export function HojaDesconectar({
 
           {vuelve && (
             <fieldset className="flex flex-col gap-2">
-              <legend className="mb-2 text-base font-bold">¿En cuánto?</legend>
+              <legend className="mb-2 text-base font-bold">
+                ¿En cuánto? <span className="font-normal text-muted-foreground">(si sabes)</span>
+              </legend>
               <div className="grid grid-cols-3 gap-2">
                 {RAPIDOS.map((r) => (
-                  <Opcion key={r.minutos} nombre="cuando-vuelve" elegida={cuando === r.minutos} onElegir={() => setCuando(r.minutos)}>
+                  <Opcion key={r.minutos} nombre="cuando-vuelve" elegida={cuando === r.minutos} onElegir={() => setCuando(cuando === r.minutos ? null : r.minutos)}>
                     {r.texto}
                   </Opcion>
                 ))}
-                <Opcion nombre="cuando-vuelve" elegida={cuando === "hora"} onElegir={() => setCuando("hora")} className="col-span-3">
+                <Opcion nombre="cuando-vuelve" elegida={cuando === "hora"} onElegir={() => setCuando(cuando === "hora" ? null : "hora")} className="col-span-3">
                   A una hora
                 </Opcion>
               </div>

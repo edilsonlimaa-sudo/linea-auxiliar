@@ -29,7 +29,9 @@ export async function conectarme() {
  * Desconectarse cancela los viajes publicados (R8) y dice si vuelve hoy (R60): en unos minutos, a una hora ("HH:MM",
  * en Caracas) o null = terminó por hoy.
  */
-export async function desconectarme(vuelta: { minutos: number } | { hora: string } | null): Promise<Resultado> {
+export async function desconectarme(vuelta: { minutos: number } | { hora: string } | "sin_hora" | null): Promise<Resultado> {
+  // R60: vuelve sin decir la hora
+  if (vuelta === "sin_hora") return rpc((s) => s.rpc("desconectar", { p_vuelve: true }))
   let vuelveEn: Date | null = null
   if (vuelta && "minutos" in vuelta) {
     if (!Number.isInteger(vuelta.minutos) || vuelta.minutos < 5 || vuelta.minutos > 720) return { error: "Escoge en cuánto vuelves." }

@@ -432,6 +432,7 @@ export type Database = {
           chofer_id: string
           id: string
           inicio: string
+          sin_hora: boolean
           vuelve_en: string | null
         }
         Insert: {
@@ -439,6 +440,7 @@ export type Database = {
           chofer_id: string
           id?: string
           inicio?: string
+          sin_hora?: boolean
           vuelve_en?: string | null
         }
         Update: {
@@ -446,6 +448,7 @@ export type Database = {
           chofer_id?: string
           id?: string
           inicio?: string
+          sin_hora?: boolean
           vuelve_en?: string | null
         }
         Relationships: [
@@ -1209,6 +1212,7 @@ export type Database = {
           chofer_id: string
           foto_path: string
           nombre: string
+          sin_hora: boolean
           vuelve_en: string
         }[]
       }
@@ -1239,7 +1243,10 @@ export type Database = {
         }[]
       }
       desactivar_parada: { Args: { p_id: string }; Returns: undefined }
-      desconectar: { Args: { p_vuelve_en?: string }; Returns: undefined }
+      desconectar: {
+        Args: { p_vuelve?: boolean; p_vuelve_en?: string }
+        Returns: undefined
+      }
       desconectar_inactivos: { Args: never; Returns: undefined }
       eliminar_cuenta: {
         Args: { p_con_historial?: boolean; p_usuario: string }

@@ -66,10 +66,10 @@ export function hoyEnPalabras(ahora = new Date()): string {
 /**
  * Cuándo vuelve un chofer en pausa (R60), como hora y nunca como "en 1 hora" (envejece en la pantalla):
  * "vuelve como a las 5:30 p. m." · "vuelve mañana como a las 7:00 a. m." · ya pasada: "dijo que volvía a las…" ·
- * sin hora: "terminó por hoy".
+ * vuelve sin decir la hora: "vuelve más tarde" · sin hora: "terminó por hoy".
  */
-export function textoVuelta(vuelveEn: string | null, ahora = new Date()): string {
-  if (!vuelveEn) return "terminó por hoy"
+export function textoVuelta(vuelveEn: string | null, ahora = new Date(), sinHora = false): string {
+  if (!vuelveEn) return sinHora ? "vuelve más tarde" : "terminó por hoy"
   const d = new Date(vuelveEn)
   if (d.getTime() <= ahora.getTime()) return `dijo que volvía a las ${hora(vuelveEn)}`
   return diaCaracas(d) === diaCaracas(ahora) ? `vuelve como a las ${hora(vuelveEn)}` : `vuelve mañana como a las ${hora(vuelveEn)}`

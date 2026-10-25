@@ -107,8 +107,11 @@ puede ocultar botones, pero nunca es la única barrera.
 - **R9 [servidor].** A medianoche (America/Caracas) todos los choferes quedan desconectados.
 - **R60. ¿Vuelves hoy? [servidor].** *(Oct. 2026: previsibilidad para el pasajero.)* Al tocar **Desconectarme**
   el chofer responde **"¿Vuelves a trabajar hoy?"**: **Sí, vuelvo** → "¿En cuánto?" (30 min, 1 hora, 2 horas o **a una
-  hora**) · **No, terminé por hoy**. Se guarda como una **pausa** (desde, vuelve a las…, cerrada) y se responde con dos
-  toques, sin escribir.
+  hora**) · **No, terminé por hoy**. Se guarda como una **pausa** (desde, vuelve a las…, cerrada) y se responde con uno o
+  dos toques, sin escribir.
+  - **La hora es opcional** *(Oct. 2026: prometer una hora y no cumplirla es peor que no decirla)*: con **Sí, vuelvo** el
+    botón Desconectarme ya se habilita. Sin hora, los pasajeros ven **"vuelve más tarde"** hasta la medianoche; quien
+    quiere dar previsibilidad escoge la hora.
   - La hora de vuelta va de ahora a 12 h como máximo. Se muestra como **hora** ("vuelve como a las 5:30 p. m."; si cae
     al día siguiente, "mañana como a las 7:00 a. m."), nunca como "en 1 hora", que envejece en la pantalla.
   - Es una **estimación, no una promesa**: se deja de mostrar 30 min después de la hora dicha si no volvió.
