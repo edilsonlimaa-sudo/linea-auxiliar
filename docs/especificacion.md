@@ -804,17 +804,17 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
 
 **Con un viaje abierto ("¿qué hago ahora y a quién recojo?"):**
 
-- **R75. El viaje en ruta, compacto arriba.** *(Oct. 2026: en ruta el chofer ya no necesita seguir ese viaje; necesita ver
+- **R75. El viaje en ruta, arriba y con sus acciones.** *(Oct. 2026: en ruta el chofer ya no necesita seguir ese viaje; necesita ver
   el próximo. Antes la próxima recogida quedaba debajo de la pantalla y competían dos botones amarillos.)* Con un viaje
   **en ruta**, siempre:
-  - Arriba, una **barra azul compacta** pegada al tope al bajar la pantalla: "En ruta hacia Valle Grande · Salió 9:01 ·
-    hace 18 min · 4 a bordo" y **Ver ▾**. Lo que no puede esperar aparece en la barra aunque esté cerrada: un **pedido en
-    el camino** (R29) en rojo y quien **espera en el camino** (R67) o hay que **recoger en el camino** en amarillo; tocarlo
-    la abre.
-  - **Ver ▾ la abre en su lugar** (no en una hoja): la misma barra con **Ocultar ▴** y, pegado debajo, un panel corto con
-    **una línea por persona** (nombre o lugar · dónde · su acción: Se bajó, Subió / No vino, Voy / Sigo) y las acciones en
-    una fila: **Subió alguien** · **Opciones** · **Terminar** (con R71 y R73). Abierta deja de pegarse al tope y **queda
-    abierta** (también al refrescar o volver a la app) hasta que la oculte; la app lo recuerda por viaje.
+  - Arriba, una **tarjeta azul** del viaje en ruta: "En ruta hacia Valle Grande", "Salió 9:01 · hace 18 min" y, grande,
+    **"4 a bordo · 0 libres"**. *(Oct. 2026: la primera versión, una barra de una línea pegada al tope, quedó muy chica
+    para ser el viaje en ruta; los choferes pidieron tener a mano subir a quien recogen en el camino y verla **siempre
+    abierta**.)* Trae **Subió alguien** (R36, si quedan puestos; si no, "Carro lleno") y, pegado debajo, **una línea por
+    persona** (nombre o lugar · dónde · su acción: Se bajó, Subió / No vino, Voy / Sigo): primero lo que no puede
+    esperar (un **pedido en el camino**, R29, y a quien hay que **recoger en el camino**), luego quien **espera en el
+    camino** (R67, en amarillo) y quienes van a bordo. Al final, las acciones del viaje: **Opciones** · **Terminar** (con
+    R71 y R73). No se pliega ni se pega al tope: es lo primero de la pantalla.
   - Debajo, el **foco**: el **próximo viaje**, completo, y el botón fijo de abajo es **el suyo** (Avisar que llego / Ya
     llegué: al llegar, el viaje en ruta se termina solo, R13). Sin próximo viaje, el foco es **"¿Qué haces después?"**
     (R73) con las tres respuestas y el botón fijo **Publicar mi vuelta**; si ya avisó pausa o último, lo que avisó (con

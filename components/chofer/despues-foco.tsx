@@ -88,7 +88,7 @@ export function DespuesFoco({ viaje }: { viaje: Pick<Viaje, "id" | "sentido" | "
           <RepeatIcon aria-hidden />
           Publicar mi vuelta
         </Link>
-        <p className="text-center text-sm text-muted-foreground">Tu viaje en ruta sigue arriba: ábrelo para Se bajó o Terminar.</p>
+        <p className="text-center text-sm text-muted-foreground">Tu viaje en ruta está arriba: ahí marcas Se bajó o Terminar.</p>
       </div>
     </>
   )

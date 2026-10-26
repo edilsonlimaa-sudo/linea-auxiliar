@@ -9,13 +9,22 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { ocuparPuesto } from "@/lib/acciones/chofer"
+import { cn } from "@/lib/utils"
 import { PERSONAS_MAX } from "@/lib/viajes"
 
 /**
  * "➕ Ocupar puesto" para quien sube sin la app (R36–R37): primero dónde recogerlo y cuántos van (es lo que el chofer
  * necesita y lo que anotaba en el nombre); el nombre, opcional. Nada es obligatorio: un toque basta.
  */
-export function OcuparPuesto({ viajeId, enRuta }: { viajeId: string; enRuta: boolean }) {
+export function OcuparPuesto({
+  viajeId,
+  enRuta,
+  claro = false,
+}: {
+  viajeId: string
+  enRuta: boolean
+  claro?: boolean // sobre el azul del viaje en ruta (R75): botón blanco
+}) {
   const idLugar = useId()
   const idNombre = useId()
   const [abierta, setAbierta] = useState(false)
@@ -33,7 +42,14 @@ export function OcuparPuesto({ viajeId, enRuta }: { viajeId: string; enRuta: boo
   const quien = nombre.trim() || lugar.trim()
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), limpiar())}>
-      <SheetTrigger render={<Button variant="outline" className="h-auto min-h-11 w-full whitespace-normal" />}>
+      <SheetTrigger
+        render={
+          <Button
+            variant="outline"
+            className={cn("h-auto min-h-11 w-full whitespace-normal", claro && "border-transparent bg-card text-primary hover:bg-card/90")}
+          />
+        }
+      >
         <UserPlusIcon aria-hidden />
         {enRuta ? "Subió alguien" : "Ocupar puesto"}
       </SheetTrigger>
