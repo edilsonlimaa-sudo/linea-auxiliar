@@ -598,6 +598,22 @@ muestra donde sirve.)*
   - **Chofer:** en Inicio sin viajes abiertos, si ya terminó 10 viajes o más.
   - Nadie la ve si opinó en los últimos **60 días**. **Ahora no** la esconde **14 días** en ese teléfono.
 
+### 5.21 Interfaz nueva: migración controlada
+
+*(Oct. 2026: el diseño nuevo, pensado para el celular (pestañas abajo, hojas inferiores, transiciones), llega de a poco y
+con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia la presentación.)*
+
+- **R83. Cada cuenta tiene su interfaz [servidor].** **Clásica** (la de siempre, por defecto) o **nueva**. **Solo el admin
+  la cambia**, por persona o en grupo; el usuario no puede volver por su cuenta. Orden: **primero pasajeros**, después
+  choferes.
+- **R84. La app lleva a cada uno a la suya.** La nueva vive en `/n` (pasajero; el chofer, más adelante, en `/n/chofer`):
+  quien está en la nueva y abre una dirección de la clásica (un enlace viejo, la app instalada) va a la pantalla
+  equivalente de la nueva, y al revés. Un cambio hecho en el panel se aplica **al siguiente toque** (cada pantalla mira la
+  interfaz de la cuenta en la base). Entrar (teléfono + PIN), registrarse y el panel son los mismos para las dos.
+- **R85. Mismas reglas, mismos datos.** Las dos interfaces usan las mismas funciones de la base y los mismos datos: un
+  pasajero en la nueva y un chofer en la clásica viajan juntos sin notarlo. **La clásica no cambia** mientras convivan;
+  se apaga cuando todos estén en la nueva y no haga falta volver.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |

@@ -19,7 +19,7 @@ const badgeVariants = cva(
         ghost:
           "hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50",
         link: "text-primary underline-offset-4 hover:underline",
-        // Del proyecto (tokens de app/globals.css): confirmado, aviso y la acción de la línea
+        // Del proyecto (tokens de app/(clasica)/globals.css): confirmado, aviso y la acción de la línea
         success: "bg-success-muted text-success",
         warning: "bg-warning-muted text-warning",
         signal: "bg-signal text-signal-foreground",

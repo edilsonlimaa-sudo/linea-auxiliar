@@ -564,6 +564,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
+          interfaz: string
           nombre: string
           rol: Database["public"]["Enums"]["rol_usuario"]
           urbanismo: string | null
@@ -577,6 +578,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["estado_cuenta"]
           foto_path?: string | null
           id: string
+          interfaz?: string
           nombre: string
           rol: Database["public"]["Enums"]["rol_usuario"]
           urbanismo?: string | null
@@ -590,6 +592,7 @@ export type Database = {
           estado?: Database["public"]["Enums"]["estado_cuenta"]
           foto_path?: string | null
           id?: string
+          interfaz?: string
           nombre?: string
           rol?: Database["public"]["Enums"]["rol_usuario"]
           urbanismo?: string | null
@@ -1056,6 +1059,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
+          interfaz: string
           nombre: string
           rol: Database["public"]["Enums"]["rol_usuario"]
           urbanismo: string | null
@@ -1078,6 +1082,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
+          interfaz: string
           nombre: string
           rol: Database["public"]["Enums"]["rol_usuario"]
           urbanismo: string | null
@@ -1100,6 +1105,7 @@ export type Database = {
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
           id: string
+          interfaz: string
           nombre: string
           rol: Database["public"]["Enums"]["rol_usuario"]
           urbanismo: string | null
@@ -1194,6 +1200,7 @@ export type Database = {
         }
       }
       _sin_abuso_sugerencias: { Args: never; Returns: undefined }
+      _trabaja_hoy: { Args: { p_chofer: string }; Returns: boolean }
       _validar_lugar: {
         Args: { p_lat: number; p_lng: number; p_lugar: string }
         Returns: undefined
@@ -1209,6 +1216,10 @@ export type Database = {
           ultimo_viaje: string
           viajes: number
         }[]
+      }
+      admin_cambiar_interfaz: {
+        Args: { p_ids: string[]; p_interfaz: string }
+        Returns: number
       }
       admin_cerrar_viaje: { Args: { p_viaje: string }; Returns: undefined }
       admin_cuentas: {
@@ -1576,6 +1587,7 @@ export type Database = {
       }
       me_fui: { Args: { p_motivo?: string }; Returns: undefined }
       me_monte: { Args: never; Returns: undefined }
+      mi_interfaz: { Args: never; Returns: string }
       mis_datos_privados: {
         Args: never
         Returns: {

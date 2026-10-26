@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
 import { esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
+import { destinoPara } from "@/lib/sesion"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 
 // Resultado de las acciones del pasajero. Los errores de las funciones de la base ya vienen en español.
@@ -60,7 +61,7 @@ export async function apartarPuesto(viajeId: string, datos?: FormData): Promise<
   if (error) return { error: error.message }
   actualizarApp()
   // Apartar es pasar de escoger a acompañar el viaje: se abre su página (docs/especificacion.md §8)
-  redirect("/mi-viaje")
+  redirect(await destinoPara("/mi-viaje"))
 }
 
 /** "Ya no voy": libera el puesto y el siguiente sube solo (R20) */
@@ -69,7 +70,7 @@ export async function liberarPuesto(reservaId: string): Promise<Resultado> {
   const { error } = await supabase.rpc("cancelar_reserva", { p_reserva: reservaId })
   if (error) return { error: error.message }
   actualizarApp()
-  redirect("/inicio")
+  redirect(await destinoPara("/inicio"))
 }
 
 /** "✋ Ya estoy en el sitio" (R23) */
@@ -78,6 +79,7 @@ export async function avisarQueLlegue(reservaId: string, listo: boolean): Promis
   const { error } = await supabase.rpc("marcar_listo", { p_reserva: reservaId, p_listo: listo })
   if (error) return { error: error.message }
   revalidatePath("/mi-viaje")
+  revalidatePath("/n")
   return { ok: true }
 }
 
@@ -105,8 +107,10 @@ export async function calificarViaje(anterior: Resultado, fd: FormData): Promise
   actualizarApp()
   // Calificando después (Mis viajes R51, Choferes R46) se vuelve ahí; al terminar el viaje, a Inicio
   const volver = fd.get("volver")
+  // Interfaz nueva: vuelve a la pantalla desde donde calificó (solo direcciones de /n)
+  if (typeof volver === "string" && /^\/n(\/[\w-]+)*$/.test(volver)) redirect(volver)
   // R82: contento con el viaje (4–5 estrellas), Inicio puede pedir su opinión sobre la app
-  redirect(volver === "mis-viajes" ? "/mis-viajes" : volver === "choferes" ? "/choferes" : estrellas >= 4 ? "/inicio?valorar=1" : "/inicio")
+  redirect(volver === "mis-viajes" ? "/mis-viajes" : volver === "choferes" ? "/choferes" : await destinoPara(estrellas >= 4 ? "/inicio?valorar=1" : "/inicio"))
 }
 
 /** "Ahora no": se puede calificar después desde Choferes o Mis viajes (R45) */
@@ -115,7 +119,7 @@ export async function omitirCalificacion(reservaId: string): Promise<Resultado> 
   const { error } = await supabase.rpc("omitir_calificacion", { p_reserva: reservaId })
   if (error) return { error: error.message }
   actualizarApp()
-  redirect("/inicio")
+  redirect(await destinoPara("/inicio"))
 }
 
 export type PosicionChofer = { lat: number; lng: number; actualizadaEn: string } | null
@@ -151,6 +155,7 @@ export async function cambiarLugar(reservaId: string, datos: FormData): Promise<
   const { error } = await supabase.rpc("cambiar_lugar", { p_reserva: reservaId, p_lugar: lugar, p_lat: lat, p_lng: lng })
   if (error) return { error: error.message }
   revalidatePath("/mi-viaje")
+  revalidatePath("/n")
   return { ok: true }
 }
 
@@ -186,7 +191,7 @@ export async function estoyEnLista(d: {
     })
   )
   // Anotado, su viaje es Mi viaje (§5.17)
-  if (r.ok) redirect("/mi-viaje")
+  if (r.ok) redirect(await destinoPara("/mi-viaje"))
   return r
 }
 

@@ -128,7 +128,7 @@ export async function entrar(anterior: EstadoFormulario, formData: FormData): Pr
   if (!resultado.success) return { errores: erroresDe(resultado.error), valores, intento }
 
   const supabase = await crearClienteServidor()
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: correoDeTelefono(resultado.data.telefono),
     password: resultado.data.pin,
   })
@@ -139,7 +139,9 @@ export async function entrar(anterior: EstadoFormulario, formData: FormData): Pr
     }
     return { error: "No pudimos entrar. Revisa tu conexión e intenta de nuevo.", valores, intento }
   }
-  redirect("/inicio")
+  // Directo a su interfaz (§5.21): quien está en la nueva no pasa por la clásica
+  const { data: perfil } = await supabase.from("perfiles").select("rol, interfaz").eq("id", data.user.id).maybeSingle()
+  redirect(perfil?.interfaz === "nueva" && perfil.rol === "pasajero" ? "/n" : "/inicio")
 }
 
 export async function salir() {

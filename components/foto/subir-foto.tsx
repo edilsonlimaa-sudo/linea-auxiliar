@@ -2,7 +2,7 @@
 
 import { CameraIcon, Loader2Icon } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { useId, useRef, useState } from "react"
+import { useRef, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { guardarFoto } from "@/lib/acciones/perfil"
@@ -26,11 +26,11 @@ async function achicar(archivo: File): Promise<Blob> {
 }
 
 /**
- * Botón para poner o cambiar una foto (R54). El celular ofrece cámara o galería. La foto se achica aquí, se sube
- * directo a la carpeta propia del bucket (Storage solo deja esa) y el servidor la guarda en el perfil o el carro.
+ * Poner o cambiar una foto (R54), sin el botón: el celular ofrece cámara o galería, la foto se achica aquí, se sube directo
+ * a la carpeta propia del bucket (Storage solo deja esa) y el servidor la guarda en el perfil o el carro. La usan el
+ * botón de la clásica y el de la interfaz nueva.
  */
-export function SubirFoto({ tipo, tieneFoto, className }: { tipo: "perfil" | "carro"; tieneFoto: boolean; className?: string }) {
-  const id = useId()
+export function useSubirFoto(tipo: "perfil" | "carro") {
   const entrada = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const [subiendo, setSubiendo] = useState(false)
@@ -62,11 +62,18 @@ export function SubirFoto({ tipo, tieneFoto, className }: { tipo: "perfil" | "ca
     }
   }
 
+  const campo = <input ref={entrada} type="file" accept="image/*" className="sr-only" tabIndex={-1} aria-hidden onChange={alElegir} />
+  return { campo, abrir: () => entrada.current?.click(), subiendo, error }
+}
+
+/** Botón para poner o cambiar una foto (R54) en la clásica */
+export function SubirFoto({ tipo, tieneFoto, className }: { tipo: "perfil" | "carro"; tieneFoto: boolean; className?: string }) {
+  const { campo, abrir, subiendo, error } = useSubirFoto(tipo)
   const texto = tipo === "perfil" ? (tieneFoto ? "Cambiar mi foto" : "Poner mi foto") : tieneFoto ? "Cambiar foto del carro" : "Poner foto del carro"
   return (
     <div className={className}>
-      <input ref={entrada} id={id} type="file" accept="image/*" className="sr-only" tabIndex={-1} onChange={alElegir} />
-      <Button type="button" variant="outline" className="w-full" disabled={subiendo} onClick={() => entrada.current?.click()}>
+      {campo}
+      <Button type="button" variant="outline" className="w-full" disabled={subiendo} onClick={abrir}>
         {subiendo ? <Loader2Icon aria-hidden className="animate-spin" /> : <CameraIcon aria-hidden />}
         {subiendo ? "Subiendo…" : texto}
       </Button>
