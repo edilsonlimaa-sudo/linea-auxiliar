@@ -81,7 +81,7 @@ function Contenido({
   choferes: ChoferEnServicio[]
   enPausa: ChoferEnPausa[]
   viajes: ViajeConChofer[]
-  sentido: Sentido
+  sentido: Sentido | null
 }) {
   const porId = new Map<string, Viaje>(viajes.map((v) => [v.id, v]))
   const situaciones: Situacion[] = choferes
@@ -118,7 +118,7 @@ function Contenido({
   )
 }
 
-function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; porId: Map<string, Viaje>; sentido: Sentido }) {
+function FilaChofer({ situacion: s, porId, sentido }: { situacion: Situacion; porId: Map<string, Viaje>; sentido: Sentido | null }) {
   const { chofer: c, actual, despues } = s
   const ahora = actual ? (actual.estado === "en_ruta" ? `En ruta ${SENTIDOS[actual.sentido].hacia}` : llegada(actual, porId).principal) : null
   const n = actual ? libres(actual) : 0

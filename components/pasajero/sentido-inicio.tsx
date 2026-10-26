@@ -10,20 +10,21 @@ import { SENTIDOS, type Sentido } from "@/lib/viajes"
 // El sentido va en la dirección (?hacia=centro): así sobrevive al refresco en vivo y a volver atrás
 export const HACIA: Record<Sentido, string> = { vg_a_centro: "centro", centro_a_vg: "valle" }
 
-const Contexto = createContext<{ sentido: Sentido; cambiar: (s: Sentido) => void } | null>(null)
+const Contexto = createContext<{ sentido: Sentido | null; cambiar: (s: Sentido) => void } | null>(null)
 
-/** El sentido escogido en Inicio; quien no está dentro (otras pantallas) usa el que le pasen */
-export function useSentido(porDefecto?: Sentido): Sentido {
+/** El sentido escogido en Inicio (null hasta que lo toque); quien no está dentro (otras pantallas) usa el que le pasen */
+export function useSentido(porDefecto?: Sentido): Sentido | null {
   const c = useContext(Contexto)
-  return c?.sentido ?? porDefecto ?? "vg_a_centro"
+  return c ? c.sentido : (porDefecto ?? null)
 }
 
 /**
  * Los dos sentidos de Inicio vienen cargados juntos (§8): cambiar es instantáneo, sin pedir la página otra vez. La
- * dirección se actualiza sin recargar, para el refresco en vivo y para volver atrás.
+ * dirección se actualiza sin recargar, para el refresco en vivo y para volver atrás. Nunca viene uno escogido: sin
+ * ?hacia=, ninguno hasta que la persona lo toca.
  */
-export function SentidoInicio({ inicial, children }: { inicial: Sentido; children: React.ReactNode }) {
-  const [sentido, setSentido] = useState(inicial)
+export function SentidoInicio({ inicial, children }: { inicial: Sentido | null; children: React.ReactNode }) {
+  const [sentido, setSentido] = useState<Sentido | null>(inicial)
   const cambiar = (s: Sentido) => {
     setSentido(s)
     window.history.replaceState(null, "", `/inicio?hacia=${HACIA[s]}`)
@@ -64,6 +65,11 @@ export function SelectorSentido({ unidades }: { unidades: Record<Sentido, number
       })}
     </div>
   )
+}
+
+/** Sin sentido escogido todavía: lo que se muestra en lugar de las unidades */
+export function SinSentido({ children }: { children: React.ReactNode }) {
+  return useSentido() === null ? <>{children}</> : null
 }
 
 /** Lo de un sentido: solo se ve cuando es el escogido (el otro sigue montado, listo para mostrarse) */

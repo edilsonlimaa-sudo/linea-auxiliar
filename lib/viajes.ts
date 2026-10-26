@@ -213,19 +213,6 @@ export const conAcompanantes = (nombre: string, personas: number) => (personas >
 /** "1 persona", "3 personas" */
 export const textoPersonas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
 
-/**
- * Sentido sugerido al abrir la app: quien vive en Valle Grande suele ir al Centro en la mañana y volver en la tarde
- * (y al revés quien vive en el Centro). Se puede cambiar con un toque.
- */
-export function sentidoSugerido(urbanismo: string | null, ahora = new Date()): Sentido {
-  const hora = Number(new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone: ZONA_HORARIA }).format(ahora))
-  const manana = hora < 12
-  // Dónde vive se escribe a mano (R1): basta que mencione el Centro
-  const viveEnCentro = /centro/i.test(urbanismo ?? "")
-  if (viveEnCentro) return manana ? "centro_a_vg" : "vg_a_centro"
-  return manana ? "vg_a_centro" : "centro_a_vg"
-}
-
 /** "Carmen Rivas" → "Carmen R." */
 export function nombreCorto(nombre: string): string {
   const [primero, segundo] = nombre.trim().split(/\s+/)
