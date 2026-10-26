@@ -96,9 +96,9 @@ export function EstadoServicio({ conectado, viajesAbiertos }: { conectado: boole
 
 /**
  * Sin viajes, dentro del bloque azul: el estado en una etiqueta y su interruptor al lado. Desconectarse también
- * pregunta si vuelve hoy (R60).
+ * pregunta si vuelve hoy (R60). Sin la cuota del día no hay "Conectarme" (R76): el aviso de la cuota va debajo.
  */
-export function EstadoEnCabecera({ conectado }: { conectado: boolean }) {
+export function EstadoEnCabecera({ conectado, sinCuota = false }: { conectado: boolean; sinCuota?: boolean }) {
   const { ejecutar, pendiente, error } = useAccion()
   const [hoja, setHoja] = useState(false)
   return (
@@ -113,18 +113,24 @@ export function EstadoEnCabecera({ conectado }: { conectado: boolean }) {
           <span aria-hidden className={cn("size-2.5 rounded-full", conectado ? "bg-success" : "bg-header-foreground/60")} />
           {conectado ? "Conectado" : "Desconectado"}
         </span>
-        <button
-          type="button"
-          disabled={pendiente}
-          onClick={() => (conectado ? setHoja(true) : ejecutar(conectarme))}
-          className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-sm font-bold underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-60"
-        >
-          {pendiente ? <Loader2Icon aria-hidden className="size-4 animate-spin" /> : <PowerIcon aria-hidden className="size-4" />}
-          {conectado ? "Desconectarme" : "Conectarme"}
-        </button>
+        {(conectado || !sinCuota) && (
+          <button
+            type="button"
+            disabled={pendiente}
+            onClick={() => (conectado ? setHoja(true) : ejecutar(conectarme))}
+            className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-2 text-sm font-bold underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring disabled:opacity-60"
+          >
+            {pendiente ? <Loader2Icon aria-hidden className="size-4 animate-spin" /> : <PowerIcon aria-hidden className="size-4" />}
+            {conectado ? "Desconectarme" : "Conectarme"}
+          </button>
+        )}
       </div>
       {/* Desconectado sí necesita explicación: es la razón de que nadie lo vea */}
-      {!conectado && <p className="text-sm opacity-90">Los pasajeros no te ven. Publicar un viaje te conecta.</p>}
+      {!conectado && (
+        <p className="text-sm opacity-90">
+          {sinCuota ? "Los pasajeros no te ven. Con la cuota del día te conectas y publicas." : "Los pasajeros no te ven. Publicar un viaje te conecta."}
+        </p>
+      )}
       {error && (
         <p role="alert" className="font-bold text-signal">
           {error}

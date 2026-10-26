@@ -11,7 +11,7 @@ import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { CabeceraInicio, sentidoDeHacia } from "@/components/pasajero/cabecera-inicio"
 import { ListaGina } from "@/components/pasajero/lista-gina"
 import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
-import { PanelSentido, SentidoInicio } from "@/components/pasajero/sentido-inicio"
+import { PanelSentido, SentidoInicio, SinSentido } from "@/components/pasajero/sentido-inicio"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { ValorarApp } from "@/components/sugerencias/valorar-app"
 import { Badge } from "@/components/ui/badge"
@@ -38,7 +38,6 @@ import {
   ordenarParaPasajero,
   otrasConPuesto,
   SENTIDOS,
-  sentidoSugerido,
   type Sentido,
 } from "@/lib/viajes"
 
@@ -103,8 +102,8 @@ function InicioPasajero({
 }) {
   const { viajes, porId, aviso, enServicio, enPausa } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
-  // Empieza en el sentido sugerido por la hora y dónde vive. Cambiarlo es un toque, sin recargar: los dos van aquí
-  const sentido = hacia ?? sentidoSugerido(perfil.urbanismo)
+  // Nunca viene un sentido escogido: el que toque (o el que ya tocó, en ?hacia=). Cambiarlo es instantáneo: los dos van aquí
+  const sentido = hacia
   const cuantas = Object.fromEntries(
     (Object.keys(SENTIDOS) as Sentido[]).map((s) => [s, disponibles.filter((v) => v.sentido === s).length])
   ) as Record<Sentido, number>
@@ -126,6 +125,12 @@ function InicioPasajero({
         {/* R80: solo de noche, los domingos o media hora antes de la nocturna */}
         <AvisoTarifa />
 
+        <SinSentido>
+          <p className="rounded-2xl border-2 border-dashed px-4 py-5 text-center text-muted-foreground">
+            Toca <strong className="text-foreground">Al Centro</strong> o <strong className="text-foreground">A Valle Grande</strong> para ver
+            cómo ir.
+          </p>
+        </SinSentido>
         {/* Centro → Valle Grande: no se aparta, se espera en la Lista de Gina (§5.17) */}
         <PanelSentido sentido="centro_a_vg">
           <ListaGina lista={lista} carros={carrosHaciaValle(viajes, porId)} porId={porId} enPausa={enPausa} />

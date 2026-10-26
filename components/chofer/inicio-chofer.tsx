@@ -74,13 +74,14 @@ export function InicioChofer({
                 ¿Sales a trabajar?
               </h1>
             </div>
-            <EstadoEnCabecera conectado={conectado} />
+            <EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} />
             {!sinCuota && <AgregarViaje modo="primero" ultimo={ultimo} />}
           </div>
           <Companeros companeros={companeros} viajes={viajesCompaneros} chofer={nombre} enCabecera />
         </section>
         {lineaCuota}
-        {lista}
+        {/* R76: sin la cuota (y sin viajes) la lista hacia Valle Grande no es para él */}
+        {!sinCuota && lista}
         {opinar && <ValorarApp />}
       </div>
     )

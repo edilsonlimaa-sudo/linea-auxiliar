@@ -1,8 +1,8 @@
 -- §5.18 Cuota del día (R76–R78): publicar pide el día pagado; el primer aviso habilita en revisión; rechazado no.
--- Cuentas propias (se deshacen al final): admin ...04 · choferes Pedro ...49, Luisa ...50
+-- Cuentas propias (se deshacen al final): admin ...04 · choferes Pedro ...49, Luisa ...50 · pasajera Ana ...77
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(18);
+select plan(23);
 
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
 returns void language plpgsql as $$
@@ -27,6 +27,10 @@ select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000049', '0414-000004
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000050', '0414-0000050', '{"rol": "chofer", "nombre": "Luisa Mata", "placa": "LM050AA"}');
 update public.perfiles set estado = 'aprobado', aprobado_en = now()
  where id in ('00000000-0000-4000-a000-000000000049', '00000000-0000-4000-a000-000000000050');
+select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000077', '0414-0000077', '{"rol": "pasajero", "nombre": "Ana Pérez"}');
+update public.perfiles set estado = 'aprobado', aprobado_en = now() where id = '00000000-0000-4000-a000-000000000077';
+-- Sin la lista real de la base local (todo se deshace al final)
+delete from public.lista_gina;
 update public.cuota_config set activa = false, banco = null, telefono = null, cedula = null;
 
 set local role authenticated;
@@ -51,6 +55,16 @@ select is((select rige and not habilitado from public.cuota_de_hoy()), true, 'R7
 select throws_ok($$ select public.publicar_viaje('vg_a_centro', 4, 10) $$,
   'P0001', 'Para publicar hoy, paga la cuota del día y avisa la referencia del Pago Móvil', 'R76: sin pagar no publica');
 
+-- Sin pagar tampoco se conecta ni ve la lista hacia Valle Grande (Ana espera en Gina)
+select throws_ok($$ select public.conectar() $$,
+  'P0001', 'Para conectarte hoy, paga la cuota del día y avisa la referencia del Pago Móvil', 'R76: sin pagar no se conecta');
+select pg_temp.yo('77');
+select public.estoy_en_lista(true);
+select is((select count(*)::int from public.lista_de_gina()), 1, 'R76: la pasajera sigue viendo la lista');
+select pg_temp.yo('49');
+select is((select count(*)::int from public.lista_para_choferes()), 0, 'R76: sin pagar, el chofer no ve la lista (ni teléfonos)');
+select is((select count(*)::int from public.lista_de_gina()), 0, 'R76: sin pagar, tampoco la lista pública');
+
 -- Avisa el pago: el primero del día habilita al momento
 select throws_ok($$ select public.avisar_pago_cuota('12', '0134') $$,
   'P0001', 'Escribe la referencia del Pago Móvil (solo números)', 'R77: la referencia tiene de 4 a 20 números');
@@ -58,6 +72,7 @@ select lives_ok($$ select public.avisar_pago_cuota('0012-3456', '0134') $$, 'R77
 select is((select referencia || '|' || estado || '|' || habilita || '|' || monto from public.cuota_pagos where id = pg_temp.aviso_de('49')),
   '00123456|revision|true|1000.00', 'R77: el primer aviso queda en revisión, habilita y guarda el monto');
 select lives_ok($$ select public.publicar_viaje('vg_a_centro', 4, 10) $$, 'R77: en revisión ya publica');
+select is((select count(*)::int from public.lista_para_choferes()), 1, 'R77: con la cuota, ve la lista');
 select throws_ok($$ select public.avisar_pago_cuota('99999999', '0134') $$,
   'P0001', 'Ya avisaste tu pago de hoy', 'R77: un aviso a la vez');
 

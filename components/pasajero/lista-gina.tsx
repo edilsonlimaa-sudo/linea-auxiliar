@@ -262,6 +262,11 @@ function CarrosQueVienen({
       <h2 id="titulo-carros" className="text-base font-bold">
         Carros que vienen
       </h2>
+      {/* R63: que no confundan a un chofer que no está con la línea hoy */}
+      <p className="text-sm text-muted-foreground">
+        Estos son los carros de la Línea hoy. Si un chofer que no aparece aquí te pregunta si estás en la lista, no está trabajando con
+        la Línea.
+      </p>
       {visibles.length === 0 ? (
         <div className="flex flex-col gap-3 rounded-2xl border-2 border-dashed px-4 py-4">
           <p className="text-muted-foreground">Ningún carro va hacia Valle Grande ahora. Esta pantalla se actualiza sola.</p>

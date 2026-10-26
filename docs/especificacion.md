@@ -486,6 +486,8 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
   - **El pasajero la ve igual, en una franja** ("La lista · 21 personas · 15 en Gina · 6 en otro lugar") que abre la
     lista completa en una hoja, con la suya destacada; su lugar en grande va arriba ("Eres el 11").
+  - **Carros que vienen** dice: "Estos son los carros de la Línea hoy. Si un chofer que no aparece aquí te pregunta si
+    estás en la lista, no está trabajando con la Línea."
   - **Anotado, va a Mi viaje** *(Oct. 2026)*: como quien aparta puesto, al anotarse pasa a **Mi viaje** (Inicio lo
     lleva ahí mientras siga en la lista, y el menú muestra "Mi viaje" de primero), sin el "¿Hacia dónde vas?". En orden
     de lo que necesita: **su lugar** ("Eres el 3 · en Gina · Antes que tú: 2 personas") → "¿Sigues ahí?" si está por
@@ -546,10 +548,14 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
 *(Oct. 2026: primera monetización, leve. El admin no madruga y hay choferes que empiezan muy temprano: el primer aviso
 del día libera al momento y él concilia después con el estado de cuenta.)*
 
-- **R76. Publicar pide el día pagado [servidor].** Desde la fecha de inicio que fija el admin, para **publicar un
+- **R76. Trabajar con la línea pide el día pagado [servidor].** Desde la fecha de inicio que fija el admin, para **publicar un
   viaje** (el primero, en cadena, la vuelta) el chofer necesita el **día habilitado** (día de Caracas). La cuota es
-  **Bs. 1.000** por día (el admin la cambia). Lo ya publicado sigue igual: conectarse, recoger, salir y terminar no se
-  bloquean. Con la cuota apagada (o antes de la fecha de inicio) todo funciona como antes.
+  **Bs. 1.000** por día (el admin la cambia). Con la cuota apagada (o antes de la fecha de inicio) todo funciona como antes.
+  - **Sin el día habilitado tampoco se conecta ni ve la lista hacia Valle Grande** (ni nombres ni teléfonos) *(Oct.
+    2026: un chofer que no pagó buscaba a la gente preguntando "¿estás en la lista?" y parecía seguir con la línea)*.
+    En Inicio no tiene "Conectarme" ni la franja de la lista; sí entra a la app, ve su historial y paga la cuota.
+  - Quien tiene un **viaje abierto** (p. ej., le rechazaron el pago a media jornada) lo termina como siempre: sigue
+    conectado, recoge, ve la lista y sale.
 - **R77. Avisar el pago [servidor].** El chofer paga por **Pago Móvil** a la cuenta de la línea (banco, teléfono y
   cédula con **Copiar todo**, como R74) y avisa con la **referencia** (4 a 20 números) y el **banco desde el que
   pagó**. En Inicio va solo el aviso ("Para publicar hoy, paga la cuota del día" · **Pagar la cuota**, en lugar de
@@ -603,7 +609,7 @@ muestra donde sirve.)*
 | **Cédula** | Solo la propia persona y el admin |
 | Lugar escrito y GPS de un pasajero (reserva) | Solo el chofer del viaje. La lista pública no lo muestra |
 | Espera de un pasajero | Él, el admin y los **choferes conectados** (nombre corto, foto, sentido, cuántos van, lugar, desde cuándo y WhatsApp, R31). Quien también espera en el mismo sentido ve su **nombre corto y desde cuándo** (como la lista pública de un viaje), nunca el lugar |
-| Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Cualquier usuario con sesión. La **distancia** al avisar (R62), solo el admin |
+| Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Los pasajeros y los choferes con la cuota del día o un viaje abierto (R76). La **distancia** al avisar (R62), solo el admin |
 | **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
 | Alertas de auxilio | Solo choferes |
@@ -777,8 +783,9 @@ aparecía dos veces.)*
 recién al apartar (R27, R57). Una pregunta, una respuesta, una acción:
 
 1. **Bloque principal** (azul de la línea, como Esperando): el saludo chico y la pregunta en grande **¿Hacia dónde
-   vas?**, con los dos sentidos ahí mismo (Al Centro / A Valle Grande, cada uno con cuántas unidades van). Empieza en el
-   sentido sugerido por la hora y dónde vive; cambiarlo es un toque y **es instantáneo**: los dos sentidos se cargan
+   vas?**, con los dos sentidos ahí mismo (Al Centro / A Valle Grande, cada uno con cuántas unidades van). **Nunca viene un
+   sentido escogido** *(Oct. 2026: antes empezaba en el sentido sugerido por la hora y dónde vive)*: hasta que toca uno,
+   en lugar de las unidades dice "Toca Al Centro o A Valle Grande para ver cómo ir"; cambiarlo es un toque y **es instantáneo**: los dos sentidos se cargan
    juntos y el teléfono solo muestra el escogido, sin volver a pedir la página *(Oct. 2026)*. El sentido queda en la
    dirección (`?hacia=`) para el refresco en vivo y para volver atrás. Abajo, una franja con **las caras de quienes
    trabajan** y "2 choferes trabajando · Cómo está la línea ›" (o "Ningún chofer trabajando ahora"). Más el aviso del
