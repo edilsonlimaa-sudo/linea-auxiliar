@@ -457,7 +457,7 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
   const distancia = enGina && gps.punto ? distanciaMetros(gps.punto, GINA) : null
   const lejos = distancia !== null && distancia > LEJOS_M
 
-  // El GPS se pide con un toque (no al abrir): en Gina, para confirmar que está ahí; en otro lugar, si quiere compartirlo
+  // El GPS se pide con un toque (no al abrir) y solo en Gina, para confirmar que está ahí. En otro lugar se escribe (R26)
   const leerGps = () => {
     if (!("geolocation" in navigator)) return setGps({ estado: "error" })
     setGps({ estado: "buscando" })
@@ -473,8 +473,8 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
       const r = await estoyEnLista({
         enGina,
         lugar: enGina ? null : lugar.trim() || null,
-        lat: gps.punto?.lat ?? null,
-        lng: gps.punto?.lng ?? null,
+        lat: enGina ? (gps.punto?.lat ?? null) : null,
+        lng: enGina ? (gps.punto?.lng ?? null) : null,
         personas: cuantos,
         distanciaM: distancia,
       })
@@ -514,8 +514,7 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
                 Escribe dónde estás
               </label>
               <Input id={idLugar} value={lugar} onChange={(e) => setLugar(e.target.value)} maxLength={60} placeholder="Ej. Plaza del Indio" autoFocus />
-              <p className="text-sm text-muted-foreground">El carro te guarda puesto y te recoge al pasar.</p>
-              <GpsBoton gps={gps} onLeer={leerGps} texto="Compartir mi ubicación" />
+              <p className="text-sm text-muted-foreground">Un punto de la ruta: el carro te guarda puesto y te recoge al pasar.</p>
             </div>
           )}
         </fieldset>
@@ -548,7 +547,7 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
             {error}
           </p>
         )}
-        <Button type="submit" variant="signal" size="lg" className="w-full" disabled={pendiente || (!enGina && !lugar.trim() && !gps.punto)}>
+        <Button type="submit" variant="signal" size="lg" className="w-full" disabled={pendiente || (!enGina && !lugar.trim())}>
           {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <HandIcon aria-hidden />}
           {lejos ? "Sí, ya estoy en Gina" : "Anotarme"}
         </Button>

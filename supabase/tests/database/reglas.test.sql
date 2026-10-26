@@ -124,8 +124,8 @@ select lives_ok($$ insert into public.calificaciones (viaje_id, chofer_id, pasaj
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000011", "role": "authenticated"}', true);
 
 select set_config('request.jwt.claims', '{"sub": "00000000-0000-4000-a000-000000000025", "role": "authenticated"}', true);
-select throws_ok($$ select public.reservar(current_setting('t.v1')::uuid, '   ') $$,
-  'P0001', 'Escribe dónde estás o comparte tu GPS', 'R26: hace falta un lugar escrito o el GPS');
+select throws_ok($$ select public.reservar(current_setting('t.v1')::uuid, '   ', 9.75, -63.18) $$,
+  'P0001', 'Escribe dónde estás', 'R26: hace falta el lugar escrito; el GPS solo no basta');
 select set_config('t.r_luis', public.reservar(current_setting('t.v1')::uuid, 'Plaza Bolívar')::text, true);
 select is((select pendiente from public.reservas where id = current_setting('t.r_luis')::uuid), true,
   'R29: el pedido en el camino queda pendiente de respuesta del chofer');

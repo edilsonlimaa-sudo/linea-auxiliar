@@ -61,7 +61,7 @@ select throws_ok($$ select public.estoy_en_lista(true) $$, 'P0001', 'Ya estás e
 select pg_temp.yo('65');
 select public.estoy_en_lista(true);
 select pg_temp.yo('66');
-select throws_ok($$ select public.estoy_en_lista(false) $$, 'P0001', 'Escribe dónde estás esperando', 'R62: en el camino, dice dónde');
+select throws_ok($$ select public.estoy_en_lista(false, null, 9.75, -63.18) $$, 'P0001', 'Escribe dónde estás esperando', 'R62/R26: en el camino, escribe dónde (el GPS solo no basta)');
 select public.estoy_en_lista(false, 'Plaza del Indio');
 select pg_temp.yo('67');
 select public.estoy_en_lista(true);

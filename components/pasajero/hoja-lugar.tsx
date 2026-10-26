@@ -3,7 +3,7 @@
 import { CheckIcon, Loader2Icon } from "lucide-react"
 import { useState, useTransition } from "react"
 
-import { CasillaGps, datosDelLugar, ElegirLugar, useGpsRecordado, useLugar } from "@/components/pasajero/elegir-lugar"
+import { datosDelLugar, ElegirLugar, useLugar } from "@/components/pasajero/elegir-lugar"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
@@ -13,7 +13,7 @@ export type OpcionPersonas = { max: number; inicial?: number; nota?: string }
 
 /**
  * "¿Dónde te recogemos?" (R25–R27): se pregunta recién al apartar o al pedir "Avísame cuando haya una".
- * Con `personas`, empieza por "¿Cuántos van?" (R57). Dónde está (texto) y GPS opcional. El texto del botón puede depender de cuántos van ("Apartar 3 puestos").
+ * Con `personas`, empieza por "¿Cuántos van?" (R57). Dónde está: solo texto (R26). El texto del botón puede depender de cuántos van ("Apartar 3 puestos").
  */
 export function HojaLugar({
   abierta,
@@ -64,16 +64,12 @@ function Formulario({
   const max = Math.max(1, Math.min(4, personas?.max ?? 1))
   const [cuantos, setCuantos] = useState(Math.min(personas?.inicial ?? 1, max))
   const lugar = useLugar(lugarInicial)
-  const [gps, setGps] = useGpsRecordado()
   const [error, setError] = useState<string>()
-  const [buscandoGps, setBuscandoGps] = useState(false)
   const [enviando, iniciar] = useTransition()
 
-  async function enviar() {
+  function enviar() {
     setError(undefined)
-    setBuscandoGps(gps)
-    const r = await datosDelLugar(lugar.valor, gps)
-    setBuscandoGps(false)
+    const r = datosDelLugar(lugar.valor)
     if ("error" in r) return setError(r.error)
     if (personas) r.datos.set("personas", String(cuantos))
     iniciar(async () => {
@@ -81,13 +77,13 @@ function Formulario({
       if (res?.error) setError(res.error)
     })
   }
-  const ocupado = enviando || buscandoGps
+  const ocupado = enviando
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        void enviar()
+        enviar()
       }}
       className="flex flex-col gap-4 px-4 pb-6"
     >
@@ -118,10 +114,9 @@ function Formulario({
         </fieldset>
       )}
       <ElegirLugar lugar={lugar} error={error} />
-      <CasillaGps marcada={gps} onCambiar={setGps} />
       <Button type="submit" variant="signal" size="lg" disabled={ocupado} className="w-full">
         {ocupado && <Loader2Icon aria-hidden className="animate-spin" />}
-        {buscandoGps ? "Buscando tu ubicación…" : enviando ? "Un momento…" : typeof textoBoton === "function" ? textoBoton(cuantos) : textoBoton}
+        {enviando ? "Un momento…" : typeof textoBoton === "function" ? textoBoton(cuantos) : textoBoton}
       </Button>
     </form>
   )

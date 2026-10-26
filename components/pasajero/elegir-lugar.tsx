@@ -1,44 +1,8 @@
 "use client"
 
-import { useId, useState, useSyncExternalStore } from "react"
+import { useId, useState } from "react"
 
 import { Input } from "@/components/ui/input"
-
-const CLAVE_GPS = "linea-auxiliar:agregar-gps"
-const leerGps = () => {
-  try {
-    return localStorage.getItem(CLAVE_GPS) === "1"
-  } catch {
-    return false
-  }
-}
-const suscribirse = () => () => {}
-
-/** Recuerda si la persona suele agregar su GPS (R26). Sin almacenamiento disponible, empieza apagado. */
-export function useGpsRecordado() {
-  const guardado = useSyncExternalStore(suscribirse, leerGps, () => false)
-  const [elegido, setElegido] = useState<boolean | null>(null)
-  const valor = elegido ?? guardado
-  const cambiar = (v: boolean) => {
-    setElegido(v)
-    try {
-      localStorage.setItem(CLAVE_GPS, v ? "1" : "0")
-    } catch {}
-  }
-  return [valor, cambiar] as const
-}
-
-/** Pide la ubicación al teléfono. Devuelve null si la persona no da permiso o tarda demasiado. */
-export function obtenerUbicacion(): Promise<{ lat: number; lng: number } | null> {
-  if (!("geolocation" in navigator)) return Promise.resolve(null)
-  return new Promise((resolver) =>
-    navigator.geolocation.getCurrentPosition(
-      (p) => resolver({ lat: p.coords.latitude, lng: p.coords.longitude }),
-      () => resolver(null),
-      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 60_000 }
-    )
-  )
-}
 
 /**
  * Estado del "¿Dónde estás?" (R25): solo el texto escrito. Empieza con el lugar inicial (p. ej. el lugar actual al
@@ -83,35 +47,10 @@ export function ElegirLugar({ lugar, error }: { lugar: ReturnType<typeof useLuga
   )
 }
 
-/** Casilla del GPS (R26): opcional, pero basta sola para quien no sabe explicar dónde está */
-export function CasillaGps({ marcada, onCambiar }: { marcada: boolean; onCambiar: (v: boolean) => void }) {
-  return (
-    <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl bg-muted px-4 py-3 has-focus-visible:ring-[3px] has-focus-visible:ring-ring">
-      <input type="checkbox" checked={marcada} onChange={(e) => onCambiar(e.target.checked)} className="size-6 shrink-0 accent-primary" />
-      <span>
-        <span className="block font-bold">Agregar mi ubicación GPS</span>
-        <span className="block text-sm text-muted-foreground">El chofer podrá abrir el mapa. Si no sabes explicar dónde estás, con el GPS basta.</span>
-      </span>
-    </label>
-  )
-}
-
-/**
- * Arma los datos del lugar para enviar: texto y, si se pidió, el GPS.
- * Devuelve un mensaje de error si falta todo o si el GPS falló y no hay texto.
- */
-export async function datosDelLugar(texto: string, gps: boolean): Promise<{ datos: FormData } | { error: string }> {
-  if (!texto && !gps) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
+/** Arma los datos del lugar para enviar: solo el texto escrito (R26: sin GPS del pasajero) */
+export function datosDelLugar(texto: string): { datos: FormData } | { error: string } {
+  if (!texto) return { error: "Escribe dónde estás." }
   const datos = new FormData()
-  if (texto) datos.set("lugar", texto)
-  if (gps) {
-    const ubicacion = await obtenerUbicacion()
-    if (ubicacion) {
-      datos.set("lat", String(ubicacion.lat))
-      datos.set("lng", String(ubicacion.lng))
-    } else if (!texto) {
-      return { error: "No pudimos ver tu ubicación. Revisa el permiso del GPS o escribe dónde estás." }
-    }
-  }
+  datos.set("lugar", texto)
   return { datos }
 }

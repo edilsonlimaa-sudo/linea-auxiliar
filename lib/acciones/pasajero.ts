@@ -40,7 +40,7 @@ export async function apartarPuesto(viajeId: string, datos?: FormData): Promise<
       lng: numero(datos, "lng") ?? null,
       personas: numero(datos, "personas") ?? 1,
     }
-    if (!origen.lugar && origen.lat === null) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
+    if (!origen.lugar) return { error: "Escribe dónde estás." }
   } else {
     const [reservaRes, esperaRes] = await Promise.all([
       supabase.from("reservas").select("lugar, lat, lng, personas").eq("pasajero_id", yo).eq("estado", "activa").maybeSingle(),
@@ -145,7 +145,7 @@ export async function cambiarLugar(reservaId: string, datos: FormData): Promise<
   const lugar = texto(datos, "lugar")
   const lat = numero(datos, "lat")
   const lng = numero(datos, "lng")
-  if (!lugar && lat === undefined) return { error: "Escribe dónde estás o marca tu ubicación GPS." }
+  if (!lugar) return { error: "Escribe dónde estás." }
   const supabase = await crearClienteServidor()
   const { error } = await supabase.rpc("cambiar_lugar", { p_reserva: reservaId, p_lugar: lugar, p_lat: lat, p_lng: lng })
   if (error) return { error: error.message }
