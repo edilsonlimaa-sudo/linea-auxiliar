@@ -6,7 +6,7 @@ import { useEffect } from "react"
 import { crearClienteNavegador } from "@/lib/supabase/cliente-navegador"
 
 // Tablas que cambian lo que se ve en Inicio y Mi viaje. Las posiciones (cada 15 s) no: las escucha solo el mapa.
-const TABLAS = ["viajes", "reservas", "esperas", "perfiles", "avisos", "lista_gina"] as const
+const TABLAS = ["viajes", "reservas", "esperas", "perfiles", "avisos", "lista_gina", "cuota_pagos"] as const
 
 /**
  * Mantiene la pantalla al día (docs/especificacion.md §4 "Tiempo real"): el navegador se suscribe directo a

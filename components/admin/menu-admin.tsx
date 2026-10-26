@@ -1,6 +1,7 @@
 "use client"
 
 import {
+  BanknoteIcon,
   BarChart3Icon,
   BusIcon,
   CarFrontIcon,
@@ -38,7 +39,7 @@ import { salirAdmin } from "@/lib/acciones/admin"
 import { cn } from "@/lib/utils"
 
 /** Contadores del menú: los que piden acción (aprobar) van en amarillo; los que informan, en gris */
-export type ContadoresAdmin = { porAprobar: number; enCurso: number; listaGina: number }
+export type ContadoresAdmin = { porAprobar: number; enCurso: number; listaGina: number; cuotas: number }
 
 type Destino = { href: string; titulo: string; icono: LucideIcon; contador?: keyof ContadoresAdmin; accion?: boolean }
 
@@ -58,6 +59,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
       { href: "/admin/aprobar", titulo: "Por aprobar", icono: UserCheckIcon, contador: "porAprobar", accion: true },
       { href: "/admin/choferes", titulo: "Choferes", icono: CarFrontIcon },
       { href: "/admin/pasajeros", titulo: "Pasajeros", icono: UsersIcon },
+      { href: "/admin/cuotas", titulo: "Cuotas", icono: BanknoteIcon, contador: "cuotas", accion: true },
     ],
   },
   {

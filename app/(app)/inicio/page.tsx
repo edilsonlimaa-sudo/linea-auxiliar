@@ -14,6 +14,7 @@ import { PanelSentido, SentidoInicio } from "@/components/pasajero/sentido-inici
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
+import { cargarCuotaChofer } from "@/lib/datos/cuota"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import {
   cargarAvisoDeCierre,
@@ -45,10 +46,10 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
 
   // Inicio del chofer: demanda y publicar; con viaje abierto, su gestión (docs/especificacion.md §8)
   if (perfil.rol === "chofer") {
-    const datos = await cargarInicioChofer(perfil.id, perfil.conectado_en !== null)
+    const [datos, cuota] = await Promise.all([cargarInicioChofer(perfil.id, perfil.conectado_en !== null), cargarCuotaChofer(perfil.id)])
     const { vuelta, r } = await searchParams
     const respuesta = r === "vuelta" || r === "pausa" || r === "ultimo" ? r : null
-    return <InicioChofer nombre={perfil.nombre} datos={datos} preguntarVuelta={vuelta === "1"} respuesta={respuesta} />
+    return <InicioChofer nombre={perfil.nombre} datos={datos} cuota={cuota} preguntarVuelta={vuelta === "1"} respuesta={respuesta} />
   }
 
   const { cambiar, hacia } = await searchParams

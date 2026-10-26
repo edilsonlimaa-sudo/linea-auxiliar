@@ -2,6 +2,7 @@ import { BarraAdmin } from "@/components/admin/barra-admin"
 import { MenuAdmin } from "@/components/admin/menu-admin"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { cargarCuentas, cargarResumen, pendientesPorRol } from "@/lib/datos/admin"
+import { contarCuotasEnRevision } from "@/lib/datos/cuota"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { exigirAdmin } from "@/lib/sesion"
 
@@ -9,7 +10,7 @@ import { exigirAdmin } from "@/lib/sesion"
 // Los contadores del menú se recalculan con cada refresco (EnVivo en las páginas que cambian solas).
 export default async function LayoutPanel({ children }: { children: React.ReactNode }) {
   await exigirAdmin()
-  const [{ cuentas }, resumen, lista] = await Promise.all([cargarCuentas(), cargarResumen(), cargarListaGina()])
+  const [{ cuentas }, resumen, lista, cuotas] = await Promise.all([cargarCuentas(), cargarResumen(), cargarListaGina(), contarCuotasEnRevision()])
   const pendientes = pendientesPorRol(cuentas)
 
   return (
@@ -19,6 +20,7 @@ export default async function LayoutPanel({ children }: { children: React.ReactN
           porAprobar: pendientes.chofer + pendientes.pasajero,
           enCurso: resumen?.viajes_en_curso ?? 0,
           listaGina: lista.reduce((n, e) => n + e.personas, 0),
+          cuotas,
         }}
       />
       <SidebarInset>

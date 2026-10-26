@@ -22,6 +22,9 @@ export function fechaHora(fechaIso: string): string {
 
 const diaCaracas = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: ZONA }).format(d) // AAAA-MM-DD
 
+/** El día de hoy en Caracas, "AAAA-MM-DD" (el día de la cuota, R76) */
+export const diaDeHoy = (ahora = new Date()) => diaCaracas(ahora)
+
 /** "2:15 p. m." */
 export function hora(fechaIso: string): string {
   return new Intl.DateTimeFormat("es-VE", { hour: "numeric", minute: "2-digit", timeZone: ZONA }).format(new Date(fechaIso))

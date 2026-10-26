@@ -30,7 +30,17 @@ async function copiar(texto: string): Promise<boolean> {
  * El Pago Móvil del chofer para el pasajero (R74): Copiar todo, grande y arriba (las apps de los bancos lo pegan de una
  * vez), y debajo cada dato con su Copiar chico. A bordo va abierto; esperando el carro, plegado.
  */
-export function PagoMovilChofer({ datos, chofer, plegado = false }: { datos: DatosPagoMovil; chofer: string; plegado?: boolean }) {
+export function PagoMovilChofer({
+  datos,
+  chofer,
+  plegado = false,
+  titulo: tituloFijo,
+}: {
+  datos: DatosPagoMovil
+  chofer: string
+  plegado?: boolean
+  titulo?: string // otro título (la cuota del día lleva el Pago Móvil de la línea, R77)
+}) {
   const [copiado, setCopiado] = useState<string | null>(null)
   const tocar = async (clave: string, texto: string) => {
     if (await copiar(texto)) {
@@ -44,7 +54,7 @@ export function PagoMovilChofer({ datos, chofer, plegado = false }: { datos: Dat
     { clave: "telefono", etiqueta: "Teléfono", valor: datos.telefono, copia: datos.telefono },
     { clave: "cedula", etiqueta: "Cédula", valor: datos.cedula, copia: datos.cedula },
   ]
-  const titulo = `Pago Móvil de ${chofer.split(" ")[0]}`
+  const titulo = tituloFijo ?? `Pago Móvil de ${chofer.split(" ")[0]}`
 
   // Copiar todo primero: las apps de los bancos lo pegan en todos los campos de una vez (R74)
   const contenido = (

@@ -37,7 +37,7 @@ Una persona tiene un solo rol. El admin se asigna a mano en la base de datos.
 |---|---|
 | **Sentido** | Dirección del viaje. Solo hay dos: **Valle Grande → Centro** y **Centro → Valle Grande** |
 | **Zona** | Área de salida de un sentido: "Valle Grande" o "Centro" |
-| **Lugar** | Dónde recoger al pasajero: **texto libre** que él escribe (ej. "Entrada de Las Cayenas") y/o su **GPS**. No hay paradas registradas (ver §4) |
+| **Lugar** | Dónde recoger al pasajero: **texto libre** que él escribe (ej. "Entrada de Las Cayenas"). No hay paradas registradas (ver §4) |
 | **Viaje** | Una salida publicada por un chofer en un sentido, con N puestos |
 | **Recogida actual** | El viaje del chofer que todavía no salió y está en curso (en camino / llegando / recogiendo) |
 | **Próximo viaje** | Viaje encadenado (`programado`): arranca solo cuando el chofer sale del anterior |
@@ -63,7 +63,7 @@ Una persona tiene un solo rol. El admin se asigna a mano en la base de datos.
 | Tiempo real | El navegador se suscribe **directo a Supabase Realtime** con la sesión de la persona (RLS decide qué le llega) y, al haber un cambio, vuelve a pedir la pantalla al servidor. Los **datos y las acciones siguen pasando por el servidor** de Next. Respaldo: cada 60 s y al volver a la app. (No por el servidor: en hosting serverless una conexión abierta por teléfono no escala) |
 | Hosting | Por decidir (Vercel Pro o Cloudflare). Nada debe atarnos a uno |
 | WhatsApp | Sigue siendo el puente con quien no tiene la app: mensajes listos para el grupo y para el chofer |
-| Dónde recoger | **Texto libre + GPS opcional, sin paradas registradas.** Así se coordina hoy en el grupo ("estoy en la entrada de Las Cayenas"); una lista fija obliga a escoger la parada "más cercana" y el chofer va al sitio equivocado, y además habría que mantenerla |
+| Dónde recoger | **Texto libre, sin GPS ni paradas registradas.** Así se coordina hoy en el grupo ("estoy en la entrada de Las Cayenas"); una lista fija obliga a escoger la parada "más cercana" y el chofer va al sitio equivocado, y además habría que mantenerla |
 
 ## 5. Reglas de negocio
 
@@ -278,13 +278,15 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 
 - **R25.** Al **apartar puesto** (o al pedir "Avísame cuando haya una", R31), el pasajero **escribe dónde está** (texto libre, máx. 60 caracteres,
   ej. "Entrada de Las Cayenas"). Eso es lo principal y lo que el chofer ve en grande. *(Oct. 2026: sin los lugares
-  recientes de un toque; la hoja muestra **solo el campo de texto** y el GPS. Al cambiar el lugar en Mi viaje, el
-  campo empieza con el lugar actual.)*
-- **R26 [servidor].** El **GPS es opcional**: casilla "📍 Agregar también mi GPS" (se recuerda la elección). Si
-  lo agrega, el chofer tiene **Cómo llegar** (Google Maps) y **Waze**. Quien no sabe explicar dónde está
-  puede mandar **solo su GPS**. Hace falta al menos uno: lugar escrito o GPS.
+  recientes de un toque; la hoja muestra **solo el campo de texto**. Al cambiar el lugar en Mi viaje, el campo empieza
+  con el lugar actual.)*
+- **R26 [servidor]. Sin GPS del pasajero: el lugar escrito es obligatorio.** *(Oct. 2026: antes había una casilla
+  "Agregar mi ubicación GPS" y bastaba el GPS solo. Se quitó porque hacía creer que el chofer iba a buscar a cada
+  uno donde estaba; el carro pasa por la ruta y el pasajero dice en qué punto de ella espera.)* Al apartar, al cambiar
+  el lugar y al anotarse en otro punto del camino (R62) hace falta el texto. Lo que ya se guardó con GPS se sigue
+  mostrando al chofer como antes.
 - **R27.** **Dónde estás se pregunta al apartar**, no antes: primero se miran las unidades sin compromiso. Al tocar
-  **Apartar puesto** sube una hoja corta **"¿Dónde te recogemos?"** (lugares recientes, otro escrito, GPS) con el
+  **Apartar puesto** sube una hoja corta **"¿Dónde te recogemos?"** (solo el lugar escrito) con el
   último lugar ya escogido, y **Apartar** confirma. Si estaba esperando (R31), empieza con el lugar de la espera. Se
   puede cambiar después en Mi viaje. Al cambiarse de unidad (R22) se usa el lugar de la reserva, sin preguntar.
 
@@ -456,7 +458,7 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
 
 - **R62. Anotarse en la lista [servidor].** En Centro → Valle Grande el pasajero no escoge carro: **se anota en la
   lista del tramo** (**Anotarme en la lista**) y dice **dónde está**: **En Gina** es la opción principal, ya escogida
-  (un toque); si espera en otro punto del camino, lo **escribe** ("Plaza del Indio", máx. 60) o usa su GPS. Pregunta
+  (un toque); si espera en otro punto del camino, lo **escribe** ("Plaza del Indio", máx. 60; sin GPS, R26). Pregunta
   **cuántos van** (1–4, R57): el grupo **sube junto o no sube**. Una sola entrada activa por persona.
   - Avisar es estar ahí: no hay "llego en 5 min". Si el GPS dice que está a más de 300 m de Gina, la app pregunta
     "¿Ya estás en Gina?" y deja seguir igual; se guarda la distancia para medir abusos.
@@ -535,6 +537,30 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
 - **R68. A bordo, igual que hoy.** Cada **Subió** crea un pasajero a bordo del viaje: **Se bajó** (R38),
   historial (R50–R51) y calificaciones (R44–R45) funcionan como en Valle Grande → Centro.
 
+### 5.18 Cuota del día (choferes)
+
+*(Oct. 2026: primera monetización, leve. El admin no madruga y hay choferes que empiezan muy temprano: el primer aviso
+del día libera al momento y él concilia después con el estado de cuenta.)*
+
+- **R76. Publicar pide el día pagado [servidor].** Desde la fecha de inicio que fija el admin, para **publicar un
+  viaje** (el primero, en cadena, la vuelta) el chofer necesita el **día habilitado** (día de Caracas). La cuota es
+  **Bs. 1.000** por día (el admin la cambia). Lo ya publicado sigue igual: conectarse, recoger, salir y terminar no se
+  bloquean. Con la cuota apagada (o antes de la fecha de inicio) todo funciona como antes.
+- **R77. Avisar el pago [servidor].** El chofer paga por **Pago Móvil** a la cuenta de la línea (banco, teléfono y
+  cédula con **Copiar todo**, como R74) y avisa con la **referencia** (4 a 20 números) y el **banco desde el que
+  pagó**. En Inicio va solo el aviso ("Para publicar hoy, paga la cuota del día" · **Pagar la cuota**, en lugar de
+  Publicar); el pago y el aviso de la referencia, en su propia pantalla **Cuota del día**.
+  - **El primer aviso del día queda "En revisión" y habilita al momento.**
+  - Un aviso a la vez: con uno en revisión o aprobado no se avisa otro ese día.
+  - **Si el admin lo rechaza, no puede publicar más viajes ese día** (lo ya publicado sigue). Puede avisar otro pago,
+    pero ese **ya no habilita hasta que el admin lo apruebe**. Así nadie vive diciendo que pagó.
+  - Al día siguiente empieza de cero.
+- **R78. Revisión en el panel [servidor].** **Cuotas** muestra los avisos del día (se puede ir a otros días): en
+  revisión primero, con chofer, referencia, banco, monto y hora. **Aprobar** o **Rechazar** (con confirmación y motivo
+  opcional, que el chofer ve); una decisión se puede cambiar. El menú cuenta los que están en revisión. Ahí mismo el
+  admin carga los datos del cobro: cuota activa, desde qué día, monto y su Pago Móvil (sin esos datos no se puede
+  activar).
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -550,6 +576,8 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
 | **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
 | Alertas de auxilio | Solo choferes |
+| Avisos de pago de la cuota (R77) | El propio chofer y el admin |
+| Pago Móvil de la línea (para la cuota) | Los choferes |
 
 ## 7. Avisos al usuario
 
@@ -575,7 +603,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** ("¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **La línea** (mapa con todos los choferes y quién trabaja) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros**) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros** · **Cuotas**, R78) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:

@@ -73,3 +73,7 @@ export function leerPagoMovil(
   if (!cedula) errores.pmCedula = "Escribe la cédula, por ejemplo V-12345678"
   return Object.keys(errores).length || !telefono || !cedula ? { datos: null, errores } : { datos: { banco, telefono, cedula }, errores }
 }
+
+/** "Bs. 1.000" (la cuota del día, R76) */
+export const bolivares = (monto: number) =>
+  `Bs. ${new Intl.NumberFormat("es-VE", { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(monto)}`

@@ -192,6 +192,99 @@ export type Database = {
           },
         ]
       }
+      cuota_config: {
+        Row: {
+          activa: boolean
+          actualizada_en: string
+          banco: string | null
+          cedula: string | null
+          desde: string
+          id: boolean
+          monto: number
+          telefono: string | null
+        }
+        Insert: {
+          activa?: boolean
+          actualizada_en?: string
+          banco?: string | null
+          cedula?: string | null
+          desde?: string
+          id?: boolean
+          monto?: number
+          telefono?: string | null
+        }
+        Update: {
+          activa?: boolean
+          actualizada_en?: string
+          banco?: string | null
+          cedula?: string | null
+          desde?: string
+          id?: boolean
+          monto?: number
+          telefono?: string | null
+        }
+        Relationships: []
+      }
+      cuota_pagos: {
+        Row: {
+          banco: string
+          chofer_id: string
+          creado_en: string
+          decidido_en: string | null
+          decidido_por: string | null
+          dia: string
+          estado: string
+          habilita: boolean
+          id: string
+          monto: number
+          motivo: string | null
+          referencia: string
+        }
+        Insert: {
+          banco: string
+          chofer_id: string
+          creado_en?: string
+          decidido_en?: string | null
+          decidido_por?: string | null
+          dia: string
+          estado?: string
+          habilita: boolean
+          id?: string
+          monto: number
+          motivo?: string | null
+          referencia: string
+        }
+        Update: {
+          banco?: string
+          chofer_id?: string
+          creado_en?: string
+          decidido_en?: string | null
+          decidido_por?: string | null
+          dia?: string
+          estado?: string
+          habilita?: boolean
+          id?: string
+          monto?: number
+          motivo?: string | null
+          referencia?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cuota_pagos_chofer_id_fkey"
+            columns: ["chofer_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cuota_pagos_decidido_por_fkey"
+            columns: ["decidido_por"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       esperas: {
         Row: {
           cerrada_en: string | null
@@ -911,10 +1004,12 @@ export type Database = {
         Args: { p_sentido: Database["public"]["Enums"]["sentido"] }
         Returns: undefined
       }
+      _cuota_rige: { Args: never; Returns: boolean }
       _devolver_a_lista: {
         Args: { p_con_subio: boolean; p_viaje: string }
         Returns: undefined
       }
+      _dia_habilitado: { Args: { p_chofer: string }; Returns: boolean }
       _exigir_aprobado: {
         Args: never
         Returns: {
@@ -981,6 +1076,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _hoy_caracas: { Args: never; Returns: string }
       _mi_fila: {
         Args: never
         Returns: {
@@ -1107,6 +1203,10 @@ export type Database = {
           telefono: string
         }[]
       }
+      admin_decidir_pago: {
+        Args: { p_aprobar: boolean; p_motivo?: string; p_pago: string }
+        Returns: undefined
+      }
       admin_demanda: {
         Args: never
         Returns: {
@@ -1134,6 +1234,17 @@ export type Database = {
         }[]
       }
       admin_desconectar: { Args: { p_chofer: string }; Returns: undefined }
+      admin_guardar_cuota: {
+        Args: {
+          p_activa: boolean
+          p_banco: string
+          p_cedula: string
+          p_desde: string
+          p_monto: number
+          p_telefono: string
+        }
+        Returns: undefined
+      }
       admin_historial: {
         Args: { p_usuario: string }
         Returns: {
@@ -1187,6 +1298,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      avisar_pago_cuota: {
+        Args: { p_banco: string; p_referencia: string }
+        Returns: string
+      }
       cambiar_lugar: {
         Args: {
           p_lat?: number
@@ -1230,6 +1345,17 @@ export type Database = {
           p_tipo: Database["public"]["Enums"]["tipo_alerta"]
         }
         Returns: string
+      }
+      cuota_de_hoy: {
+        Args: never
+        Returns: {
+          banco: string
+          cedula: string
+          habilitado: boolean
+          monto: number
+          rige: boolean
+          telefono: string
+        }[]
       }
       decir_despues: {
         Args: { p_despues: string; p_viaje: string; p_vuelve_en?: string }
