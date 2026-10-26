@@ -4,6 +4,7 @@ import { CircleCheckIcon, CoffeeIcon, FlagIcon, Loader2Icon, RepeatIcon } from "
 import { useRouter } from "next/navigation"
 import { useId, useState } from "react"
 
+import { marcarAhoraNo } from "@/components/chofer/ahora-no"
 import { Opcion } from "@/components/chofer/publicar-viaje"
 import { useAccion } from "@/components/chofer/use-accion"
 import { Button } from "@/components/ui/button"
@@ -24,8 +25,8 @@ export type Respuesta = "vuelta" | "pausa" | "ultimo"
 
 /**
  * R73 (antes R61): en ruta y sin otro viaje publicado, "¿Qué haces después de este viaje?" → publico mi vuelta (cuándo
- * llega a recoger) · hago una pausa (a qué hora vuelve, como R60) · es mi último viaje de hoy. Sin "No, por ahora no":
- * cerrar la hoja no responde y el viaje lo sigue pidiendo (DespuesDelViaje, y Terminar viaje abre esta hoja).
+ * llega a recoger) · hago una pausa (a qué hora vuelve, como R60) · es mi último viaje de hoy. Se pregunta una vez:
+ * cerrarla (✕) es "ahora no" y ese viaje no vuelve a pedirlo (R73).
  * Llega abierta por ?vuelta=1 (al salir, el viaje cambia de lugar en la pantalla y un estado local se perdería).
  */
 export function PreguntarVuelta({
@@ -64,7 +65,7 @@ export function PreguntarVuelta({
   }
 
   return (
-    <Sheet open={abierta} onOpenChange={(v) => !v && cerrar()}>
+    <Sheet open={abierta} onOpenChange={(v) => !v && (marcarAhoraNo(viaje.id), cerrar())}>
       <SheetContent side="bottom" className="mx-auto max-h-[90svh] max-w-2xl overflow-y-auto">
         <SheetHeader>
           {/* Primero, lo que acaba de pasar: la hoja sigue a "Salir", no la interrumpe */}

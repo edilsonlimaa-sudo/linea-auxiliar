@@ -5,6 +5,7 @@ import { useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { type DatosPagoMovil, nombreBanco, textoPagoMovil } from "@/lib/bancos"
+import { type Tarifa, textoTarifa } from "@/lib/tarifas"
 import { cn } from "@/lib/utils"
 
 // Copiar al portapapeles; si el navegador no deja (sin HTTPS o viejo), con un campo escondido
@@ -35,11 +36,13 @@ export function PagoMovilChofer({
   chofer,
   plegado = false,
   titulo: tituloFijo,
+  pasaje,
 }: {
   datos: DatosPagoMovil
   chofer: string
   plegado?: boolean
   titulo?: string // otro título (la cuota del día lleva el Pago Móvil de la línea, R77)
+  pasaje?: Tarifa // cuánto pagar (R80): se dice aquí, al pagar
 }) {
   const [copiado, setCopiado] = useState<string | null>(null)
   const tocar = async (clave: string, texto: string) => {
@@ -59,6 +62,11 @@ export function PagoMovilChofer({
   // Copiar todo primero: las apps de los bancos lo pegan en todos los campos de una vez (R74)
   const contenido = (
     <div className="flex flex-col gap-3">
+      {pasaje && (
+        <p className="text-base">
+          Pasaje: <strong>{textoTarifa(pasaje)}</strong>
+        </p>
+      )}
       <Button size="lg" onClick={() => tocar("todo", textoPagoMovil(datos))} className={cn("w-full", copiado === "todo" && "bg-success text-success-foreground hover:bg-success")}>
         {copiado === "todo" ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}
         {copiado === "todo" ? "Copiado: pégalo en tu banco" : "Copiar todo"}

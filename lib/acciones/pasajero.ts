@@ -105,7 +105,8 @@ export async function calificarViaje(anterior: Resultado, fd: FormData): Promise
   actualizarApp()
   // Calificando después (Mis viajes R51, Choferes R46) se vuelve ahí; al terminar el viaje, a Inicio
   const volver = fd.get("volver")
-  redirect(volver === "mis-viajes" ? "/mis-viajes" : volver === "choferes" ? "/choferes" : "/inicio")
+  // R82: contento con el viaje (4–5 estrellas), Inicio puede pedir su opinión sobre la app
+  redirect(volver === "mis-viajes" ? "/mis-viajes" : volver === "choferes" ? "/choferes" : estrellas >= 4 ? "/inicio?valorar=1" : "/inicio")
 }
 
 /** "Ahora no": se puede calificar después desde Choferes o Mis viajes (R45) */

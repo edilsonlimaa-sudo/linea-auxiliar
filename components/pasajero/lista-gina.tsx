@@ -27,6 +27,7 @@ import { estoyEnLista, meFui, sigoEnLista, type Resultado } from "@/lib/acciones
 import type { ChoferEnPausa, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import type { EnListaGina } from "@/lib/datos/lista-gina"
 import { hace, hora } from "@/lib/fechas"
+import { tarifaEn, textoTarifa } from "@/lib/tarifas"
 import { distanciaMetros, distanciaTexto, GINA, type Punto } from "@/lib/mapa"
 import { MOTIVOS_SALIDA, OPCION_ME_FUI, type MotivoMeFui } from "@/lib/motivos-salida"
 import { cn } from "@/lib/utils"
@@ -451,6 +452,8 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
   const [cuantos, setCuantos] = useState(1)
   const [lugar, setLugar] = useState("")
   const [gps, setGps] = useState<{ estado: "no" | "buscando" | "listo" | "error"; punto?: Punto }>({ estado: "no" })
+  // R80: una línea solo si rige la tarifa especial (se calcula al abrir la hoja)
+  const [tarifa] = useState(() => tarifaEn(new Date()))
   const [pendiente, iniciar] = useTransition()
   const [error, setError] = useState<string>()
   const idLugar = useId()
@@ -530,6 +533,12 @@ function FormAviso({ onCerrar }: { onCerrar: () => void }) {
           </div>
           {cuantos > 1 && <p className="text-sm text-muted-foreground">Suben juntos: si no caben todos, esperan el siguiente carro sin perder el lugar.</p>}
         </fieldset>
+
+        {tarifa.tipo !== "normal" && (
+          <p className="rounded-xl bg-signal/15 px-3 py-2 text-sm">
+            Pasaje: <strong>{textoTarifa(tarifa)}</strong>
+          </p>
+        )}
 
         {lejos && (
           <div role="alert" className="flex gap-3 rounded-2xl border-2 border-warning/50 bg-warning-muted px-4 py-3">

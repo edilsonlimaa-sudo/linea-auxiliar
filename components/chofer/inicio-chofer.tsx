@@ -8,6 +8,7 @@ import { EnRutaCompacto } from "@/components/chofer/en-ruta-compacto"
 import { PreguntarVuelta, type Respuesta } from "@/components/chofer/preguntar-vuelta"
 import { ViajeChofer } from "@/components/chofer/viaje-chofer"
 import { EnVivo } from "@/components/en-vivo"
+import { ValorarApp } from "@/components/sugerencias/valorar-app"
 import type { CuotaChofer } from "@/lib/datos/cuota"
 import type { DatosInicioChofer } from "@/lib/datos/inicio-chofer"
 import { saludo } from "@/lib/fechas"
@@ -23,12 +24,14 @@ export function InicioChofer({
   nombre,
   datos,
   cuota = null,
+  opinar = false,
   preguntarVuelta = false,
   respuesta = null,
 }: {
   nombre: string
   datos: DatosInicioChofer
   cuota?: CuotaChofer | null // R76: con la cuota vigente; null = sin cobro hoy
+  opinar?: boolean // R82: "¿Qué tal la app?" (solo sin viajes abiertos)
   preguntarVuelta?: boolean // recién salió (?vuelta=1): preguntar por la vuelta (R61)
   respuesta?: Respuesta | null // desde el foco "¿Qué haces después?" (R75): la hoja abre con esta respuesta
 }) {
@@ -78,6 +81,7 @@ export function InicioChofer({
         </section>
         {lineaCuota}
         {lista}
+        {opinar && <ValorarApp />}
       </div>
     )
   }
@@ -99,7 +103,6 @@ export function InicioChofer({
           viaje={enRuta}
           esperanEnCamino={esperanEnCamino}
           sinVuelta={abiertos.length === 1}
-          faltaDespues={abiertos.length === 1 && enRuta.despues !== "pausa" && enRuta.despues !== "ultimo"}
         />
       )}
       {/* Conexión y ubicación (R40) en una línea: solo crece si el GPS falla */}

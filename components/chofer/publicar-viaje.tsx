@@ -59,7 +59,7 @@ export function Opcion({
 
 /**
  * Publicar un viaje (R10) o agregar otro a la cadena (R11). Pensado para hacerlo parado y con prisa: todo se
- * toca; solo "Otro" y "A una hora" piden escribir. Sugiere el sentido contrario al último viaje y los mismos puestos.
+ * toca; solo "Otro" y "A una hora" piden escribir. El sentido nunca viene escogido (R10); los puestos, los del último viaje.
  */
 export function PublicarViaje({
   modo,
@@ -70,16 +70,14 @@ export function PublicarViaje({
 }: {
   modo: ModoPublicar
   ultimo: { sentido: Sentido; puestos: number } | null
-  sentidoInicial?: Sentido | null // si no se indica, el contrario al último viaje
+  sentidoInicial?: Sentido | null // si no se indica, ninguno: el chofer lo escoge siempre (R10)
   enHoja?: boolean // dentro de "Agregar otro viaje": el botón no se pega abajo de la página
   onPublicado?: () => void
 }) {
   const idOtro = useId()
   const idHora = useId()
   const tiempos = TIEMPOS[modo]
-  const [sentido, setSentido] = useState<Sentido>(
-    sentidoInicial ?? (ultimo ? contrario(ultimo.sentido) : "vg_a_centro")
-  )
+  const [sentido, setSentido] = useState<Sentido | null>(sentidoInicial ?? null)
   const [puestos, setPuestos] = useState(ultimo?.puestos ?? 4)
   const [cuando, setCuando] = useState<number | "otro" | "hora">(tiempos.inicial)
   const [otro, setOtro] = useState("")
@@ -87,7 +85,7 @@ export function PublicarViaje({
   const [vuelta, setVuelta] = useState<number | null>(null) // R61: null = solo ida; si no, minutos después de salir
   const [conVuelta, setConVuelta] = useState(false)
   const [error, setError] = useState<string>()
-  const regreso = contrario(sentido)
+  const regreso = sentido ? contrario(sentido) : null
 
   // La pregunta de la vuelta queda al final, detrás del botón fijo: mientras no se ve, la barra muestra la escogida y
   // lleva hasta ella con un toque (R61). El margen de abajo descuenta lo que tapa la barra.
@@ -116,6 +114,7 @@ export function PublicarViaje({
 
   const publicar = () =>
     iniciar(async () => {
+      if (!sentido) return setError("Escoge hacia dónde vas.")
       const datos = new FormData()
       datos.set("sentido", sentido)
       datos.set("puestos", String(puestos))
@@ -148,7 +147,7 @@ export function PublicarViaje({
             </Opcion>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground">Recoges {SENTIDOS[sentido].enRecogida}.</p>
+        <p className="text-sm text-muted-foreground">{sentido ? `Recoges ${SENTIDOS[sentido].enRecogida}.` : "Toca hacia dónde vas."}</p>
       </fieldset>
 
       <fieldset className="flex flex-col gap-2">
@@ -219,7 +218,7 @@ export function PublicarViaje({
 
       {/* R61: la vuelta es el sentido contrario con los mismos puestos; solo se pregunta cuándo llega a recoger */}
       <fieldset ref={refVuelta} className="flex scroll-mt-4 flex-col gap-2">
-        <legend className="mb-2 text-base font-bold">¿Después recoges gente {SENTIDOS[regreso].enRecogida} para volver?</legend>
+        <legend className="mb-2 text-base font-bold">¿Después recoges gente {regreso ? SENTIDOS[regreso].enRecogida : "allá"} para volver?</legend>
         <div className="grid grid-cols-2 gap-2">
           <Opcion nombre="vuelta" elegida={!conVuelta} onElegir={() => (setConVuelta(false), setVuelta(null))}>
             Solo ida
@@ -230,7 +229,7 @@ export function PublicarViaje({
         </div>
         {conVuelta && (
           <div className="mt-2 flex flex-col gap-2">
-            <p className="font-bold">¿Cuánto tardas en llegar a recoger {SENTIDOS[regreso].enRecogida} después de salir?</p>
+            <p className="font-bold">¿Cuánto tardas en llegar a recoger {regreso ? SENTIDOS[regreso].enRecogida : "allá"} después de salir?</p>
             <div className="grid grid-cols-2 gap-2">
               {[15, 20, 30, 45].map((m) => (
                 <Opcion key={m} nombre="vuelta-min" elegida={vuelta === m} onElegir={() => setVuelta(m)}>
@@ -239,7 +238,7 @@ export function PublicarViaje({
               ))}
             </div>
             <p className="text-sm text-muted-foreground">
-              La vuelta ({SENTIDOS[regreso].hacia}, {puestos} {puestos === 1 ? "puesto" : "puestos"}) se publica ya y empieza sola cuando sales.
+              La vuelta ({regreso ? SENTIDOS[regreso].hacia : "de regreso"}, {puestos} {puestos === 1 ? "puesto" : "puestos"}) se publica ya y empieza sola cuando sales.
             </p>
           </div>
         )}

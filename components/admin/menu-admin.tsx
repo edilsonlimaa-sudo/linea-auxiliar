@@ -6,6 +6,7 @@ import {
   BusIcon,
   CarFrontIcon,
   KeyRoundIcon,
+  LightbulbIcon,
   LayoutDashboardIcon,
   ListOrderedIcon,
   LogOutIcon,
@@ -39,7 +40,7 @@ import { salirAdmin } from "@/lib/acciones/admin"
 import { cn } from "@/lib/utils"
 
 /** Contadores del menú: los que piden acción (aprobar) van en amarillo; los que informan, en gris */
-export type ContadoresAdmin = { porAprobar: number; enCurso: number; listaGina: number; cuotas: number }
+export type ContadoresAdmin = { porAprobar: number; enCurso: number; listaGina: number; cuotas: number; sugerencias: number }
 
 type Destino = { href: string; titulo: string; icono: LucideIcon; contador?: keyof ContadoresAdmin; accion?: boolean }
 
@@ -67,6 +68,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
     destinos: [
       { href: "/admin/uso", titulo: "Uso de la app", icono: BarChart3Icon },
       { href: "/admin/calificaciones", titulo: "Calificaciones", icono: StarIcon },
+      { href: "/admin/sugerencias", titulo: "Sugerencias", icono: LightbulbIcon, contador: "sugerencias", accion: true },
     ],
   },
 ]

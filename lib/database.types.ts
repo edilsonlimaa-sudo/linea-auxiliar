@@ -798,6 +798,41 @@ export type Database = {
           },
         ]
       }
+      sugerencias: {
+        Row: {
+          autor_id: string
+          creada_en: string
+          estrellas: number | null
+          id: string
+          leida_en: string | null
+          texto: string | null
+        }
+        Insert: {
+          autor_id: string
+          creada_en?: string
+          estrellas?: number | null
+          id?: string
+          leida_en?: string | null
+          texto?: string | null
+        }
+        Update: {
+          autor_id?: string
+          creada_en?: string
+          estrellas?: number | null
+          id?: string
+          leida_en?: string | null
+          texto?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sugerencias_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehiculos: {
         Row: {
           aire_acondicionado: boolean
@@ -1158,6 +1193,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _sin_abuso_sugerencias: { Args: never; Returns: undefined }
       _validar_lugar: {
         Args: { p_lat: number; p_lng: number; p_lugar: string }
         Returns: undefined
@@ -1252,6 +1288,10 @@ export type Database = {
           reservas: number
           viajes: number
         }[]
+      }
+      admin_marcar_sugerencia: {
+        Args: { p_id: string; p_leida: boolean }
+        Returns: undefined
       }
       admin_resumen: {
         Args: never
@@ -1378,6 +1418,7 @@ export type Database = {
         Args: { p_con_historial?: boolean; p_usuario: string }
         Returns: undefined
       }
+      enviar_sugerencia: { Args: { p_texto: string }; Returns: string }
       es_admin: { Args: never; Returns: boolean }
       es_aprobado: { Args: never; Returns: boolean }
       es_chofer: { Args: never; Returns: boolean }
@@ -1604,6 +1645,7 @@ export type Database = {
         }
         Returns: string
       }
+      puede_valorar_app: { Args: never; Returns: boolean }
       puede_ver_telefono: { Args: { p_objetivo: string }; Returns: boolean }
       quitar_anotado: { Args: { p_reserva: string }; Returns: undefined }
       quitar_pago_movil: { Args: never; Returns: undefined }
@@ -1626,6 +1668,10 @@ export type Database = {
       sigo_en_lista: { Args: never; Returns: undefined }
       subio_de_lista: {
         Args: { p_entrada: string; p_viaje: string }
+        Returns: string
+      }
+      valorar_app: {
+        Args: { p_comentario?: string; p_estrellas: number }
         Returns: string
       }
       vencer_esperas: { Args: never; Returns: undefined }

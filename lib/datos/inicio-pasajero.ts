@@ -88,7 +88,14 @@ function consultarReservaEnCurso(supabase: Cliente, pasajeroId: string) {
     .maybeSingle()
 }
 
-export type CalificacionPendiente = { reservaId: string; viajeId: string; choferId: string; chofer: string; sentido: Viaje["sentido"] }
+export type CalificacionPendiente = {
+  reservaId: string
+  viajeId: string
+  choferId: string
+  chofer: string
+  sentido: Viaje["sentido"]
+  salidaEn?: string | null // para la tarifa del pasaje (R79)
+}
 
 /**
  * Viaje por calificar (R45): terminado hace menos de 12 h, sin calificar ni "Ahora no". Para el pasajero, su
@@ -97,7 +104,7 @@ export type CalificacionPendiente = { reservaId: string; viajeId: string; chofer
 export async function cargarCalificacionPendiente(pasajeroId: string): Promise<CalificacionPendiente | null> {
   const supabase = await crearClienteServidor()
   const hace12h = new Date(Date.now() - 12 * 3_600_000).toISOString()
-  const campos = "id, viaje_id, cerrada_en, viaje:viajes!inner(estado, llegada_en, sentido, chofer_id, chofer:perfiles!viajes_chofer_id_fkey(nombre))"
+  const campos = "id, viaje_id, cerrada_en, viaje:viajes!inner(estado, llegada_en, salida_en, sentido, chofer_id, chofer:perfiles!viajes_chofer_id_fkey(nombre))"
   const [seBajo, llego] = await Promise.all([
     // El chofer marcó "Se bajó": termina en ese momento (cerrada_en)
     supabase
@@ -140,6 +147,7 @@ export async function cargarCalificacionPendiente(pasajeroId: string): Promise<C
     choferId: data.viaje.chofer_id,
     chofer: data.viaje.chofer?.nombre ?? "tu chofer",
     sentido: data.viaje.sentido,
+    salidaEn: data.viaje.salida_en,
   }
 }
 

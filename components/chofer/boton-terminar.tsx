@@ -1,7 +1,6 @@
 "use client"
 
 import { FlagIcon, Loader2Icon } from "lucide-react"
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -21,7 +20,6 @@ export function BotonTerminar({
   salioEn,
   destino,
   sinVuelta = false,
-  faltaDespues = false,
   variante = "signal",
   texto = "Terminar viaje",
   className,
@@ -30,17 +28,14 @@ export function BotonTerminar({
   salioEn?: string | null // cuándo salió (estado_en del viaje en ruta)
   destino?: string // dónde deja a la gente, en frase ("en Valle Grande")
   sinVuelta?: boolean // sin otro viaje publicado: se recuerda que no hace falta terminar para publicarla
-  faltaDespues?: boolean // sin decir qué hace después (R73)
   variante?: "signal" | "outline"
   texto?: string
   className?: string
 }) {
-  const router = useRouter()
   const { ejecutar, pendiente, error } = useAccion()
   const [haceMin, setHaceMin] = useState<number | null>(null)
 
   const terminar = () => {
-    if (faltaDespues) return router.replace("/inicio?vuelta=1", { scroll: false })
     const min = salioEn ? (Date.now() - new Date(salioEn).getTime()) / 60_000 : Infinity
     if (min < MIN_EN_RUTA) setHaceMin(Math.max(0, Math.floor(min)))
     else ejecutar(() => avanzarViaje(viajeId, "finalizado"))

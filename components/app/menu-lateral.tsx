@@ -5,6 +5,7 @@ import {
   HistoryIcon,
   HouseIcon,
   IdCardIcon,
+  LightbulbIcon,
   LogOutIcon,
   MoonIcon,
   StarIcon,
@@ -46,12 +47,14 @@ const DESTINOS: Record<"pasajero" | "chofer", Destino[]> = {
     { href: "/choferes", titulo: "Choferes", icono: UsersIcon },
     { href: "/mis-viajes", titulo: "Mis viajes", icono: HistoryIcon },
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },
+    { href: "/sugerencias", titulo: "Enviar una sugerencia", icono: LightbulbIcon },
   ],
   chofer: [
     { href: "/inicio", titulo: "Inicio", icono: HouseIcon },
     { href: "/mis-viajes", titulo: "Mis viajes", icono: HistoryIcon },
     { href: "/calificaciones", titulo: "Mis calificaciones", icono: StarIcon },
     { href: "/carnet", titulo: "Mi carnet", icono: IdCardIcon },
+    { href: "/sugerencias", titulo: "Enviar una sugerencia", icono: LightbulbIcon },
   ],
 }
 

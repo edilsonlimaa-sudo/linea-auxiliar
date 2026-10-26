@@ -140,9 +140,10 @@ puede ocultar botones, pero nunca es la única barrera.
 - **R10.** Al publicar, el chofer elige solo el **sentido** (se muestra cuánta gente espera en cada sentido),
   **puestos** (1–8) y **cuándo llega a la zona de recogida**: "Ya estoy aquí", botones rápidos (5/10/15/20 min),
   cualquier número de minutos (1–240) o **una hora fija** (ej. 14:00; si esa hora ya pasó hoy, es la de
-  mañana).
+  mañana). **El sentido nunca viene escogido** *(Oct. 2026: choferes publicaban hacia el lado equivocado por no mirar
+  la opción ya marcada)*: hasta que toca **Al Centro** o **A Valle Grande**, no se publica.
 - **R11. Cadena.** Mientras va en ruta (o con una recogida en curso), puede **agregar todos los viajes que
-  necesite** ("➕ Agregar otro viaje"). El formulario sugiere el sentido contrario al último viaje. Los
+  necesite** ("➕ Agregar otro viaje"). El sentido tampoco viene escogido aquí (R10). Los
   encadenados quedan `programado` y **aceptan reservas desde que se publican**.
 - **R12 [servidor].** Cuando el chofer **sale** de la recogida actual, el siguiente `programado` pasa solo a
   `en_camino`. Si tenía hora fija posterior, se respeta como mínimo.
@@ -160,16 +161,19 @@ puede ocultar botones, pero nunca es la única barrera.
     Centro → Valle Grande · 4 puestos"). **Sí, publicar mi vuelta** la publica `en_camino` (como "Agregar otro viaje" en
     ruta, R11/R13). *(Desde R73 ya no hay "No, por ahora no": la hoja pregunta qué hace después.)* Se pregunta
     todavía parado, nunca con el carro andando. Si ya tenía la vuelta publicada, no aparece.
-- **R73. ¿Qué haces después? (obligatorio).** *(Oct. 2026: choferes salían sin publicar la vuelta y el pasajero no sabía
+- **R73. ¿Qué haces después? (se pregunta una vez).** *(Oct. 2026: choferes salían sin publicar la vuelta y el pasajero no sabía
   si iban a volver.)* Reemplaza el "No, por ahora no" de R61. Al salir (`en_ruta`) **sin otro viaje publicado**, en los dos
   sentidos, la hoja pregunta **"¿Qué haces después de este viaje?"** con tres respuestas:
   - **Sigo trabajando: publico mi vuelta** → "¿Cuándo llegas a recoger en …?" (20, 30, 45 min, 1 hora), como en R61.
   - **Hago una pausa** → "¿A qué hora vuelves?" (30 min, 1 hora, 2 horas o **a una hora**, como R60).
   - **Es mi último viaje de hoy.**
-  - Cerrar la hoja no responde: el viaje en ruta muestra en amarillo **"Avisa qué haces después: tus pasajeros lo ven"**
-    con el botón para responder, y **Terminar viaje** abre la misma pregunta mientras no responda (en la app; si el
-    viaje se termina solo al llegar a la siguiente recogida, R13, ya publicó). Ya respondido, el viaje dice "Después:
-    pausa, vuelves como a las 4:30" / "Es tu último viaje de hoy", con **Cambiar**.
+  - **Se pregunta una sola vez por viaje** *(Oct. 2026: "acabo de tocar la X para no publicar otro y ya me sale de
+    nuevo")*: la hoja se abre sola al salir; **cerrarla (✕) es "ahora no"** y ese viaje no vuelve a preguntarlo: ni
+    tarjeta en el foco, ni botón amarillo fijo, ni al tocar **Terminar** (que termina sin preguntar). Si la hoja no llegó
+    a verse (recargó la app), el foco muestra la pregunta una vez, también con **✕ Ahora no**. Lo que quiera hacer
+    después sigue a mano sin empujar: **Agregar otro viaje** al final de Inicio y, al desconectarse, "¿Vuelves hoy?"
+    (R60). Ya respondido, el viaje dice "Después: pausa, vuelves como a las 4:30" / "Es tu último viaje de hoy", con
+    **Cambiar**.
   - **[servidor]** Se guarda en el viaje (`despues`: pausa con su hora, o último). Publicar cualquier viaje mientras va
     en ruta lo cambia a **vuelta** (cambió de idea). Al **terminar** el viaje con pausa o último, y sin otro viaje
     abierto, queda **desconectado** con la pausa de R60 (vuelve a las… / terminó por hoy).
@@ -561,6 +565,33 @@ del día libera al momento y él concilia después con el estado de cuenta.)*
   admin carga los datos del cobro: cuota activa, desde qué día, monto y su Pago Móvil (sin esos datos no se puede
   activar).
 
+### 5.19 El pasaje
+
+*(Oct. 2026: la línea fija el precio del pasaje y lo cambia de noche y los domingos. Mostrarlo siempre cansa; se
+muestra donde sirve.)*
+
+- **R79. Tarifa.** **Bs. 1.000**. **Tarifa especial, Bs. 1.300**: **de noche** (desde las **6:00 p. m.** hasta las
+  5:00 a. m.) y **los domingos** todo el día (hora de Caracas). Vale la hora en que **sale** el viaje; antes de salir,
+  la hora del momento.
+- **R80. Dónde se ve (sin cansar).**
+  - **Al pagar**, siempre: en Mi viaje, en el Pago Móvil del chofer: "Pasaje: Bs. 1.300 · tarifa nocturna".
+  - **Aviso de tarifa especial** en Inicio del pasajero, **solo cuando rige** (o 30 min antes de que empiece la
+    nocturna: "Desde las 6:00 p. m. el pasaje es Bs. 1.300"). Se cierra con ✕ y no vuelve en esa noche o ese domingo.
+  - **Al apartar o anotarse en la lista**, una línea en la hoja solo si rige la especial.
+  - **Chofer**: en la tarjeta del viaje en ruta, una línea solo si rige la especial, para cobrar bien.
+  - La tarifa normal no se anuncia fuera del momento de pagar.
+
+### 5.20 Sugerencias y opinión sobre la app
+
+- **R81. Sugerencias [servidor].** En el menú, **Enviar una sugerencia** (pasajeros y choferes): un texto (hasta 1.000
+  letras) que le llega al admin. En el panel, **Sugerencias**: la más nueva primero, con quién (nombre y si es chofer o
+  pasajero) y cuándo; **Marcar leída**. El menú cuenta las no leídas.
+- **R82. "¿Qué tal la app?" [servidor].** Estrellas (1–5) y un comentario opcional; llega a Sugerencias con sus
+  estrellas. Se pide en un momento bueno, nunca en medio de un viaje:
+  - **Pasajero:** justo después de calificar un viaje con 4 o 5 estrellas, si ya hizo 3 viajes o más.
+  - **Chofer:** en Inicio sin viajes abiertos, si ya terminó 10 viajes o más.
+  - Nadie la ve si opinó en los últimos **60 días**. **Ahora no** la esconde **14 días** en ese teléfono.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -577,6 +608,7 @@ del día libera al momento y él concilia después con el estado de cuenta.)*
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
 | Alertas de auxilio | Solo choferes |
 | Avisos de pago de la cuota (R77) | El propio chofer y el admin |
+| Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 
 ## 7. Avisos al usuario
@@ -603,7 +635,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** ("¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **La línea** (mapa con todos los choferes y quién trabaja) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros** · **Cuotas**, R78) · Análisis (**Uso de la app** · **Calificaciones**) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros** · **Cuotas**, R78) · Análisis (**Uso de la app** · **Calificaciones** · **Sugerencias**, R81) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
@@ -816,9 +848,9 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
     camino** (R67, en amarillo) y quienes van a bordo. Al final, las acciones del viaje: **Opciones** · **Terminar** (con
     R71 y R73). No se pliega ni se pega al tope: es lo primero de la pantalla.
   - Debajo, el **foco**: el **próximo viaje**, completo, y el botón fijo de abajo es **el suyo** (Avisar que llego / Ya
-    llegué: al llegar, el viaje en ruta se termina solo, R13). Sin próximo viaje, el foco es **"¿Qué haces después?"**
-    (R73) con las tres respuestas y el botón fijo **Publicar mi vuelta**; si ya avisó pausa o último, lo que avisó (con
-    Cambiar y Publicar mi vuelta) y el botón fijo **Terminar viaje**.
+    llegué: al llegar, el viaje en ruta se termina solo, R13). Sin próximo viaje y sin haber cerrado la pregunta, el foco
+    es **"¿Qué haces después?"** (R73) con las tres respuestas y **✕ Ahora no**, sin botón fijo; si ya avisó pausa o
+    último, lo que avisó (con Cambiar y Publicar mi vuelta) y el botón fijo **Terminar viaje**.
 
 - **Estado en una línea** arriba: "● Conectado · Ubicación activa". Tocarla deja desconectarse (con confirmación si
   cancela viajes, R8) después de "¿Vuelves a trabajar hoy?" (R60). Solo si el GPS falla se vuelve un aviso amarillo con "Intentar de nuevo" (R40).

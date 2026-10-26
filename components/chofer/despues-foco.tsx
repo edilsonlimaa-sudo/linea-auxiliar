@@ -1,6 +1,9 @@
-import { CoffeeIcon, FlagIcon, RepeatIcon } from "lucide-react"
+"use client"
+
+import { CoffeeIcon, FlagIcon, RepeatIcon, XIcon } from "lucide-react"
 import Link from "next/link"
 
+import { marcarAhoraNo, useAhoraNo } from "@/components/chofer/ahora-no"
 import { BotonTerminar } from "@/components/chofer/boton-terminar"
 import { buttonVariants } from "@/components/ui/button"
 import { textoVuelta } from "@/lib/fechas"
@@ -14,13 +17,14 @@ const BARRA =
   "fixed inset-x-0 bottom-0 z-20 mx-auto flex max-w-2xl flex-col gap-2 border-t bg-background/95 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur sm:border-x"
 
 /**
- * En ruta sin próximo viaje (R75): el foco es qué hace después (R73). Sin responder, la pregunta con sus tres respuestas
- * y el botón fijo "Publicar mi vuelta"; con pausa o último, lo que avisado (Cambiar, Publicar mi vuelta) y el botón fijo
- * "Terminar viaje", lo único que queda.
+ * En ruta sin próximo viaje (R75): qué hace después (R73), preguntado una sola vez. Sin responder, la pregunta con sus
+ * tres respuestas y ✕ "Ahora no" (sin botón fijo); si ya dijo "ahora no" (aquí o cerrando la hoja), nada. Con pausa o
+ * último, lo que avisó (Cambiar, Publicar mi vuelta) y el botón fijo "Terminar viaje", lo único que queda.
  */
 export function DespuesFoco({ viaje }: { viaje: Pick<Viaje, "id" | "sentido" | "despues" | "despues_vuelve_en" | "estado_en" | "salida_en"> }) {
   const regreso = SENTIDOS[contrario(viaje.sentido)]
   const avisado = viaje.despues === "pausa" || viaje.despues === "ultimo"
+  const ahoraNo = useAhoraNo(viaje.id)
 
   if (avisado) {
     const Icono = viaje.despues === "pausa" ? CoffeeIcon : FlagIcon
@@ -54,42 +58,43 @@ export function DespuesFoco({ viaje }: { viaje: Pick<Viaje, "id" | "sentido" | "
     )
   }
 
+  // Ya dijo "ahora no": no se vuelve a preguntar en este viaje (R73)
+  if (ahoraNo) return null
+
   const opciones = [
     { r: "vuelta" as const, Icono: RepeatIcon, texto: "Sigo trabajando: publico mi vuelta" },
     { r: "pausa" as const, Icono: CoffeeIcon, texto: "Hago una pausa" },
     { r: "ultimo" as const, Icono: FlagIcon, texto: "Es mi último viaje de hoy" },
   ]
   return (
-    <>
-      <section aria-labelledby="titulo-despues" className="flex flex-col gap-3 rounded-2xl border-2 border-primary bg-card p-4">
-        <div className="flex flex-col gap-1">
+    <section aria-labelledby="titulo-despues" className="flex flex-col gap-3 rounded-2xl border-2 bg-card p-4">
+      <div className="flex items-start gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
           <h2 id="titulo-despues" className="text-lg leading-tight font-bold">
             ¿Qué haces después de este viaje?
           </h2>
-          <p className="text-muted-foreground">Tus pasajeros lo ven: así saben si vuelves y cuándo.</p>
+          <p className="text-muted-foreground">Si quieres, avísalo: así quien espera {regreso.enRecogida} sabe si vuelves.</p>
         </div>
-        {opciones.map(({ r, Icono, texto }) => (
-          <Link
-            key={r}
-            href={preguntar(r)}
-            scroll={false}
-            className={cn(buttonVariants({ variant: "outline" }), "h-auto min-h-12 justify-start whitespace-normal text-left")}
-          >
-            <Icono aria-hidden className="text-primary" />
-            {texto}
-          </Link>
-        ))}
-      </section>
-      <p className="rounded-2xl border-2 border-dashed px-4 py-3 text-center text-sm text-muted-foreground">
-        Cuando publiques tu vuelta, aparece aquí: la gente que espera {regreso.enRecogida} ya la ve y aparta puesto.
-      </p>
-      <div className={BARRA}>
-        <Link href={preguntar("vuelta")} scroll={false} className={buttonVariants({ variant: "signal", size: "lg", className: "w-full" })}>
-          <RepeatIcon aria-hidden />
-          Publicar mi vuelta
-        </Link>
-        <p className="text-center text-sm text-muted-foreground">Tu viaje en ruta está arriba: ahí marcas Se bajó o Terminar.</p>
+        <button
+          type="button"
+          onClick={() => marcarAhoraNo(viaje.id)}
+          className="flex min-h-10 shrink-0 items-center gap-1 rounded-full px-2 text-sm font-bold text-muted-foreground outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
+        >
+          <XIcon aria-hidden className="size-4" />
+          Ahora no
+        </button>
       </div>
-    </>
+      {opciones.map(({ r, Icono, texto }) => (
+        <Link
+          key={r}
+          href={preguntar(r)}
+          scroll={false}
+          className={cn(buttonVariants({ variant: "outline" }), "h-auto min-h-12 justify-start whitespace-normal text-left")}
+        >
+          <Icono aria-hidden className="text-primary" />
+          {texto}
+        </Link>
+      ))}
+    </section>
   )
 }

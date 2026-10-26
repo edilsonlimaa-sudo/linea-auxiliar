@@ -6,6 +6,7 @@ import { useState, useTransition } from "react"
 import { datosDelLugar, ElegirLugar, useLugar } from "@/components/pasajero/elegir-lugar"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { tarifaEn, textoTarifa } from "@/lib/tarifas"
 import { cn } from "@/lib/utils"
 
 /** "¿Cuántos van?" en la hoja (R57): hasta `max` (los puestos libres de ese carro, máx. 4); `nota` explica el límite */
@@ -64,6 +65,8 @@ function Formulario({
   const max = Math.max(1, Math.min(4, personas?.max ?? 1))
   const [cuantos, setCuantos] = useState(Math.min(personas?.inicial ?? 1, max))
   const lugar = useLugar(lugarInicial)
+  // R80: al apartar, una línea solo si rige la tarifa especial (se calcula al abrir la hoja)
+  const [tarifa] = useState(() => tarifaEn(new Date()))
   const [error, setError] = useState<string>()
   const [enviando, iniciar] = useTransition()
 
@@ -114,6 +117,11 @@ function Formulario({
         </fieldset>
       )}
       <ElegirLugar lugar={lugar} error={error} />
+      {personas && tarifa.tipo !== "normal" && (
+        <p className="rounded-xl bg-signal/15 px-3 py-2 text-sm">
+          Pasaje: <strong>{textoTarifa(tarifa)}</strong>
+        </p>
+      )}
       <Button type="submit" variant="signal" size="lg" disabled={ocupado} className="w-full">
         {ocupado && <Loader2Icon aria-hidden className="animate-spin" />}
         {enviando ? "Un momento…" : typeof textoBoton === "function" ? textoBoton(cuantos) : textoBoton}

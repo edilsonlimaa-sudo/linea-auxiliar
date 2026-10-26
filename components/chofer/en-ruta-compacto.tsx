@@ -10,6 +10,7 @@ import { MasOpciones } from "@/components/chofer/mas-opciones"
 import { OcuparPuesto } from "@/components/chofer/ocupar-puesto"
 import type { EntradaTramo, ViajeChofer } from "@/lib/datos/inicio-chofer"
 import { hora } from "@/lib/fechas"
+import { tarifaEn, textoTarifa } from "@/lib/tarifas"
 import { contrario, duracion, libres, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
 /**
@@ -21,12 +22,10 @@ export function EnRutaCompacto({
   viaje,
   esperanEnCamino = [],
   sinVuelta,
-  faltaDespues,
 }: {
   viaje: ViajeChofer
   esperanEnCamino?: EntradaTramo[] // R67: hacia Valle Grande, anotados en el camino sin carro que caben
   sinVuelta: boolean // sin otro viaje publicado
-  faltaDespues: boolean // sin decir qué hace después (R73)
 }) {
   // "hace N min": con la hora del celular (en el servidor no se muestra)
   const suscribirReloj = useCallback((avisar: () => void) => {
@@ -40,6 +39,8 @@ export function EnRutaCompacto({
   const porRecoger = viaje.lista.filter((f) => f.estado === "activa" && !f.pendiente)
   const aBordo = viaje.lista.filter((f) => f.estado === "subio")
   const personasABordo = sumaPersonas(aBordo)
+  // R80: para cobrar bien, solo si rige la tarifa especial (la de la hora en que salió)
+  const tarifa = tarifaEn(new Date(salio))
 
   return (
     <section aria-label={`Tu viaje en ruta ${SENTIDOS[viaje.sentido].hacia}`} className="flex flex-col">
@@ -63,6 +64,8 @@ export function EnRutaCompacto({
           {personasABordo === 1 ? "1 a bordo" : `${personasABordo} a bordo`}
           <span className="font-normal opacity-90">· {libres(viaje) === 1 ? "1 libre" : `${libres(viaje)} libres`}</span>
         </p>
+
+        {tarifa.tipo !== "normal" && <p className="text-sm">Pasaje: <strong>{textoTarifa(tarifa)}</strong></p>}
 
         {/* Lo que más usa en ruta, siempre a mano: subir a quien recoge en el camino (R36) */}
         {libres(viaje) > 0 ? (
@@ -106,7 +109,6 @@ export function EnRutaCompacto({
             salioEn={salio}
             destino={SENTIDOS[contrario(viaje.sentido)].enRecogida}
             sinVuelta={sinVuelta}
-            faltaDespues={faltaDespues}
             variante="outline"
             texto="Terminar"
           />

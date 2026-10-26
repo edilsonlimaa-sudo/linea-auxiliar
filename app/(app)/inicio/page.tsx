@@ -6,12 +6,14 @@ import { redirect } from "next/navigation"
 import { EnVivo } from "@/components/en-vivo"
 import { InicioChofer } from "@/components/chofer/inicio-chofer"
 import { AvisoCierre } from "@/components/pasajero/aviso-cierre"
+import { AvisoTarifa } from "@/components/pasajero/aviso-tarifa"
 import { EstadoLinea } from "@/components/pasajero/estado-linea"
 import { CabeceraInicio, sentidoDeHacia } from "@/components/pasajero/cabecera-inicio"
 import { ListaGina } from "@/components/pasajero/lista-gina"
 import { QuienVuelve } from "@/components/pasajero/quien-vuelve"
 import { PanelSentido, SentidoInicio } from "@/components/pasajero/sentido-inicio"
 import { TarjetaUnidad } from "@/components/pasajero/tarjeta-unidad"
+import { ValorarApp } from "@/components/sugerencias/valorar-app"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { cargarCuotaChofer } from "@/lib/datos/cuota"
@@ -26,6 +28,7 @@ import {
 } from "@/lib/datos/inicio-pasajero"
 import { saludo } from "@/lib/fechas"
 import { cargarListaGina, type EnListaGina } from "@/lib/datos/lista-gina"
+import { puedeValorarApp } from "@/lib/datos/sugerencias"
 import { exigirCuentaAprobada, type Perfil } from "@/lib/sesion"
 import {
   aceptaReservas,
@@ -46,13 +49,17 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
 
   // Inicio del chofer: demanda y publicar; con viaje abierto, su gestión (docs/especificacion.md §8)
   if (perfil.rol === "chofer") {
-    const [datos, cuota] = await Promise.all([cargarInicioChofer(perfil.id, perfil.conectado_en !== null), cargarCuotaChofer(perfil.id)])
+    const [datos, cuota, opinar] = await Promise.all([
+      cargarInicioChofer(perfil.id, perfil.conectado_en !== null),
+      cargarCuotaChofer(perfil.id),
+      puedeValorarApp(),
+    ])
     const { vuelta, r } = await searchParams
     const respuesta = r === "vuelta" || r === "pausa" || r === "ultimo" ? r : null
-    return <InicioChofer nombre={perfil.nombre} datos={datos} cuota={cuota} preguntarVuelta={vuelta === "1"} respuesta={respuesta} />
+    return <InicioChofer nombre={perfil.nombre} datos={datos} cuota={cuota} opinar={opinar} preguntarVuelta={vuelta === "1"} respuesta={respuesta} />
   }
 
-  const { cambiar, hacia } = await searchParams
+  const { cambiar, hacia, valorar } = await searchParams
   const datos = await cargarInicioPasajero(perfil.id)
 
   // Con un viaje en curso, Inicio es Mi viaje; solo se queda aquí para cambiarse de unidad desde la lista de
@@ -69,7 +76,9 @@ export default async function PaginaInicio({ searchParams }: PageProps<"/inicio"
   ])
   // Anotado en la lista hacia Valle Grande: como quien aparta puesto, su viaje es Mi viaje (§5.17)
   if (pendiente || lista.some((e) => e.esMio)) redirect("/mi-viaje")
-  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} lista={lista} />
+  // R82: recién calificó un buen viaje: si toca, "¿Qué tal la app?"
+  const opinar = valorar === "1" && (await puedeValorarApp())
+  return <InicioPasajero perfil={perfil} datos={datos} cierre={cierre} hacia={sentidoDeHacia(hacia)} lista={lista} opinar={opinar} />
 }
 
 /**
@@ -83,12 +92,14 @@ function InicioPasajero({
   cierre,
   hacia,
   lista,
+  opinar = false,
 }: {
   perfil: Perfil
   datos: DatosInicioPasajero
   cierre: AvisoDeCierre | null
   hacia: Sentido | null
   lista: EnListaGina[]
+  opinar?: boolean // R82
 }) {
   const { viajes, porId, aviso, enServicio, enPausa } = datos
   const disponibles = ordenarParaPasajero(viajes.filter(aceptaReservas), porId)
@@ -103,6 +114,7 @@ function InicioPasajero({
       <div className="flex flex-col gap-6">
         <EnVivo />
         {cierre && <AvisoCierre aviso={cierre} />}
+        {opinar && <ValorarApp />}
         <CabeceraInicio
           saludo={`${saludo()}, ${perfil.nombre.split(" ")[0]}`}
           unidades={cuantas}
@@ -111,6 +123,8 @@ function InicioPasajero({
           viajes={viajes}
         />
         {aviso && <EstadoLinea aviso={aviso} />}
+        {/* R80: solo de noche, los domingos o media hora antes de la nocturna */}
+        <AvisoTarifa />
 
         {/* Centro → Valle Grande: no se aparta, se espera en la Lista de Gina (§5.17) */}
         <PanelSentido sentido="centro_a_vg">

@@ -13,6 +13,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { exigirCuentaAprobada } from "@/lib/sesion"
+import { tarifaEn } from "@/lib/tarifas"
 import { carrosHaciaValle, otrasConPuesto, tienePuesto } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Mi viaje · Línea Auxiliar" }
@@ -35,7 +36,7 @@ export default async function PaginaMiViaje() {
       return (
         <div className="flex flex-col gap-4">
           <CalificarViaje pendiente={pendiente} />
-          {pago && <PagoMovilChofer datos={pago} chofer={pendiente.chofer} />}
+          {pago && <PagoMovilChofer datos={pago} chofer={pendiente.chofer} pasaje={tarifaEn(pendiente.salidaEn ? new Date(pendiente.salidaEn) : new Date())} />}
         </div>
       )
     }
@@ -75,7 +76,14 @@ export default async function PaginaMiViaje() {
         }
       />
       {/* R74: a bordo, a la vista; esperando el carro, plegado */}
-      {pago && <PagoMovilChofer datos={pago} chofer={miReserva.viaje.chofer.nombre} plegado={!aBordo} />}
+      {pago && (
+        <PagoMovilChofer
+          datos={pago}
+          chofer={miReserva.viaje.chofer.nombre}
+          plegado={!aBordo}
+          pasaje={tarifaEn(miReserva.viaje.salida_en ? new Date(miReserva.viaje.salida_en) : new Date())}
+        />
+      )}
     </div>
   )
 }
