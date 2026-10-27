@@ -1,7 +1,7 @@
 import { CirclePlus, Clock, Users } from "lucide-react"
 import Link from "next/link"
 
-import { puestosTexto } from "@/components/nueva/chofer/comun"
+import { puestosTexto } from "@/lib/nueva/textos"
 import { OpcionesDrawer } from "@/components/nueva/chofer/viaje"
 import { Badge } from "@/components/nueva/ui/badge"
 import type { ViajeChofer } from "@/lib/datos/inicio-chofer"

@@ -47,8 +47,6 @@ export function ErrorAccion({ error, className }: { error?: string; className?: 
   )
 }
 
-export const personasTexto = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
-export const puestosTexto = (n: number) => (n === 1 ? "1 puesto" : `${n} puestos`)
 
 /**
  * Confirmar una acción que no se deshace (como components/confirmar.tsx de la clásica), en hoja: botones que dicen qué

@@ -4,7 +4,8 @@ import { Clock, Ellipsis, Lightbulb, Loader2, Minus, Moon, Plus, Ticket, Trash2,
 import * as React from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
-import { ErrorAccion, Opcion, puestosTexto } from "@/components/nueva/chofer/comun"
+import { ErrorAccion, Opcion } from "@/components/nueva/chofer/comun"
+import { puestosTexto } from "@/lib/nueva/textos"
 import { FaixaLista, FilaLista, ListaConAcciones } from "@/components/nueva/chofer/gina"
 import { FilaPasajero, SubioAlguienDrawer } from "@/components/nueva/chofer/pasajeros"
 import { Badge } from "@/components/nueva/ui/badge"
