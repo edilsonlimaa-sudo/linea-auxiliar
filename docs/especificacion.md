@@ -636,6 +636,24 @@ los picos y si la oferta alcanza, con números de varios días.)*
     un viaje olvidado abierto cuenta como mucho 6 h).
   - Cuenta la hora en que empezó la espera o se hizo la reserva, y la hora de salida de cada viaje.
 
+### 5.23 Notificaciones
+
+*(Oct. 2026: el admin necesita un canal propio para avisar, dar consejos y contar novedades, a todos o a una persona,
+y saber quién lo vio. Primera etapa: solo pasajeros de la interfaz nueva y solo lo que manda el admin; después,
+choferes, la clásica, avisos automáticos y avisos en el celular con la app cerrada.)*
+
+- **R88. El admin manda notificaciones [servidor].** Desde el panel escribe una: **tipo** (Aviso · Consejo · Novedad),
+  **título** (hasta 60 caracteres) y **texto** (hasta 280), y escoge a quién: **todos los pasajeros de la interfaz
+  nueva** o **personas escogidas** (de entre ellos). Cada destinatario recibe su copia; quien entra a la nueva después
+  no recibe las anteriores. Una enviada no se edita; el admin la puede **retirar** (desaparece para todos).
+- **R89. El pasajero las ve [servidor].** Cada uno ve **solo las suyas**. En la interfaz nueva hay una pestaña
+  **Notificaciones** (campana) con un **número** de no leídas. La lista va de la más nueva a la más vieja, agrupada en
+  **Hoy · Esta semana · Antes**; las no leídas, con fondo destacado. **Al abrir la pestaña quedan leídas** (el número
+  desaparece; el destacado se mantiene mientras siga en esa pantalla). *(Oct. 2026: sin tarjeta en Inicio; el número
+  en la campana basta para llamar la atención.)*
+- **En el panel** (**Notificaciones**, en Operación): el formulario para mandar y la lista de las enviadas, la más nueva
+  primero, con tipo, título, a cuántos llegó y **cuántos la vieron**, y **Retirar**.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -654,6 +672,7 @@ los picos y si la oferta alcanza, con números de varios días.)*
 | Avisos de pago de la cuota (R77) | El propio chofer y el admin |
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
+| Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 
 ## 7. Avisos al usuario
 
@@ -694,7 +713,7 @@ lo primero es *qué necesita de mí*, después *qué pasa ahora* y al final *có
 
 **Menú lateral** (fijo en la computadora; en el celular, un cajón que abre el botón "Menú"), agrupado por tema:
 - **Resumen** (el tablero).
-- **Operación:** Viajes en curso · Lista a Valle Grande. *(Oct. 2026: **Demanda** sale del menú mientras "Avísame" esté
+- **Operación:** Viajes en curso · Lista a Valle Grande · Notificaciones (R88). *(Oct. 2026: **Demanda** sale del menú mientras "Avísame" esté
   suspendido, R31: sin esperas, estaba siempre vacía. **Viajes terminados** también sale del menú, pero la página
   sigue: se llega desde los indicadores del Resumen y desde Viajes en curso; lo de cada chofer está en su detalle.)*
 - **Personas:** Por aprobar · Choferes · Pasajeros.

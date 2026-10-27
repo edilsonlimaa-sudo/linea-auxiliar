@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { CarFront, History, House, Menu } from "lucide-react"
+import { Bell, CarFront, History, House, Menu } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -19,6 +19,7 @@ export const tabsPasajero: Tab[] = [
   { href: "/n", label: "Inicio", icon: House },
   { href: "/n/choferes", label: "Choferes", icon: CarFront },
   { href: "/n/viajes", label: "Mis viajes", icon: History },
+  { href: "/n/notificaciones", label: "Notificaciones", icon: Bell },
   { href: "/n/menu", label: "Menú", icon: Menu, fija: true },
 ]
 
@@ -30,7 +31,7 @@ function coincide(pathname: string, href: string) {
  * Barra inferior. A aba ativa é a de href mais específico que casa com a
  * URL, então "/chofer" não fica ativa em "/chofer/viajes".
  */
-export function TabBar({ tabs = tabsPasajero }: { tabs?: Tab[] }) {
+export function TabBar({ tabs = tabsPasajero, contadores = {} }: { tabs?: Tab[]; contadores?: Record<string, number> }) {
   const pathname = usePathname()
   const activa = tabs
     .filter((t) => coincide(pathname, t.href))
@@ -45,12 +46,14 @@ export function TabBar({ tabs = tabsPasajero }: { tabs?: Tab[] }) {
       <ul className="flex h-16 items-stretch">
         {tabs.map(({ href, label, icon: Icon, fija }) => {
           const active = href === activa
+          const contador = contadores[href] ?? 0
           return (
             <li key={href} className="flex-1">
               <Link
                 href={href}
                 prefetch={fija ? true : undefined}
                 aria-current={active ? "page" : undefined}
+                aria-label={contador > 0 ? `${label}, ${contador} sin leer` : undefined}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-1 text-xs font-medium transition-colors",
                   active
@@ -58,11 +61,21 @@ export function TabBar({ tabs = tabsPasajero }: { tabs?: Tab[] }) {
                     : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon
-                  className="size-6"
-                  strokeWidth={active ? 2.25 : 1.75}
-                  aria-hidden
-                />
+                <span className="relative">
+                  <Icon
+                    className="size-6"
+                    strokeWidth={active ? 2.25 : 1.75}
+                    aria-hidden
+                  />
+                  {contador > 0 ? (
+                    <span
+                      aria-hidden
+                      className="absolute -top-1.5 -right-2.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-primary px-1 text-[11px] leading-none font-semibold text-primary-foreground tabular-nums ring-2 ring-background"
+                    >
+                      {contador > 9 ? "9+" : contador}
+                    </span>
+                  ) : null}
+                </span>
                 {label}
               </Link>
             </li>

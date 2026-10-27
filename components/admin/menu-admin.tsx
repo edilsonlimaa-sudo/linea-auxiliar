@@ -3,6 +3,7 @@
 import {
   BanknoteIcon,
   BarChart3Icon,
+  BellIcon,
   ChartColumnIcon,
   BusIcon,
   CarFrontIcon,
@@ -53,6 +54,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
     destinos: [
       { href: "/admin/viajes", titulo: "Viajes en curso", icono: BusIcon, contador: "enCurso" },
       { href: "/admin/lista-gina", titulo: "Lista a Valle Grande", icono: ListOrderedIcon, contador: "listaGina" },
+      { href: "/admin/notificaciones", titulo: "Notificaciones", icono: BellIcon },
     ],
   },
   {

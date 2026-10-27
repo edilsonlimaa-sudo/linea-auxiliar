@@ -5,6 +5,8 @@ import "server-only"
 import type { DatosPagoMovil } from "@/lib/bancos"
 import type { Chofer, ChoferEnServicio, MiReserva, ViajeConChofer } from "@/lib/datos/inicio-pasajero"
 import type { EnListaGina } from "@/lib/datos/lista-gina"
+import type { MiNotificacion } from "@/lib/datos/notificaciones"
+import { hace } from "@/lib/fechas"
 import { type Tarifa, tarifaEn } from "@/lib/tarifas"
 import {
   aceptaReservas,
@@ -203,3 +205,14 @@ export const filaVista = (e: EnListaGina): FilaVista => ({
   creadaEn: e.creadaEn,
   esMio: e.esMio,
 })
+
+/** Una notificación como la muestra la pestaña (R89): con su grupo y "hace cuánto" ya calculados */
+export type NotificacionVista = MiNotificacion & { grupo: "Hoy" | "Esta semana" | "Antes"; cuando: string }
+
+const diaCaracas = (t: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(t)
+
+export function notificacionVista(n: MiNotificacion, ahora: number): NotificacionVista {
+  const t = new Date(n.creadaEn).getTime()
+  const grupo = diaCaracas(t) === diaCaracas(ahora) ? "Hoy" : ahora - t < 7 * 86_400_000 ? "Esta semana" : "Antes"
+  return { ...n, grupo, cuando: hace(n.creadaEn) }
+}

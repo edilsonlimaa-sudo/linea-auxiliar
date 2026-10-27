@@ -431,6 +431,77 @@ export type Database = {
           },
         ]
       }
+      notificacion_destinos: {
+        Row: {
+          leida_en: string | null
+          notificacion_id: string
+          persona_id: string
+        }
+        Insert: {
+          leida_en?: string | null
+          notificacion_id: string
+          persona_id: string
+        }
+        Update: {
+          leida_en?: string | null
+          notificacion_id?: string
+          persona_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacion_destinos_notificacion_id_fkey"
+            columns: ["notificacion_id"]
+            isOneToOne: false
+            referencedRelation: "notificaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacion_destinos_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificaciones: {
+        Row: {
+          autor_id: string
+          creada_en: string
+          id: string
+          retirada_en: string | null
+          texto: string
+          tipo: string
+          titulo: string
+        }
+        Insert: {
+          autor_id?: string
+          creada_en?: string
+          id?: string
+          retirada_en?: string | null
+          texto: string
+          tipo: string
+          titulo: string
+        }
+        Update: {
+          autor_id?: string
+          creada_en?: string
+          id?: string
+          retirada_en?: string | null
+          texto?: string
+          tipo?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificaciones_autor_id_fkey"
+            columns: ["autor_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pago_movil: {
         Row: {
           actualizado_en: string
@@ -1307,6 +1378,15 @@ export type Database = {
         }[]
       }
       admin_desconectar: { Args: { p_chofer: string }; Returns: undefined }
+      admin_enviar_notificacion: {
+        Args: {
+          p_ids?: string[]
+          p_texto: string
+          p_tipo: string
+          p_titulo: string
+        }
+        Returns: number
+      }
       admin_guardar_cuota: {
         Args: {
           p_activa: boolean
@@ -1334,6 +1414,19 @@ export type Database = {
         Args: { p_id: string; p_leida: boolean }
         Returns: undefined
       }
+      admin_notificaciones: {
+        Args: never
+        Returns: {
+          creada_en: string
+          destinatarios: number
+          id: string
+          retirada_en: string
+          texto: string
+          tipo: string
+          titulo: string
+          vistas: number
+        }[]
+      }
       admin_resumen: {
         Args: never
         Returns: {
@@ -1346,6 +1439,7 @@ export type Database = {
           viajes_hoy: number
         }[]
       }
+      admin_retirar_notificacion: { Args: { p_id: string }; Returns: undefined }
       admin_uso_pasajeros: {
         Args: { p_desde: string }
         Returns: {
@@ -1609,6 +1703,10 @@ export type Database = {
         Returns: undefined
       }
       marcar_no_vino: { Args: { p_reserva: string }; Returns: undefined }
+      marcar_notificaciones_leidas: {
+        Args: { p_ids?: string[] }
+        Returns: number
+      }
       marcar_se_bajo: { Args: { p_reserva: string }; Returns: undefined }
       marcar_subio: { Args: { p_reserva: string }; Returns: undefined }
       me_atraso: {
