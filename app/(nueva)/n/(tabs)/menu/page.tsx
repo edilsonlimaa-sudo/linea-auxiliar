@@ -5,14 +5,14 @@ import Link from "next/link"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
-import { CerrarSesionDrawer, OpinionAppDrawer, SugerenciaDrawer } from "@/components/nueva/pasajero/menu"
+import { CerrarSesionDrawer, OpinionAppDrawer, SugerenciaDrawer, TemaSelector } from "@/components/nueva/pasajero/menu"
 import { firmarFotos } from "@/lib/fotos"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { iniciales } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Menú · Línea Auxiliar" }
 
-// Menú del pasajero en la interfaz nueva: su carnet, sugerencias (R81), opinión sobre la app (R82) y salir
+// Menú del pasajero en la interfaz nueva: su carnet, sugerencias (R81), opinión sobre la app (R82), apariencia (R85) y salir
 export default async function Menu() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva" })
   const fotos = await firmarFotos([perfil.foto_path])
@@ -37,6 +37,10 @@ export default async function Menu() {
         <section className="divide-y rounded-3xl border bg-card">
           <SugerenciaDrawer />
           <OpinionAppDrawer />
+        </section>
+
+        <section className="rounded-3xl border bg-card">
+          <TemaSelector />
         </section>
 
         <section className="rounded-3xl border bg-card">

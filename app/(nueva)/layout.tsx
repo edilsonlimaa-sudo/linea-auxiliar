@@ -22,7 +22,11 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#ffffff",
+  // El fondo de cada tema (--background en globals.css)
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b0d0e" },
+  ],
 }
 
 export default function LayoutNueva({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -33,7 +37,8 @@ export default function LayoutNueva({ children }: Readonly<{ children: React.Rea
       className={cn("antialiased", fontSans.variable, fontHeading.variable, fontMono.variable, "font-sans")}
     >
       <body>
-        <ThemeProvider defaultTheme="light" enableSystem={false}>
+        {/* Sigue al sistema; Menú → Apariencia lo fija. Clave propia: el tema de la clásica no se arrastra */}
+        <ThemeProvider storageKey="tema-nueva">
           <AppShell>{children}</AppShell>
         </ThemeProvider>
       </body>

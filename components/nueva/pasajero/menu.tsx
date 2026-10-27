@@ -1,6 +1,7 @@
 "use client"
 
-import { CheckCircle2, ChevronRight, Lightbulb, Loader2, LogOut, Star } from "lucide-react"
+import { CheckCircle2, ChevronRight, Lightbulb, Loader2, LogOut, Moon, Palette, Star, Sun, SunMoon } from "lucide-react"
+import { useTheme } from "next-themes"
 import * as React from "react"
 
 import { Button } from "@/components/nueva/ui/button"
@@ -214,5 +215,55 @@ export function CerrarSesionDrawer() {
         </form>
       </DrawerContent>
     </Drawer>
+  )
+}
+
+const TEMAS = [
+  { valor: "system", nombre: "Sistema", icon: SunMoon },
+  { valor: "light", nombre: "Claro", icon: Sun },
+  { valor: "dark", nombre: "Oscuro", icon: Moon },
+] as const
+
+const nada = () => () => {}
+
+/** Apariencia: sigue al teléfono (Sistema) o fija Claro u Oscuro; se guarda en el teléfono */
+export function TemaSelector() {
+  const { theme, setTheme } = useTheme()
+  // En el servidor no se sabe el tema guardado: ninguna opción marcada hasta montar
+  const montado = React.useSyncExternalStore(nada, () => true, () => false)
+  const actual = montado ? (theme ?? "system") : null
+
+  return (
+    <div className="flex flex-col gap-3 p-3">
+      <div className="flex items-center gap-3">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <Palette className="size-5" />
+        </div>
+        <p id="tema-titulo" className="font-medium">
+          Apariencia
+        </p>
+      </div>
+      <div role="radiogroup" aria-labelledby="tema-titulo" className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1">
+        {TEMAS.map(({ valor, nombre, icon: Icon }) => {
+          const marcado = actual === valor
+          return (
+            <button
+              key={valor}
+              type="button"
+              role="radio"
+              aria-checked={marcado}
+              onClick={() => setTheme(valor)}
+              className={cn(
+                "flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium transition-colors",
+                marcado ? "bg-background text-foreground shadow-sm" : "text-muted-foreground active:bg-background/60",
+              )}
+            >
+              <Icon className="size-4" />
+              {nombre}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
