@@ -49,7 +49,7 @@ export async function apagarAvisosDeEsteCelular() {
 
 /**
  * Avisos en el celular (R90), arriba de la pestaña Notificaciones: el permiso se pide solo al tocar "Avisarme en el
- * celular". Explica qué hacer si el teléfono lo bloqueó o si es un iPhone sin la app instalada.
+ * celular". Explica qué hacer si el teléfono lo bloqueó o si es un iPhone sin la app instalada. Ya activados, no se ve.
  */
 export function AvisosCelular() {
   const [estado, setEstado] = React.useState<Estado>("cargando")
@@ -83,33 +83,14 @@ export function AvisosCelular() {
       }
     })
 
-  const desactivar = () =>
-    iniciar(async () => {
-      setError(undefined)
-      await apagarAvisosDeEsteCelular()
-      setEstado("inactivo")
-    })
-
-  if (estado === "cargando" || estado === "sin-soporte") return null
-
-  if (estado === "activo") {
-    return (
-      <div className="flex items-center gap-3 rounded-3xl border bg-card px-4 py-3">
-        <BellRing className="size-5 shrink-0 text-primary" />
-        <p className="min-w-0 flex-1 text-sm">Te avisamos en este celular, aunque la app esté cerrada.</p>
-        <Button variant="ghost" size="sm" disabled={pendiente} onClick={desactivar}>
-          {pendiente ? <Loader2 className="animate-spin" /> : null}
-          Desactivar
-        </Button>
-      </div>
-    )
-  }
+  // Activados, la tarjeta no aparece: la app no ofrece apagarlos (quien no los quiera, los bloquea en el teléfono)
+  if (estado === "cargando" || estado === "sin-soporte" || estado === "activo") return null
 
   const textos: Record<"iphone" | "bloqueado" | "inactivo", { icono: React.ReactNode; titulo: string; texto: string }> = {
     inactivo: {
       icono: <BellRing className="size-5" />,
       titulo: "Recibe los avisos en tu celular",
-      texto: "Te avisamos aunque la app esté cerrada. Lo puedes desactivar cuando quieras.",
+      texto: "Te avisamos aunque la app esté cerrada.",
     },
     bloqueado: {
       icono: <BellOff className="size-5" />,

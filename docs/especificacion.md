@@ -654,7 +654,8 @@ choferes, la clásica y avisos automáticos.)*
 - **R90. También en el celular, si la persona quiere [servidor].** En la pestaña Notificaciones, una tarjeta ofrece
   **Avisarme en el celular**: al tocarla el teléfono pide el permiso (nunca antes de ese toque). Con el permiso, cada
   notificación que manda el admin llega además como aviso del teléfono (título y texto), **aunque la app esté cerrada**;
-  tocarlo abre la pestaña Notificaciones. Se puede **desactivar** desde la misma tarjeta. Vale por aparato: cada
+  tocarlo abre la pestaña Notificaciones. Ya activados, la tarjeta no aparece: **la app no ofrece apagarlos** (quien no
+  los quiera los bloquea en el teléfono; ese aparato se borra solo al mandar el siguiente). Vale por aparato: cada
   teléfono de la persona se activa aparte. Si el teléfono lo bloqueó, la tarjeta explica cómo desbloquearlo; en el
   iPhone, que primero hay que agregar la app a la pantalla de inicio. La app se puede instalar (manifiesto con nombre,
   colores e íconos; se abre en pantalla completa). *(Oct. 2026: el push no garantiza la hora exacta: algunos Android con
