@@ -7,13 +7,11 @@ import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { Estrellas } from "@/components/nueva/pasajero/estrellas"
-import { PagoMovilCard } from "@/components/nueva/pasajero/pago-movil-card"
 import { CalificarDrawer } from "@/components/nueva/pasajero/viaje-terminado"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import { cargarDetalleViaje } from "@/lib/nueva/datos"
 import { exigirCuentaAprobada } from "@/lib/sesion"
-import { tarifaEn } from "@/lib/tarifas"
 import { SENTIDOS } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Viaje · Línea Auxiliar" }
@@ -23,7 +21,7 @@ const cuando = (iso: string) =>
     new Date(iso)
   )
 
-// Un viaje hecho (R51): con quién, dónde lo recogieron, su calificación (o Calificar) y el Pago Móvil si todavía vale
+// Un viaje hecho (R51): con quién, dónde lo recogieron, su calificación (o Calificar). Sin Pago Móvil: en la nueva va solo a bordo (R74)
 export default async function DetalleViaje({ params }: PageProps<"/n/viajes/[id]">) {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva" })
   const { id } = await params
@@ -75,7 +73,6 @@ export default async function DetalleViaje({ params }: PageProps<"/n/viajes/[id]
           </dl>
         </section>
 
-        {v.pago ? <PagoMovilCard datos={v.pago} chofer={chofer.nombre} pasaje={tarifaEn(new Date(v.cuando))} /> : null}
 
         <section className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
           <h2 className="font-heading font-semibold">Tu calificación</h2>

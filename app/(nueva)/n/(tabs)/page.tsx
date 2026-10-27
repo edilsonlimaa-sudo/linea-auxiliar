@@ -14,14 +14,13 @@ import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero,
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista, unidadVista } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
-import { tarifaEn } from "@/lib/tarifas"
 import { aceptaReservas, carrosHaciaValle, ordenarParaPasajero } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Línea Auxiliar" }
 
 /**
  * Inicio de la interfaz nueva (§5.21, §8). Con reserva o anotado en la lista hacia Valle Grande, la misma dirección es
- * Mi viaje; si no, "¿Hacia dónde vas?" con el viaje recién terminado arriba (pagar y calificar), los avisos y la línea.
+ * Mi viaje; si no, "¿Hacia dónde vas?" con el viaje recién terminado arriba (calificar), los avisos y la línea.
  */
 export default async function InicioNueva() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva" })
@@ -29,7 +28,8 @@ export default async function InicioNueva() {
   const datos = await cargarInicioPasajero(perfil.id)
 
   if (datos.miReserva) {
-    const pago = await cargarPagoMovilDe(datos.miReserva.viaje.chofer_id)
+    // El Pago Móvil solo a bordo (R74 en la nueva)
+    const pago = datos.miReserva.reserva.estado === "subio" ? await cargarPagoMovilDe(datos.miReserva.viaje.chofer_id) : null
     return (
       <Screen>
         <EnVivo />
@@ -54,7 +54,6 @@ export default async function InicioNueva() {
     )
   }
 
-  const pago = pendiente ? await cargarPagoMovilDe(pendiente.choferId) : null
   const alCentro = ordenarParaPasajero(datos.viajes.filter((v) => v.sentido === "vg_a_centro" && aceptaReservas(v)), datos.porId).length
   const enGina = lista.reduce((n, e) => n + e.personas, 0)
 
@@ -63,9 +62,7 @@ export default async function InicioNueva() {
       <EnVivo />
       <AppHeader title={`Hola, ${perfil.nombre.split(" ")[0]}`} />
       <div className="flex flex-col gap-6 p-4">
-        {pendiente ? (
-          <ViajeTerminado viaje={pendiente} pago={pago} pasaje={tarifaEn(pendiente.salidaEn ? new Date(pendiente.salidaEn) : new Date(ahora))} />
-        ) : null}
+        {pendiente ? <ViajeTerminado viaje={pendiente} /> : null}
         {cierre ? <AvisoCierre aviso={cierre} /> : null}
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
         <AvisoTarifa />

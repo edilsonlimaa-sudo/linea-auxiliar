@@ -160,7 +160,7 @@ export function miViajeVista(m: MiReserva, porId: Map<string, Viaje>, pago: Dato
     puedeSoltar: !aBordo && (viaje.estado !== "en_ruta" || reserva.pendiente || vaPorTi),
     unidad: unidadVista(viaje, porId, ahora),
     telefonoChofer: m.telefonoChofer,
-    pago,
+    pago: aBordo ? pago : null, // R74 en la nueva: solo a bordo
     pasaje: tarifaEn(viaje.salida_en ? new Date(viaje.salida_en) : new Date(ahora)),
     yo: reserva.lat !== null && reserva.lng !== null ? { lat: reserva.lat, lng: reserva.lng } : null,
   }

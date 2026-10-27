@@ -444,7 +444,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   - **Quién lo ve:** el pasajero con reserva activa o a bordo en un viaje de ese chofer, y hasta **3 h** después de
     bajarse o de terminar el viaje; el admin y el propio chofer. Nadie más (lleva la cédula).
   - **Dónde:** en **Mi viaje** (a bordo, a la vista; esperando el carro, plegado: "Pago Móvil del chofer") y en
-    **"¿Cómo te fue?"** al terminar. **Copiar todo** es la acción principal, arriba y grande: los tres datos, uno por
+    **"¿Cómo te fue?"** al terminar. **En la interfaz nueva (§5.21), solo a bordo**, en Mi viaje *(Oct. 2026: aparecía en
+    momentos en que no hay que pagar; la clásica sigue igual)*. **Copiar todo** es la acción principal, arriba y grande: los tres datos, uno por
     línea, para usar el **Pegar** de las apps de los bancos (en Venezuela llenan todos los campos de una vez).
     *(Oct. 2026: antes cada dato tenía su botón grande; es lo menos usado.)* Debajo, cada dato con un **Copiar** chico
     (el banco como código "0102", el teléfono solo con números "04141234567", la cédula "V12345678"), por si la app no

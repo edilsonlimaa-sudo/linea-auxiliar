@@ -2,8 +2,6 @@
 // un viaje hecho. El resto (Inicio, choferes, Mis viajes, carnet) usa las de siempre de lib/datos
 import "server-only"
 
-import type { DatosPagoMovil } from "@/lib/bancos"
-import { cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { iniciales, type Sentido } from "@/lib/viajes"
@@ -64,10 +62,9 @@ export type DetalleViaje = {
   lugar: string | null
   chofer: { id: string; nombre: string; iniciales: string; fotoUrl: string | null; placa: string | null; modelo: string | null; color: string | null }
   calificacion: Opinion | null
-  pago: DatosPagoMovil | null // solo hasta 3 h después (lo decide la base, R74)
 }
 
-/** Un viaje que hizo (subió o se bajó), con su calificación y, si todavía corresponde, el Pago Móvil */
+/** Un viaje que hizo (subió o se bajó), con su calificación */
 export async function cargarDetalleViaje(pasajeroId: string, reservaId: string): Promise<DetalleViaje | null> {
   const supabase = await crearClienteServidor()
   const { data: r } = await supabase
@@ -80,9 +77,8 @@ export async function cargarDetalleViaje(pasajeroId: string, reservaId: string):
     .in("estado", ["subio", "bajo"])
     .maybeSingle()
   if (!r) return null
-  const [califRes, pago, fotos] = await Promise.all([
+  const [califRes, fotos] = await Promise.all([
     supabase.from("calificaciones").select("estrellas, etiquetas, comentario, creado_en").eq("viaje_id", r.viaje.id).eq("pasajero_id", pasajeroId).maybeSingle(),
-    cargarPagoMovilDe(r.viaje.chofer_id),
     firmarFotos([r.viaje.chofer?.foto_path]),
   ])
   const chofer = r.viaje.chofer
@@ -105,6 +101,5 @@ export async function cargarDetalleViaje(pasajeroId: string, reservaId: string):
       color: v?.color ?? null,
     },
     calificacion: k ? { estrellas: k.estrellas, etiquetas: k.etiquetas ?? [], comentario: k.comentario, creadaEn: k.creado_en } : null,
-    pago,
   }
 }

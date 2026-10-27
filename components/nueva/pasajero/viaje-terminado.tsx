@@ -3,13 +3,10 @@
 import { CheckCircle2, Loader2, Star } from "lucide-react"
 import * as React from "react"
 
-import { PagoMovilCard } from "@/components/nueva/pasajero/pago-movil-card"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/nueva/ui/drawer"
 import { Textarea } from "@/components/nueva/ui/textarea"
 import { calificarViaje, omitirCalificacion } from "@/lib/acciones/pasajero"
-import type { DatosPagoMovil } from "@/lib/bancos"
-import type { Tarifa } from "@/lib/tarifas"
 import { cn } from "@/lib/utils"
 import { SENTIDOS, type Sentido } from "@/lib/viajes"
 
@@ -19,10 +16,10 @@ const SIGNIFICADO = ["", "Muy mal", "Mal", "Regular", "Bien", "Excelente"]
 export type ViajePorCalificar = { reservaId: string; viajeId: string; choferId: string; chofer: string; sentido: Sentido }
 
 /**
- * Al terminar el viaje (R45, R74): "Llegaste bien", el Pago Móvil del chofer con el pasaje y "Calificar viaje"
- * (estrellas; etiquetas y comentario opcionales). "Ahora no" lo deja para Mis viajes.
+ * Al terminar el viaje (R45): "Llegaste bien" y "Calificar viaje" (estrellas; etiquetas y comentario opcionales).
+ * "Ahora no" lo deja para Mis viajes. Sin Pago Móvil: en la nueva va solo a bordo (R74).
  */
-export function ViajeTerminado({ viaje, pago, pasaje }: { viaje: ViajePorCalificar; pago: DatosPagoMovil | null; pasaje: Tarifa }) {
+export function ViajeTerminado({ viaje }: { viaje: ViajePorCalificar }) {
   const [omitiendo, omitir] = React.useTransition()
   return (
     <section className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4 text-card-foreground">
@@ -37,7 +34,6 @@ export function ViajeTerminado({ viaje, pago, pasaje }: { viaje: ViajePorCalific
           </p>
         </div>
       </div>
-      {pago ? <PagoMovilCard datos={pago} chofer={viaje.chofer} pasaje={pasaje} /> : null}
       <CalificarDrawer viaje={viaje} trigger={<Button size="lg">Calificar viaje</Button>} />
       <Button variant="ghost" size="lg" disabled={omitiendo} onClick={() => omitir(async () => void (await omitirCalificacion(viaje.reservaId)))}>
         Ahora no
