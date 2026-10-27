@@ -6,7 +6,6 @@ import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { AccionRecogida, TerminarViaje } from "@/components/nueva/chofer/accion"
-import { FranjaCompaneros } from "@/components/nueva/chofer/companeros"
 import { EstadoEnCabecera, Ubicacion } from "@/components/nueva/chofer/conexion"
 import { CuotaAviso } from "@/components/nueva/chofer/cuota"
 import { DespuesTarjeta, PreguntaDespues, type Respuesta } from "@/components/nueva/chofer/despues"
@@ -70,7 +69,6 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
           ) : null}
           {/* R76: sin la cuota, la lista de Gina no es para él */}
           {!sinCuota ? <FaixaLista lista={listaTramo} /> : null}
-          <FranjaCompaneros companeros={datos.companeros} />
         </div>
         {hoja}
       </Screen>
@@ -116,7 +114,6 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
           puedeAgregar={!sinCuota}
         />
         {!sinCuota && !recogiendoEnGina ? <FaixaLista lista={listaTramo} destacada={Boolean(enRuta?.sentido === "centro_a_vg")} /> : null}
-        <FranjaCompaneros companeros={datos.companeros} />
         {recogida ? (
           <AccionRecogida viaje={recogida} vehiculo={vehiculo} listaTramo={listaTramo} />
         ) : enRuta ? (
