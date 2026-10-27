@@ -1,9 +1,12 @@
 "use client"
 
-import { CheckCircle2, ChevronRight, Lightbulb, Loader2, LogOut, Moon, Palette, Star, Sun, SunMoon } from "lucide-react"
+import { CheckCircle2, ChevronRight, IdCard, Lightbulb, Loader2, LogOut, Moon, Palette, Star, Sun, SunMoon } from "lucide-react"
+import Link from "next/link"
 import { useTheme } from "next-themes"
 import * as React from "react"
 
+import { usePerfil } from "@/components/nueva/app/perfil"
+import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/nueva/ui/drawer"
 import { Textarea } from "@/components/nueva/ui/textarea"
@@ -265,5 +268,23 @@ export function TemaSelector() {
         })}
       </div>
     </div>
+  )
+}
+
+/** La tarjeta de arriba del Menú: quién es y el enlace a Mi carnet (el perfil viene del layout de las pestañas) */
+export function MiCarnetLink() {
+  const perfil = usePerfil()
+  return (
+    <Link href="/n/carnet" transitionTypes={["nav-forward"]} className="flex items-center gap-4 rounded-3xl border bg-card p-4 transition-colors active:bg-muted">
+      <ChoferAvatar chofer={perfil} className="size-14 text-lg" />
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-heading text-lg font-semibold">{perfil.nombre}</p>
+        {perfil.urbanismo ? <p className="truncate text-sm text-muted-foreground">{perfil.urbanismo}</p> : null}
+        <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-primary">
+          <IdCard className="size-3.5" /> Mi carnet
+        </p>
+      </div>
+      <ChevronRight className="size-5 text-muted-foreground" />
+    </Link>
   )
 }

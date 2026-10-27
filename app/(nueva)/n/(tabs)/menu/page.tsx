@@ -1,38 +1,19 @@
-import { ChevronRight, IdCard } from "lucide-react"
 import type { Metadata } from "next"
-import Link from "next/link"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
-import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
-import { CerrarSesionDrawer, OpinionAppDrawer, SugerenciaDrawer, TemaSelector } from "@/components/nueva/pasajero/menu"
-import { firmarFotos } from "@/lib/fotos"
-import { exigirCuentaAprobada } from "@/lib/sesion"
-import { iniciales } from "@/lib/viajes"
+import { CerrarSesionDrawer, MiCarnetLink, OpinionAppDrawer, SugerenciaDrawer, TemaSelector } from "@/components/nueva/pasajero/menu"
 
 export const metadata: Metadata = { title: "Menú · Línea Auxiliar" }
 
-// Menú del pasajero en la interfaz nueva: su carnet, sugerencias (R81), opinión sobre la app (R82), apariencia (R85) y salir
-export default async function Menu() {
-  const perfil = await exigirCuentaAprobada({ interfaz: "nueva" })
-  const fotos = await firmarFotos([perfil.foto_path])
-  const fotoUrl = perfil.foto_path ? (fotos.get(perfil.foto_path) ?? null) : null
-
+// Menú del pasajero en la interfaz nueva: su carnet, sugerencias (R81), opinión sobre la app (R82), apariencia (R85) y
+// salir. Sin datos propios (el perfil viene del layout de las pestañas): la pestaña lo deja listo antes del toque
+export default function Menu() {
   return (
     <Screen>
       <AppHeader title="Menú" />
       <div className="flex flex-col gap-6 p-4">
-        <Link href="/n/carnet" transitionTypes={["nav-forward"]} className="flex items-center gap-4 rounded-3xl border bg-card p-4 transition-colors active:bg-muted">
-          <ChoferAvatar chofer={{ nombre: perfil.nombre, iniciales: iniciales(perfil.nombre), fotoUrl }} className="size-14 text-lg" />
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-heading text-lg font-semibold">{perfil.nombre}</p>
-            {perfil.urbanismo ? <p className="truncate text-sm text-muted-foreground">{perfil.urbanismo}</p> : null}
-            <p className="mt-0.5 flex items-center gap-1 text-xs font-medium text-primary">
-              <IdCard className="size-3.5" /> Mi carnet
-            </p>
-          </div>
-          <ChevronRight className="size-5 text-muted-foreground" />
-        </Link>
+        <MiCarnetLink />
 
         <section className="divide-y rounded-3xl border bg-card">
           <SugerenciaDrawer />
