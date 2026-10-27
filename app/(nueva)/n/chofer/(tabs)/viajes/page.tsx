@@ -11,7 +11,7 @@ import { diaYHora } from "@/lib/fechas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { duracion, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
-export const metadata: Metadata = { title: "Mis viajes · Línea Auxiliar" }
+export const metadata: Metadata = { title: "Viajes · Línea Auxiliar" }
 
 // Mis viajes del chofer (R50): los últimos 20 terminados; cada uno abre a quién llevó y cómo le fue
 export default async function ViajesChofer() {
@@ -20,7 +20,7 @@ export default async function ViajesChofer() {
 
   return (
     <Screen>
-      <AppHeader title="Mis viajes" />
+      <AppHeader title="Viajes" />
       <div className="flex flex-col gap-4 p-4">
         {viajes.length === 0 ? (
           <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">

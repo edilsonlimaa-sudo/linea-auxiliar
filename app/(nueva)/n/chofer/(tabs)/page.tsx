@@ -53,7 +53,7 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
         <EnVivo />
         {cabecera}
         <div className="flex flex-1 flex-col gap-4 p-4">
-          {cuota && sinCuota ? <CuotaAviso cuota={cuota} /> : null}
+          {cuota ? <CuotaAviso cuota={cuota} /> : null}
           {!sinCuota ? (
             <section className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
               <div>
@@ -68,7 +68,6 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
               </Button>
             </section>
           ) : null}
-          {cuota && !sinCuota ? <CuotaAviso cuota={cuota} /> : null}
           {/* R76: sin la cuota, la lista de Gina no es para él */}
           {!sinCuota ? <FaixaLista lista={listaTramo} /> : null}
           <FranjaCompaneros companeros={datos.companeros} />
@@ -93,6 +92,7 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
       {cabecera}
       <div className="flex flex-1 flex-col gap-4 p-4">
         <Ubicacion activa={conectado} />
+        {cuota ? <CuotaAviso cuota={cuota} /> : null}
         {enRuta ? (
           <TarjetaEnRuta
             viaje={enRuta}
@@ -115,7 +115,6 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
           modo={recogida ? "cadena" : "desde_ruta"}
           puedeAgregar={!sinCuota}
         />
-        {cuota ? <CuotaAviso cuota={cuota} /> : null}
         {!sinCuota && !recogiendoEnGina ? <FaixaLista lista={listaTramo} destacada={Boolean(enRuta?.sentido === "centro_a_vg")} /> : null}
         <FranjaCompaneros companeros={datos.companeros} />
         {recogida ? (

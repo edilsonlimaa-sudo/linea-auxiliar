@@ -26,7 +26,7 @@ export const tabsPasajero: Tab[] = [
 /** Abas do chofer (§5.21) */
 export const tabsChofer: Tab[] = [
   { href: "/n/chofer", label: "Inicio", icon: House },
-  { href: "/n/chofer/viajes", label: "Mis viajes", icon: History },
+  { href: "/n/chofer/viajes", label: "Viajes", icon: History },
   { href: "/n/chofer/calificaciones", label: "Calificaciones", icon: Star },
   { href: "/n/chofer/menu", label: "Menú", icon: Menu, fija: true },
 ]

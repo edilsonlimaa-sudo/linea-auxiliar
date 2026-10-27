@@ -1,13 +1,15 @@
 "use client"
 
-import { Check, Loader2, Minus, Plus, Send } from "lucide-react"
+import { Building2, Home, Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 
-import { ErrorAccion, Opcion, puestosTexto } from "@/components/nueva/chofer/comun"
+import { ErrorAccion, puestosTexto } from "@/components/nueva/chofer/comun"
 import { Button } from "@/components/nueva/ui/button"
 import { Input } from "@/components/nueva/ui/input"
+import { Switch } from "@/components/nueva/ui/switch"
 import { publicarViaje } from "@/lib/acciones/chofer"
+import { cn } from "@/lib/utils"
 import { contrario, SENTIDOS, type Sentido } from "@/lib/viajes"
 
 /**
@@ -18,21 +20,32 @@ import { contrario, SENTIDOS, type Sentido } from "@/lib/viajes"
  */
 export type ModoPublicar = "primero" | "cadena" | "desde_ruta"
 
-const TIEMPOS: Record<ModoPublicar, { pregunta: string; ayuda?: string; rapidos: number[]; inicial: number; yaEstoy: boolean }> = {
-  primero: { pregunta: "¿Cuándo llegas a recoger?", rapidos: [5, 10, 15, 20], inicial: 10, yaEstoy: true },
+const TIEMPOS: Record<ModoPublicar, { pregunta: string; aviso?: string; rapidos: number[]; inicial: number; yaEstoy: boolean }> = {
+  primero: { pregunta: "¿Cuándo llegas a la zona de recogida?", rapidos: [5, 10, 15, 20], inicial: 10, yaEstoy: true },
   cadena: {
     pregunta: "¿Cuánto tardas en llegar a recoger después de salir?",
-    ayuda: "Este viaje empieza solo cuando sales con el actual.",
+    aviso: "Tienes un viaje recogiendo. Este queda como tu próximo viaje y empieza solo cuando salgas del actual.",
     rapidos: [15, 20, 30, 45],
     inicial: 20,
     yaEstoy: false,
   },
-  desde_ruta: { pregunta: "¿Cuándo llegas a recoger?", rapidos: [5, 10, 15, 20], inicial: 15, yaEstoy: false },
+  desde_ruta: {
+    pregunta: "¿Cuándo llegas a la zona de recogida?",
+    aviso: "Vas en ruta. Este viaje empieza ya: los pasajeros te ven en camino a recogerlos.",
+    rapidos: [5, 10, 15, 20],
+    inicial: 15,
+    yaEstoy: false,
+  },
 }
 
+const ICONOS: Record<Sentido, typeof Home> = { vg_a_centro: Building2, centro_a_vg: Home }
+const PUESTOS = [1, 2, 3, 4, 5, 6, 7, 8]
+const VUELTA_MIN = [15, 20, 30, 45]
+
 /**
- * Publicar un viaje (R10) o agregarlo a la cadena (R11). Todo se toca; solo "Otro" y "A una hora" piden escribir. El
- * sentido nunca viene escogido (R10); los puestos, los del último viaje. Ida y vuelta (R61) publica también la vuelta.
+ * Publicar un viaje (R10) o agregarlo a la cadena (R11), con el aspecto del prototipo: una sola pantalla de toques; solo
+ * "Otro" y "Hora fija" piden escribir. El sentido nunca viene escogido (R10); los puestos, los del último viaje. Ida y
+ * vuelta (R61) publica también la vuelta.
  */
 export function PublicarFormulario({ modo, puestosIniciales }: { modo: ModoPublicar; puestosIniciales: number }) {
   const router = useRouter()
@@ -43,22 +56,22 @@ export function PublicarFormulario({ modo, puestosIniciales }: { modo: ModoPubli
   const [otro, setOtro] = React.useState("")
   const [hora, setHora] = React.useState("")
   const [conVuelta, setConVuelta] = React.useState(false)
-  const [vuelta, setVuelta] = React.useState<number | null>(null)
+  const [vuelta, setVuelta] = React.useState(30)
   const [error, setError] = React.useState<string>()
   const [enviando, iniciar] = React.useTransition()
   const regreso = sentido ? contrario(sentido) : null
+  const elegirCuando = (c: typeof cuando) => (setCuando(c), setError(undefined))
 
   const publicar = (e: React.FormEvent) => {
     e.preventDefault()
     iniciar(async () => {
-      if (!sentido) return setError("Escoge hacia dónde vas.")
-      if (conVuelta && vuelta === null) return setError("Escoge cuánto tardas en llegar a recoger para la vuelta.")
+      if (!sentido) return setError("Elige hacia dónde vas.")
       const datos = new FormData()
       datos.set("sentido", sentido)
       datos.set("puestos", String(puestos))
       if (cuando === "hora") datos.set("hora", hora)
       else datos.set("minutos", cuando === "otro" ? otro : String(cuando))
-      if (conVuelta && vuelta !== null) datos.set("vuelta", String(vuelta))
+      if (conVuelta) datos.set("vuelta", String(vuelta))
       const r = await publicarViaje(datos)
       setError(r.error)
       if (r.ok) router.replace("/n/chofer")
@@ -66,108 +79,150 @@ export function PublicarFormulario({ modo, puestosIniciales }: { modo: ModoPubli
   }
 
   return (
-    <form onSubmit={publicar} className="flex flex-1 flex-col gap-6">
+    <form onSubmit={publicar} className="flex flex-1 flex-col gap-5">
+      {tiempos.aviso ? <p className="rounded-2xl bg-secondary px-3 py-2 text-sm text-muted-foreground">{tiempos.aviso}</p> : null}
+
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-heading text-lg font-semibold">¿Hacia dónde vas?</legend>
+        <legend className="mb-2 font-medium">¿Hacia dónde vas?</legend>
         <div className="grid grid-cols-2 gap-2">
-          {(Object.keys(SENTIDOS) as Sentido[]).map((s) => (
-            <Opcion key={s} nombre="sentido" elegida={sentido === s} onElegir={() => (setSentido(s), setError(undefined))} className="min-h-16 font-heading text-base">
-              {sentido === s ? <Check className="size-5" /> : null}
-              {SENTIDOS[s].corto}
-            </Opcion>
+          {(Object.keys(SENTIDOS) as Sentido[]).map((s) => {
+            const Icono = ICONOS[s]
+            const activo = sentido === s
+            return (
+              <button
+                key={s}
+                type="button"
+                aria-pressed={activo}
+                onClick={() => (setSentido(s), setError(undefined))}
+                className={cn(
+                  "flex flex-col items-start gap-1 rounded-2xl border p-3 text-left transition-colors",
+                  activo ? "border-primary bg-primary/10 text-primary" : "bg-input/30 active:bg-muted"
+                )}
+              >
+                <Icono className="size-5" />
+                <span className="font-medium">{SENTIDOS[s].corto}</span>
+                <span className={cn("text-xs", activo ? "text-primary/80" : "text-muted-foreground")}>Recoges {SENTIDOS[s].enRecogida}</span>
+              </button>
+            )
+          })}
+        </div>
+      </fieldset>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 font-medium">¿Cuántos puestos?</legend>
+        <div className="grid grid-cols-4 gap-2">
+          {PUESTOS.map((n) => (
+            <Button
+              key={n}
+              type="button"
+              size="lg"
+              variant={puestos === n ? "default" : "outline"}
+              aria-pressed={puestos === n}
+              onClick={() => setPuestos(n)}
+              className="font-heading text-base"
+            >
+              {n}
+            </Button>
           ))}
         </div>
-        <p className="text-sm text-muted-foreground">{sentido ? `Recoges ${SENTIDOS[sentido].enRecogida}.` : "Toca hacia dónde vas."}</p>
       </fieldset>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-heading text-lg font-semibold">¿Cuántos puestos llevas?</legend>
-        <div className="flex items-center gap-3">
-          <Button type="button" variant="outline" size="icon-lg" aria-label="Un puesto menos" disabled={puestos <= 1} onClick={() => setPuestos((p) => p - 1)}>
-            <Minus />
-          </Button>
-          <output aria-live="polite" className="min-w-16 text-center font-heading text-4xl font-semibold tabular-nums">
-            {puestos}
-          </output>
-          <Button type="button" variant="outline" size="icon-lg" aria-label="Un puesto más" disabled={puestos >= 8} onClick={() => setPuestos((p) => p + 1)}>
-            <Plus />
-          </Button>
-        </div>
-      </fieldset>
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-heading text-lg font-semibold">{tiempos.pregunta}</legend>
-        {tiempos.ayuda ? <p className="-mt-1 text-sm text-muted-foreground">{tiempos.ayuda}</p> : null}
-        <div className="grid grid-cols-3 gap-2">
+        <legend className="mb-2 font-medium">{tiempos.pregunta}</legend>
+        <div className="flex flex-wrap gap-2">
           {tiempos.yaEstoy ? (
-            <Opcion nombre="cuando" elegida={cuando === 0} onElegir={() => setCuando(0)} className="col-span-3">
+            <Chip activo={cuando === 0} onClick={() => elegirCuando(0)}>
               Ya estoy aquí
-            </Opcion>
+            </Chip>
           ) : null}
           {tiempos.rapidos.map((m) => (
-            <Opcion key={m} nombre="cuando" elegida={cuando === m} onElegir={() => setCuando(m)}>
+            <Chip key={m} activo={cuando === m} onClick={() => elegirCuando(m)}>
               {m} min
-            </Opcion>
+            </Chip>
           ))}
-          <Opcion nombre="cuando" elegida={cuando === "otro"} onElegir={() => setCuando("otro")}>
+          <Chip activo={cuando === "otro"} onClick={() => elegirCuando("otro")}>
             Otro
-          </Opcion>
-          <Opcion nombre="cuando" elegida={cuando === "hora"} onElegir={() => setCuando("hora")} className="col-span-3">
-            A una hora
-          </Opcion>
+          </Chip>
+          <Chip activo={cuando === "hora"} onClick={() => elegirCuando("hora")}>
+            Hora fija
+          </Chip>
         </div>
         {cuando === "otro" ? (
-          <label className="flex items-center gap-3">
-            <Input type="number" inputMode="numeric" min={1} max={240} value={otro} onChange={(e) => setOtro(e.target.value)} autoFocus className="w-28 text-center" />
-            <span className="font-medium">minutos</span>
-          </label>
+          <div className="flex items-center gap-2">
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={240}
+              value={otro}
+              onChange={(e) => setOtro(e.target.value)}
+              placeholder="Minutos"
+              aria-label="Minutos hasta llegar"
+              className="max-w-32"
+              autoFocus
+            />
+            <span className="text-sm text-muted-foreground">minutos</span>
+          </div>
         ) : null}
         {cuando === "hora" ? (
-          <label className="flex flex-col gap-2">
-            <span className="flex items-center gap-3">
-              <span className="font-medium">Llego a las</span>
-              <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} autoFocus className="w-36" />
-            </span>
+          <div className="flex flex-col gap-1">
+            <Input type="time" value={hora} onChange={(e) => setHora(e.target.value)} aria-label="Hora a la que llegas" className="max-w-40" autoFocus />
             <span className="text-xs text-muted-foreground">Si esa hora ya pasó hoy, es la de mañana.</span>
-          </label>
+          </div>
         ) : null}
       </fieldset>
 
       {/* R61: la vuelta es el sentido contrario con los mismos puestos; solo se pregunta cuándo llega a recoger */}
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 font-heading text-lg font-semibold">¿Después recoges gente {regreso ? SENTIDOS[regreso].enRecogida : "allá"} para volver?</legend>
-        <div className="grid grid-cols-2 gap-2">
-          <Opcion nombre="vuelta" elegida={!conVuelta} onElegir={() => (setConVuelta(false), setVuelta(null))}>
-            Solo ida
-          </Opcion>
-          <Opcion nombre="vuelta" elegida={conVuelta} onElegir={() => setConVuelta(true)}>
-            Ida y vuelta
-          </Opcion>
-        </div>
+      <section className="flex flex-col gap-3 rounded-2xl border p-3">
+        <label className="flex items-center justify-between gap-3">
+          <span>
+            <span className="block font-medium">Ida y vuelta</span>
+            <span className="block text-xs text-muted-foreground">Publica también el regreso.</span>
+          </span>
+          <Switch checked={conVuelta} onCheckedChange={setConVuelta} />
+        </label>
         {conVuelta ? (
-          <div className="mt-2 flex flex-col gap-2">
-            <p className="font-medium">¿Cuánto tardas en llegar a recoger {regreso ? SENTIDOS[regreso].enRecogida : "allá"} después de salir?</p>
-            <div className="grid grid-cols-2 gap-2">
-              {[15, 20, 30, 45].map((m) => (
-                <Opcion key={m} nombre="vuelta-min" elegida={vuelta === m} onElegir={() => setVuelta(m)}>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-2 text-sm text-muted-foreground">
+              ¿Cuánto después de salir vuelves a recoger{regreso ? ` ${SENTIDOS[regreso].enRecogida}` : ""}?
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {VUELTA_MIN.map((m) => (
+                <Chip key={m} activo={vuelta === m} onClick={() => setVuelta(m)}>
                   {m} min
-                </Opcion>
+                </Chip>
               ))}
             </div>
             <p className="text-xs text-muted-foreground">
               La vuelta ({regreso ? SENTIDOS[regreso].hacia : "de regreso"}, {puestosTexto(puestos)}) se publica ya y empieza sola cuando sales.
             </p>
-          </div>
+          </fieldset>
         ) : null}
-      </fieldset>
+      </section>
 
-      <div className="sticky bottom-0 -mx-4 mt-auto flex flex-col gap-2 border-t bg-background/90 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] backdrop-blur">
+      <div className="mt-auto flex flex-col gap-2 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <ErrorAccion error={error} />
         <Button type="submit" size="lg" disabled={enviando}>
-          {enviando ? <Loader2 className="animate-spin" /> : <Send />}
-          {enviando ? "Publicando…" : conVuelta ? "Publicar ida y vuelta" : modo === "cadena" ? "Agregar como próximo viaje" : "Publicar viaje"}
+          {enviando ? <Loader2 className="animate-spin" /> : null}
+          {enviando ? "Publicando…" : modo === "cadena" ? "Dejar publicado" : "Publicar"}
         </Button>
       </div>
     </form>
+  )
+}
+
+function Chip({ activo, children, ...props }: React.ComponentProps<"button"> & { activo: boolean }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={activo}
+      className={cn(
+        "rounded-full border px-3 py-1.5 text-sm transition-colors",
+        activo ? "border-primary bg-primary/10 text-primary" : "bg-input/30 text-muted-foreground active:bg-muted"
+      )}
+      {...props}
+    >
+      {children}
+    </button>
   )
 }

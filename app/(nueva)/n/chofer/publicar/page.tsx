@@ -10,12 +10,6 @@ import { exigirCuentaAprobada } from "@/lib/sesion"
 
 export const metadata: Metadata = { title: "Publicar un viaje · Línea Auxiliar" }
 
-const DESCRIPCION: Record<ModoPublicar, string> = {
-  primero: "Los pasajeros te ven trabajando y pueden apartar desde ya. Publicar te conecta.",
-  cadena: "Queda como tu próximo viaje y los pasajeros ya pueden apartar.",
-  desde_ruta: "Empieza ya: los pasajeros te ven en camino a recogerlos.",
-}
-
 // Publicar un viaje (R10) o agregar otro a la cadena (R11). El modo sale de sus viajes abiertos, no de la dirección
 export default async function Publicar() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva-chofer" })
@@ -31,7 +25,6 @@ export default async function Publicar() {
     <Screen>
       <AppHeader title={modo === "primero" ? "Publicar un viaje" : "Agregar otro viaje"} backHref="/n/chofer" />
       <div className="flex flex-1 flex-col gap-4 p-4 pb-0">
-        <p className="text-sm text-muted-foreground">{DESCRIPCION[modo]}</p>
         <PublicarFormulario modo={modo} puestosIniciales={finDeCadena?.puestos ?? ultimo?.puestos ?? 4} />
       </div>
     </Screen>
