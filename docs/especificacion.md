@@ -617,6 +617,25 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   oscuro) por defecto; en Menú → Apariencia se escoge Sistema, Claro u Oscuro (se guarda en el teléfono, aparte del
   tema de la clásica).
 
+### 5.22 Demanda y oferta; cuentas de prueba
+
+*(Oct. 2026: la lista hacia Valle Grande mostró que en la tarde la gente espera y no hay carro; el admin necesita ver
+los picos y si la oferta alcanza, con números de varios días.)*
+
+- **R86. Cuentas de prueba [servidor].** El admin marca una cuenta (pasajero o chofer) como **de prueba** en su detalle
+  y la desmarca cuando quiera. Sus viajes, reservas y anotaciones **no cuentan en Demanda y oferta**. La cuenta sigue
+  funcionando igual.
+- **R87. Demanda y oferta [servidor].** Solo el admin lo ve. Para cada hora del día (hora de Caracas):
+  - **A Valle Grande** (desde Gina): cuántas **personas querían ir** y qué pasó con ellas: **llevadas**, se fueron en
+    **otro transporte** (van u otro carro), la anotación **venció** (R65) o **desistieron**. Una persona que se vuelve a
+    anotar menos de 60 min después de cerrarse su anotación es **la misma espera** (se cuenta una vez). Se suman los
+    pedidos en el camino (R28) y la gente sin app que el chofer subió (R36), que siempre cuentan como llevados.
+  - **Al Centro:** cuántas personas fueron **llevadas** y cuántas **no atendidas** (sin puesto, rechazadas, no llegó).
+    Sin lista en ese sentido, quien no consiguió carro no queda registrado: se dice en pantalla.
+  - **Oferta:** salidas de cada sentido (con sus puestos) y **choferes trabajando** (con algún viaje abierto en esa hora;
+    un viaje olvidado abierto cuenta como mucho 6 h).
+  - Cuenta la hora en que empezó la espera o se hizo la reserva, y la hora de salida de cada viaje.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -679,7 +698,8 @@ lo primero es *qué necesita de mí*, después *qué pasa ahora* y al final *có
   suspendido, R31: sin esperas, estaba siempre vacía. **Viajes terminados** también sale del menú, pero la página
   sigue: se llega desde los indicadores del Resumen y desde Viajes en curso; lo de cada chofer está en su detalle.)*
 - **Personas:** Por aprobar · Choferes · Pasajeros.
-- **Análisis:** Uso de la app · Calificaciones.
+- **Análisis:** Uso de la app · Demanda y oferta · Calificaciones. *(Oct. 2026: Demanda vuelve al menú, ahora con el
+  histórico por hora, R87.)*
 - Abajo: Cambiar contraseña · Modo oscuro/claro · Salir del panel.
 
 Cada entrada muestra su contador: cuentas por aprobar en amarillo (piden acción); viajes en curso y personas en la
@@ -740,14 +760,19 @@ menú (formularios).
   - **Cancelado** (en rojo): chofer y placa, sentido, a qué hora se canceló, quién y por qué (R72), hasta dónde llegó ("Antes de llegar a
     recoger" / "Avisó que llegaba" / "Después de llegar a recoger"), quiénes tenían puesto y lo perdieron.
   - Los dos, con su línea de tiempo (R56).
-- **Demanda** (fuera del menú mientras "Avísame" esté suspendido, R31; la página sigue en `/admin/demanda`; para organizar la operación; se actualiza sola, §4). El admin sí ve quién espera y dónde (§6):
-  1. **Por sentido** (Al Centro / A Valle Grande): cuántos esperan, cuántas unidades aceptan pasajeros con cuántos
-     puestos libres, y si **falta transporte** (esperan más que los puestos libres) o está cubierto.
-  2. **Quién espera**, por sentido y primero quien lleva más tiempo: foto, nombre, "espera hace N min" (en
-     amarillo desde 20 min), dónde (texto) y **Ver ubicación** si compartió GPS (abre el mapa del teléfono),
-     WhatsApp y Llamar. Solo esperas activas de las últimas 2 h (R35).
-  3. **Hoy** (hora de Caracas): pedidos, cuántos consiguieron puesto, cuántos se fueron sin transporte (la
-     espera venció), cuántos cancelaron y la espera promedio hasta conseguir puesto.
+- **Demanda y oferta** (`/admin/demanda`, R87; para organizar la operación y conversar con los choferes con números).
+  *(Oct. 2026: antes mostraba quién esperaba con "Avísame", suspendido por R31; sin esperas, estaba siempre vacía.)*
+  - **Filtros:** período **Hoy · 7 días · Desde la lista** (21/10/2026, cuando empezó la lista hacia Valle Grande) y
+    días **Todos · Lunes a viernes · Fin de semana** (no se muestra con Hoy). Por defecto, 7 días · Lunes a viernes.
+  - **Totales del período:** A Valle Grande, personas que querían ir y cuántas fueron llevadas (con %), otro
+    transporte, venció y desistieron; Al Centro, llevadas y no atendidas; y qué parte de los llevados **no tiene la
+    app** (los subió el chofer).
+  - **Por hora** (promedio por día del filtro; con Hoy, los números del día), solo las horas con gente o salidas: barras de
+    "querían ir" y "llevados" a Valle Grande, llevados al Centro, salidas de cada sentido y choferes trabajando. Las
+    horas en que a Valle Grande quedó más de la mitad sin llevar se marcan en amarillo.
+  - **Por día:** fecha, querían ir y llevados a Valle Grande, llevados al Centro, salidas y choferes.
+  - Abajo, cómo se cuenta (una espera = varias anotaciones seguidas; "venció" puede incluir a quien subió sin que lo
+    marcaran; quien abrió la app y no se anotó no aparece).
 - **Por aprobar** *(Oct. 2026: la aprobación sale de Choferes y Pasajeros)*: las cuentas nuevas de los dos roles, con
   pestañas **Pendientes** (con su número en amarillo en el menú) y **Rechazados**, y filtro **Todos · Choferes ·
   Pasajeros**. Cada tarjeta trae lo necesario para verificar (R2, R5): fotos (del chofer, también la del carro),

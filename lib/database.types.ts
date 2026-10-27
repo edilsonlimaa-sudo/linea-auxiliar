@@ -560,6 +560,7 @@ export type Database = {
           aprobado_por: string | null
           conectado_en: string | null
           creado_en: string
+          de_prueba: boolean
           debe_cambiar_clave: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
@@ -574,6 +575,7 @@ export type Database = {
           aprobado_por?: string | null
           conectado_en?: string | null
           creado_en?: string
+          de_prueba?: boolean
           debe_cambiar_clave?: boolean
           estado?: Database["public"]["Enums"]["estado_cuenta"]
           foto_path?: string | null
@@ -588,6 +590,7 @@ export type Database = {
           aprobado_por?: string | null
           conectado_en?: string | null
           creado_en?: string
+          de_prueba?: boolean
           debe_cambiar_clave?: boolean
           estado?: Database["public"]["Enums"]["estado_cuenta"]
           foto_path?: string | null
@@ -1055,6 +1058,7 @@ export type Database = {
           aprobado_por: string | null
           conectado_en: string | null
           creado_en: string
+          de_prueba: boolean
           debe_cambiar_clave: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
@@ -1078,6 +1082,7 @@ export type Database = {
           aprobado_por: string | null
           conectado_en: string | null
           creado_en: string
+          de_prueba: boolean
           debe_cambiar_clave: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
@@ -1101,6 +1106,7 @@ export type Database = {
           aprobado_por: string | null
           conectado_en: string | null
           creado_en: string
+          de_prueba: boolean
           debe_cambiar_clave: boolean
           estado: Database["public"]["Enums"]["estado_cuenta"]
           foto_path: string | null
@@ -1280,6 +1286,26 @@ export type Database = {
           sin_transporte: number
         }[]
       }
+      admin_demanda_oferta: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: {
+          centro_llevados: number
+          centro_no_atendidos: number
+          centro_puestos: number
+          centro_salidas: number
+          choferes: number
+          dia: string
+          hora: number
+          llevados_sin_app: number
+          valle_desistio: number
+          valle_llevados: number
+          valle_otro: number
+          valle_puestos: number
+          valle_quieren: number
+          valle_salidas: number
+          valle_vencio: number
+        }[]
+      }
       admin_desconectar: { Args: { p_chofer: string }; Returns: undefined }
       admin_guardar_cuota: {
         Args: {
@@ -1299,6 +1325,10 @@ export type Database = {
           reservas: number
           viajes: number
         }[]
+      }
+      admin_marcar_prueba: {
+        Args: { p_id: string; p_prueba: boolean }
+        Returns: undefined
       }
       admin_marcar_sugerencia: {
         Args: { p_id: string; p_leida: boolean }
