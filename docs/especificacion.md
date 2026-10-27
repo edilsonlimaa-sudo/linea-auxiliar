@@ -627,6 +627,13 @@ los picos y si la oferta alcanza, con números de varios días.)*
 - **R86. Cuentas de prueba [servidor].** El admin marca una cuenta (pasajero o chofer) como **de prueba** en su detalle
   y la desmarca cuando quiera. Sus viajes, reservas y anotaciones **no cuentan en Demanda y oferta**. La cuenta sigue
   funcionando igual.
+- **R91. El chofer de prueba no se ve [servidor].** *(Oct. 2026: el admin prueba en producción con un chofer de prueba y
+  eso no debe aparecerle a nadie.)* Un **chofer de prueba** (R86), sus viajes, su ubicación, su carro, sus calificaciones y
+  su pausa solo los ven él mismo, las **cuentas de prueba** y el admin: los demás pasajeros y choferes no lo ven en ninguna
+  pantalla (unidades, La línea, Choferes, compañeros, carros que vienen, quién vuelve). Tampoco se cruza con la gente
+  real: nadie de verdad puede apartar en sus viajes, en la lista hacia Valle Grande solo ve y atiende a pasajeros de
+  prueba, y su carro en Gina no les quita puestos a los choferes reales (R63). Un **pasajero de prueba** sí se ve y viaja
+  con choferes reales, como siempre.
 - **R87. Demanda y oferta [servidor].** Solo el admin lo ve. Para cada hora del día (hora de Caracas):
   - **A Valle Grande** (desde Gina): cuántas **personas querían ir** y qué pasó con ellas: **llevadas**, se fueron en
     **otro transporte** (van u otro carro), la anotación **venció** (R65) o **desistieron**. Una persona que se vuelve a

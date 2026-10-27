@@ -1157,6 +1157,7 @@ export type Database = {
         Returns: undefined
       }
       _dia_habilitado: { Args: { p_chofer: string }; Returns: boolean }
+      _es_prueba: { Args: { p_persona: string }; Returns: boolean }
       _exigir_aprobado: {
         Args: never
         Returns: {
@@ -1845,6 +1846,7 @@ export type Database = {
         Returns: string
       }
       puede_valorar_app: { Args: never; Returns: boolean }
+      puede_ver_chofer: { Args: { p_chofer: string }; Returns: boolean }
       puede_ver_telefono: { Args: { p_objetivo: string }; Returns: boolean }
       quitar_anotado: { Args: { p_reserva: string }; Returns: undefined }
       quitar_pago_movil: { Args: never; Returns: undefined }
