@@ -4,6 +4,7 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 
 import { leerPagoMovil } from "@/lib/bancos"
+import { inicioDe } from "@/lib/sesion"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { correoDeTelefono, normalizarTelefono, telefonoValido } from "@/lib/telefono"
 
@@ -141,7 +142,7 @@ export async function entrar(anterior: EstadoFormulario, formData: FormData): Pr
   }
   // Directo a su interfaz (§5.21): quien está en la nueva no pasa por la clásica
   const { data: perfil } = await supabase.from("perfiles").select("rol, interfaz").eq("id", data.user.id).maybeSingle()
-  redirect(perfil?.interfaz === "nueva" && perfil.rol === "pasajero" ? "/n" : "/inicio")
+  redirect(perfil ? inicioDe(perfil) : "/inicio")
 }
 
 export async function salir() {

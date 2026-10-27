@@ -17,6 +17,7 @@ export async function guardarPagoMovil(anterior: EstadoFormulario, formData: For
   const { error } = await supabase.rpc("guardar_pago_movil", { p_banco: datos.banco, p_telefono: datos.telefono, p_cedula: datos.cedula })
   if (error) return { error: error.message, valores, intento }
   revalidatePath("/carnet")
+  revalidatePath("/n/chofer", "layout") // la interfaz nueva del chofer (§5.21)
   return { valores: { ...valores, guardado: "si" }, intento }
 }
 
@@ -26,5 +27,6 @@ export async function quitarPagoMovil(): Promise<{ error?: string }> {
   const { error } = await supabase.rpc("quitar_pago_movil")
   if (error) return { error: error.message }
   revalidatePath("/carnet")
+  revalidatePath("/n/chofer", "layout") // la interfaz nueva del chofer (§5.21)
   return {}
 }

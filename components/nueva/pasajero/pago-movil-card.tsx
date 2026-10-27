@@ -26,8 +26,11 @@ async function copiar(texto: string): Promise<boolean> {
   }
 }
 
-/** El Pago Móvil del chofer (R74) con el pasaje (R80): Copiar todo primero y cada dato con su toque */
-export function PagoMovilCard({ datos, chofer, pasaje }: { datos: DatosPagoMovil; chofer: string; pasaje?: Tarifa }) {
+/**
+ * El Pago Móvil del chofer (R74) con el pasaje (R80): Copiar todo primero y cada dato con su toque. Con `titulo`, otro
+ * Pago Móvil (el de la línea, para la cuota del chofer, R77)
+ */
+export function PagoMovilCard({ datos, chofer, pasaje, titulo }: { datos: DatosPagoMovil; chofer: string; pasaje?: Tarifa; titulo?: string }) {
   const [copiado, setCopiado] = React.useState<string | null>(null)
   const tocar = async (clave: string, texto: string) => {
     if (await copiar(texto)) {
@@ -44,7 +47,7 @@ export function PagoMovilCard({ datos, chofer, pasaje }: { datos: DatosPagoMovil
   return (
     <section className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
       <div>
-        <h2 className="font-heading font-semibold">Pago Móvil de {chofer.split(" ")[0]}</h2>
+        <h2 className="font-heading font-semibold">{titulo ?? `Pago Móvil de ${chofer.split(" ")[0]}`}</h2>
         <p className="text-sm text-muted-foreground">
           {pasaje ? (
             <>

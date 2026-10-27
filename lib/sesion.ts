@@ -27,8 +27,15 @@ function sacar(conSesion: boolean, admin = false): never {
   redirect(admin ? "/admin/entrar" : "/")
 }
 
-/** Dónde empieza cada interfaz (§5.21) */
-const INICIO_DE = { clasica: "/inicio", nueva: "/n" } as const
+/** Dónde empieza cada interfaz (§5.21): la nueva tiene una parte para el pasajero y otra para el chofer */
+const INICIO_DE = { clasica: "/inicio", nueva: "/n", "nueva-chofer": "/n/chofer" } as const
+export type InterfazPantalla = keyof typeof INICIO_DE
+
+const suInterfaz = (p: Pick<Perfil, "rol" | "interfaz">): InterfazPantalla =>
+  p.interfaz !== "nueva" ? "clasica" : p.rol === "chofer" ? "nueva-chofer" : "nueva"
+
+/** El inicio de la interfaz de una cuenta (al entrar, R84) */
+export const inicioDe = (p: Pick<Perfil, "rol" | "interfaz">) => INICIO_DE[suInterfaz(p)]
 
 /**
  * Adónde ir después de una acción (apartar, anotarse, ya no voy): la pantalla de la clásica o, para quien está en la
@@ -36,7 +43,7 @@ const INICIO_DE = { clasica: "/inicio", nueva: "/n" } as const
  */
 export async function destinoPara(clasica: string): Promise<string> {
   const perfil = await obtenerPerfil()
-  return perfil?.interfaz === "nueva" && perfil.rol === "pasajero" ? INICIO_DE.nueva : clasica
+  return perfil && perfil.interfaz === "nueva" ? inicioDe(perfil) : clasica
 }
 
 /**
@@ -44,13 +51,13 @@ export async function destinoPara(clasica: string): Promise<string> {
  * dice de qué interfaz es (la clásica, si no): quien tiene la otra va al inicio de la suya (R84). Se lee de la base en
  * cada pedido, así un cambio del admin vale al siguiente toque.
  */
-export async function exigirCuentaAprobada({ interfaz = "clasica" }: { interfaz?: "clasica" | "nueva" } = {}): Promise<Perfil> {
+export async function exigirCuentaAprobada({ interfaz = "clasica" }: { interfaz?: InterfazPantalla } = {}): Promise<Perfil> {
   const { conSesion, perfil } = await obtenerSesion()
   if (!perfil) sacar(conSesion)
   if (perfil.rol === "admin") redirect("/admin")
   if (perfil.estado !== "aprobado") redirect("/en-revision")
-  // Por ahora la nueva es solo del pasajero (R83): el chofer sigue en la clásica hasta que exista /n/chofer
-  const suya = perfil.interfaz === "nueva" && perfil.rol === "pasajero" ? "nueva" : "clasica"
+  // Pasajero y chofer de la nueva tienen cada uno su parte: quien abre la del otro va a la suya
+  const suya = suInterfaz(perfil)
   if (suya !== interfaz) redirect(INICIO_DE[suya])
   return perfil
 }

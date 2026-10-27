@@ -607,7 +607,9 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
 - **R83. Cada cuenta tiene su interfaz [servidor].** **Clásica** (la de siempre, por defecto) o **nueva**. **Solo el admin
   la cambia**, por persona o en grupo; el usuario no puede volver por su cuenta. Orden: **primero pasajeros**, después
   choferes.
-- **R84. La app lleva a cada uno a la suya.** La nueva vive en `/n` (pasajero; el chofer, más adelante, en `/n/chofer`):
+- **R84. La app lleva a cada uno a la suya.** La nueva vive en `/n` (pasajero) y en `/n/chofer` (chofer, con las mismas
+  pantallas de la clásica: Inicio con su viaje, Publicar, la lista de Gina, la cuota, Mis viajes, Calificaciones, Mi carnet y
+  los compañeros):
   quien está en la nueva y abre una dirección de la clásica (un enlace viejo, la app instalada) va a la pantalla
   equivalente de la nueva, y al revés. Un cambio hecho en el panel se aplica **al siguiente toque** (cada pantalla mira la
   interfaz de la cuenta en la base). Entrar (teléfono + PIN), registrarse y el panel son los mismos para las dos.

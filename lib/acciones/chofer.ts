@@ -18,6 +18,7 @@ async function rpc(llamada: (s: Awaited<ReturnType<typeof crearClienteServidor>>
   const { error } = await llamada(supabase)
   if (error) return { error: error.message }
   revalidatePath("/inicio")
+  revalidatePath("/n/chofer", "layout") // la interfaz nueva del chofer (§5.21)
   return { ok: true }
 }
 

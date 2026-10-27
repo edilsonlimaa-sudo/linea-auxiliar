@@ -22,6 +22,7 @@ export async function avisarPagoCuota(anterior: EstadoFormulario, formData: Form
   revalidatePath("/inicio")
   // La página muestra el aviso enviado (en revisión: "Ir a publicar")
   revalidatePath("/cuota")
+  revalidatePath("/n/chofer", "layout") // la interfaz nueva del chofer (§5.21)
   return { intento }
 }
 

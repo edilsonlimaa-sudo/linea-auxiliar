@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bell, CarFront, History, House, Menu } from "lucide-react"
+import { Bell, CarFront, History, House, Menu, Star } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -23,6 +23,14 @@ export const tabsPasajero: Tab[] = [
   { href: "/n/menu", label: "Menú", icon: Menu, fija: true },
 ]
 
+/** Abas do chofer (§5.21) */
+export const tabsChofer: Tab[] = [
+  { href: "/n/chofer", label: "Inicio", icon: House },
+  { href: "/n/chofer/viajes", label: "Mis viajes", icon: History },
+  { href: "/n/chofer/calificaciones", label: "Calificaciones", icon: Star },
+  { href: "/n/chofer/menu", label: "Menú", icon: Menu, fija: true },
+]
+
 function coincide(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
@@ -31,8 +39,17 @@ function coincide(pathname: string, href: string) {
  * Barra inferior. A aba ativa é a de href mais específico que casa com a
  * URL, então "/chofer" não fica ativa em "/chofer/viajes".
  */
-export function TabBar({ tabs = tabsPasajero, contadores = {} }: { tabs?: Tab[]; contadores?: Record<string, number> }) {
+export function TabBar({
+  tabs: propias,
+  para = "pasajero",
+  contadores = {},
+}: {
+  tabs?: Tab[]
+  para?: "pasajero" | "chofer" // desde un Server Component: los íconos no pasan como props
+  contadores?: Record<string, number>
+}) {
   const pathname = usePathname()
+  const tabs = propias ?? (para === "chofer" ? tabsChofer : tabsPasajero)
   const activa = tabs
     .filter((t) => coincide(pathname, t.href))
     .sort((a, b) => b.href.length - a.href.length)[0]?.href
