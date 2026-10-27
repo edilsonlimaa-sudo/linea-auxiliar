@@ -11,8 +11,10 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#0b3b66",
-    theme_color: "#0b3b66",
+    // Las dos en el fondo del tema oscuro: en el Android con 3 botones, la barra de abajo toma el color del manifiesto (no
+    // cambia con el tema): negra, como el tema oscuro. La pantalla de inicio también queda negra con el ícono
+    background_color: "#0b0d0e",
+    theme_color: "#0b0d0e",
     icons: [
       { src: "/icono-192.png", sizes: "192x192", type: "image/png" },
       { src: "/icono-512.png", sizes: "512x512", type: "image/png" },
