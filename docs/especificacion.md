@@ -647,9 +647,10 @@ choferes, la clásica y avisos automáticos.)*
   nueva** o **personas escogidas** (de entre ellos). Cada destinatario recibe su copia; quien entra a la nueva después
   no recibe las anteriores. Una enviada no se edita; el admin la puede **retirar** (desaparece para todos).
 - **R89. El pasajero las ve [servidor].** Cada uno ve **solo las suyas**. En la interfaz nueva hay una pestaña
-  **Notificaciones** (campana) con un **número** de no leídas. La lista va de la más nueva a la más vieja, agrupada en
-  **Hoy · Esta semana · Antes**; las no leídas, con fondo destacado. **Al abrir la pestaña quedan leídas** (el número
-  desaparece; el destacado se mantiene mientras siga en esa pantalla). *(Oct. 2026: sin tarjeta en Inicio; el número
+  **Notificaciones** (campana) con un **número** de no leídas, que se actualiza solo en cualquier pestaña. La lista
+  va de la más nueva a la más vieja, agrupada en **Hoy · Esta semana · Antes**; las no leídas, con fondo destacado.
+  **Al abrir la pestaña quedan leídas** (el número desaparece; el destacado se mantiene mientras siga en esa
+  pantalla). *(Oct. 2026: sin tarjeta en Inicio; el número
   en la campana basta para llamar la atención.)*
 - **R90. También en el celular, si la persona quiere [servidor].** En la pestaña Notificaciones, una tarjeta ofrece
   **Avisarme en el celular**: al tocarla el teléfono pide el permiso (nunca antes de ese toque). Con el permiso, cada
