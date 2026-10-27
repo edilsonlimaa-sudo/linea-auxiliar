@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 
 import { EnLaNuevaFranja } from "@/components/admin/en-la-nueva"
 import { ListaPersonas } from "@/components/admin/lista-personas"
+import { TodosALaNueva } from "@/components/admin/todos-a-la-nueva"
 import { cargarEnLaNueva } from "@/lib/datos/interfaz"
 import { cargarPersonas } from "@/lib/datos/personas-admin"
 import { exigirAdmin } from "@/lib/sesion"
@@ -20,6 +21,8 @@ export default async function PaginaPasajeros({ searchParams }: PageProps<"/admi
       <h1 className="text-xl leading-tight font-bold">Pasajeros</h1>
       {/* R83: quiénes ya usan la interfaz nueva */}
       <EnLaNuevaFranja personas={enLaNueva} base="/admin/pasajeros" />
+      {/* R83 en grupo: el lanzamiento de la nueva para todos, y la vuelta por si algo sale mal */}
+      {!error && <TodosALaNueva total={personas.length} enLaNueva={enLaNueva.length} />}
       <ListaPersonas rol="pasajero" todas={personas} busquedaInicial={busqueda} error={error} />
     </div>
   )

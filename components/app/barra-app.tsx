@@ -23,7 +23,7 @@ export function BarraApp() {
         </button>
         <div className="flex min-w-0 items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element -- ícono SVG local */}
-          <img src="/icon.svg" alt="" width={34} height={34} className="size-8.5 rounded-[9px]" />
+          <img src="/logo-clasica.svg" alt="" width={34} height={34} className="size-8.5 rounded-[9px]" />
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-[15px] font-bold">Línea Auxiliar</span>
             <span className="block truncate text-sm opacity-90">Valle Grande</span>

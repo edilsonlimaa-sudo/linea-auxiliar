@@ -689,7 +689,8 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
 
 - **R83. Cada cuenta tiene su interfaz [servidor].** **Clásica** (la de siempre, por defecto) o **nueva**. **Solo el admin
   la cambia**, por persona o en grupo; el usuario no puede volver por su cuenta. Orden: **primero pasajeros**, después
-  choferes.
+  choferes. En Pasajeros, **Pasar a todos a la nueva** (el lanzamiento, nov. 2026) y **Volver a todos a la clásica**
+  (por si algo sale mal), los dos con confirmación; los choferes no cambian.
 - **R84. La app lleva a cada uno a la suya.** La nueva vive en `/n` (pasajero) y en `/n/chofer` (chofer, con las mismas
   pantallas de la clásica: Inicio con su viaje, Publicar, la lista de Gina, la cuota, Mis viajes, Calificaciones, Mi carnet y
   los compañeros). Pestañas del chofer en la nueva: **Inicio · Compañeros · Calificaciones · Menú**. **Compañeros**
@@ -703,7 +704,9 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   pasajero en la nueva y un chofer en la clásica viajan juntos sin notarlo. **La clásica no cambia** mientras convivan;
   se apaga cuando todos estén en la nueva y no haga falta volver. La nueva sigue el **tema del teléfono** (claro u
   oscuro) por defecto; en Menú → **Apariencia** (una línea como las demás, que dice el tema actual y abre una hoja) se escoge Sistema, Claro u Oscuro (se guarda en el teléfono, aparte del
-  tema de la clásica). **Fondo "aurora arriba"** (Oct. 2026): arriba de cada pantalla, manchas suaves con los colores
+  tema de la clásica). **Ícono de la app** (el instalado, el de la pantalla de inicio y el de la pestaña): la **L de
+  Línea hecha camino**, blanca con la parada final celeste, sobre el mismo fondo oscuro de la pantalla de inicio. La
+  cabecera de la clásica conserva su logo del bus. **Fondo "aurora arriba"** (Oct. 2026): arriba de cada pantalla, manchas suaves con los colores
   de la tarde llanera (azul de la Línea, ámbar, coral) que se mueven despacio y se desvanecen hacia el fondo. En el
   claro el fondo es gris claro y las tarjetas blancas y opacas con sombra suave (contraste para leer en la calle); en el
   oscuro las tarjetas dejan ver un poco la aurora. Es solo CSS (sin imágenes) y se queda quieta si el teléfono pide

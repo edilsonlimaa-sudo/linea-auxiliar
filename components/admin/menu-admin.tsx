@@ -100,7 +100,7 @@ export function MenuAdmin({ contadores }: { contadores: ContadoresAdmin }) {
       <SidebarHeader className="border-b-4 border-signal bg-header p-4 text-header-foreground">
         <Link href="/admin" onClick={cerrar} className="flex items-center gap-3 rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring">
           {/* eslint-disable-next-line @next/next/no-img-element -- ícono SVG local */}
-          <img src="/icon.svg" alt="" width={40} height={40} className="size-10 rounded-[10px]" />
+          <img src="/logo-clasica.svg" alt="" width={40} height={40} className="size-10 rounded-[10px]" />
           <span className="min-w-0 leading-tight">
             <span className="block truncate text-base font-bold">Línea Auxiliar</span>
             <span className="block truncate text-sm opacity-90">Administración</span>
