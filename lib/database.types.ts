@@ -469,6 +469,7 @@ export type Database = {
           autor_id: string
           creada_en: string
           id: string
+          push_enviados: number
           retirada_en: string | null
           texto: string
           tipo: string
@@ -478,6 +479,7 @@ export type Database = {
           autor_id?: string
           creada_en?: string
           id?: string
+          push_enviados?: number
           retirada_en?: string | null
           texto: string
           tipo: string
@@ -487,6 +489,7 @@ export type Database = {
           autor_id?: string
           creada_en?: string
           id?: string
+          push_enviados?: number
           retirada_en?: string | null
           texto?: string
           tipo?: string
@@ -734,6 +737,38 @@ export type Database = {
             foreignKeyName: "posiciones_chofer_id_fkey"
             columns: ["chofer_id"]
             isOneToOne: true
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_suscripciones: {
+        Row: {
+          auth: string
+          creada_en: string
+          endpoint: string
+          p256dh: string
+          persona_id: string
+        }
+        Insert: {
+          auth: string
+          creada_en?: string
+          endpoint: string
+          p256dh: string
+          persona_id: string
+        }
+        Update: {
+          auth?: string
+          creada_en?: string
+          endpoint?: string
+          p256dh?: string
+          persona_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_suscripciones_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: false
             referencedRelation: "perfiles"
             referencedColumns: ["id"]
           },
@@ -1385,7 +1420,10 @@ export type Database = {
           p_tipo: string
           p_titulo: string
         }
-        Returns: number
+        Returns: {
+          destinatarios: number
+          id: string
+        }[]
       }
       admin_guardar_cuota: {
         Args: {
@@ -1420,12 +1458,21 @@ export type Database = {
           creada_en: string
           destinatarios: number
           id: string
+          push_enviados: number
           retirada_en: string
           texto: string
           tipo: string
           titulo: string
           vistas: number
         }[]
+      }
+      admin_registrar_push: {
+        Args: {
+          p_caducados?: string[]
+          p_enviados: number
+          p_notificacion: string
+        }
+        Returns: undefined
       }
       admin_resumen: {
         Args: never
@@ -1440,6 +1487,14 @@ export type Database = {
         }[]
       }
       admin_retirar_notificacion: { Args: { p_id: string }; Returns: undefined }
+      admin_suscripciones_de: {
+        Args: { p_notificacion: string }
+        Returns: {
+          auth: string
+          endpoint: string
+          p256dh: string
+        }[]
+      }
       admin_uso_pasajeros: {
         Args: { p_desde: string }
         Returns: {
@@ -1640,6 +1695,10 @@ export type Database = {
         }
         Returns: string
       }
+      guardar_suscripcion: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
+        Returns: undefined
+      }
       lista_de_gina: {
         Args: never
         Returns: {
@@ -1789,6 +1848,7 @@ export type Database = {
       puede_ver_telefono: { Args: { p_objetivo: string }; Returns: boolean }
       quitar_anotado: { Args: { p_reserva: string }; Returns: undefined }
       quitar_pago_movil: { Args: never; Returns: undefined }
+      quitar_suscripcion: { Args: { p_endpoint: string }; Returns: undefined }
       reservar: {
         Args: {
           p_lat?: number

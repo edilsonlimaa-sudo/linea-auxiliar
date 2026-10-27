@@ -6,6 +6,7 @@ import { useTheme } from "next-themes"
 import * as React from "react"
 
 import { usePerfil } from "@/components/nueva/app/perfil"
+import { apagarAvisosDeEsteCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/nueva/ui/drawer"
@@ -210,7 +211,8 @@ export function CerrarSesionDrawer() {
           <DrawerTitle className="font-heading text-xl">¿Cerrar sesión?</DrawerTitle>
           <DrawerDescription>Para volver a entrar necesitas tu teléfono y tu PIN.</DrawerDescription>
         </DrawerHeader>
-        <form action={salir} className="flex flex-col gap-2 p-4">
+        {/* R90: este celular deja de recibir los avisos de la cuenta antes de salir */}
+        <form action={async () => (await apagarAvisosDeEsteCelular().catch(() => {}), await salir())} className="flex flex-col gap-2 p-4">
           <Button type="submit" variant="destructive" size="lg">
             Sí, cerrar sesión
           </Button>

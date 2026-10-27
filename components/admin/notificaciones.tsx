@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button"
 import { enviarNotificacion, retirarNotificacion } from "@/lib/acciones/notificaciones"
 import type { EnLaNueva } from "@/lib/datos/interfaz"
 import type { NotificacionEnviada } from "@/lib/datos/notificaciones"
-import { fechaHora } from "@/lib/fechas"
 import { TIPOS_NOTIFICACION, type TipoNotificacion } from "@/lib/notificaciones"
 import { cn } from "@/lib/utils"
 
@@ -36,7 +35,7 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
   const [escogidas, setEscogidas] = useState<string[]>([])
   const [confirmando, setConfirmando] = useState(false)
   const [error, setError] = useState<string>()
-  const [enviadas, setEnviadas] = useState<number>()
+  const [enviadas, setEnviadas] = useState<{ personas: number; celulares: number }>()
   const [pendiente, iniciar] = useTransition()
 
   const cuantas = todos ? personas.length : escogidas.length
@@ -55,7 +54,7 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
       setError(r.error)
       if (r.error) return
       setConfirmando(false)
-      setEnviadas(r.enviadas)
+      setEnviadas({ personas: r.enviadas ?? 0, celulares: r.celulares ?? 0 })
       setTitulo("")
       setTexto("")
       setEscogidas([])
@@ -67,7 +66,8 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
       {enviadas !== undefined && (
         <p role="status" className="flex items-center gap-2 rounded-2xl bg-success-muted px-4 py-3 font-bold text-success">
           <CheckCircle2Icon aria-hidden className="size-5 shrink-0" />
-          Le llegó a {enviadas} {enviadas === 1 ? "persona" : "personas"}.
+          Le llegó a {enviadas.personas} {enviadas.personas === 1 ? "persona" : "personas"}
+          {enviadas.celulares > 0 ? ` y como aviso a ${enviadas.celulares} ${enviadas.celulares === 1 ? "celular" : "celulares"}` : ""}.
         </p>
       )}
 
@@ -148,7 +148,10 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
               })}
             </ul>
           ))}
-        <p className="text-sm text-muted-foreground">Por ahora solo la reciben los pasajeros de la interfaz nueva.</p>
+        <p className="text-sm text-muted-foreground">
+          Por ahora solo la reciben los pasajeros de la interfaz nueva. A quien activó los avisos en su celular también le
+          llega como aviso del teléfono.
+        </p>
       </fieldset>
 
       {error && !confirmando && (
@@ -200,14 +203,16 @@ function Enviada({ n }: { n: NotificacionEnviada }) {
   return (
     <li className={cn("flex flex-col gap-2 rounded-2xl border-2 bg-card p-4", retirada && "opacity-60")}>
       <p className="text-sm text-muted-foreground">
-        {tipo} · {fechaHora(n.creada_en)}
+        {tipo} · {n.cuando}
         {retirada ? " · Retirada" : ""}
       </p>
       <p className="font-bold">{n.titulo}</p>
       <p className="whitespace-pre-line">{n.texto}</p>
       <div className="flex flex-wrap items-center gap-3 pt-1">
         <p className="flex-1 text-sm">
-          Llegó a <b className="tabular-nums">{n.destinatarios}</b> · la {n.vistas === 1 ? "vio" : "vieron"}{" "}
+          Llegó a <b className="tabular-nums">{n.destinatarios}</b> · aviso en <b className="tabular-nums">{n.push_enviados}</b>{" "}
+          {n.push_enviados === 1 ? "celular" : "celulares"} · la{" "}
+          {n.vistas === 1 ? "vio" : "vieron"}{" "}
           <b className="tabular-nums">{n.vistas}</b> <span className="text-muted-foreground">({pct}%)</span>
         </p>
         {!retirada && (

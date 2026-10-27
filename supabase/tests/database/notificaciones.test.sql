@@ -39,10 +39,10 @@ select pg_temp.yo('08');
 select throws_ok($$ select public.admin_enviar_notificacion('aviso', '   ', 'Texto') $$, 'P0001', 'Escribe el título', 'R88: el título es obligatorio');
 select throws_ok($$ select public.admin_enviar_notificacion('aviso', 'Hola', repeat('a', 281)) $$,
   'P0001', 'El texto es muy largo (máximo 280 letras)', 'R88: el texto tiene un máximo');
-select is(public.admin_enviar_notificacion('aviso', 'Llueve fuerte', 'Hoy salen menos carros después de las 5 p. m.'),
+select is((select destinatarios from public.admin_enviar_notificacion('aviso', 'Llueve fuerte', 'Hoy salen menos carros después de las 5 p. m.')),
   (select n::int from antes), 'R88: a todos los pasajeros de la nueva');
-select is(public.admin_enviar_notificacion('consejo', 'Sigo aquí', 'En la lista de Gina, toca Sigo aquí para no perder tu puesto.',
-  array['00000000-0000-4000-a000-0000000000b2', '00000000-0000-4000-a000-0000000000b3']::uuid[]), 1,
+select is((select destinatarios from public.admin_enviar_notificacion('consejo', 'Sigo aquí', 'En la lista de Gina, toca Sigo aquí para no perder tu puesto.',
+  array['00000000-0000-4000-a000-0000000000b2', '00000000-0000-4000-a000-0000000000b3']::uuid[])), 1,
   'R88: a personas escogidas, solo las de la nueva (Rosa está en la clásica)');
 select throws_ok($$ select public.admin_enviar_notificacion('novedad', 'Hola', 'Texto', array['00000000-0000-4000-a000-0000000000b3']::uuid[]) $$,
   'P0001', 'Nadie recibiría esta notificación: escoge pasajeros de la interfaz nueva', 'R88: sin destinatarios no se manda');

@@ -62,7 +62,7 @@ function redirigir(request: NextRequest, respuesta: NextResponse, destino: strin
 
 export const config = {
   matcher: [
-    // Todo menos archivos estáticos e imágenes
-    "/((?!_next/static|_next/image|favicon.ico|icon.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
+    // Todo menos archivos estáticos e imágenes (y el service worker de los avisos en el celular, R90)
+    "/((?!_next/static|_next/image|favicon.ico|icon.svg|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
   ],
 }
