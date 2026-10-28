@@ -13,6 +13,7 @@ import {
   ListOrderedIcon,
   LogOutIcon,
   MoonIcon,
+  RouteIcon,
   StarIcon,
   SunIcon,
   UserCheckIcon,
@@ -71,6 +72,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
     destinos: [
       { href: "/admin/uso", titulo: "Uso de la app", icono: BarChart3Icon },
       { href: "/admin/demanda", titulo: "Demanda y oferta", icono: ChartColumnIcon },
+      { href: "/admin/rutas", titulo: "Rutas", icono: RouteIcon },
       { href: "/admin/calificaciones", titulo: "Calificaciones", icono: StarIcon },
       { href: "/admin/sugerencias", titulo: "Sugerencias", icono: LightbulbIcon, contador: "sugerencias", accion: true },
     ],

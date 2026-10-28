@@ -363,8 +363,10 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   moverse más de 30 m). El chofer ve "📡 Tus pasajeros ven por dónde vas" o un aviso si falta permiso. Solo
   funciona **con la app abierta y la pantalla encendida** (límite de una web app, §11); el chofer lo ve dicho.
 - **R92. Recorrido de los viajes [servidor].** *(Oct. 2026: para ver la ruta de verdad, sus variantes, el tiempo de
-  cada tramo y dónde para la gente.)* Solo si el admin lo **enciende** en el panel ("Grabar recorridos", Demanda y
-  oferta; apagado por defecto). Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
+  cada tramo y dónde para la gente.)* Solo si el admin lo **enciende** en el panel (Análisis → **Rutas**, "Grabar
+  recorridos"; apagado por defecto). En esa misma pantalla, un **mapa** dibuja cada viaje terminado como una línea del
+  color de su sentido (de la salida a la llegada; donde se juntan muchas está la ruta principal), con filtros de período,
+  sentido y chofer; tocar una línea dice de quién es, cuándo salió y cuánto tardó. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
   en el teléfono** (IndexedDB, sobrevive a cerrar la app) y los sube **en lotes**: cada ~100 puntos (unos 25 min), al
   salir de la app o dejar de compartir (sin viajes), y al abrirla si quedó algo pendiente (sin señal, se reintenta
   después). Un punto ya guardado no se guarda dos veces. Cada lote queda con el chofer y su hora; a qué viaje pertenece

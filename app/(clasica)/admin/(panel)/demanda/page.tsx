@@ -2,9 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { ComoSeCuenta, DemandaPorDia, DemandaPorHora, TotalesDemanda } from "@/components/admin/demanda-oferta"
-import { GrabarRecorridos } from "@/components/admin/grabar-recorridos"
 import { Alert, AlertTitle } from "@/components/ui/alert"
-import { cargarDemandaOferta, cargarRecorridos, DIAS, type Dias, PERIODOS, type Periodo } from "@/lib/datos/demanda"
+import { cargarDemandaOferta, DIAS, type Dias, PERIODOS, type Periodo } from "@/lib/datos/demanda"
 import { exigirAdmin } from "@/lib/sesion"
 import { cn } from "@/lib/utils"
 
@@ -18,7 +17,7 @@ export default async function PaginaDemanda({ searchParams }: PageProps<"/admin/
   const { periodo: p, dias: d } = await searchParams
   const periodo: Periodo = PERIODOS.find((x) => x.id === p)?.id ?? "7"
   const dias: Dias = DIAS.find((x) => x.id === d)?.id ?? "semana"
-  const [datos, recorridos] = await Promise.all([cargarDemandaOferta(periodo, dias), cargarRecorridos()])
+  const datos = await cargarDemandaOferta(periodo, dias)
   const enlace = (cambio: { periodo?: Periodo; dias?: Dias }) => `/admin/demanda?periodo=${cambio.periodo ?? periodo}&dias=${cambio.dias ?? dias}`
 
   return (
@@ -59,10 +58,7 @@ export default async function PaginaDemanda({ searchParams }: PageProps<"/admin/
               <DemandaPorDia dias={datos.porDia} />
             </section>
           )}
-          <ComoSeCuenta />
-          {/* R92: la ruta de verdad, para analizar después */}
-          <GrabarRecorridos resumen={recorridos} />
-        </>
+          <ComoSeCuenta />        </>
       )}
     </div>
   )

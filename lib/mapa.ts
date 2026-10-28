@@ -38,3 +38,6 @@ export const EN_VIVO_MS = 60_000
 
 /** La parada de Gina, en el Centro: de donde sale Centro → Valle Grande (docs/especificacion.md R62) */
 export const GINA: Punto = { lat: 9.74505, lng: -63.17923 }
+
+/** Rutas (R92): un color por sentido, en el mapa y en la leyenda */
+export const COLOR_SENTIDO = { vg_a_centro: "#2563eb", centro_a_vg: "#16a34a" } as const

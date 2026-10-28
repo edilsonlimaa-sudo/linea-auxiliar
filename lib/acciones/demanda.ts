@@ -18,6 +18,6 @@ export async function grabarRecorridos(grabar: boolean): Promise<{ error?: strin
   const supabase = await crearClienteServidor()
   const { error } = await supabase.rpc("admin_grabar_recorridos", { p_grabar: grabar })
   if (error) return { error: error.message }
-  revalidatePath("/admin/demanda")
+  revalidatePath("/admin/rutas")
   return {}
 }
