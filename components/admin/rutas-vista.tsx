@@ -10,6 +10,17 @@ import { SENTIDOS } from "@/lib/viajes"
 
 type Dia = { dia: string; texto: string; choferes: { id: string; nombre: string; tramos: Tramo[] }[] }
 
+// Los tramos seguidos del mismo viaje, juntos (el marco de la lista); los de sin viaje, cada uno suelto
+function porViaje(tramos: Tramo[]) {
+  const grupos: { ciclo: Tramo["ciclo"]; tramos: Tramo[] }[] = []
+  for (const t of tramos) {
+    const ultimo = grupos.at(-1)
+    if (t.ciclo && ultimo?.ciclo?.id === t.ciclo.id) ultimo.tramos.push(t)
+    else grupos.push({ ciclo: t.ciclo, tramos: [t] })
+  }
+  return grupos
+}
+
 // Los días, el más nuevo primero; en cada día, cada chofer con sus tramos en orden (como pasaron)
 function porDia(tramos: Tramo[]): Dia[] {
   const dias = new Map<string, Dia>()
@@ -56,7 +67,10 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
           <h2 id="titulo-cronologia" className="text-base font-bold">
             En orden
           </h2>
-          <p className="text-sm text-muted-foreground">Cada bloque es un tramo del mapa: puntos seguidos del mismo chofer, sin cortes del GPS.</p>
+          <p className="text-sm text-muted-foreground">
+            Cada bloque es un tramo del mapa: puntos seguidos del mismo chofer, sin cortes del GPS. El marco punteado es un viaje,
+            según lo que marcó el chofer: desde que lo publica (o termina el anterior) hasta que lo termina.
+          </p>
         </div>
         <div ref={lista} className="flex flex-col gap-3">
           {dias.map((d, i) => (
@@ -72,16 +86,35 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                   <div key={c.id} className="flex flex-col gap-1.5">
                     <h3 className="font-bold">{c.nombre}</h3>
                     <ol className="flex flex-col gap-1.5">
-                      {c.tramos.map((t, j) => (
-                        <li key={t.id} className="flex flex-col gap-1.5">
-                          {t.sinGrabarAntes && t.anterior === c.tramos[j - 1]?.id ? (
-                            <p className="flex items-center gap-2 text-sm text-muted-foreground before:h-px before:flex-1 before:border-t-2 before:border-dashed after:h-px after:flex-1 after:border-t-2 after:border-dashed">
-                              {t.sinGrabarAntes} sin GPS
-                            </p>
-                          ) : null}
-                          <Bloque tramo={t} elegido={elegido === t.id} onClick={() => escoger(t.id)} />
-                        </li>
-                      ))}
+                      {porViaje(c.tramos).map((g) => {
+                        // El hueco sin GPS antes de un bloque (entre dos viajes, va fuera del marco)
+                        const hueco = (t: Tramo) => {
+                          const previo = c.tramos[c.tramos.indexOf(t) - 1]
+                          return t.sinGrabarAntes && previo && t.anterior === previo.id ? <SinGps tiempo={t.sinGrabarAntes} /> : null
+                        }
+                        const filas = g.tramos.map((t, k) => (
+                          <li key={t.id} className="flex flex-col gap-1.5">
+                            {g.ciclo && k === 0 ? null : hueco(t)}
+                            <Bloque tramo={t} elegido={elegido === t.id} onClick={() => escoger(t.id)} />
+                          </li>
+                        ))
+                        if (!g.ciclo) return filas
+                        // El marco del viaje: de que pasa a ser el viaje del chofer hasta que termina (registros del viaje)
+                        return (
+                          <li key={g.ciclo.id + g.tramos[0].id} className="flex flex-col gap-1.5">
+                            {hueco(g.tramos[0])}
+                            <div className="rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-2">
+                              <p className="flex flex-wrap items-baseline justify-between gap-x-3 px-1 pb-1.5 text-sm">
+                                <span className="font-bold">{g.ciclo.titulo}</span>
+                                <span className="text-muted-foreground">
+                                  {g.ciclo.horas} · {g.ciclo.nota}
+                                </span>
+                              </p>
+                              <ol className="flex flex-col gap-1.5">{filas}</ol>
+                            </div>
+                          </li>
+                        )
+                      })}
                     </ol>
                   </div>
                 ))}
@@ -91,6 +124,14 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
         </div>
       </section>
     </>
+  )
+}
+
+function SinGps({ tiempo }: { tiempo: string }) {
+  return (
+    <p className="flex items-center gap-2 text-sm text-muted-foreground before:h-px before:flex-1 before:border-t-2 before:border-dashed after:h-px after:flex-1 after:border-t-2 after:border-dashed">
+      {tiempo} sin GPS
+    </p>
   )
 }
 
@@ -110,7 +151,7 @@ function Bloque({ tramo: t, elegido, onClick }: { tramo: Tramo; elegido: boolean
       <span aria-hidden className={cn("w-1.5 shrink-0 rounded-full", !t.sentido && "opacity-60")} style={{ backgroundColor: color }} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <span className="font-bold">{t.sentido ? SENTIDOS[t.sentido].corto : "Fuera de un viaje"}</span>
+          <span className="font-bold">{t.sentido ? SENTIDOS[t.sentido].corto : t.ciclo ? "Antes de salir" : "Fuera de un viaje"}</span>
           <span className="text-sm font-bold tabular-nums">{t.horas}</span>
         </span>
         <span className="text-sm text-muted-foreground">

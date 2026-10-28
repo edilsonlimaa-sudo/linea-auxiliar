@@ -36,6 +36,9 @@ export type Tramo = {
   n: number // puntos
   km: string // "4,2 km"
   anterior: string | null // el tramo de antes del mismo chofer
+  // El viaje del que es parte (de que pasa a ser el viaje del chofer hasta que termina), para agruparlo en la lista;
+  // sin sentido y con ciclo es "antes de salir" (recoger, esperar en la parada)
+  ciclo: { id: string; titulo: string; horas: string; nota: string } | null
   sinGrabarAntes: string | null // "17 min" si entre el anterior y este el GPS no grabó
   puntos: [number, number][]
 }
@@ -69,8 +72,8 @@ const metros = (a: number[], b: number[]) =>
   111_320 * Math.hypot(b[1] - a[1], (b[2] - a[2]) * Math.cos((a[1] * Math.PI) / 180))
 
 /**
- * Rutas (R92): los puntos de cada chofer, limpios, se cortan en tramos al cambiar de estado (dentro de un viaje, por
- * la hora de salida y llegada, o fuera) o donde el GPS dejó de grabar.
+ * Rutas (R92): los puntos de cada chofer, limpios, se cortan en tramos al cambiar de estado (de un viaje a otro, de
+ * antes de salir a en ruta, o sin viaje) o donde el GPS dejó de grabar.
  */
 export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null, chofer: string | null, ver: VerRutas): Promise<DatosRutas> {
   const supabase = await crearClienteServidor()
@@ -83,19 +86,18 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
   const ids = [...new Set(filas.map((l) => l.chofer_id))]
   if (ids.length === 0) return { resumen, tramos: [], choferes: [] }
 
-  // Los viajes que ya salieron (terminados o en ruta), para saber a cuál pertenece cada punto
+  // Los viajes del período (también los que no salieron), para saber de cuál es cada punto
   const [{ data: viajes }, { data: nombres }] = await Promise.all([
     supabase
       .from("viajes")
-      .select("id, chofer_id, sentido, salida_en, llegada_en")
+      .select("id, chofer_id, sentido, estado, creado_en, estado_en, salida_en, llegada_en")
       .in("chofer_id", ids)
-      .in("estado", ["finalizado", "en_ruta"])
-      .not("salida_en", "is", null)
-      .or(`llegada_en.is.null,llegada_en.gte.${desde.toISOString()}`)
-      .order("salida_en"),
+      .gte("creado_en", new Date(desde.getTime() - DIA).toISOString())
+      .order("creado_en"),
     supabase.from("perfiles").select("id, nombre").in("id", ids),
   ])
   const ahora = Date.now() / 1000
+  const seg = (iso: string | null) => (iso ? new Date(iso).getTime() / 1000 : null)
   const nombreDe = new Map((nombres ?? []).map((n) => [n.id, n.nombre.split(" ")[0]]))
 
   // Los puntos de cada chofer, en orden: [epoch, lat, lng, precisión]
@@ -109,27 +111,40 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
   const tramos: Tramo[] = []
   for (const [choferId, lista] of puntosDe) {
     lista.sort((a, b) => a[0] - b[0])
+    // Cada viaje es "el del chofer" desde que se publica (o termina el anterior, si se encadenó) hasta que termina o se
+    // cancela. Con ida y vuelta publicadas juntas, la vuelta empieza al terminar la ida.
     const suyos = (viajes ?? [])
       .filter((v) => v.chofer_id === choferId)
       .map((v) => ({
         id: v.id,
         sentido: v.sentido,
-        salida: new Date(v.salida_en as string).getTime() / 1000,
-        llegada: v.llegada_en ? new Date(v.llegada_en).getTime() / 1000 : ahora,
+        estado: v.estado,
+        creado: seg(v.creado_en)!,
+        salida: seg(v.salida_en),
+        fin: seg(v.llegada_en) ?? (v.estado === "cancelado" || v.estado === "finalizado" ? seg(v.estado_en)! : ahora),
+        desde: 0,
       }))
-    const viajeEn = (t: number) => suyos.find((v) => t >= v.salida && t <= v.llegada) ?? null
+      .sort((a, b) => a.creado - b.creado || (a.salida ?? Infinity) - (b.salida ?? Infinity))
+    let finAnterior = -Infinity
+    for (const v of suyos) {
+      v.desde = Math.max(v.creado, finAnterior)
+      finAnterior = Math.max(finAnterior, v.fin)
+    }
+    const cicloEn = (t: number) => suyos.find((v) => v.desde < v.fin && t >= v.desde && t <= v.fin) ?? null
     const nombre = nombreDe.get(choferId) ?? "Chofer"
 
-    const propios: { viaje: (typeof suyos)[number] | null; inicio: number; fin: number; metros: number; hueco: boolean; puntos: [number, number][] }[] = []
+    type Ciclo = (typeof suyos)[number]
+    const propios: { ciclo: Ciclo | null; enRuta: boolean; inicio: number; fin: number; metros: number; hueco: boolean; puntos: [number, number][] }[] = []
     let previo: number[] | null = null
     for (const p of lista) {
       if (p[3] > PRECISION_MAX) continue
       if (previo && p[0] > previo[0] && metros(previo, p) / (p[0] - previo[0]) > VELOCIDAD_MAX) continue
-      const v = viajeEn(p[0])
+      const c = cicloEn(p[0])
+      const enRuta = Boolean(c?.salida && p[0] >= c.salida)
       const ultimo = propios.at(-1)
       const hueco = !previo || p[0] - previo[0] > HUECO_S
-      if (!ultimo || !previo || hueco || ultimo.viaje !== v) {
-        propios.push({ viaje: v, inicio: p[0], fin: p[0], metros: 0, hueco, puntos: [[p[1], p[2]]] })
+      if (!ultimo || !previo || hueco || ultimo.ciclo !== c || ultimo.enRuta !== enRuta) {
+        propios.push({ ciclo: c, enRuta, inicio: p[0], fin: p[0], metros: 0, hueco, puntos: [[p[1], p[2]]] })
       } else {
         ultimo.puntos.push([p[1], p[2]])
         ultimo.metros += metros(previo, p)
@@ -138,18 +153,28 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
       previo = p
     }
 
-    // El texto del popup: el viaje entero (de la salida a la llegada) o el pedazo de fuera de un viaje
-    propios.forEach(({ viaje: v, inicio, fin, metros: m, hueco, puntos }, i) => {
+    const tituloDe = (c: Ciclo) => `Viaje ${SENTIDOS[c.sentido].corto.replace(/^A/, "a")}`
+    const notaDe = (c: Ciclo) =>
+      c.salida
+        ? `salió ${hora(c.salida)}${c.estado === "finalizado" ? ` · ${duracion((c.fin - c.salida) / 60)} en ruta` : ""}`
+        : c.estado === "cancelado"
+          ? "cancelado sin salir"
+          : "todavía no sale"
+    propios.forEach(({ ciclo: c, enRuta, inicio, fin, metros: m, hueco, puntos }, i) => {
       const antes = propios[i - 1]
+      const v = enRuta ? c : null
       tramos.push({
         id: `${choferId}-${inicio}`,
         viaje: v?.id ?? null,
         sentido: v?.sentido ?? null,
         choferId,
         chofer: nombre,
+        // El texto del popup: el viaje entero (de la salida a la llegada), lo de antes de salir o lo de fuera de un viaje
         cuando: v
-          ? `${SENTIDOS[v.sentido].corto} · ${fechaHora(v.salida)} · ${duracion((v.llegada - v.salida) / 60)}`
-          : `Fuera de un viaje · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`,
+          ? `${SENTIDOS[v.sentido].corto} · ${fechaHora(v.salida!)} · ${duracion((v.fin - v.salida!) / 60)}`
+          : c
+            ? `Antes de salir · ${tituloDe(c).replace(/^V/, "v")} · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`
+            : `Fuera de un viaje · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`,
         dia: diaDe(inicio),
         diaTexto: diaTexto(inicio),
         horas: `${hora(inicio)} – ${hora(fin)}`,
@@ -158,6 +183,9 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
         km: km(m),
         anterior: antes ? `${choferId}-${antes.inicio}` : null,
         sinGrabarAntes: antes && hueco ? duracion((inicio - antes.fin) / 60) : null,
+        ciclo: c
+          ? { id: c.id, titulo: tituloDe(c), horas: `${hora(c.desde)} – ${c.fin >= ahora - 60 && c.estado !== "finalizado" && c.estado !== "cancelado" ? "ahora" : hora(c.fin)}`, nota: notaDe(c) }
+          : null,
         puntos,
       })
     })
