@@ -41,3 +41,5 @@ export const GINA: Punto = { lat: 9.74505, lng: -63.17923 }
 
 /** Rutas (R92): un color por sentido, en el mapa y en la leyenda */
 export const COLOR_SENTIDO = { vg_a_centro: "#2563eb", centro_a_vg: "#16a34a" } as const
+/** Lo de fuera de un viaje (recoger, ir a la salida, volver vacío) */
+export const COLOR_FUERA_DE_VIAJE = "#6b7280"

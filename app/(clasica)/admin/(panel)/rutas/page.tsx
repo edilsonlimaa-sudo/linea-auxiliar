@@ -4,8 +4,8 @@ import Link from "next/link"
 
 import { GrabarRecorridos } from "@/components/admin/grabar-recorridos"
 import { MapaRutas } from "@/components/admin/mapa-rutas"
-import { COLOR_SENTIDO } from "@/lib/mapa"
-import { cargarRutas, PERIODOS_RUTAS, type PeriodoRutas, SENTIDOS_RUTAS } from "@/lib/datos/rutas"
+import { COLOR_FUERA_DE_VIAJE, COLOR_SENTIDO } from "@/lib/mapa"
+import { cargarRutas, PERIODOS_RUTAS, type PeriodoRutas, SENTIDOS_RUTAS, VER_RUTAS, type VerRutas } from "@/lib/datos/rutas"
 import { exigirAdmin } from "@/lib/sesion"
 import { cn } from "@/lib/utils"
 import { SENTIDOS, type Sentido } from "@/lib/viajes"
@@ -15,20 +15,24 @@ export const metadata: Metadata = { title: "Rutas · Administración · Línea A
 // Rutas (R92): la ruta de verdad, dibujada con el recorrido que graban los teléfonos de los choferes
 export default async function PaginaRutas({ searchParams }: PageProps<"/admin/rutas">) {
   await exigirAdmin()
-  const { periodo: p, sentido: s, chofer: c } = await searchParams
+  const { periodo: p, sentido: s, chofer: c, ver: w } = await searchParams
   const periodo: PeriodoRutas = PERIODOS_RUTAS.find((x) => x.id === p)?.id ?? "7"
   const sentido: Sentido | null = SENTIDOS_RUTAS.find((x) => x.id === s)?.id ?? null
   const chofer = typeof c === "string" && /^[0-9a-f-]{36}$/i.test(c) ? c : null
-  const datos = await cargarRutas(periodo, sentido, chofer)
-  const enlace = (cambio: { periodo?: string; sentido?: string | null; chofer?: string | null }) => {
+  const ver: VerRutas = VER_RUTAS.find((x) => x.id === w)?.id ?? "todo"
+  const datos = await cargarRutas(periodo, sentido, chofer, ver)
+  const enlace = (cambio: { periodo?: string; sentido?: string | null; chofer?: string | null; ver?: VerRutas }) => {
     const q = new URLSearchParams({ periodo: cambio.periodo ?? periodo })
     const sen = cambio.sentido === undefined ? sentido : cambio.sentido
     const cho = cambio.chofer === undefined ? chofer : cambio.chofer
     if (sen) q.set("sentido", sen)
     if (cho) q.set("chofer", cho)
+    if ((cambio.ver ?? ver) === "viajes") q.set("ver", "viajes")
     return `/admin/rutas?${q}`
   }
-  const porSentido = (x: Sentido) => datos.viajes.filter((v) => v.sentido === x).length
+  const viajes = new Set(datos.tramos.filter((t) => t.viaje).map((t) => t.viaje))
+  const porSentido = (x: Sentido) => new Set(datos.tramos.filter((t) => t.sentido === x).map((t) => t.viaje)).size
+  const hayFuera = datos.tramos.some((t) => !t.sentido)
 
   return (
     <div className="flex flex-col gap-4">
@@ -36,7 +40,8 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
         <h1 className="text-xl leading-tight font-bold">Rutas</h1>
         <p className="text-muted-foreground">
           Por dónde van de verdad los carros, con el recorrido que graban los teléfonos de los choferes. Cada viaje es una línea:
-          donde se juntan muchas está la ruta principal; las sueltas son variantes.
+          donde se juntan muchas está la ruta principal; las sueltas son variantes. En gris, lo de fuera de un viaje: recoger
+          gente antes de salir, ir a la salida o volver vacío. Donde el GPS dejó de grabar, la línea se corta.
         </p>
       </header>
 
@@ -52,6 +57,7 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
           ]}
           activo={sentido ?? "todos"}
         />
+        {!sentido && <Filtro etiqueta="Ver" opciones={VER_RUTAS.map((o) => ({ ...o, href: enlace({ ver: o.id }) }))} activo={ver} />}
         {datos.choferes.length > 1 || chofer ? (
           <Filtro
             etiqueta="Chofer"
@@ -64,20 +70,20 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
         ) : null}
       </div>
 
-      {datos.viajes.length === 0 ? (
+      {datos.tramos.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center">
           <RouteIcon aria-hidden className="size-8 text-muted-foreground" />
           <p className="font-bold">Todavía no hay recorridos en este período</p>
           <p className="max-w-md text-sm text-muted-foreground">
             {datos.resumen.grabando
-              ? "Aparecen cuando los choferes terminan viajes con la app abierta y el recorrido sube desde su teléfono."
-              : "Enciende la grabación: desde ese momento, cada viaje terminado se dibuja aquí."}
+              ? "Aparecen cuando los choferes trabajan con la app abierta y el recorrido sube desde su teléfono."
+              : "Enciende la grabación: desde ese momento, el recorrido de los choferes se dibuja aquí."}
           </p>
         </div>
       ) : (
         <>
           <p className="text-sm text-muted-foreground">
-            {datos.viajes.length} {datos.viajes.length === 1 ? "viaje" : "viajes"} ·{" "}
+            {viajes.size} {viajes.size === 1 ? "viaje" : "viajes"} ·{" "}
             {(Object.keys(SENTIDOS) as Sentido[]).map((x, i) => (
               <span key={x}>
                 {i > 0 ? " · " : null}
@@ -86,9 +92,17 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
                 </span>
               </span>
             ))}
+            {hayFuera && (
+              <>
+                {" · "}
+                <span className="font-bold" style={{ color: COLOR_FUERA_DE_VIAJE }}>
+                  fuera de un viaje
+                </span>
+              </>
+            )}
             . Toca una línea para ver de quién es.
           </p>
-          <MapaRutas viajes={datos.viajes} />
+          <MapaRutas tramos={datos.tramos} />
         </>
       )}
     </div>

@@ -364,9 +364,13 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   funciona **con la app abierta y la pantalla encendida** (límite de una web app, §11); el chofer lo ve dicho.
 - **R92. Recorrido de los viajes [servidor].** *(Oct. 2026: para ver la ruta de verdad, sus variantes, el tiempo de
   cada tramo y dónde para la gente.)* Solo si el admin lo **enciende** en el panel (Análisis → **Rutas**, "Grabar
-  recorridos"; apagado por defecto). En esa misma pantalla, un **mapa** dibuja cada viaje terminado como una línea del
-  color de su sentido (de la salida a la llegada; donde se juntan muchas está la ruta principal), con filtros de período,
-  sentido y chofer; tocar una línea dice de quién es, cuándo salió y cuánto tardó. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
+  recorridos"; apagado por defecto). En esa misma pantalla, un **mapa** dibuja **todo el recorrido grabado**: lo que va
+  de la salida a la llegada de un viaje, del color de su sentido (donde se juntan muchas líneas está la ruta principal), y
+  lo de **fuera de un viaje** (recoger gente antes de salir, ir a la salida, volver vacío) en gris punteado; cada punto
+  grabado se ve como un puntito. La línea se corta donde el GPS dejó de grabar más de 2 min (no se inventa el tramo) y
+  se descartan los puntos imprecisos (más de 50 m) y los saltos imposibles (más de 150 km/h). Filtros de período,
+  sentido (escoger uno deja solo sus viajes), chofer y "Todo el recorrido / Solo viajes"; tocar una línea dice de quién es, cuándo
+  fue y cuánto duró. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
   en el teléfono** (IndexedDB, sobrevive a cerrar la app) y los sube **en lotes**: cada ~100 puntos (unos 25 min), al
   salir de la app o dejar de compartir (sin viajes), y al abrirla si quedó algo pendiente (sin señal, se reintenta
   después). Un punto ya guardado no se guarda dos veces. Cada lote queda con el chofer y su hora; a qué viaje pertenece
