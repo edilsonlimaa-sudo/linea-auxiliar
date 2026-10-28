@@ -6,6 +6,7 @@ import * as React from "react"
 
 import { Button } from "@/components/nueva/ui/button"
 import { cancelarAvisoAlCentro, pedirAvisoAlCentro } from "@/lib/acciones/pasajero"
+import { pedirPermisoSiFalta } from "@/lib/avisos-celular"
 
 type Props = {
   // El pedido vigente (hasta = "3:40 p. m.", escrito en el servidor); avisada = ya le llegó el aviso de un carro
@@ -14,8 +15,8 @@ type Props = {
 
 /**
  * R94, en Al Centro cuando no hay carro con puesto: "Avisarme cuando haya un carro" por 1 h, 2 h o hasta una hora. El
- * aviso llega una sola vez; con el pedido vigente, lo dice y deja cancelarlo. Si el celular no tiene los avisos
- * activados, lleva a activarlos (sin ellos, lo ve al abrir la app).
+ * aviso llega una sola vez; con el pedido vigente, lo dice y deja cancelarlo. Si el celular nunca respondió al permiso de
+ * avisos, se pide en el mismo toque; si los rechazó, lleva a activarlos (sin ellos, lo ve al abrir la app).
  */
 export function AvisoAlCentro({ pedido }: Props) {
   const [error, setError] = React.useState<string>()
@@ -32,6 +33,9 @@ export function AvisoAlCentro({ pedido }: Props) {
   const pedir = (hasta: { horas: number } | { hora: string }) =>
     iniciar(async () => {
       setError(undefined)
+      // Quien pide un aviso quiere que le llegue: si este celular nunca respondió al permiso, se pide ahora (mismo toque)
+      const permiso = await pedirPermisoSiFalta().catch(() => null)
+      if (permiso) setSinAvisos(permiso !== "activo")
       const r = await pedirAvisoAlCentro(hasta)
       if (r.error) setError(r.error)
       else setConHora(false)

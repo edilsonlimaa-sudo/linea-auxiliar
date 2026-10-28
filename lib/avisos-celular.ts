@@ -56,3 +56,54 @@ export async function apagarAvisosDeEsteCelular() {
   await desactivarAvisosCelular(suscripcion.endpoint)
   await suscripcion.unsubscribe()
 }
+
+/** R94: al pedir un aviso, si este aparato nunca respondió al permiso, se pide en el mismo toque */
+export async function pedirPermisoSiFalta(): Promise<EstadoAvisos | null> {
+  if (!soportado() || Notification.permission !== "default") return null
+  return (await activarAvisos()).estado
+}
+
+// R90: cuándo la app vuelve a ofrecer los avisos (en este aparato). La bienvenida, una vez; el recordatorio de Inicio,
+// al día siguiente de "Ahora no" y luego cada 7 días al cerrarlo, como mucho 3 veces
+const BIENVENIDA = "avisos-bienvenida"
+const RECORDATORIO = "avisos-recordatorio"
+const DIA_MS = 86_400_000
+const MAXIMO_RECORDATORIOS = 3
+
+const leer = (clave: string) => {
+  try {
+    return localStorage.getItem(clave)
+  } catch {
+    return null
+  }
+}
+const escribir = (clave: string, valor: string) => {
+  try {
+    localStorage.setItem(clave, valor)
+  } catch {
+    // Sin localStorage: se vuelve a ofrecer la próxima vez
+  }
+}
+
+export const bienvenidaVista = () => leer(BIENVENIDA) !== null
+export function marcarBienvenidaVista(ahoraNo: boolean) {
+  escribir(BIENVENIDA, String(Date.now()))
+  if (ahoraNo) escribir(RECORDATORIO, JSON.stringify({ veces: 0, desde: Date.now() + DIA_MS }))
+}
+
+export function puedeRecordar() {
+  if (!bienvenidaVista()) return false
+  try {
+    const r = JSON.parse(leer(RECORDATORIO) ?? "null") as { veces: number; desde: number } | null
+    return !r || (r.veces < MAXIMO_RECORDATORIOS && Date.now() >= r.desde)
+  } catch {
+    return true
+  }
+}
+export function posponerRecordatorio() {
+  let veces = 0
+  try {
+    veces = (JSON.parse(leer(RECORDATORIO) ?? "null") as { veces: number } | null)?.veces ?? 0
+  } catch {}
+  escribir(RECORDATORIO, JSON.stringify({ veces: veces + 1, desde: Date.now() + 7 * DIA_MS }))
+}

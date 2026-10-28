@@ -4,6 +4,7 @@ import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { AvisoCierre, AvisoTarifa } from "@/components/nueva/pasajero/avisos"
+import { AvisosCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
@@ -62,6 +63,7 @@ export default async function InicioNueva() {
       <EnVivo />
       <AppHeader title={`Hola, ${perfil.nombre.split(" ")[0]}`} />
       <div className="flex flex-col gap-6 p-4">
+        <AvisosCelular recordatorio />
         {pendiente ? <ViajeTerminado viaje={pendiente} /> : null}
         {cierre ? <AvisoCierre aviso={cierre} /> : null}
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}

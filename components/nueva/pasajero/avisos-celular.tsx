@@ -1,29 +1,37 @@
 "use client"
 
-import { BellOff, BellRing, Loader2, Smartphone } from "lucide-react"
+import { BellOff, BellRing, Loader2, Smartphone, X } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/nueva/ui/button"
-import { activarAvisos, type EstadoAvisos, revisarAvisos } from "@/lib/avisos-celular"
+import { activarAvisos, type EstadoAvisos, posponerRecordatorio, puedeRecordar, revisarAvisos } from "@/lib/avisos-celular"
 
 /**
  * Avisos en el celular (R90), arriba de la pestaña Notificaciones: el permiso se pide solo al tocar "Avisarme en el
  * celular". Explica qué hacer si el teléfono lo bloqueó o si es un iPhone sin la app instalada. Ya activados, no se ve.
+ * Con `recordatorio` (arriba de Inicio): solo después de la bienvenida y cuando toca (`puedeRecordar`), y con ✕ para
+ * dejarlo para dentro de 7 días.
  */
-export function AvisosCelular() {
+export function AvisosCelular({ recordatorio = false }: { recordatorio?: boolean }) {
   const [estado, setEstado] = React.useState<EstadoAvisos>("cargando")
+  const [cerrado, setCerrado] = React.useState(false)
   const [error, setError] = React.useState<string>()
   const [pendiente, iniciar] = React.useTransition()
 
   React.useEffect(() => {
     let vigente = true
+    if (recordatorio && !puedeRecordar()) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- lo que guardó el aparato solo se lee en el navegador
+      setEstado("sin-soporte") // todavía no toca: no se muestra
+      return
+    }
     revisarAvisos()
       .then((e) => vigente && setEstado(e))
       .catch(() => vigente && setEstado("sin-soporte"))
     return () => {
       vigente = false
     }
-  }, [])
+  }, [recordatorio])
 
   const activar = () =>
     iniciar(async () => {
@@ -34,7 +42,7 @@ export function AvisosCelular() {
     })
 
   // Activados, la tarjeta no aparece: la app no ofrece apagarlos (quien no los quiera, los bloquea en el teléfono)
-  if (estado === "cargando" || estado === "sin-soporte" || estado === "activo") return null
+  if (cerrado || estado === "cargando" || estado === "sin-soporte" || estado === "activo") return null
 
   const textos: Record<"iphone" | "bloqueado" | "inactivo", { icono: React.ReactNode; titulo: string; texto: string }> = {
     inactivo: {
@@ -63,6 +71,17 @@ export function AvisosCelular() {
           <p className="font-heading font-semibold">{t.titulo}</p>
           <p className="text-sm text-muted-foreground">{t.texto}</p>
         </div>
+        {recordatorio ? (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            aria-label="Ahora no"
+            onClick={() => (posponerRecordatorio(), setCerrado(true))}
+            className="-mt-1 -mr-1 shrink-0"
+          >
+            <X />
+          </Button>
+        ) : null}
       </div>
       {estado === "inactivo" ? (
         <Button disabled={pendiente} onClick={activar}>

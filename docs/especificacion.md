@@ -725,6 +725,17 @@ choferes, la clásica y avisos automáticos.)*
   iPhone, que primero hay que agregar la app a la pantalla de inicio. La app se puede instalar (manifiesto con nombre,
   colores e íconos; se abre en pantalla completa). *(Oct. 2026: el push no garantiza la hora exacta: algunos Android con
   ahorro de batería lo entregan al desbloquear.)*
+  **Dónde se ofrecen** *(oct. 2026: los avisos son la base de la interfaz nueva y la pestaña Notificaciones los dejaba
+  escondidos)*. El navegador pregunta una sola vez (si la persona dice que no, solo se desbloquea en sus ajustes), así
+  que la app nunca pregunta en frío: primero explica, y el permiso se pide al tocar.
+  - **Bienvenida:** la primera vez que se abre la interfaz nueva en ese aparato, una hoja "¿Te avisamos en el
+    celular?" dice para qué sirven (el carro al Centro que pidió, R94, y las novedades de la línea) con **Activar
+    avisos** y **Ahora no**. En un iPhone sin la app instalada, explica cómo instalarla. Una sola vez por aparato; no
+    aparece si ya están activados o bloqueados.
+  - **Recordatorio en Inicio:** quien dijo "Ahora no" ve arriba de Inicio la tarjeta de los avisos (la de la pestaña
+    Notificaciones) **desde el día siguiente**; con ✕ vuelve a los **7 días**, como mucho **3 veces**.
+  - **En el momento de pedir un aviso** (R94): si el aparato nunca respondió, tocar 1 hora / 2 horas / Avisarme pide
+    el permiso en el mismo toque.
 - **En el panel** (**Notificaciones**, en Operación): el formulario para mandar y la lista de las enviadas, la más nueva
   primero, con tipo, título, a cuántos llegó, **a cuántos celulares llegó el aviso** (R90) y **cuántos la vieron**, y
   **Retirar**.

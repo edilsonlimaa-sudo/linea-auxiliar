@@ -1,6 +1,7 @@
 import { CampanaEnVivo } from "@/components/nueva/app/campana-en-vivo"
 import { PerfilProvider } from "@/components/nueva/app/perfil"
 import { TabBar } from "@/components/nueva/app/tab-bar"
+import { BienvenidaAvisos } from "@/components/nueva/pasajero/bienvenida-avisos"
 import { contarNoLeidas } from "@/lib/datos/notificaciones"
 import { firmarFotos } from "@/lib/fotos"
 import { exigirCuentaAprobada } from "@/lib/sesion"
@@ -19,6 +20,8 @@ export default async function LayoutPestanas({ children }: Readonly<{ children: 
     <PerfilProvider perfil={{ nombre: perfil.nombre, iniciales: iniciales(perfil.nombre), urbanismo: perfil.urbanismo, fotoUrl }}>
       {children}
       <CampanaEnVivo personaId={perfil.id} />
+      {/* R90: la primera vez en este aparato, la oferta de los avisos en el celular */}
+      <BienvenidaAvisos />
       <TabBar contadores={{ "/n/notificaciones": noLeidas }} />
     </PerfilProvider>
   )
