@@ -1,6 +1,6 @@
 "use client"
 
-import { MapIcon } from "lucide-react"
+import { MapIcon, PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { MapaRutas } from "@/components/admin/mapa-rutas"
@@ -115,11 +115,32 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
   const verTodo = () => ver(null)
   const delMapa = useCallback((id: string | null) => setEleccion(id ? { tramo: id } : null), [])
 
+  // En la computadora la lista va al lado del mapa y se puede recoger (el mapa toma todo el ancho); se recuerda
+  const [sinLista, setSinLista] = useState(false)
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage solo existe en el navegador
+      setSinLista(localStorage.getItem("rutas-sin-lista") === "1")
+    } catch {}
+  }, [])
+  const alternarLista = () =>
+    setSinLista((antes) => {
+      try {
+        localStorage.setItem("rutas-sin-lista", antes ? "0" : "1")
+      } catch {}
+      return !antes
+    })
+
   return (
-    <>
-      <div id="mapa-rutas" className="flex flex-col gap-2">
+    <div
+      className={cn(
+        "flex flex-col gap-4 lg:grid lg:h-[calc(100dvh-2rem)] lg:min-h-[32rem] lg:gap-4",
+        sinLista ? "lg:grid-cols-1" : "lg:grid-cols-[minmax(0,1fr)_25rem]"
+      )}
+    >
+      <div id="mapa-rutas" className="relative flex flex-col gap-2 lg:min-h-0">
         {avisoVista ? (
-          <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-2 border-primary bg-accent px-4 py-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-2 border-primary bg-accent px-4 py-2 lg:absolute lg:top-3 lg:right-3 lg:left-16 lg:z-[1001] lg:shadow-md">
             <p className="text-sm">
               {avisoVista.verbo} <span className="font-bold">{avisoVista.que}</span>
             </p>
@@ -128,13 +149,25 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
             </Button>
           </div>
         ) : null}
-        <MapaRutas tramos={enMapa} elegidos={elegidos} onElegir={delMapa} />
+        <MapaRutas tramos={enMapa} elegidos={elegidos} onElegir={delMapa} className="h-[65vh] min-h-80 lg:h-full lg:min-h-0" />
+        {sinLista ? (
+          <Button variant="outline" onClick={alternarLista} className="absolute right-3 bottom-8 z-[1001] hidden shadow-md lg:inline-flex">
+            <PanelRightOpenIcon aria-hidden />
+            Ver la lista
+          </Button>
+        ) : null}
       </div>
-      <section aria-labelledby="titulo-cronologia" className="flex flex-col gap-3">
+      <section aria-labelledby="titulo-cronologia" className={cn("flex flex-col gap-3 lg:min-h-0 lg:overflow-y-auto lg:pr-1", sinLista && "lg:hidden")}>
         <div>
-          <h2 id="titulo-cronologia" className="text-base font-bold">
-            En orden
-          </h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 id="titulo-cronologia" className="text-base font-bold">
+              En orden
+            </h2>
+            <Button variant="ghost" size="sm" onClick={alternarLista} className="hidden lg:inline-flex">
+              <PanelRightCloseIcon aria-hidden />
+              Ocultar
+            </Button>
+          </div>
           <p className="text-sm text-muted-foreground">
             Cada bloque es un tramo del mapa: puntos seguidos del mismo chofer, sin cortes del GPS. El marco punteado es un viaje,
             según lo que marcó el chofer: desde que empieza a recoger (Ya llegué) hasta que lo termina.
@@ -196,7 +229,7 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
           ))}
         </div>
       </section>
-    </>
+    </div>
   )
 }
 

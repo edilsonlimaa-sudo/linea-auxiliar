@@ -47,7 +47,7 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
 
       <GrabarRecorridos resumen={datos.resumen} />
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 lg:flex-row lg:flex-wrap lg:gap-x-6">
         <Filtro etiqueta="Período" opciones={PERIODOS_RUTAS.map((o) => ({ ...o, href: enlace({ periodo: o.id }) }))} activo={periodo} />
         <Filtro
           etiqueta="Sentido"

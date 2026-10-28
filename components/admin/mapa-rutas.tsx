@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react"
 import { CENTRO_INICIAL } from "@/components/pasajero/ver-en-mapa"
 import type { Tramo } from "@/lib/datos/rutas"
 import { COLOR_FUERA_DE_VIAJE, COLOR_SENTIDO } from "@/lib/mapa"
+import { cn } from "@/lib/utils"
 
 const ESPACIO_FLECHAS = 90 // px en la pantalla entre una flechita y la siguiente
 const PUNTO: CircleMarkerOptions = { radius: 2, weight: 1, opacity: 0.7, fillOpacity: 0.2 }
@@ -56,7 +57,17 @@ function dibujarFlechas(leaflet: typeof import("leaflet"), m: MapaLeaflet, grupo
  * `elegidos`: con uno, el mapa va a ese tramo y abre su popup; con varios (un viaje entero), los resalta todos juntos
  * y se encuadra en ellos, sin popup. `onElegir` avisa del tramo que se toca en el mapa (o null al cerrar su popup).
  */
-export function MapaRutas({ tramos, elegidos, onElegir }: { tramos: Tramo[]; elegidos: string[]; onElegir: (id: string | null) => void }) {
+export function MapaRutas({
+  tramos,
+  elegidos,
+  onElegir,
+  className,
+}: {
+  tramos: Tramo[]
+  elegidos: string[]
+  onElegir: (id: string | null) => void
+  className?: string
+}) {
   const contenedor = useRef<HTMLDivElement>(null)
   const mapa = useRef<MapaLeaflet | null>(null)
   const capa = useRef<LayerGroup | null>(null)
@@ -94,6 +105,10 @@ export function MapaRutas({ tramos, elegidos, onElegir }: { tramos: Tramo[]; ele
       flechas.current = grupoFlechas
       m.on("zoomend", () => dibujarFlechas(leaflet, m, grupoFlechas, actuales.current))
       L.current = leaflet
+      // El contenedor cambia de tamaño (la lista se abre o se recoge al lado): el mapa se rehace a la medida
+      const medida = new ResizeObserver(() => m.invalidateSize())
+      medida.observe(contenedor.current)
+      m.on("unload", () => medida.disconnect())
       setListo(true)
     })
     return () => {
@@ -192,5 +207,5 @@ export function MapaRutas({ tramos, elegidos, onElegir }: { tramos: Tramo[]; ele
     capas.current.get(tramo.id)?.objetivo.openPopup(tramo.puntos[Math.floor(tramo.puntos.length / 2)])
   }, [listo, elegidos, tramos])
 
-  return <div ref={contenedor} className="h-[65vh] min-h-80 w-full overflow-hidden rounded-2xl border-2" />
+  return <div ref={contenedor} className={cn("w-full overflow-hidden rounded-2xl border-2", className ?? "h-[65vh] min-h-80")} />
 }

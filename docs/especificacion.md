@@ -383,7 +383,7 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   vuelve a mostrar todo. Los bloques de **fuera de un viaje** traen una casilla. **Ver en el mapa** de los viajes y las casillas **se suman**:
   el mapa muestra solo lo marcado, todo resaltado junto, para comparar (por ejemplo, un viaje y lo que el chofer hizo antes
   y después: "Solo se ven el viaje a Valle Grande (9:29 – 9:52) y 2 bloques fuera de un viaje"); tocar otra vez un
-  encabezado o una casilla lo saca. Tocar una línea en el mapa la escoge sin esconder nada. Tocar un bloque lleva el mapa
+  encabezado o una casilla lo saca. Tocar una línea en el mapa la escoge sin esconder nada. **En la computadora** el mapa y la lista van **lado a lado**, del alto de la ventana: la lista rueda sola y el mapa nunca sale de la vista (el aviso de lo que se ve va encima del mapa); **Ocultar** recoge la lista para que el mapa tome todo el ancho ("Ver la lista" la vuelve a abrir; se recuerda en ese navegador). En el celular, uno debajo del otro. Tocar un bloque lleva el mapa
   a ese tramo y lo resalta con su popup; tocar una línea en el mapa marca su bloque. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
   en el teléfono** (IndexedDB, sobrevive a cerrar la app) y los sube **en lotes**: cada ~100 puntos (unos 25 min), al
   salir de la app o dejar de compartir (sin viajes), y al abrirla si quedó algo pendiente (sin señal, se reintenta
