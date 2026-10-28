@@ -55,6 +55,8 @@ export async function exigirCuentaAprobada({ interfaz = "clasica" }: { interfaz?
   const { conSesion, perfil } = await obtenerSesion()
   if (!perfil) sacar(conSesion)
   if (perfil.rol === "admin") redirect("/admin")
+  // R4: con el PIN temporal, nada más hasta escoger el suyo
+  if (perfil.debe_cambiar_clave) redirect("/nuevo-pin")
   if (perfil.estado !== "aprobado") redirect("/en-revision")
   // Pasajero y chofer de la nueva tienen cada uno su parte: quien abre la del otro va a la suya
   const suya = suInterfaz(perfil)

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { CuentaPrueba } from "@/components/admin/cuenta-prueba"
 import { VistaPasajero } from "@/components/admin/detalle-persona"
 import { InterfazCuenta } from "@/components/admin/interfaz-cuenta"
+import { RestablecerPin } from "@/components/admin/restablecer-pin"
 import { VolverALista } from "@/components/admin/lista-personas"
 import { esDePrueba } from "@/lib/datos/demanda"
 import { interfazDe } from "@/lib/datos/interfaz"
@@ -30,6 +31,8 @@ export default async function PaginaPasajero({ params }: PageProps<"/admin/pasaj
       <VistaPasajero detalle={detalle} />
       {/* R86: si es de prueba, no cuenta en Demanda y oferta */}
       <CuentaPrueba id={id} prueba={prueba} />
+      {/* R4: PIN olvidado */}
+      <RestablecerPin id={id} nombre={detalle.cuenta.nombre} telefono={detalle.cuenta.telefono} />
     </div>
   )
 }

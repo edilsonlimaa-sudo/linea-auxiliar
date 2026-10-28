@@ -112,7 +112,11 @@ Rutas actuales: `/` portada = **entrar** (teléfono + PIN) · `/registro` (¿pas
 - Nadie se vuelve admin desde el registro: solo con la función `crear_admin(usuario, clave)`, que únicamente
   ejecuta la clave secreta del servidor (`npm run admin:crear`, o el seed en local).
 - Toda cuenta de admin nueva queda con `debe_cambiar_clave`: el panel exige cambiar la contraseña antes de abrirse.
-- Pendiente: restablecer el PIN de un pasajero/chofer desde el panel (R4) y reforzar el límite de intentos de login.
+- **PIN olvidado (R4):** `RestablecerPin` en el detalle del pasajero y del chofer llama `admin_restablecer_pin` (PIN
+  temporal al azar, cierra sus sesiones y marca `perfiles.debe_cambiar_clave`, la misma marca del admin); el PIN se ve
+  una vez, con "Mandar por WhatsApp". Con la marca, `exigirCuentaAprobada` y el login llevan a **`/nuevo-pin`**
+  (`FormularioNuevoPin` → `escogerMiPin` → `cambiar_mi_pin`, distinto del temporal). Prueba: `restablecer_pin.test.sql`.
+- Pendiente: reforzar el límite de intentos de login.
 
 ## Base de datos (Supabase)
 

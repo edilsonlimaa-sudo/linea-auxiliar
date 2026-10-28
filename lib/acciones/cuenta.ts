@@ -141,7 +141,30 @@ export async function entrar(anterior: EstadoFormulario, formData: FormData): Pr
     return { error: "No pudimos entrar. Revisa tu conexión e intenta de nuevo.", valores, intento }
   }
   // Directo a su interfaz (§5.21): quien está en la nueva no pasa por la clásica
-  const { data: perfil } = await supabase.from("perfiles").select("rol, interfaz").eq("id", data.user.id).maybeSingle()
+  const { data: perfil } = await supabase.from("perfiles").select("rol, interfaz, debe_cambiar_clave").eq("id", data.user.id).maybeSingle()
+  // R4: entró con el PIN temporal: primero escoge el suyo
+  if (perfil?.debe_cambiar_clave) redirect("/nuevo-pin")
+  redirect(perfil ? inicioDe(perfil) : "/inicio")
+}
+
+const nuevoPin = z
+  .object({ pin, pinConfirmado: z.string() })
+  .refine((d) => d.pin === d.pinConfirmado, { path: ["pinConfirmado"], message: "Los dos PIN no coinciden" })
+
+/** R4: después del PIN temporal, la persona escoge el suyo y sigue a su inicio */
+export async function escogerMiPin(anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
+  const intento = (anterior.intento ?? 0) + 1
+  const resultado = nuevoPin.safeParse(Object.fromEntries(formData))
+  if (!resultado.success) return { errores: erroresDe(resultado.error), intento }
+
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("cambiar_mi_pin", { p_nuevo: resultado.data.pin })
+  if (error) {
+    if (error.message.includes("distinto")) return { errores: { pin: error.message }, intento }
+    return { error: "No pudimos guardar tu PIN. Intenta de nuevo.", intento }
+  }
+  const { data: claims } = await supabase.auth.getClaims()
+  const { data: perfil } = await supabase.from("perfiles").select("rol, interfaz").eq("id", claims?.claims?.sub ?? "").maybeSingle()
   redirect(perfil ? inicioDe(perfil) : "/inicio")
 }
 

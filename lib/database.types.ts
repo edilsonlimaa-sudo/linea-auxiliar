@@ -1475,6 +1475,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_restablecer_pin: { Args: { p_persona: string }; Returns: string }
       admin_resumen: {
         Args: never
         Returns: {
@@ -1542,6 +1543,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      cambiar_mi_pin: { Args: { p_nuevo: string }; Returns: undefined }
       cambiar_puestos: {
         Args: { p_puestos: number; p_viaje: string }
         Returns: undefined

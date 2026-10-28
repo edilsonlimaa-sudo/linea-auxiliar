@@ -93,8 +93,11 @@ puede ocultar botones, pero nunca es la única barrera.
   se borran: quedan como "Cuenta eliminada", para que el historial de esos choferes siga contando bien.
 - **R3. Teléfono único [servidor].** Un teléfono = una cuenta. Se normaliza a formato internacional
   (`0414-1234567` → `+584141234567`).
-- **R4. PIN olvidado.** No hay recuperación automática: el admin genera un PIN temporal y se lo pasa por
-  WhatsApp.
+- **R4. PIN olvidado [servidor].** No hay recuperación automática: en el detalle de la cuenta, el admin toca
+  **Restablecer PIN** y confirma; la app genera un **PIN temporal** de 6 números al azar, que el admin ve **una sola vez**
+  (no se guarda en ningún lado) y le manda por WhatsApp con un botón. El PIN anterior deja de servir y se cierran las
+  sesiones abiertas de esa cuenta. Al entrar con el temporal, antes de ver cualquier otra pantalla, la persona **escoge
+  su PIN** (6 números, dos veces, distinto del temporal); hasta que lo haga, toda pantalla la lleva ahí.
 - **R5. Verificado.** Los demás ven "✓ Verificado" solo en cuentas aprobadas.
 
 ### 5.2 Conexión del chofer

@@ -136,3 +136,11 @@ export async function desconectarChoferAdmin(choferId: string): Promise<{ error?
   revalidatePath("/", "layout")
   return {}
 }
+
+/** R4: PIN olvidado. Devuelve el PIN temporal para mostrarlo una sola vez (no se guarda en ningún lado) */
+export async function restablecerPin(id: string): Promise<{ pin?: string; error?: string }> {
+  const supabase = await crearClienteServidor()
+  const { data, error } = await supabase.rpc("admin_restablecer_pin", { p_persona: id })
+  if (error || !data) return { error: error?.message ?? "No pudimos restablecer el PIN. Intenta de nuevo." }
+  return { pin: data }
+}

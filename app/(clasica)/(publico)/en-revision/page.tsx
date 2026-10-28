@@ -18,6 +18,7 @@ export const metadata: Metadata = { title: "Cuenta en revisión · Línea Auxili
 export default async function PaginaEnRevision() {
   const perfil = await obtenerPerfil()
   if (!perfil) redirect("/")
+  if (perfil.debe_cambiar_clave && perfil.rol !== "admin") redirect("/nuevo-pin")
   if (perfil.estado === "aprobado") redirect("/inicio")
 
   const nombre = perfil.nombre.split(" ")[0]
