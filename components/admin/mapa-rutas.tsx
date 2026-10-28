@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css"
 
-import type { CircleMarkerOptions, LayerGroup, Map as MapaLeaflet, Path } from "leaflet"
+import type { CircleMarkerOptions, FitBoundsOptions, LatLngBounds, LayerGroup, Map as MapaLeaflet, Path } from "leaflet"
 import { useEffect, useRef, useState } from "react"
 
 import { CENTRO_INICIAL } from "@/components/pasajero/ver-en-mapa"
@@ -80,6 +80,12 @@ export function MapaRutas({
   const cerrando = useRef(false) // el mapa cierra el popup para mostrar un grupo: no es que lo cerró el admin
   const avisar = useRef(onElegir)
   const L = useRef<typeof import("leaflet") | null>(null)
+  // El último encuadre pedido (se olvida si el admin mueve el mapa a mano)
+  const encuadre = useRef<{ limites: LatLngBounds; opciones: FitBoundsOptions } | null>(null)
+  const encuadrar = (limites: LatLngBounds, opciones: FitBoundsOptions) => {
+    encuadre.current = { limites, opciones }
+    mapa.current?.fitBounds(limites, opciones)
+  }
   const [listo, setListo] = useState(false)
 
   useEffect(() => {
@@ -104,9 +110,14 @@ export function MapaRutas({
       const grupoFlechas = leaflet.layerGroup().addTo(m)
       flechas.current = grupoFlechas
       m.on("zoomend", () => dibujarFlechas(leaflet, m, grupoFlechas, actuales.current))
+      m.on("dragstart", () => (encuadre.current = null))
       L.current = leaflet
       // El contenedor cambia de tamaño (la lista se abre o se recoge al lado): el mapa se rehace a la medida
-      const medida = new ResizeObserver(() => m.invalidateSize())
+      const medida = new ResizeObserver(() => {
+        m.invalidateSize()
+        // Si el último encuadre se hizo con otro tamaño (la columna aún no tenía su alto), se repite a la medida nueva
+        if (encuadre.current) m.fitBounds(encuadre.current.limites, { ...encuadre.current.opciones, animate: false })
+      })
       medida.observe(contenedor.current)
       m.on("unload", () => medida.disconnect())
       setListo(true)
@@ -170,7 +181,7 @@ export function MapaRutas({
       capas.current.set(t.id, { objetivo, resaltar })
       todos.push(...t.puntos)
     }
-    if (todos.length > 0) m.fitBounds(leaflet.latLngBounds(todos), { padding: [24, 24] })
+    if (todos.length > 0) encuadrar(leaflet.latLngBounds(todos), { padding: [24, 24] })
     // Si el encuadre no cambia el zoom no hay zoomend: se dibujan igual
     actuales.current = orden
     if (flechas.current) dibujarFlechas(leaflet, m, flechas.current, orden)
@@ -198,12 +209,12 @@ export function MapaRutas({
         cerrando.current = false
       }
       for (const id of grupo) capas.current.get(id)?.resaltar(true)
-      m.fitBounds(leaflet.latLngBounds(elegidosTramos.flatMap((t) => t.puntos)), { padding: [48, 48], maxZoom: 16 })
+      encuadrar(leaflet.latLngBounds(elegidosTramos.flatMap((t) => t.puntos)), { padding: [48, 48], maxZoom: 16 })
       return
     }
     const [tramo] = elegidosTramos
     if (abierto.current === tramo.id) return
-    m.fitBounds(leaflet.latLngBounds(tramo.puntos), { padding: [48, 48], maxZoom: 16 })
+    encuadrar(leaflet.latLngBounds(tramo.puntos), { padding: [48, 48], maxZoom: 16 })
     capas.current.get(tramo.id)?.objetivo.openPopup(tramo.puntos[Math.floor(tramo.puntos.length / 2)])
   }, [listo, elegidos, tramos])
 

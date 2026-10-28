@@ -1,16 +1,26 @@
 "use client"
 
-import { MapIcon, PanelRightCloseIcon, PanelRightOpenIcon } from "lucide-react"
+import { MapIcon, PanelRightCloseIcon, PanelRightOpenIcon, PowerOffIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { MapaRutas } from "@/components/admin/mapa-rutas"
 import { Button } from "@/components/ui/button"
-import type { Tramo } from "@/lib/datos/rutas"
+import type { PausaRuta, Tramo } from "@/lib/datos/rutas"
 import { COLOR_FUERA_DE_VIAJE, COLOR_SENTIDO } from "@/lib/mapa"
 import { cn } from "@/lib/utils"
 import { SENTIDOS } from "@/lib/viajes"
 
-type Dia = { dia: string; texto: string; choferes: { id: string; nombre: string; tramos: Tramo[] }[] }
+type ChoferDia = { id: string; nombre: string; tramos: Tramo[]; pausas: PausaRuta[] }
+type Dia = { dia: string; texto: string; choferes: ChoferDia[] }
+
+// La cronología de un chofer en el día: los grupos de bloques y sus desconexiones, en el orden en que pasaron
+function enOrden(c: ChoferDia) {
+  const entradas: ({ grupo: ReturnType<typeof porViaje>[number]; t: number } | { pausa: PausaRuta; t: number })[] = [
+    ...porViaje(c.tramos).map((grupo) => ({ grupo, t: grupo.tramos[0].inicio })),
+    ...c.pausas.map((pausa) => ({ pausa, t: pausa.inicio })),
+  ]
+  return entradas.sort((a, b) => a.t - b.t)
+}
 
 // Los tramos seguidos del mismo viaje, juntos (el marco de la lista); los de sin viaje, cada uno suelto
 function porViaje(tramos: Tramo[]) {
@@ -23,16 +33,18 @@ function porViaje(tramos: Tramo[]) {
   return grupos
 }
 
-// Los días, el más nuevo primero; en cada día, cada chofer con sus tramos en orden (como pasaron)
-function porDia(tramos: Tramo[]): Dia[] {
+// Los días, el más nuevo primero; en cada día, cada chofer con sus tramos y desconexiones en orden (como pasaron)
+function porDia(tramos: Tramo[], pausas: PausaRuta[]): Dia[] {
   const dias = new Map<string, Dia>()
-  for (const t of tramos) {
-    const d = dias.get(t.dia) ?? { dia: t.dia, texto: t.diaTexto, choferes: [] }
-    dias.set(t.dia, d)
-    let c = d.choferes.find((x) => x.id === t.choferId)
-    if (!c) d.choferes.push((c = { id: t.choferId, nombre: t.chofer, tramos: [] }))
-    c.tramos.push(t)
+  const choferDe = (dia: string, diaTexto: string, id: string, nombre: string) => {
+    const d = dias.get(dia) ?? { dia, texto: diaTexto, choferes: [] }
+    dias.set(dia, d)
+    let c = d.choferes.find((x) => x.id === id)
+    if (!c) d.choferes.push((c = { id, nombre, tramos: [], pausas: [] }))
+    return c
   }
+  for (const t of tramos) choferDe(t.dia, t.diaTexto, t.choferId, t.chofer).tramos.push(t)
+  for (const p of pausas) choferDe(p.dia, p.diaTexto, p.choferId, p.chofer).pausas.push(p)
   return [...dias.values()].sort((a, b) => b.dia.localeCompare(a.dia))
 }
 
@@ -47,8 +59,8 @@ const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno
  * en el mapa solo ese; "Ver en el mapa" (viajes) y las casillas (bloques de fuera de un viaje) se suman: el mapa muestra
  * todo lo marcado junto. Tocar una línea en el mapa escoge su bloque sin esconder nada.
  */
-export function RutasVista({ tramos }: { tramos: Tramo[] }) {
-  const dias = useMemo(() => porDia(tramos), [tramos])
+export function RutasVista({ tramos, pausas }: { tramos: Tramo[]; pausas: PausaRuta[] }) {
+  const dias = useMemo(() => porDia(tramos, pausas), [tramos, pausas])
   const lista = useRef<HTMLDivElement>(null)
   // Lo que se ve en el mapa (hasta "Ver todo") y lo resaltado dentro de eso (cambia también al tocar el mapa)
   const [vista, setVista] = useState<Vista>(null)
@@ -179,7 +191,12 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
               <summary className="flex min-h-11 cursor-pointer items-center justify-between gap-2 px-4 py-2 font-bold capitalize">
                 {d.texto}
                 <span className="text-sm font-normal text-muted-foreground normal-case">
-                  {d.choferes.reduce((n, c) => n + c.tramos.length, 0)} bloques
+                  {[
+                    plural(d.choferes.reduce((n, c) => n + c.tramos.length, 0), "bloque", "bloques"),
+                    ...(d.choferes.some((c) => c.pausas.length)
+                      ? [plural(d.choferes.reduce((n, c) => n + c.pausas.length, 0), "desconexión", "desconexiones")]
+                      : []),
+                  ].join(" · ")}
                 </span>
               </summary>
               <div className="flex flex-col gap-4 border-t-2 p-3">
@@ -187,7 +204,9 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                   <div key={c.id} className="flex flex-col gap-1.5">
                     <h3 className="font-bold">{c.nombre}</h3>
                     <ol className="flex flex-col gap-1.5">
-                      {porViaje(c.tramos).map((g) => {
+                      {enOrden(c).map((e) => {
+                        if ("pausa" in e) return <Desconexion key={e.pausa.id} pausa={e.pausa} />
+                        const g = e.grupo
                         // El hueco sin GPS antes de un bloque (entre dos viajes, va fuera del marco)
                         const hueco = (t: Tramo) => {
                           const previo = c.tramos[c.tramos.indexOf(t) - 1]
@@ -253,6 +272,24 @@ function MarcoViaje({ ciclo, elegido, onClick }: { ciclo: NonNullable<Tramo["cic
         {ciclo.horas} · {ciclo.nota}
       </span>
     </button>
+  )
+}
+
+// El chofer tocó Desconectarme (R60): qué dijo y qué pasó después. No es un tramo: no se escoge ni va al mapa
+function Desconexion({ pausa: p }: { pausa: PausaRuta }) {
+  return (
+    <li className="flex items-start gap-3 rounded-xl border-2 border-warning/40 bg-warning-muted px-3 py-2.5">
+      <PowerOffIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-warning" />
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <span>
+            <span className="font-bold">Se desconectó</span> · {p.dijo}
+          </span>
+          <span className="text-sm font-bold tabular-nums">{p.hora}</span>
+        </p>
+        <p className="text-sm text-muted-foreground">{p.despues}</p>
+      </div>
+    </li>
   )
 }
 

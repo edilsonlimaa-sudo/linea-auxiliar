@@ -102,7 +102,7 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
             )}
             . Toca una línea o un bloque de la lista para ver de quién es.
           </p>
-          <RutasVista tramos={datos.tramos} />
+          <RutasVista tramos={datos.tramos} pausas={datos.pausas} />
         </>
       )}
     </div>

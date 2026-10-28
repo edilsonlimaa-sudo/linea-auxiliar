@@ -23,6 +23,7 @@ export type VerRutas = (typeof VER_RUTAS)[number]["id"]
  */
 export type Tramo = {
   id: string
+  inicio: number // epoch, para ordenar con las desconexiones
   viaje: string | null
   sentido: Sentido | null
   choferId: string
@@ -43,9 +44,23 @@ export type Tramo = {
   puntos: [number, number][]
 }
 
+/** Una desconexión del chofer (R60: tocó Desconectarme y dijo si vuelve), para la lista en orden */
+export type PausaRuta = {
+  id: string
+  choferId: string
+  chofer: string
+  inicio: number // epoch, para ordenar con los bloques
+  dia: string
+  diaTexto: string
+  hora: string // "10:13 a. m."
+  dijo: string // "dijo que vuelve 12:01 p. m." | "terminó por hoy"
+  despues: string // "Volvió 12:37 p. m. · 36 min tarde" | "Sigue desconectado" | "Lo cambió enseguida" | "No volvió ese día"
+}
+
 export type DatosRutas = {
   resumen: RecorridosResumen
   tramos: Tramo[]
+  pausas: PausaRuta[]
   choferes: { id: string; nombre: string }[] // los que tienen recorridos en el período, para el filtro
 }
 
@@ -84,7 +99,7 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
   const [resumen, lotesRes] = await Promise.all([cargarRecorridos(), lotes])
   const filas = lotesRes.data ?? []
   const ids = [...new Set(filas.map((l) => l.chofer_id))]
-  if (ids.length === 0) return { resumen, tramos: [], choferes: [] }
+  if (ids.length === 0) return { resumen, tramos: [], pausas: [], choferes: [] }
 
   // Los viajes del período (también los que no salieron), para saber de cuál es cada punto
   const [{ data: viajes }, { data: nombres }] = await Promise.all([
@@ -96,6 +111,12 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
       .order("creado_en"),
     supabase.from("perfiles").select("id, nombre").in("id", ids),
   ])
+  const { data: filasPausas } = await supabase
+    .from("pausas")
+    .select("id, chofer_id, inicio, vuelve_en, cerrada_en")
+    .in("chofer_id", ids)
+    .gte("inicio", desde.toISOString())
+    .order("inicio")
   const ahora = Date.now() / 1000
   const seg = (iso: string | null) => (iso ? new Date(iso).getTime() / 1000 : null)
 
@@ -183,6 +204,7 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
       const v = enRuta ? c : null
       tramos.push({
         id: `${choferId}-${inicio}`,
+        inicio,
         viaje: v?.id ?? null,
         sentido: v?.sentido ?? null,
         choferId,
@@ -209,8 +231,36 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
     })
   }
 
+  // Desconexiones: qué dijo y qué pasó después. Si a menos de 1 min hizo otra, la cambió (lo que vale es la siguiente)
+  const pausas: PausaRuta[] = (filasPausas ?? []).map((pa, i, todas) => {
+    const inicio = seg(pa.inicio)!
+    const vuelve = seg(pa.vuelve_en)
+    const cerrada = seg(pa.cerrada_en)
+    const siguiente = todas.slice(i + 1).find((x) => x.chofer_id === pa.chofer_id)
+    let despues: string
+    if (cerrada === null) despues = diaDe(inicio) === diaDe(ahora) ? "Sigue desconectado" : "No volvió ese día"
+    else if (siguiente && Math.abs(seg(siguiente.inicio)! - cerrada) < 60) despues = "Lo cambió enseguida"
+    else if (diaDe(cerrada) !== diaDe(inicio)) despues = "No volvió ese día"
+    else {
+      const tarde = vuelve ? (cerrada - vuelve) / 60 : 0
+      despues = `Volvió ${hora(cerrada)} (${duracion((cerrada - inicio) / 60)} después)${tarde >= 5 ? ` · ${duracion(tarde)} tarde` : ""}`
+    }
+    return {
+      id: pa.id,
+      choferId: pa.chofer_id,
+      chofer: nombreDe.get(pa.chofer_id) ?? "Chofer",
+      inicio,
+      dia: diaDe(inicio),
+      diaTexto: diaTexto(inicio),
+      hora: hora(inicio),
+      dijo: vuelve ? `dijo que vuelve ${hora(vuelve)}` : "terminó por hoy",
+      despues,
+    }
+  })
+
   return {
     resumen,
+    pausas,
     tramos: tramos.filter((t) => (sentido ? t.sentido === sentido : ver === "todo" || t.sentido !== null)),
     choferes: (nombres ?? []).map((n) => ({ id: n.id, nombre: n.nombre })).sort((a, b) => a.nombre.localeCompare(b.nombre, "es")),
   }
