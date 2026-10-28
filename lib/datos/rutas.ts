@@ -22,10 +22,21 @@ export type VerRutas = (typeof VER_RUTAS)[number]["id"]
  * de un viaje; sin sentido (null), es lo de fuera de un viaje (recoger, ir a la salida, volver vacío).
  */
 export type Tramo = {
+  id: string
   viaje: string | null
   sentido: Sentido | null
+  choferId: string
   chofer: string
-  cuando: string // "28/10 5:12 p. m. · 24 min", escrito en el servidor
+  cuando: string // para el popup: "Al Centro · 28/10 5:12 p. m. · 24 min" (el viaje entero), escrito en el servidor
+  // Para la lista (todo escrito en el servidor, hora de Caracas)
+  dia: string // "2026-10-28", para agrupar
+  diaTexto: string // "martes 28/10"
+  horas: string // "7:24 a. m. – 7:46 a. m."
+  duracion: string // lo que duró el tramo
+  n: number // puntos
+  km: string // "4,2 km"
+  anterior: string | null // el tramo de antes del mismo chofer
+  sinGrabarAntes: string | null // "17 min" si entre el anterior y este el GPS no grabó
   puntos: [number, number][]
 }
 
@@ -44,6 +55,12 @@ const fechaHora = (s: number) =>
   new Intl.DateTimeFormat("es-VE", { day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Caracas" }).format(
     new Date(s * 1000)
   )
+const hora = (s: number) =>
+  new Intl.DateTimeFormat("es-VE", { hour: "numeric", minute: "2-digit", timeZone: "America/Caracas" }).format(new Date(s * 1000))
+const diaDe = (s: number) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(new Date(s * 1000))
+const diaTexto = (s: number) =>
+  new Intl.DateTimeFormat("es-VE", { weekday: "long", day: "numeric", month: "numeric", timeZone: "America/Caracas" }).format(new Date(s * 1000))
+const km = (m: number) => `${(m / 1000).toLocaleString("es-VE", { maximumFractionDigits: 1, minimumFractionDigits: 1 })} km`
 const inicioDeHoy = () => {
   const hoy = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(new Date())
   return new Date(`${hoy}T00:00:00-04:00`)
@@ -103,34 +120,47 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
     const viajeEn = (t: number) => suyos.find((v) => t >= v.salida && t <= v.llegada) ?? null
     const nombre = nombreDe.get(choferId) ?? "Chofer"
 
-    const propios: { viaje: (typeof suyos)[number] | null; inicio: number; fin: number; puntos: [number, number][] }[] = []
+    const propios: { viaje: (typeof suyos)[number] | null; inicio: number; fin: number; metros: number; hueco: boolean; puntos: [number, number][] }[] = []
     let previo: number[] | null = null
     for (const p of lista) {
       if (p[3] > PRECISION_MAX) continue
       if (previo && p[0] > previo[0] && metros(previo, p) / (p[0] - previo[0]) > VELOCIDAD_MAX) continue
       const v = viajeEn(p[0])
       const ultimo = propios.at(-1)
-      if (!ultimo || !previo || p[0] - previo[0] > HUECO_S || ultimo.viaje !== v) {
-        propios.push({ viaje: v, inicio: p[0], fin: p[0], puntos: [[p[1], p[2]]] })
+      const hueco = !previo || p[0] - previo[0] > HUECO_S
+      if (!ultimo || !previo || hueco || ultimo.viaje !== v) {
+        propios.push({ viaje: v, inicio: p[0], fin: p[0], metros: 0, hueco, puntos: [[p[1], p[2]]] })
       } else {
         ultimo.puntos.push([p[1], p[2]])
+        ultimo.metros += metros(previo, p)
         ultimo.fin = p[0]
       }
       previo = p
     }
 
     // El texto del popup: el viaje entero (de la salida a la llegada) o el pedazo de fuera de un viaje
-    for (const { viaje: v, inicio, fin, puntos } of propios) {
+    propios.forEach(({ viaje: v, inicio, fin, metros: m, hueco, puntos }, i) => {
+      const antes = propios[i - 1]
       tramos.push({
+        id: `${choferId}-${inicio}`,
         viaje: v?.id ?? null,
         sentido: v?.sentido ?? null,
+        choferId,
         chofer: nombre,
         cuando: v
           ? `${SENTIDOS[v.sentido].corto} · ${fechaHora(v.salida)} · ${duracion((v.llegada - v.salida) / 60)}`
           : `Fuera de un viaje · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`,
+        dia: diaDe(inicio),
+        diaTexto: diaTexto(inicio),
+        horas: `${hora(inicio)} – ${hora(fin)}`,
+        duracion: duracion((fin - inicio) / 60),
+        n: puntos.length,
+        km: km(m),
+        anterior: antes ? `${choferId}-${antes.inicio}` : null,
+        sinGrabarAntes: antes && hueco ? duracion((inicio - antes.fin) / 60) : null,
         puntos,
       })
-    }
+    })
   }
 
   return {

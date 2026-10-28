@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 import { GrabarRecorridos } from "@/components/admin/grabar-recorridos"
-import { MapaRutas } from "@/components/admin/mapa-rutas"
+import { RutasVista } from "@/components/admin/rutas-vista"
 import { COLOR_FUERA_DE_VIAJE, COLOR_SENTIDO } from "@/lib/mapa"
 import { cargarRutas, PERIODOS_RUTAS, type PeriodoRutas, SENTIDOS_RUTAS, VER_RUTAS, type VerRutas } from "@/lib/datos/rutas"
 import { exigirAdmin } from "@/lib/sesion"
@@ -100,9 +100,9 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
                 </span>
               </>
             )}
-            . Toca una línea para ver de quién es.
+            . Toca una línea o un bloque de la lista para ver de quién es.
           </p>
-          <MapaRutas tramos={datos.tramos} />
+          <RutasVista tramos={datos.tramos} />
         </>
       )}
     </div>

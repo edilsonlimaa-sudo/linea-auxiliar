@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css"
 
-import type { CircleMarkerOptions, LayerGroup, Map as MapaLeaflet, Polyline } from "leaflet"
+import type { CircleMarkerOptions, LayerGroup, Map as MapaLeaflet, Path } from "leaflet"
 import { useEffect, useRef, useState } from "react"
 
 import { CENTRO_INICIAL } from "@/components/pasajero/ver-en-mapa"
@@ -52,15 +52,21 @@ function dibujarFlechas(leaflet: typeof import("leaflet"), m: MapaLeaflet, grupo
  * se ve fuerte), y los de fuera de un viaje, grises y punteados. Cada punto grabado es un puntito y las flechitas dicen
  * hacia dónde iba. Tocar una línea dice de quién es, cuándo fue y cuánto duró. El mapa se encuadra en lo que hay.
  */
-export function MapaRutas({ tramos }: { tramos: Tramo[] }) {
+export function MapaRutas({ tramos, elegido, onElegir }: { tramos: Tramo[]; elegido: string | null; onElegir: (id: string | null) => void }) {
   const contenedor = useRef<HTMLDivElement>(null)
   const mapa = useRef<MapaLeaflet | null>(null)
   const capa = useRef<LayerGroup | null>(null)
   const flechas = useRef<LayerGroup | null>(null)
   const actuales = useRef<Tramo[]>([])
-  const elegida = useRef<Polyline | null>(null)
+  const capas = useRef(new Map<string, Path>()) // la línea (o el puntito, si el tramo tiene uno solo) de cada tramo
+  const abierto = useRef<string | null>(null) // el tramo con el popup abierto
+  const avisar = useRef(onElegir)
   const L = useRef<typeof import("leaflet") | null>(null)
   const [listo, setListo] = useState(false)
+
+  useEffect(() => {
+    avisar.current = onElegir
+  }, [onElegir])
 
   useEffect(() => {
     let cancelado = false
@@ -96,40 +102,44 @@ export function MapaRutas({ tramos }: { tramos: Tramo[] }) {
     const grupo = capa.current
     if (!listo || !leaflet || !m || !grupo) return
     grupo.clearLayers()
-    elegida.current = null
+    capas.current.clear()
+    abierto.current = null
     const todos: [number, number][] = []
     // Primero lo de fuera de un viaje, para que los viajes queden encima
     const orden = [...tramos.filter((t) => !t.sentido), ...tramos.filter((t) => t.sentido)]
     for (const t of orden) {
       const color = colorDe(t)
       const normal = t.sentido ? { weight: 4, opacity: 0.45 } : { weight: 3, opacity: 0.6 }
-      const puntos = t.puntos.map((p) => leaflet.circleMarker(p, { color, ...PUNTO, interactive: false }).addTo(grupo))
-      if (t.puntos.length > 1) {
-        const linea = leaflet.polyline(t.puntos, { color, ...normal, dashArray: t.sentido ? undefined : "4 6" })
-        linea.bindPopup(`<strong>${t.chofer}</strong><br>${t.cuando}`)
-        // Pasar el mouse lo resalta; tocarlo lo deja resaltado mientras su popup está abierto
-        const resaltar = (si: boolean) => {
-          linea.setStyle(si ? { opacity: 1, weight: 6 } : normal)
-          for (const p of puntos) p.setStyle(si ? PUNTO_RESALTADO : PUNTO)
-          if (si) {
-            linea.bringToFront()
-            for (const p of puntos) p.bringToFront()
-          }
+      const solo = t.puntos.length === 1
+      const puntos = t.puntos.map((p) => leaflet.circleMarker(p, { color, ...PUNTO, interactive: solo }).addTo(grupo))
+      const linea = solo ? null : leaflet.polyline(t.puntos, { color, ...normal, dashArray: t.sentido ? undefined : "4 6" }).addTo(grupo)
+      const objetivo: Path = linea ?? puntos[0]
+      objetivo.bindPopup(`<strong>${t.chofer}</strong><br>${t.cuando}`)
+      // Pasar el mouse lo resalta; tocarlo (en el mapa o en la lista) lo deja resaltado mientras su popup está abierto
+      const resaltar = (si: boolean) => {
+        linea?.setStyle(si ? { opacity: 1, weight: 6 } : normal)
+        for (const p of puntos) p.setStyle(si ? PUNTO_RESALTADO : PUNTO)
+        if (si) {
+          linea?.bringToFront()
+          for (const p of puntos) p.bringToFront()
         }
-        linea.on("mouseover", () => resaltar(true))
-        linea.on("mouseout", () => {
-          if (elegida.current !== linea) resaltar(false)
-        })
-        linea.on("popupopen", () => {
-          elegida.current = linea
-          resaltar(true)
-        })
-        linea.on("popupclose", () => {
-          if (elegida.current === linea) elegida.current = null
-          resaltar(false)
-        })
-        linea.addTo(grupo)
       }
+      objetivo.on("mouseover", () => resaltar(true))
+      objetivo.on("mouseout", () => {
+        if (abierto.current !== t.id) resaltar(false)
+      })
+      objetivo.on("popupopen", () => {
+        abierto.current = t.id
+        resaltar(true)
+        avisar.current(t.id)
+      })
+      objetivo.on("popupclose", () => {
+        resaltar(false)
+        if (abierto.current !== t.id) return
+        abierto.current = null
+        avisar.current(null)
+      })
+      capas.current.set(t.id, objetivo)
       todos.push(...t.puntos)
     }
     if (todos.length > 0) m.fitBounds(leaflet.latLngBounds(todos), { padding: [24, 24] })
@@ -137,6 +147,23 @@ export function MapaRutas({ tramos }: { tramos: Tramo[] }) {
     actuales.current = orden
     if (flechas.current) dibujarFlechas(leaflet, m, flechas.current, orden)
   }, [listo, tramos])
+
+  // Escogido en la lista: el mapa va a ese tramo y abre su popup (lo que a su vez lo resalta)
+  useEffect(() => {
+    const m = mapa.current
+    const leaflet = L.current
+    if (!listo || !m || !leaflet) return
+    if (!elegido) {
+      if (abierto.current) m.closePopup()
+      return
+    }
+    if (abierto.current === elegido) return
+    const objetivo = capas.current.get(elegido)
+    const tramo = tramos.find((t) => t.id === elegido)
+    if (!objetivo || !tramo) return
+    m.fitBounds(leaflet.latLngBounds(tramo.puntos), { padding: [48, 48], maxZoom: 16 })
+    objetivo.openPopup(tramo.puntos[Math.floor(tramo.puntos.length / 2)])
+  }, [listo, elegido, tramos])
 
   return <div ref={contenedor} className="h-[65vh] min-h-80 w-full overflow-hidden rounded-2xl border-2" />
 }

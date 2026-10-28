@@ -371,7 +371,10 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   distancia en la pantalla con cualquier zoom). La línea se corta donde el GPS dejó de grabar más de 2 min (no se inventa el tramo) y
   se descartan los puntos imprecisos (más de 50 m) y los saltos imposibles (más de 150 km/h). Filtros de período,
   sentido (escoger uno deja solo sus viajes), chofer y "Todo el recorrido / Solo viajes"; tocar una línea dice de quién es, cuándo
-  fue y cuánto duró. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
+  fue y cuánto duró. **Debajo del mapa, "En orden"**: los mismos tramos como bloques, por día (el más nuevo primero y
+  abierto) y por chofer, en el orden en que pasaron: tipo (sentido o fuera de un viaje), de qué hora a qué hora, cuánto
+  duró, cuántos puntos y cuántos km; entre dos bloques, cuánto tiempo estuvo **sin GPS**. Tocar un bloque lleva el mapa
+  a ese tramo y lo resalta con su popup; tocar una línea en el mapa marca su bloque. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
   en el teléfono** (IndexedDB, sobrevive a cerrar la app) y los sube **en lotes**: cada ~100 puntos (unos 25 min), al
   salir de la app o dejar de compartir (sin viajes), y al abrirla si quedó algo pendiente (sin señal, se reintenta
   después). Un punto ya guardado no se guarda dos veces. Cada lote queda con el chofer y su hora; a qué viaje pertenece
