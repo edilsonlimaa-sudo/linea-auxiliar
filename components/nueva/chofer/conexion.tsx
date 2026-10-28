@@ -47,15 +47,19 @@ export function EstadoEnCabecera({ conectado, sinCuota, viajesAbiertos }: { cone
  * GPS falla, un aviso con "Intentar de nuevo" (los pasajeros no ven por dónde va).
  */
 export function Ubicacion({ activa }: { activa: boolean }) {
-  const { estado, reintentar } = useCompartirUbicacion(activa)
+  const { estado, reintentar, grabando } = useCompartirUbicacion(activa)
   if (!activa) return null
   const falla = estado === "sin_permiso" || estado === "sin_gps"
   if (!falla) {
     return (
-      <p role="status" className="flex items-center gap-2 px-1 text-sm text-muted-foreground">
-        {estado === "pidiendo" ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4 text-primary" />}
-        {estado === "pidiendo" ? "Buscando tu ubicación…" : "Tus pasajeros ven por dónde vas"}
-      </p>
+      <div role="status" className="flex flex-col gap-0.5 px-1 text-sm text-muted-foreground">
+        <p className="flex items-center gap-2">
+          {estado === "pidiendo" ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4 text-primary" />}
+          {estado === "pidiendo" ? "Buscando tu ubicación…" : "Tus pasajeros ven por dónde vas"}
+        </p>
+        {/* R92 */}
+        {grabando ? <p className="pl-6 text-xs">También guardamos tu recorrido para mejorar la línea; solo lo ve la administración.</p> : null}
+      </div>
     )
   }
   return (

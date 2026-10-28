@@ -103,3 +103,16 @@ export async function esDePrueba(id: string): Promise<boolean> {
   const { data } = await supabase.from("perfiles").select("de_prueba").eq("id", id).maybeSingle()
   return data?.de_prueba ?? false
 }
+
+export type RecorridosResumen = { grabando: boolean; lotes: number; puntos: number; choferes: number; ultimo: string | null }
+
+/** R92: si se graba el recorrido y cuánto llegó en los últimos 7 días (la hora, ya escrita para la pantalla) */
+export async function cargarRecorridos(): Promise<RecorridosResumen> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase.rpc("admin_recorridos_resumen")
+  const r = data?.[0]
+  const ultimo = r?.ultimo
+    ? new Intl.DateTimeFormat("es-VE", { day: "numeric", month: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Caracas" }).format(new Date(r.ultimo))
+    : null
+  return { grabando: r?.grabando ?? false, lotes: r?.lotes ?? 0, puntos: r?.puntos ?? 0, choferes: r?.choferes ?? 0, ultimo }
+}

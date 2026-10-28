@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react"
 
+import { useGrabarRecorrido } from "@/components/chofer/grabar-recorrido"
 import { guardarPosicion } from "@/lib/acciones/chofer"
 import { distanciaMetros, type Punto } from "@/lib/mapa"
 
@@ -24,6 +25,8 @@ export function useCompartirUbicacion(activo: boolean) {
   const estado: EstadoUbicacion = tieneGps ? estadoGps : "sin_gps"
   const [intento, setIntento] = useState(0)
   const ultimo = useRef<{ punto: Punto; en: number } | null>(null)
+  // R92: el mismo punto que ven los pasajeros queda en el recorrido (si el admin lo encendió)
+  const { grabando, registrar } = useGrabarRecorrido(activo)
 
   const enviar = useCallback((p: GeolocationPosition) => {
     const punto = { lat: p.coords.latitude, lng: p.coords.longitude }
@@ -33,8 +36,10 @@ export function useCompartirUbicacion(activo: boolean) {
     const movido = previo ? distanciaMetros(previo.punto, punto) : Infinity
     if (transcurrido < CADA_MS && !(movido > SI_SE_MUEVE_M && transcurrido >= MINIMO_MS)) return
     ultimo.current = { punto, en: ahora }
-    void guardarPosicion(punto.lat, punto.lng, p.coords.accuracy ?? null)
-  }, [])
+    // Sin señal, este punto se pierde para el mapa (el próximo lo reemplaza); el recorrido lo guarda igual
+    guardarPosicion(punto.lat, punto.lng, p.coords.accuracy ?? null).catch(() => {})
+    registrar(p)
+  }, [registrar])
 
   // GPS
   useEffect(() => {
@@ -74,5 +79,5 @@ export function useCompartirUbicacion(activo: boolean) {
     setIntento((n) => n + 1)
   }, [])
 
-  return { estado, reintentar }
+  return { estado, reintentar, grabando }
 }

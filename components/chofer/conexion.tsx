@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils"
 export function EstadoServicio({ conectado, viajesAbiertos }: { conectado: boolean; viajesAbiertos: number }) {
   const { ejecutar, pendiente, error } = useAccion()
   const [hoja, setHoja] = useState(false)
-  const { estado, reintentar } = useCompartirUbicacion(conectado)
+  const { estado, reintentar, grabando } = useCompartirUbicacion(conectado)
   const fallaGps = conectado && (estado === "sin_permiso" || estado === "sin_gps")
 
   if (!conectado) {
@@ -68,6 +68,11 @@ export function EstadoServicio({ conectado, viajesAbiertos }: { conectado: boole
         </span>
         <ChevronRightIcon aria-hidden className="ml-auto size-4 shrink-0 text-muted-foreground" />
       </button>
+
+      {/* R92: con la grabación encendida, que lo sepa */}
+      {grabando && !fallaGps && (
+        <p className="-mt-2 px-1 text-sm text-muted-foreground">También guardamos tu recorrido para mejorar la línea; solo lo ve la administración.</p>
+      )}
 
       {/* Lo único que merece ocupar espacio: los pasajeros no ven por dónde va */}
       {fallaGps && (

@@ -213,3 +213,18 @@ export async function guardarPosicion(lat: number, lng: number, precision: numbe
   }
   return { ok: true }
 }
+
+/** R92: ¿graba este teléfono el recorrido? Y de quién es (los puntos guardados en el teléfono llevan su dueño) */
+export async function recorridoActivo(): Promise<{ grabar: boolean; yo: string | null }> {
+  const supabase = await crearClienteServidor()
+  const [{ data: claims }, { data: grabar }] = await Promise.all([supabase.auth.getClaims(), supabase.rpc("grabar_recorridos")])
+  return { grabar: grabar === true, yo: claims?.claims?.sub ?? null }
+}
+
+/** R92: sube un lote del recorrido guardado en el teléfono */
+export async function subirRecorrido(puntos: [number, number, number, number | null][]): Promise<{ guardados?: number; error?: string }> {
+  const supabase = await crearClienteServidor()
+  const { data, error } = await supabase.rpc("guardar_trayecto", { p_puntos: puntos })
+  if (error) return { error: error.message }
+  return { guardados: data ?? 0 }
+}

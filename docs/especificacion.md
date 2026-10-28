@@ -362,6 +362,15 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R40.** Con el chofer conectado y con viajes, su teléfono envía la posición como mucho cada **15 s** (o al
   moverse más de 30 m). El chofer ve "📡 Tus pasajeros ven por dónde vas" o un aviso si falta permiso. Solo
   funciona **con la app abierta y la pantalla encendida** (límite de una web app, §11); el chofer lo ve dicho.
+- **R92. Recorrido de los viajes [servidor].** *(Oct. 2026: para ver la ruta de verdad, sus variantes, el tiempo de
+  cada tramo y dónde para la gente.)* Solo si el admin lo **enciende** en el panel ("Grabar recorridos", Demanda y
+  oferta; apagado por defecto). Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
+  en el teléfono** (IndexedDB, sobrevive a cerrar la app) y los sube **en lotes**: cada ~100 puntos (unos 25 min), al
+  salir de la app o dejar de compartir (sin viajes), y al abrirla si quedó algo pendiente (sin señal, se reintenta
+  después). Un punto ya guardado no se guarda dos veces. Cada lote queda con el chofer y su hora; a qué viaje pertenece
+  se sabe cruzando la hora con sus viajes. Solo el admin lo ve; se borra a los **60 días**. Con la grabación encendida,
+  el chofer lo ve dicho donde se habla de su ubicación: "También guardamos tu recorrido para mejorar la línea; solo lo
+  ve la administración."
 - **R41.** **Ver en el mapa** en cada unidad (Inicio, esperando) y en Mi viaje abre un mapa con 🚐 el carro,
   📍 el pasajero (si compartió GPS) y "está a 744 m de ti". Mientras está abierto, la posición llega por
   Realtime cada vez que el chofer la envía. Sin posición reciente: "Este chofer no está compartiendo su ubicación ahora".
@@ -694,6 +703,7 @@ choferes, la clásica y avisos automáticos.)*
 | Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Los pasajeros y los choferes con la cuota del día o un viaje abierto (R76). La **distancia** al avisar (R62), solo el admin |
 | **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
+| Recorrido de los viajes del chofer (R92) | Solo admin (el chofer lo sube; nadie más lo lee). Se borra a los 60 días |
 | Alertas de auxilio | Solo choferes |
 | Avisos de pago de la cuota (R77) | El propio chofer y el admin |
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |

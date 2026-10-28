@@ -34,6 +34,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      ajustes: {
+        Row: {
+          grabar_recorridos: boolean
+          id: boolean
+        }
+        Insert: {
+          grabar_recorridos?: boolean
+          id?: boolean
+        }
+        Update: {
+          grabar_recorridos?: boolean
+          id?: boolean
+        }
+        Relationships: []
+      }
       alerta_apoyos: {
         Row: {
           alerta_id: string
@@ -945,6 +960,44 @@ export type Database = {
           },
         ]
       }
+      trayectos: {
+        Row: {
+          chofer_id: string
+          desde: string
+          hasta: string
+          id: string
+          n: number
+          puntos: Json
+          subido_en: string
+        }
+        Insert: {
+          chofer_id: string
+          desde: string
+          hasta: string
+          id?: string
+          n: number
+          puntos: Json
+          subido_en?: string
+        }
+        Update: {
+          chofer_id?: string
+          desde?: string
+          hasta?: string
+          id?: string
+          n?: number
+          puntos?: Json
+          subido_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trayectos_chofer_id_fkey"
+            columns: ["chofer_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehiculos: {
         Row: {
           aire_acondicionado: boolean
@@ -1426,6 +1479,10 @@ export type Database = {
           id: string
         }[]
       }
+      admin_grabar_recorridos: {
+        Args: { p_grabar: boolean }
+        Returns: undefined
+      }
       admin_guardar_cuota: {
         Args: {
           p_activa: boolean
@@ -1465,6 +1522,16 @@ export type Database = {
           tipo: string
           titulo: string
           vistas: number
+        }[]
+      }
+      admin_recorridos_resumen: {
+        Args: never
+        Returns: {
+          choferes: number
+          grabando: boolean
+          lotes: number
+          puntos: number
+          ultimo: string
         }[]
       }
       admin_registrar_push: {
@@ -1534,6 +1601,7 @@ export type Database = {
         Args: { p_banco: string; p_referencia: string }
         Returns: string
       }
+      borrar_recorridos_viejos: { Args: never; Returns: undefined }
       cambiar_lugar: {
         Args: {
           p_lat?: number
@@ -1683,6 +1751,7 @@ export type Database = {
           posicion: number
         }[]
       }
+      grabar_recorridos: { Args: never; Returns: boolean }
       guardar_pago_movil: {
         Args: { p_banco: string; p_cedula: string; p_telefono: string }
         Returns: undefined
@@ -1702,6 +1771,7 @@ export type Database = {
         Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
         Returns: undefined
       }
+      guardar_trayecto: { Args: { p_puntos: Json }; Returns: number }
       lista_de_gina: {
         Args: never
         Returns: {
