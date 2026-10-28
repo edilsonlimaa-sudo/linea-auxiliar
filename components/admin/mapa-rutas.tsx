@@ -52,14 +52,21 @@ function dibujarFlechas(leaflet: typeof import("leaflet"), m: MapaLeaflet, grupo
  * se ve fuerte), y los de fuera de un viaje, grises y punteados. Cada punto grabado es un puntito y las flechitas dicen
  * hacia dónde iba. Tocar una línea dice de quién es, cuándo fue y cuánto duró. El mapa se encuadra en lo que hay.
  */
-export function MapaRutas({ tramos, elegido, onElegir }: { tramos: Tramo[]; elegido: string | null; onElegir: (id: string | null) => void }) {
+/**
+ * `elegidos`: con uno, el mapa va a ese tramo y abre su popup; con varios (un viaje entero), los resalta todos juntos
+ * y se encuadra en ellos, sin popup. `onElegir` avisa del tramo que se toca en el mapa (o null al cerrar su popup).
+ */
+export function MapaRutas({ tramos, elegidos, onElegir }: { tramos: Tramo[]; elegidos: string[]; onElegir: (id: string | null) => void }) {
   const contenedor = useRef<HTMLDivElement>(null)
   const mapa = useRef<MapaLeaflet | null>(null)
   const capa = useRef<LayerGroup | null>(null)
   const flechas = useRef<LayerGroup | null>(null)
   const actuales = useRef<Tramo[]>([])
-  const capas = useRef(new Map<string, Path>()) // la línea (o el puntito, si el tramo tiene uno solo) de cada tramo
+  // La línea (o el puntito, si el tramo tiene uno solo) de cada tramo y cómo resaltarlo
+  const capas = useRef(new Map<string, { objetivo: Path; resaltar: (si: boolean) => void }>())
   const abierto = useRef<string | null>(null) // el tramo con el popup abierto
+  const enGrupo = useRef(new Set<string>()) // los tramos resaltados juntos (un viaje entero)
+  const cerrando = useRef(false) // el mapa cierra el popup para mostrar un grupo: no es que lo cerró el admin
   const avisar = useRef(onElegir)
   const L = useRef<typeof import("leaflet") | null>(null)
   const [listo, setListo] = useState(false)
@@ -104,6 +111,7 @@ export function MapaRutas({ tramos, elegido, onElegir }: { tramos: Tramo[]; eleg
     grupo.clearLayers()
     capas.current.clear()
     abierto.current = null
+    enGrupo.current.clear()
     const todos: [number, number][] = []
     // Primero lo de fuera de un viaje, para que los viajes queden encima
     const orden = [...tramos.filter((t) => !t.sentido), ...tramos.filter((t) => t.sentido)]
@@ -126,7 +134,7 @@ export function MapaRutas({ tramos, elegido, onElegir }: { tramos: Tramo[]; eleg
       }
       objetivo.on("mouseover", () => resaltar(true))
       objetivo.on("mouseout", () => {
-        if (abierto.current !== t.id) resaltar(false)
+        if (abierto.current !== t.id && !enGrupo.current.has(t.id)) resaltar(false)
       })
       objetivo.on("popupopen", () => {
         abierto.current = t.id
@@ -134,12 +142,16 @@ export function MapaRutas({ tramos, elegido, onElegir }: { tramos: Tramo[]; eleg
         avisar.current(t.id)
       })
       objetivo.on("popupclose", () => {
-        resaltar(false)
+        if (!enGrupo.current.has(t.id)) resaltar(false)
         if (abierto.current !== t.id) return
+        if (cerrando.current) {
+          abierto.current = null
+          return
+        }
         abierto.current = null
         avisar.current(null)
       })
-      capas.current.set(t.id, objetivo)
+      capas.current.set(t.id, { objetivo, resaltar })
       todos.push(...t.puntos)
     }
     if (todos.length > 0) m.fitBounds(leaflet.latLngBounds(todos), { padding: [24, 24] })
@@ -148,22 +160,36 @@ export function MapaRutas({ tramos, elegido, onElegir }: { tramos: Tramo[]; eleg
     if (flechas.current) dibujarFlechas(leaflet, m, flechas.current, orden)
   }, [listo, tramos])
 
-  // Escogido en la lista: el mapa va a ese tramo y abre su popup (lo que a su vez lo resalta)
+  // Escogido en la lista: un tramo (el mapa va a él y abre su popup, que lo resalta) o un viaje entero
   useEffect(() => {
     const m = mapa.current
     const leaflet = L.current
     if (!listo || !m || !leaflet) return
-    if (!elegido) {
+    const grupo = elegidos.length > 1 ? new Set(elegidos) : new Set<string>()
+    for (const id of enGrupo.current) if (!grupo.has(id) && id !== abierto.current) capas.current.get(id)?.resaltar(false)
+    enGrupo.current = grupo
+
+    if (elegidos.length === 0) {
       if (abierto.current) m.closePopup()
       return
     }
-    if (abierto.current === elegido) return
-    const objetivo = capas.current.get(elegido)
-    const tramo = tramos.find((t) => t.id === elegido)
-    if (!objetivo || !tramo) return
+    const elegidosTramos = tramos.filter((t) => elegidos.includes(t.id))
+    if (elegidosTramos.length === 0) return
+    if (elegidos.length > 1) {
+      if (abierto.current) {
+        cerrando.current = true
+        m.closePopup()
+        cerrando.current = false
+      }
+      for (const id of grupo) capas.current.get(id)?.resaltar(true)
+      m.fitBounds(leaflet.latLngBounds(elegidosTramos.flatMap((t) => t.puntos)), { padding: [48, 48], maxZoom: 16 })
+      return
+    }
+    const [tramo] = elegidosTramos
+    if (abierto.current === tramo.id) return
     m.fitBounds(leaflet.latLngBounds(tramo.puntos), { padding: [48, 48], maxZoom: 16 })
-    objetivo.openPopup(tramo.puntos[Math.floor(tramo.puntos.length / 2)])
-  }, [listo, elegido, tramos])
+    capas.current.get(tramo.id)?.objetivo.openPopup(tramo.puntos[Math.floor(tramo.puntos.length / 2)])
+  }, [listo, elegidos, tramos])
 
   return <div ref={contenedor} className="h-[65vh] min-h-80 w-full overflow-hidden rounded-2xl border-2" />
 }

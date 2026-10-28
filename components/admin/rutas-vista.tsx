@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState } from "react"
+import { MapIcon } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { MapaRutas } from "@/components/admin/mapa-rutas"
 import type { Tramo } from "@/lib/datos/rutas"
@@ -34,33 +35,49 @@ function porDia(tramos: Tramo[]): Dia[] {
   return [...dias.values()].sort((a, b) => b.dia.localeCompare(a.dia))
 }
 
+type Eleccion = { tramo: string } | { viaje: string } | null
+
 /**
  * Rutas (R92): el mapa y, debajo, los mismos tramos como bloques en orden, para leer la cronología. Escoger un bloque
- * lleva el mapa a ese tramo; tocar una línea en el mapa marca su bloque.
+ * lleva el mapa a ese tramo; escoger un viaje (su marco) muestra todos sus bloques juntos; tocar una línea en el mapa
+ * marca su bloque.
  */
 export function RutasVista({ tramos }: { tramos: Tramo[] }) {
-  const [elegido, setElegido] = useState<string | null>(null)
+  const [eleccion, setEleccion] = useState<Eleccion>(null)
   const dias = useMemo(() => porDia(tramos), [tramos])
   const lista = useRef<HTMLDivElement>(null)
+  const elegidos = useMemo(
+    () =>
+      !eleccion ? [] : "tramo" in eleccion ? [eleccion.tramo] : tramos.filter((t) => t.ciclo?.id === eleccion.viaje).map((t) => t.id),
+    [eleccion, tramos]
+  )
+  const tramoElegido = eleccion && "tramo" in eleccion ? eleccion.tramo : null
+  const viajeElegido = eleccion && "viaje" in eleccion ? eleccion.viaje : null
 
   // Escogido en el mapa: abre su día si estaba cerrado y lo muestra
   useEffect(() => {
-    if (!elegido) return
-    const bloque = lista.current?.querySelector<HTMLElement>(`[data-tramo="${elegido}"]`)
+    if (!tramoElegido) return
+    const bloque = lista.current?.querySelector<HTMLElement>(`[data-tramo="${tramoElegido}"]`)
     const dia = bloque?.closest("details")
     if (dia && !dia.open) dia.open = true
     bloque?.scrollIntoView({ block: "nearest", behavior: "smooth" })
-  }, [elegido])
+  }, [tramoElegido])
 
+  const alMapa = () => document.getElementById("mapa-rutas")?.scrollIntoView({ block: "nearest", behavior: "smooth" })
   const escoger = (id: string) => {
-    setElegido((actual) => (actual === id ? null : id))
-    document.getElementById("mapa-rutas")?.scrollIntoView({ block: "nearest", behavior: "smooth" })
+    setEleccion((actual) => (actual && "tramo" in actual && actual.tramo === id ? null : { tramo: id }))
+    alMapa()
   }
+  const escogerViaje = (id: string) => {
+    setEleccion((actual) => (actual && "viaje" in actual && actual.viaje === id ? null : { viaje: id }))
+    alMapa()
+  }
+  const delMapa = useCallback((id: string | null) => setEleccion(id ? { tramo: id } : null), [])
 
   return (
     <>
       <div id="mapa-rutas">
-        <MapaRutas tramos={tramos} elegido={elegido} onElegir={setElegido} />
+        <MapaRutas tramos={tramos} elegidos={elegidos} onElegir={delMapa} />
       </div>
       <section aria-labelledby="titulo-cronologia" className="flex flex-col gap-3">
         <div>
@@ -95,7 +112,7 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                         const filas = g.tramos.map((t, k) => (
                           <li key={t.id} className="flex flex-col gap-1.5">
                             {g.ciclo && k === 0 ? null : hueco(t)}
-                            <Bloque tramo={t} elegido={elegido === t.id} onClick={() => escoger(t.id)} />
+                            <Bloque tramo={t} elegido={elegidos.includes(t.id)} onClick={() => escoger(t.id)} />
                           </li>
                         ))
                         if (!g.ciclo) return filas
@@ -103,13 +120,13 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                         return (
                           <li key={g.ciclo.id + g.tramos[0].id} className="flex flex-col gap-1.5">
                             {hueco(g.tramos[0])}
-                            <div className="rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-2">
-                              <p className="flex flex-wrap items-baseline justify-between gap-x-3 px-1 pb-1.5 text-sm">
-                                <span className="font-bold">{g.ciclo.titulo}</span>
-                                <span className="text-muted-foreground">
-                                  {g.ciclo.horas} · {g.ciclo.nota}
-                                </span>
-                              </p>
+                            <div
+                              className={cn(
+                                "rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-2",
+                                viajeElegido === g.ciclo.id && "border-primary bg-accent/60"
+                              )}
+                            >
+                              <MarcoViaje ciclo={g.ciclo} elegido={viajeElegido === g.ciclo.id} onClick={() => escogerViaje(g.ciclo!.id)} />
                               <ol className="flex flex-col gap-1.5">{filas}</ol>
                             </div>
                           </li>
@@ -124,6 +141,29 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
         </div>
       </section>
     </>
+  )
+}
+
+// El encabezado del marco: tocarlo muestra en el mapa todos los bloques del viaje juntos (o los suelta)
+function MarcoViaje({ ciclo, elegido, onClick }: { ciclo: NonNullable<Tramo["ciclo"]>; elegido: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={elegido}
+      onClick={onClick}
+      className="mb-1.5 flex min-h-11 w-full flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl px-2 py-1 text-left text-sm outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring"
+    >
+      <span className="flex items-center gap-2">
+        <span className="font-bold">{ciclo.titulo}</span>
+        <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-bold", elegido ? "border-primary bg-primary text-primary-foreground" : "bg-card text-primary")}>
+          <MapIcon aria-hidden className="size-3.5" />
+          {elegido ? "En el mapa" : "Ver en el mapa"}
+        </span>
+      </span>
+      <span className="text-muted-foreground">
+        {ciclo.horas} · {ciclo.nota}
+      </span>
+    </button>
   )
 }
 
