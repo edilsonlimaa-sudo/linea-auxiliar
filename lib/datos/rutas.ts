@@ -36,8 +36,8 @@ export type Tramo = {
   n: number // puntos
   km: string // "4,2 km"
   anterior: string | null // el tramo de antes del mismo chofer
-  // El viaje del que es parte (de que pasa a ser el viaje del chofer hasta que termina), para agruparlo en la lista;
-  // sin sentido y con ciclo es "antes de salir" (recoger, esperar en la parada)
+  // El viaje del que es parte (de que empieza a recoger hasta que termina), para agruparlo en la lista;
+  // sin sentido y con ciclo es "recogiendo" (de Ya llegué a Salir)
   ciclo: { id: string; titulo: string; horas: string; nota: string } | null
   sinGrabarAntes: string | null // "17 min" si entre el anterior y este el GPS no grabó
   puntos: [number, number][]
@@ -98,6 +98,19 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
   ])
   const ahora = Date.now() / 1000
   const seg = (iso: string | null) => (iso ? new Date(iso).getTime() / 1000 : null)
+
+  // Cuándo empezó a recoger cada viaje: la primera vez que pasó a "en parada" (el chofer tocó Ya llegué). En pedazos:
+  // con muchos viajes, la lista de ids no cabe en una sola dirección
+  const recogeDesde = new Map<string, number>()
+  const idsViajes = (viajes ?? []).map((v) => v.id)
+  const pedazos = Array.from({ length: Math.ceil(idsViajes.length / 150) }, (_, k) => idsViajes.slice(k * 150, k * 150 + 150))
+  const eventos = await Promise.all(
+    pedazos.map((p) => supabase.from("viaje_eventos").select("viaje_id, en").eq("estado", "en_parada").in("viaje_id", p))
+  )
+  for (const e of eventos.flatMap((x) => x.data ?? [])) {
+    const t = seg(e.en)!
+    if (!recogeDesde.has(e.viaje_id) || t < recogeDesde.get(e.viaje_id)!) recogeDesde.set(e.viaje_id, t)
+  }
   const nombreDe = new Map((nombres ?? []).map((n) => [n.id, n.nombre.split(" ")[0]]))
 
   // Los puntos de cada chofer, en orden: [epoch, lat, lng, precisión]
@@ -111,23 +124,28 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
   const tramos: Tramo[] = []
   for (const [choferId, lista] of puntosDe) {
     lista.sort((a, b) => a[0] - b[0])
-    // Cada viaje es "el del chofer" desde que se publica (o termina el anterior, si se encadenó) hasta que termina o se
-    // cancela. Con ida y vuelta publicadas juntas, la vuelta empieza al terminar la ida.
+    // Cada viaje empieza cuando el chofer empieza a recoger (o, sin ese registro, cuando sale) y termina cuando lo
+    // termina o lo cancela. Lo de antes (ir a la parada) es de fuera de un viaje. Si se pisara con el anterior, empieza
+    // cuando aquel termina. Un viaje que no llegó a recoger ni a salir no tiene marco.
     const suyos = (viajes ?? [])
       .filter((v) => v.chofer_id === choferId)
-      .map((v) => ({
-        id: v.id,
-        sentido: v.sentido,
-        estado: v.estado,
-        creado: seg(v.creado_en)!,
-        salida: seg(v.salida_en),
-        fin: seg(v.llegada_en) ?? (v.estado === "cancelado" || v.estado === "finalizado" ? seg(v.estado_en)! : ahora),
-        desde: 0,
-      }))
-      .sort((a, b) => a.creado - b.creado || (a.salida ?? Infinity) - (b.salida ?? Infinity))
+      .map((v) => {
+        const salida = seg(v.salida_en)
+        return {
+          id: v.id,
+          sentido: v.sentido,
+          estado: v.estado,
+          recoge: recogeDesde.get(v.id) ?? salida,
+          salida,
+          fin: seg(v.llegada_en) ?? (v.estado === "cancelado" || v.estado === "finalizado" ? seg(v.estado_en)! : ahora),
+          desde: 0,
+        }
+      })
+      .filter((v) => v.recoge !== null)
+      .sort((a, b) => a.recoge! - b.recoge!)
     let finAnterior = -Infinity
     for (const v of suyos) {
-      v.desde = Math.max(v.creado, finAnterior)
+      v.desde = Math.max(v.recoge!, finAnterior)
       finAnterior = Math.max(finAnterior, v.fin)
     }
     const cicloEn = (t: number) => suyos.find((v) => v.desde < v.fin && t >= v.desde && t <= v.fin) ?? null
@@ -156,10 +174,10 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
     const tituloDe = (c: Ciclo) => `Viaje ${SENTIDOS[c.sentido].corto.replace(/^A/, "a")}`
     const notaDe = (c: Ciclo) =>
       c.salida
-        ? `salió ${hora(c.salida)}${c.estado === "finalizado" ? ` · ${duracion((c.fin - c.salida) / 60)} en ruta` : ""}`
+        ? `recogió ${duracion((c.salida - c.desde) / 60)} · salió ${hora(c.salida)}${c.estado === "finalizado" ? ` · ${duracion((c.fin - c.salida) / 60)} en ruta` : ""}`
         : c.estado === "cancelado"
           ? "cancelado sin salir"
-          : "todavía no sale"
+          : "recogiendo"
     propios.forEach(({ ciclo: c, enRuta, inicio, fin, metros: m, hueco, puntos }, i) => {
       const antes = propios[i - 1]
       const v = enRuta ? c : null
@@ -169,11 +187,11 @@ export async function cargarRutas(periodo: PeriodoRutas, sentido: Sentido | null
         sentido: v?.sentido ?? null,
         choferId,
         chofer: nombre,
-        // El texto del popup: el viaje entero (de la salida a la llegada), lo de antes de salir o lo de fuera de un viaje
+        // El texto del popup: el viaje entero (de la salida a la llegada), lo de recoger o lo de fuera de un viaje
         cuando: v
           ? `${SENTIDOS[v.sentido].corto} · ${fechaHora(v.salida!)} · ${duracion((v.fin - v.salida!) / 60)}`
           : c
-            ? `Antes de salir · ${tituloDe(c).replace(/^V/, "v")} · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`
+            ? `Recogiendo · ${tituloDe(c).replace(/^V/, "v")} · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`
             : `Fuera de un viaje · ${fechaHora(inicio)} · ${duracion((fin - inicio) / 60)}`,
         dia: diaDe(inicio),
         diaTexto: diaTexto(inicio),

@@ -86,7 +86,7 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
           </h2>
           <p className="text-sm text-muted-foreground">
             Cada bloque es un tramo del mapa: puntos seguidos del mismo chofer, sin cortes del GPS. El marco punteado es un viaje,
-            según lo que marcó el chofer: desde que lo publica (o termina el anterior) hasta que lo termina.
+            según lo que marcó el chofer: desde que empieza a recoger (Ya llegué) hasta que lo termina.
           </p>
         </div>
         <div ref={lista} className="flex flex-col gap-3">
@@ -116,7 +116,7 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                           </li>
                         ))
                         if (!g.ciclo) return filas
-                        // El marco del viaje: de que pasa a ser el viaje del chofer hasta que termina (registros del viaje)
+                        // El marco del viaje: de que empieza a recoger hasta que termina (registros del viaje)
                         return (
                           <li key={g.ciclo.id + g.tramos[0].id} className="flex flex-col gap-1.5">
                             {hueco(g.tramos[0])}
@@ -191,7 +191,7 @@ function Bloque({ tramo: t, elegido, onClick }: { tramo: Tramo; elegido: boolean
       <span aria-hidden className={cn("w-1.5 shrink-0 rounded-full", !t.sentido && "opacity-60")} style={{ backgroundColor: color }} />
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <span className="font-bold">{t.sentido ? SENTIDOS[t.sentido].corto : t.ciclo ? "Antes de salir" : "Fuera de un viaje"}</span>
+          <span className="font-bold">{t.sentido ? SENTIDOS[t.sentido].corto : t.ciclo ? "Recogiendo" : "Fuera de un viaje"}</span>
           <span className="text-sm font-bold tabular-nums">{t.horas}</span>
         </span>
         <span className="text-sm text-muted-foreground">

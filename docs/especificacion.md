@@ -366,7 +366,7 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   cada tramo y dónde para la gente.)* Solo si el admin lo **enciende** en el panel (Análisis → **Rutas**, "Grabar
   recorridos"; apagado por defecto). En esa misma pantalla, un **mapa** dibuja **todo el recorrido grabado**: lo que va
   de la salida a la llegada de un viaje, del color de su sentido (donde se juntan muchas líneas está la ruta principal), y
-  lo de **fuera de un viaje** (recoger gente antes de salir, ir a la salida, volver vacío) en gris punteado; cada punto
+  lo que no es en ruta (recoger, ir a la parada, volver vacío) en gris punteado; cada punto
   grabado se ve como un puntito, y **flechitas** a lo largo de cada línea dicen hacia dónde iba el carro (a la misma
   distancia en la pantalla con cualquier zoom). La línea se corta donde el GPS dejó de grabar más de 2 min (no se inventa el tramo) y
   se descartan los puntos imprecisos (más de 50 m) y los saltos imposibles (más de 150 km/h). Filtros de período,
@@ -374,9 +374,10 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   fue y cuánto duró. **Debajo del mapa, "En orden"**: los mismos tramos como bloques, por día (el más nuevo primero y
   abierto) y por chofer, en el orden en que pasaron: tipo (sentido o fuera de un viaje), de qué hora a qué hora, cuánto
   duró, cuántos puntos y cuántos km; entre dos bloques, cuánto tiempo estuvo **sin GPS**. Los bloques de un mismo **viaje** van dentro de un **marco punteado** con el viaje, sus horas y cuándo salió.
-  Sale de los registros del viaje, sin adivinar nada por el GPS: un viaje es del chofer desde que lo publica (o, si lo
-  encadenó, desde que termina el anterior) hasta que lo termina o lo cancela. Lo gris dentro del marco es **antes de
-  salir** (recoger, esperar en la parada: hasta que toca Salir); lo de fuera de todo marco, sin ningún viaje abierto. Tocar el encabezado del marco (**Ver en el mapa**) resalta en el mapa todos
+  Sale de los registros del viaje, sin adivinar nada por el GPS: el viaje empieza cuando el chofer **empieza a recoger**
+  (la primera vez que toca Ya llegué; sin ese registro, cuando sale) y termina cuando lo termina o lo cancela. Lo gris
+  dentro del marco es **Recogiendo** (de Ya llegué a Salir); lo de fuera de todo marco (ir a la parada, volver vacío,
+  sin viaje) es fuera de un viaje. Tocar el encabezado del marco (**Ver en el mapa**) resalta en el mapa todos
   los bloques de ese viaje a la vez y lo encuadra; tocarlo otra vez lo suelta, y tocar un bloque o una línea vuelve a uno
   solo. Tocar un bloque lleva el mapa
   a ese tramo y lo resalta con su popup; tocar una línea en el mapa marca su bloque. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto

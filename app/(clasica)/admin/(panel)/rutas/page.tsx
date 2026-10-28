@@ -40,8 +40,8 @@ export default async function PaginaRutas({ searchParams }: PageProps<"/admin/ru
         <h1 className="text-xl leading-tight font-bold">Rutas</h1>
         <p className="text-muted-foreground">
           Por dónde van de verdad los carros, con el recorrido que graban los teléfonos de los choferes. Cada viaje es una línea:
-          donde se juntan muchas está la ruta principal; las sueltas son variantes. En gris, lo de fuera de un viaje: recoger
-          gente antes de salir, ir a la salida o volver vacío. Donde el GPS dejó de grabar, la línea se corta.
+          donde se juntan muchas está la ruta principal; las sueltas son variantes. En gris, lo que no es en ruta: recoger
+          (de Ya llegué a Salir), ir a la parada o volver vacío. Donde el GPS dejó de grabar, la línea se corta.
         </p>
       </header>
 
