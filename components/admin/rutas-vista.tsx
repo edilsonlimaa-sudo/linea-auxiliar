@@ -36,56 +36,54 @@ function porDia(tramos: Tramo[]): Dia[] {
   return [...dias.values()].sort((a, b) => b.dia.localeCompare(a.dia))
 }
 
-// Un bloque, un viaje entero o varios bloques de fuera de un viaje marcados juntos
-type Eleccion = { tramo: string } | { viaje: string } | { varios: string[] } | null
+// Lo escogido: un bloque solo, o una combinación de viajes enteros y bloques de fuera de un viaje (para comparar)
+type Vista = { tramo: string } | { viajes: string[]; varios: string[] } | null
+type Eleccion = { tramo: string } | { ids: string[] } | null
+
+const plural = (n: number, uno: string, varios: string) => `${n} ${n === 1 ? uno : varios}`
 
 /**
- * Rutas (R92): el mapa y, debajo, los mismos tramos como bloques en orden, para leer la cronología. Escoger un bloque
- * lleva el mapa a ese tramo; escoger un viaje (su marco) muestra todos sus bloques juntos; los de fuera de un viaje se
- * pueden marcar varios y verlos juntos; tocar una línea en el mapa marca su bloque.
+ * Rutas (R92): el mapa y, debajo, los mismos tramos como bloques en orden, para leer la cronología. Tocar un bloque deja
+ * en el mapa solo ese; "Ver en el mapa" (viajes) y las casillas (bloques de fuera de un viaje) se suman: el mapa muestra
+ * todo lo marcado junto. Tocar una línea en el mapa escoge su bloque sin esconder nada.
  */
 export function RutasVista({ tramos }: { tramos: Tramo[] }) {
-  const [eleccion, setEleccion] = useState<Eleccion>(null)
   const dias = useMemo(() => porDia(tramos), [tramos])
   const lista = useRef<HTMLDivElement>(null)
-  const elegidos = useMemo(
-    () =>
-      !eleccion
-        ? []
-        : "tramo" in eleccion
-          ? [eleccion.tramo]
-          : "varios" in eleccion
-            ? eleccion.varios
-            : tramos.filter((t) => t.ciclo?.id === eleccion.viaje).map((t) => t.id),
-    [eleccion, tramos]
-  )
-  const tramoElegido = eleccion && "tramo" in eleccion ? eleccion.tramo : null
-  // Lo que se ve solo en el mapa al escoger en la lista (un bloque o un viaje entero), hasta "Ver todo". Tocar una línea
-  // en el mapa escoge sin cambiar lo que se ve
-  const [vista, setVista] = useState<Eleccion>(null)
-  const enMapa = useMemo(
-    () =>
-      !vista
-        ? tramos
-        : "tramo" in vista
-          ? tramos.filter((t) => t.id === vista.tramo)
-          : "varios" in vista
-            ? tramos.filter((t) => vista.varios.includes(t.id))
-            : tramos.filter((t) => t.ciclo?.id === vista.viaje),
-    [vista, tramos]
-  )
-  const aislado = vista && "viaje" in vista ? vista.viaje : null
+  // Lo que se ve en el mapa (hasta "Ver todo") y lo resaltado dentro de eso (cambia también al tocar el mapa)
+  const [vista, setVista] = useState<Vista>(null)
+  const [eleccion, setEleccion] = useState<Eleccion>(null)
+  const viajes = vista && "viajes" in vista ? vista.viajes : []
   const marcados = vista && "varios" in vista ? vista.varios : []
+  const idsDe = useCallback(
+    (v: Vista) =>
+      !v ? [] : "tramo" in v ? [v.tramo] : tramos.filter((t) => (t.ciclo && v.viajes.includes(t.ciclo.id)) || v.varios.includes(t.id)).map((t) => t.id),
+    [tramos]
+  )
+  const enMapa = useMemo(() => {
+    if (!vista) return tramos
+    const ids = new Set(idsDe(vista))
+    return tramos.filter((t) => ids.has(t.id))
+  }, [vista, tramos, idsDe])
+  const elegidos = useMemo(() => (!eleccion ? [] : "tramo" in eleccion ? [eleccion.tramo] : eleccion.ids), [eleccion])
+  const tramoElegido = eleccion && "tramo" in eleccion ? eleccion.tramo : null
+
   const avisoVista = useMemo(() => {
     if (!vista) return null
-    if ("varios" in vista) return { que: `${vista.varios.length} ${vista.varios.length === 1 ? "bloque" : "bloques"} fuera de un viaje`, horas: null, varios: vista.varios.length > 1 }
-    if ("viaje" in vista) {
-      const c = tramos.find((t) => t.ciclo?.id === vista.viaje)?.ciclo
-      return c ? { que: `el ${c.titulo.replace(/^V/, "v")}`, horas: c.horas } : null
+    if ("tramo" in vista) {
+      const t = tramos.find((x) => x.id === vista.tramo)
+      if (!t) return null
+      const tipo = t.sentido ? SENTIDOS[t.sentido].corto : t.ciclo ? "Recogiendo" : "Fuera de un viaje"
+      return { verbo: "Solo se ve", que: `un bloque de ${t.chofer} (${tipo.replace(/^./, (c) => c.toLowerCase())}) · ${t.horas}` }
     }
-    const t = tramos.find((x) => x.id === vista.tramo)
-    const tipo = t?.sentido ? SENTIDOS[t.sentido].corto : t?.ciclo ? "Recogiendo" : "Fuera de un viaje"
-    return t ? { que: `un bloque de ${t.chofer} (${tipo.replace(/^./, (c) => c.toLowerCase())})`, horas: t.horas } : null
+    const partes: string[] = []
+    if (vista.viajes.length === 1) {
+      const c = tramos.find((t) => t.ciclo?.id === vista.viajes[0])?.ciclo
+      if (c) partes.push(`el ${c.titulo.replace(/^V/, "v")} (${c.horas})`)
+    } else if (vista.viajes.length > 1) partes.push(plural(vista.viajes.length, "viaje", "viajes"))
+    if (vista.varios.length) partes.push(plural(vista.varios.length, "bloque fuera de un viaje", "bloques fuera de un viaje"))
+    const varios = vista.viajes.length + vista.varios.length > 1
+    return { verbo: varios ? "Solo se ven" : "Solo se ve", que: partes.join(" y ") }
   }, [vista, tramos])
 
   // Escogido en el mapa: abre su día si estaba cerrado y lo muestra
@@ -98,29 +96,23 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
   }, [tramoElegido])
 
   const alMapa = () => document.getElementById("mapa-rutas")?.scrollIntoView({ block: "nearest", behavior: "smooth" })
+  // Cambia lo que se ve y lo resalta todo (si queda un solo bloque, con su popup)
+  const ver = (v: Vista) => {
+    const ids = idsDe(v)
+    setVista(ids.length ? v : null)
+    setEleccion(ids.length === 0 ? null : ids.length === 1 ? { tramo: ids[0] } : { ids })
+  }
   const escoger = (id: string) => {
-    const soltar = vista !== null && "tramo" in vista && vista.tramo === id
-    setVista(soltar ? null : { tramo: id })
-    setEleccion(soltar ? null : { tramo: id })
+    ver(vista && "tramo" in vista && vista.tramo === id ? null : { tramo: id })
     alMapa()
   }
+  const alternar = (lista: string[], id: string) => (lista.includes(id) ? lista.filter((x) => x !== id) : [...lista, id])
   const escogerViaje = (id: string) => {
-    const soltar = aislado === id
-    setVista(soltar ? null : { viaje: id })
-    setEleccion(soltar ? null : { viaje: id })
+    ver({ viajes: alternar(viajes, id), varios: marcados })
     alMapa()
   }
-  // Marcar o desmarcar un bloque de fuera de un viaje: el mapa muestra todos los marcados juntos
-  const marcar = (id: string) => {
-    const varios = marcados.includes(id) ? marcados.filter((x) => x !== id) : [...marcados, id]
-    const nueva = varios.length === 0 ? null : varios.length === 1 ? { tramo: varios[0] } : { varios }
-    setVista(varios.length === 0 ? null : { varios })
-    setEleccion(nueva)
-  }
-  const verTodo = () => {
-    setVista(null)
-    setEleccion(null)
-  }
+  const marcar = (id: string) => ver({ viajes, varios: alternar(marcados, id) })
+  const verTodo = () => ver(null)
   const delMapa = useCallback((id: string | null) => setEleccion(id ? { tramo: id } : null), [])
 
   return (
@@ -129,8 +121,7 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
         {avisoVista ? (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-2 border-primary bg-accent px-4 py-2">
             <p className="text-sm">
-              {"varios" in avisoVista && avisoVista.varios ? "Solo se ven" : "Solo se ve"} <span className="font-bold">{avisoVista.que}</span>
-              {avisoVista.horas ? ` · ${avisoVista.horas}` : null}
+              {avisoVista.verbo} <span className="font-bold">{avisoVista.que}</span>
             </p>
             <Button variant="outline" onClick={verTodo}>
               Ver todo
@@ -188,10 +179,10 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                             <div
                               className={cn(
                                 "rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-2",
-                                aislado === g.ciclo.id && "border-primary bg-accent/60"
+                                viajes.includes(g.ciclo.id) && "border-primary bg-accent/60"
                               )}
                             >
-                              <MarcoViaje ciclo={g.ciclo} elegido={aislado === g.ciclo.id} onClick={() => escogerViaje(g.ciclo!.id)} />
+                              <MarcoViaje ciclo={g.ciclo} elegido={viajes.includes(g.ciclo.id)} onClick={() => escogerViaje(g.ciclo!.id)} />
                               <ol className="flex flex-col gap-1.5">{filas}</ol>
                             </div>
                           </li>
