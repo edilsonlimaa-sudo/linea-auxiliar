@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css"
 
-import type { LayerGroup, Map as MapaLeaflet } from "leaflet"
+import type { CircleMarkerOptions, LayerGroup, Map as MapaLeaflet, Polyline } from "leaflet"
 import { useEffect, useRef, useState } from "react"
 
 import { CENTRO_INICIAL } from "@/components/pasajero/ver-en-mapa"
@@ -10,6 +10,8 @@ import type { Tramo } from "@/lib/datos/rutas"
 import { COLOR_FUERA_DE_VIAJE, COLOR_SENTIDO } from "@/lib/mapa"
 
 const ESPACIO_FLECHAS = 90 // px en la pantalla entre una flechita y la siguiente
+const PUNTO: CircleMarkerOptions = { radius: 2, weight: 1, opacity: 0.7, fillOpacity: 0.2 }
+const PUNTO_RESALTADO: CircleMarkerOptions = { radius: 4, weight: 2, opacity: 1, fillOpacity: 1 }
 
 const colorDe = (t: Tramo) => (t.sentido ? COLOR_SENTIDO[t.sentido] : COLOR_FUERA_DE_VIAJE)
 
@@ -56,6 +58,7 @@ export function MapaRutas({ tramos }: { tramos: Tramo[] }) {
   const capa = useRef<LayerGroup | null>(null)
   const flechas = useRef<LayerGroup | null>(null)
   const actuales = useRef<Tramo[]>([])
+  const elegida = useRef<Polyline | null>(null)
   const L = useRef<typeof import("leaflet") | null>(null)
   const [listo, setListo] = useState(false)
 
@@ -93,18 +96,38 @@ export function MapaRutas({ tramos }: { tramos: Tramo[] }) {
     const grupo = capa.current
     if (!listo || !leaflet || !m || !grupo) return
     grupo.clearLayers()
+    elegida.current = null
     const todos: [number, number][] = []
     // Primero lo de fuera de un viaje, para que los viajes queden encima
     const orden = [...tramos.filter((t) => !t.sentido), ...tramos.filter((t) => t.sentido)]
     for (const t of orden) {
       const color = colorDe(t)
       const normal = t.sentido ? { weight: 4, opacity: 0.45 } : { weight: 3, opacity: 0.6 }
-      for (const p of t.puntos) leaflet.circleMarker(p, { radius: 2, color, weight: 1, opacity: 0.7, interactive: false }).addTo(grupo)
+      const puntos = t.puntos.map((p) => leaflet.circleMarker(p, { color, ...PUNTO, interactive: false }).addTo(grupo))
       if (t.puntos.length > 1) {
         const linea = leaflet.polyline(t.puntos, { color, ...normal, dashArray: t.sentido ? undefined : "4 6" })
         linea.bindPopup(`<strong>${t.chofer}</strong><br>${t.cuando}`)
-        linea.on("mouseover", () => linea.setStyle({ opacity: 1, weight: 6 }))
-        linea.on("mouseout", () => linea.setStyle(normal))
+        // Pasar el mouse lo resalta; tocarlo lo deja resaltado mientras su popup está abierto
+        const resaltar = (si: boolean) => {
+          linea.setStyle(si ? { opacity: 1, weight: 6 } : normal)
+          for (const p of puntos) p.setStyle(si ? PUNTO_RESALTADO : PUNTO)
+          if (si) {
+            linea.bringToFront()
+            for (const p of puntos) p.bringToFront()
+          }
+        }
+        linea.on("mouseover", () => resaltar(true))
+        linea.on("mouseout", () => {
+          if (elegida.current !== linea) resaltar(false)
+        })
+        linea.on("popupopen", () => {
+          elegida.current = linea
+          resaltar(true)
+        })
+        linea.on("popupclose", () => {
+          if (elegida.current === linea) elegida.current = null
+          resaltar(false)
+        })
         linea.addTo(grupo)
       }
       todos.push(...t.puntos)
