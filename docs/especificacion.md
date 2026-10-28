@@ -695,6 +695,14 @@ choferes, la clásica y avisos automáticos.)*
 - **En el panel** (**Notificaciones**, en Operación): el formulario para mandar y la lista de las enviadas, la más nueva
   primero, con tipo, título, a cuántos llegó, **a cuántos celulares llegó el aviso** (R90) y **cuántos la vieron**, y
   **Retirar**.
+- **R93. Aviso al admin de cada cuenta nueva [servidor].** *(Oct. 2026: para aprobar rápido a quien se acaba de
+  registrar.)* Arriba de **Por aprobar**, una tarjeta ofrece **Avisarme en este aparato** (como R90: el permiso se pide
+  solo al tocar, vale por aparato, explica si está bloqueado o si es un iPhone sin la app instalada); activado, dice que
+  ese aparato recibe los avisos. Cada vez que alguien **termina de registrarse** (pasajero o chofer), los aparatos
+  activados del admin reciben **"Nueva cuenta por aprobar"** con el nombre y si es pasajero o chofer; tocarlo abre Por
+  aprobar. Lo pide el servidor con la sesión de la cuenta nueva, **una sola vez** por cuenta y solo mientras está
+  pendiente y recién creada (15 min); si el aviso falla, el registro sigue igual. Al salir del panel, ese aparato deja
+  de recibirlos.
 
 ## 6. Privacidad: quién ve qué [servidor]
 
@@ -716,7 +724,7 @@ choferes, la clásica y avisos automáticos.)*
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
-| Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más |
+| Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |
 
 ## 7. Avisos al usuario
 

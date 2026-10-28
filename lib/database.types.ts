@@ -647,6 +647,7 @@ export type Database = {
         Row: {
           aprobado_en: string | null
           aprobado_por: string | null
+          aviso_admin_en: string | null
           conectado_en: string | null
           creado_en: string
           de_prueba: boolean
@@ -662,6 +663,7 @@ export type Database = {
         Insert: {
           aprobado_en?: string | null
           aprobado_por?: string | null
+          aviso_admin_en?: string | null
           conectado_en?: string | null
           creado_en?: string
           de_prueba?: boolean
@@ -677,6 +679,7 @@ export type Database = {
         Update: {
           aprobado_en?: string | null
           aprobado_por?: string | null
+          aviso_admin_en?: string | null
           conectado_en?: string | null
           creado_en?: string
           de_prueba?: boolean
@@ -1216,6 +1219,7 @@ export type Database = {
         Returns: {
           aprobado_en: string | null
           aprobado_por: string | null
+          aviso_admin_en: string | null
           conectado_en: string | null
           creado_en: string
           de_prueba: boolean
@@ -1240,6 +1244,7 @@ export type Database = {
         Returns: {
           aprobado_en: string | null
           aprobado_por: string | null
+          aviso_admin_en: string | null
           conectado_en: string | null
           creado_en: string
           de_prueba: boolean
@@ -1264,6 +1269,7 @@ export type Database = {
         Returns: {
           aprobado_en: string | null
           aprobado_por: string | null
+          aviso_admin_en: string | null
           conectado_en: string | null
           creado_en: string
           de_prueba: boolean
@@ -1600,6 +1606,14 @@ export type Database = {
       avisar_pago_cuota: {
         Args: { p_banco: string; p_referencia: string }
         Returns: string
+      }
+      aviso_de_cuenta_nueva: {
+        Args: never
+        Returns: {
+          auth: string
+          endpoint: string
+          p256dh: string
+        }[]
       }
       borrar_recorridos_viejos: { Args: never; Returns: undefined }
       cambiar_lugar: {

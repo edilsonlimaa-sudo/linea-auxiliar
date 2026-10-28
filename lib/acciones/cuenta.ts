@@ -1,9 +1,11 @@
 "use server"
 
 import { redirect } from "next/navigation"
+import { after } from "next/server"
 import { z } from "zod"
 
 import { leerPagoMovil } from "@/lib/bancos"
+import { mandarPush } from "@/lib/push"
 import { inicioDe } from "@/lib/sesion"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { correoDeTelefono, normalizarTelefono, telefonoValido } from "@/lib/telefono"
@@ -84,7 +86,7 @@ export async function registrarse(anterior: EstadoFormulario, formData: FormData
 
   const d = resultado.data
   const supabase = await crearClienteServidor()
-  const { error } = await supabase.auth.signUp({
+  const { data: creada, error } = await supabase.auth.signUp({
     email: correoDeTelefono(d.telefono),
     password: d.pin,
     options: {
@@ -116,6 +118,18 @@ export async function registrarse(anterior: EstadoFormulario, formData: FormData
       return { errores: { placa: "Esa placa ya está registrada" }, valores, intento }
     }
     return { error: "No pudimos crear tu cuenta. Revisa tu conexión e intenta de nuevo.", valores, intento }
+  }
+
+  // R93: aviso a los aparatos del admin (con la sesión de la cuenta nueva, una sola vez). Si falla, el registro sigue igual
+  const { data: aparatos } = await supabase.rpc("aviso_de_cuenta_nueva")
+  if (aparatos?.length && creada.user) {
+    const aviso = {
+      id: `cuenta-${creada.user.id}`,
+      titulo: "Nueva cuenta por aprobar",
+      texto: `${d.rol === "chofer" ? "Chofer" : "Pasajero"}: ${d.nombre}`,
+      url: "/admin/aprobar",
+    }
+    after(() => mandarPush(aparatos, aviso).catch(() => {}))
   }
 
   // La cuenta nueva queda pendiente (R2): /inicio la lleva a "En revisión"

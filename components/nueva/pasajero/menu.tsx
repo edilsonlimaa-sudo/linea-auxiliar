@@ -6,7 +6,7 @@ import { useTheme } from "next-themes"
 import * as React from "react"
 
 import { usePerfil } from "@/components/nueva/app/perfil"
-import { apagarAvisosDeEsteCelular } from "@/components/nueva/pasajero/avisos-celular"
+import { apagarAvisosDeEsteCelular } from "@/lib/avisos-celular"
 import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/nueva/ui/drawer"

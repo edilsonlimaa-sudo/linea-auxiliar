@@ -40,6 +40,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { salirAdmin } from "@/lib/acciones/admin"
+import { apagarAvisosDeEsteCelular } from "@/lib/avisos-celular"
 import { cn } from "@/lib/utils"
 
 /** Contadores del menú: los que piden acción (aprobar) van en amarillo; los que informan, en gris */
@@ -165,7 +166,8 @@ export function MenuAdmin({ contadores }: { contadores: ContadoresAdmin }) {
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <form action={salirAdmin}>
+            {/* R93: al salir, este aparato deja de avisar de las cuentas nuevas */}
+            <form action={async () => (await apagarAvisosDeEsteCelular().catch(() => {}), await salirAdmin())}>
               <SidebarMenuButton type="submit" className="text-destructive hover:text-destructive">
                 <LogOutIcon aria-hidden />
                 Salir del panel

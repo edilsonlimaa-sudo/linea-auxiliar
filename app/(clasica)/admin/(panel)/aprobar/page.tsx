@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 
+import { AvisosAdmin } from "@/components/admin/avisos-admin"
 import { estadoDeParam, ListaPorAprobar, rolDeParam } from "@/components/admin/lista-cuentas"
 import { cargarCuentas } from "@/lib/datos/admin"
 import { exigirAdmin } from "@/lib/sesion"
@@ -18,6 +19,7 @@ export default async function PaginaPorAprobar({ searchParams }: PageProps<"/adm
         <h1 className="text-xl leading-tight font-bold">Por aprobar</h1>
         <p className="text-muted-foreground">Revisa la foto y los datos (del chofer, también la placa y el carro) antes de aprobar.</p>
       </header>
+      <AvisosAdmin />
       <ListaPorAprobar
         estado={estadoDeParam(typeof estado === "string" ? estado : undefined)}
         rol={rolDeParam(typeof rol === "string" ? rol : undefined)}
