@@ -1,8 +1,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { after } from "next/server"
 
 import type { Database } from "@/lib/database.types"
+import { hora, horaDeCaracas } from "@/lib/fechas"
+import { mandarPush } from "@/lib/push"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { esMotivoCancelar, type MotivoCancelar } from "@/lib/motivos-cancelar"
 import { contrario } from "@/lib/viajes"
@@ -61,17 +64,6 @@ export async function decirDespues(viajeId: string, despues: { minutos: number }
   return rpc((s) => s.rpc("decir_despues", { p_viaje: viajeId, p_despues: "pausa", p_vuelve_en: vuelveEn.toISOString() }))
 }
 
-// "14:30" en Caracas (UTC-4, sin horario de verano) → instante. Si esa hora ya pasó hoy, es la de mañana (R10).
-function horaDeCaracas(hhmm: string): Date | null {
-  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm)
-  if (!m || Number(m[1]) > 23 || Number(m[2]) > 59) return null
-  const ahoraCaracas = new Date(Date.now() - 4 * 3_600_000)
-  const hoy = Date.UTC(ahoraCaracas.getUTCFullYear(), ahoraCaracas.getUTCMonth(), ahoraCaracas.getUTCDate())
-  let instante = hoy + (Number(m[1]) + 4) * 3_600_000 + Number(m[2]) * 60_000
-  if (instante <= Date.now()) instante += 24 * 3_600_000
-  return new Date(instante)
-}
-
 /**
  * Publicar viaje (R10) o agregar otro a la cadena (R11): sentido, puestos y cuándo llega a recoger,
  * en minutos ("minutos") o a una hora fija ("hora", HH:MM). La base decide si queda en camino o como próximo.
@@ -85,11 +77,13 @@ export async function publicarViaje(fd: FormData): Promise<Resultado> {
     return { error: "Escoge cuánto tardas en llegar a recoger para la vuelta." }
   }
   const ida = await publicarIda(fd)
+  if (ida.ok) await avisarQuienEspera()
   if (!ida.ok || !vuelta) return ida
   const sentido = String(fd.get("sentido")) as Sentido
   const vueltaRes = await rpc((s) =>
     s.rpc("publicar_viaje", { p_sentido: contrario(sentido), p_puestos: Number(fd.get("puestos")), p_eta_min: minutosVuelta })
   )
+  if (vueltaRes.ok) await avisarQuienEspera()
   // La ida ya quedó publicada: se dice para que agregue la vuelta a mano
   return vueltaRes.ok ? vueltaRes : { error: `Tu viaje quedó publicado, pero la vuelta no: ${vueltaRes.error} Agrégala con "Agregar otro viaje".` }
 }
@@ -97,7 +91,49 @@ export async function publicarViaje(fd: FormData): Promise<Resultado> {
 /** La vuelta al salir (R61): sentido contrario, mismos puestos; con un viaje en ruta queda en camino ya */
 export async function publicarVuelta(sentidoIda: Sentido, puestos: number, minutos: number): Promise<Resultado> {
   if (!Number.isInteger(minutos) || minutos < 1 || minutos > 240) return { error: "Escoge cuándo llegas a recoger." }
-  return rpc((s) => s.rpc("publicar_viaje", { p_sentido: contrario(sentidoIda), p_puestos: puestos, p_eta_min: minutos }))
+  const r = await rpc((s) => s.rpc("publicar_viaje", { p_sentido: contrario(sentidoIda), p_puestos: puestos, p_eta_min: minutos }))
+  if (r.ok) await avisarQuienEspera()
+  return r
+}
+
+/**
+ * R94: recién publicado un viaje al Centro, a quien pidió aviso le llega (una sola vez) "Hay un carro al Centro" en el
+ * celular. La base marca los pedidos y devuelve los aparatos; el aviso sale después de responder al chofer. Si falla,
+ * la publicación ya quedó igual.
+ */
+async function avisarQuienEspera() {
+  try {
+    const supabase = await crearClienteServidor()
+    const { data: aparatos } = await supabase.rpc("avisar_esperas")
+    if (!aparatos?.length) return
+    const ids = [...new Set(aparatos.map((a) => a.viaje_id))]
+    const { data: viajes } = await supabase
+      .from("viajes")
+      .select("id, estado, estado_en, eta_min, hora_fija, chofer:perfiles!viajes_chofer_id_fkey(nombre, vehiculo:vehiculos(unidad))")
+      .in("id", ids)
+    for (const v of viajes ?? []) {
+      const chofer = Array.isArray(v.chofer) ? v.chofer[0] : v.chofer
+      const vehiculo = Array.isArray(chofer?.vehiculo) ? chofer?.vehiculo[0] : chofer?.vehiculo
+      const quien = `${chofer?.nombre.split(" ")[0] ?? "Un chofer"}${vehiculo?.unidad ? ` (unidad ${vehiculo.unidad})` : ""}`
+      const cuando = v.hora_fija
+        ? `a las ${hora(v.hora_fija)}`
+        : v.estado === "programado"
+          ? "después de su viaje de ahora"
+          : v.eta_min <= 1
+            ? "ya"
+            : `en unos ${v.eta_min} min`
+      const aviso = {
+        id: `aviso-centro-${v.id}`,
+        titulo: "Hay un carro al Centro",
+        texto: `${quien} va al Centro y llega a recoger ${cuando}. Aparta tu puesto.`,
+        url: "/n/al-centro",
+      }
+      const suyos = aparatos.filter((a) => a.viaje_id === v.id)
+      after(() => mandarPush(suyos, aviso).catch(() => {}))
+    }
+  } catch {
+    // El aviso es un extra: la publicación no depende de él
+  }
 }
 
 async function publicarIda(fd: FormData): Promise<Resultado> {

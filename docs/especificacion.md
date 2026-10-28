@@ -311,8 +311,24 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 La espera es solo una **señal de demanda** y un **aviso al pasajero**. No hay pantalla "Esperando" para el
 chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la única forma de entrar a un carro.
 
+- **R94. Avísame cuando haya un carro al Centro [servidor].** *(Oct. 2026: en el sentido Al Centro el pasajero solo
+  veía algo si ya había viajes; quien no encontraba carro se iba sin dejar rastro. Solo en la interfaz nueva, que tiene
+  los avisos en el celular, R90. Usa las esperas de R31, sin pedir el lugar.)* En **Al Centro**, cuando no hay ningún
+  carro con puesto, la pantalla ofrece **Avisarme cuando haya un carro** y la persona escoge **por cuánto tiempo**: la
+  próxima hora, 2 horas (lo de siempre) o hasta las 12 m. / hasta una hora del día (como mucho 12 h). Mientras espera,
+  la pantalla lo dice ("Te avisamos hasta las 3:40 p. m.") con **Ya no** para cancelar. Reglas para no molestar a nadie:
+  - **Un pedido, un aviso:** llega una sola vez, con el primer viaje al Centro que se publique **con puesto** mientras
+    el pedido vale; después ya no llega nada más. Si se le escapa, lo pide otra vez.
+  - **Vence solo** a la hora que escogió, sin aviso. Un viaje con **hora fija** después de esa hora no avisa.
+  - Se cierra solo si la persona **aparta puesto** (R35) o lo cancela; un pedido activo por persona.
+  - El aviso llega al celular si activó los avisos (R90): "Hay un carro al Centro", quién va y cuándo llega a recoger;
+    tocarlo abre Al Centro. Sin avisos activados, lo ve al abrir la app. Un chofer de prueba solo avisa a cuentas de
+    prueba (R91).
+  - Nadie más ve quién pidió aviso (ni los choferes); el admin, sí. *(Mostrar a los choferes cuántos esperan queda para
+    después.)*
 - **R31.** *(Suspendida en oct. 2026: por ahora el pasajero solo ve las unidades y pide puesto; no hay "Avísame"
-  ni página Esperando. La base sigue lista para volver a activarla.)* **Esperar es opcional:** el pasajero ve las unidades sin dar nada. Si no hay unidad de su sentido o
+  ni página Esperando. La base sigue lista para volver a activarla. Desde R94, las esperas vuelven solo como aviso al
+  Centro de la interfaz nueva; "quién espera" con teléfono para los choferes sigue apagado.)* **Esperar es opcional:** el pasajero ve las unidades sin dar nada. Si no hay unidad de su sentido o
   todas van llenas, **Avísame cuando haya una** registra la espera: el **sentido** y su **lugar** (escrito y/o GPS,
   R25–R26). Los choferes ven cuántos esperan por sentido al publicar (R10) y en su Inicio ("3 personas esperan para
   ir al Centro"), y **los choferes conectados ven quién espera**: nombre corto, foto, sentido, cuántos van, el lugar,
@@ -323,7 +339,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R33.** *(Eliminada.)* El chofer ya no agrega a su viaje a quien espera: duplicaba la reserva y saltaba el
   orden justo. Si encuentra a alguien en la calle, usa **Ocupar puesto** (R36).
 - **R34.** *(Eliminada.)* "Recogido" desde la espera; lo cubre Ocupar puesto (R36).
-- **R35 [servidor].** Una espera vence sola a las 2 h. También se cierra cuando la persona aparta (R18).
+- **R35 [servidor].** Una espera vence sola a las 2 h (el aviso de R94, a la hora que escogió la persona). También se
+  cierra cuando la persona aparta (R18).
 
 ### 5.9 Puestos manuales (quien no usa la app)
 
@@ -730,7 +747,7 @@ choferes, la clásica y avisos automáticos.)*
 | **Teléfono** de un chofer | Pasajeros con reserva en sus viajes, otros choferes y el admin |
 | **Cédula** | Solo la propia persona y el admin |
 | Lugar escrito y GPS de un pasajero (reserva) | Solo el chofer del viaje. La lista pública no lo muestra |
-| Espera de un pasajero | Él, el admin y los **choferes conectados** (nombre corto, foto, sentido, cuántos van, lugar, desde cuándo y WhatsApp, R31). Quien también espera en el mismo sentido ve su **nombre corto y desde cuándo** (como la lista pública de un viaje), nunca el lugar |
+| Espera de un pasajero (aviso al Centro, R94) | Él y el admin. *(Con R31 apagado, los choferes y los demás que esperan ya no la ven: `esperando_para_choferes` y `esperan_conmigo` no se pueden llamar desde la app.)* |
 | Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Los pasajeros y los choferes con la cuota del día o un viaje abierto (R76). La **distancia** al avisar (R62), solo el admin |
 | **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
@@ -1039,6 +1056,11 @@ definitivo, con RLS y funciones, vive en `supabase/migrations/`.
 - **Tiempo real:** lo que hace un teléfono aparece en los demás en ~1 s.
 - **Sin señal:** la app abre (PWA) y muestra el último estado conocido.
 - **Hora:** todas las horas en America/Caracas; el orden de las reservas lo define el reloj del servidor.
+- **Si una pantalla falla:** nunca la pantalla cruda de Next. Cada interfaz tiene la suya ("Algo salió mal", **Recargar la
+  app** y Volver a intentar), y si falla el layout, una general con estilo propio. *(Oct. 2026: el chofer que deja la app
+  abierta y vuelve después de un despliegue tenía el código viejo y la pantalla se rompía.)* Un **error de versión**
+  (un archivo de la app o una acción que ya no existen en el servidor) **recarga la app sola**, como mucho una vez por
+  minuto; si el error sigue, se ve la pantalla.
 
 ## 11. Fuera de alcance (por ahora)
 

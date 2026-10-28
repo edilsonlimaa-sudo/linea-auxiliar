@@ -302,6 +302,8 @@ export type Database = {
       }
       esperas: {
         Row: {
+          avisado_en: string | null
+          avisado_por: string | null
           cerrada_en: string | null
           creado_en: string
           estado: Database["public"]["Enums"]["estado_espera"]
@@ -312,8 +314,11 @@ export type Database = {
           pasajero_id: string
           personas: number
           sentido: Database["public"]["Enums"]["sentido"]
+          vence_en: string | null
         }
         Insert: {
+          avisado_en?: string | null
+          avisado_por?: string | null
           cerrada_en?: string | null
           creado_en?: string
           estado?: Database["public"]["Enums"]["estado_espera"]
@@ -324,8 +329,11 @@ export type Database = {
           pasajero_id: string
           personas?: number
           sentido: Database["public"]["Enums"]["sentido"]
+          vence_en?: string | null
         }
         Update: {
+          avisado_en?: string | null
+          avisado_por?: string | null
           cerrada_en?: string | null
           creado_en?: string
           estado?: Database["public"]["Enums"]["estado_espera"]
@@ -336,8 +344,16 @@ export type Database = {
           pasajero_id?: string
           personas?: number
           sentido?: Database["public"]["Enums"]["sentido"]
+          vence_en?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "esperas_avisado_por_fkey"
+            columns: ["avisado_por"]
+            isOneToOne: false
+            referencedRelation: "viajes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "esperas_pasajero_id_fkey"
             columns: ["pasajero_id"]
@@ -1603,6 +1619,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      avisar_esperas: {
+        Args: never
+        Returns: {
+          auth: string
+          endpoint: string
+          p256dh: string
+          viaje_id: string
+        }[]
+      }
       avisar_pago_cuota: {
         Args: { p_banco: string; p_referencia: string }
         Returns: string
@@ -1902,6 +1927,13 @@ export type Database = {
           cedula: string
           telefono: string
         }[]
+      }
+      pedir_aviso: {
+        Args: {
+          p_hasta: string
+          p_sentido: Database["public"]["Enums"]["sentido"]
+        }
+        Returns: string
       }
       plan_de_gina: {
         Args: { p_viaje: string }

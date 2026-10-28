@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
+import { horaDeCaracas } from "@/lib/fechas"
 import { esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
 import { destinoPara } from "@/lib/sesion"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
@@ -204,4 +205,29 @@ export async function sigoEnLista(): Promise<Resultado> {
 export async function meFui(motivo: MotivoMeFui): Promise<Resultado> {
   if (!esMotivoMeFui(motivo)) return { error: "Escoge una opción" }
   return llamarLista((s) => s.rpc("me_fui", { p_motivo: motivo }))
+}
+
+/** R94: avisarme cuando haya un carro al Centro: por 1 h, 2 h o hasta una hora del día ("HH:MM", Caracas) */
+export async function pedirAvisoAlCentro(hasta: { horas: number } | { hora: string }): Promise<Resultado> {
+  const instante =
+    "horas" in hasta
+      ? hasta.horas === 1 || hasta.horas === 2
+        ? new Date(Date.now() + hasta.horas * 3_600_000)
+        : null
+      : horaDeCaracas(hasta.hora)
+  if (!instante) return { error: "Escoge hasta qué hora te avisamos." }
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("pedir_aviso", { p_sentido: "vg_a_centro", p_hasta: instante.toISOString() })
+  if (error) return { error: error.message }
+  revalidatePath("/n", "layout")
+  return { ok: true }
+}
+
+/** R94: ya no me avises */
+export async function cancelarAvisoAlCentro(): Promise<Resultado> {
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("cancelar_espera")
+  if (error) return { error: error.message }
+  revalidatePath("/n", "layout")
+  return { ok: true }
 }

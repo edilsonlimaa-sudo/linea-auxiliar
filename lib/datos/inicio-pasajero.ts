@@ -227,7 +227,8 @@ export async function cargarInicioPasajero(pasajeroId: string): Promise<DatosIni
       .select("*")
       .eq("pasajero_id", pasajeroId)
       .eq("estado", "esperando")
-      .gt("creado_en", new Date(Date.now() - 2 * 3_600_000).toISOString())
+      // Vigente: hasta la hora que escogió (aviso al Centro, R94) o 2 h (R35)
+      .or(`vence_en.gt.${new Date().toISOString()},and(vence_en.is.null,creado_en.gt.${new Date(Date.now() - 2 * 3_600_000).toISOString()})`)
       .maybeSingle(),
     supabase
       .from("avisos")

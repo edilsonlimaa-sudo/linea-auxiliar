@@ -77,3 +77,14 @@ export function textoVuelta(vuelveEn: string | null, ahora = new Date(), sinHora
   if (d.getTime() <= ahora.getTime()) return `dijo que volvía a las ${hora(vuelveEn)}`
   return diaCaracas(d) === diaCaracas(ahora) ? `vuelve como a las ${hora(vuelveEn)}` : `vuelve mañana como a las ${hora(vuelveEn)}`
 }
+
+// "14:30" en Caracas (UTC-4, sin horario de verano) → instante. Si esa hora ya pasó hoy, es la de mañana (R10).
+export function horaDeCaracas(hhmm: string): Date | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm)
+  if (!m || Number(m[1]) > 23 || Number(m[2]) > 59) return null
+  const ahoraCaracas = new Date(Date.now() - 4 * 3_600_000)
+  const hoy = Date.UTC(ahoraCaracas.getUTCFullYear(), ahoraCaracas.getUTCMonth(), ahoraCaracas.getUTCDate())
+  let instante = hoy + (Number(m[1]) + 4) * 3_600_000 + Number(m[2]) * 60_000
+  if (instante <= Date.now()) instante += 24 * 3_600_000
+  return new Date(instante)
+}
