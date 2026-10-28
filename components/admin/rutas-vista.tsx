@@ -4,6 +4,7 @@ import { MapIcon } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { MapaRutas } from "@/components/admin/mapa-rutas"
+import { Button } from "@/components/ui/button"
 import type { Tramo } from "@/lib/datos/rutas"
 import { COLOR_FUERA_DE_VIAJE, COLOR_SENTIDO } from "@/lib/mapa"
 import { cn } from "@/lib/utils"
@@ -52,7 +53,10 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
     [eleccion, tramos]
   )
   const tramoElegido = eleccion && "tramo" in eleccion ? eleccion.tramo : null
-  const viajeElegido = eleccion && "viaje" in eleccion ? eleccion.viaje : null
+  // El viaje que se ve solo en el mapa: desde "Ver en el mapa" hasta que se escoge algo de otro viaje o "Ver todo"
+  const [aislado, setAislado] = useState<string | null>(null)
+  const enMapa = useMemo(() => (aislado ? tramos.filter((t) => t.ciclo?.id === aislado) : tramos), [aislado, tramos])
+  const viajeAislado = aislado ? tramos.find((t) => t.ciclo?.id === aislado)?.ciclo : null
 
   // Escogido en el mapa: abre su día si estaba cerrado y lo muestra
   useEffect(() => {
@@ -65,19 +69,36 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
 
   const alMapa = () => document.getElementById("mapa-rutas")?.scrollIntoView({ block: "nearest", behavior: "smooth" })
   const escoger = (id: string) => {
+    if (aislado && tramos.find((t) => t.id === id)?.ciclo?.id !== aislado) setAislado(null)
     setEleccion((actual) => (actual && "tramo" in actual && actual.tramo === id ? null : { tramo: id }))
     alMapa()
   }
   const escogerViaje = (id: string) => {
-    setEleccion((actual) => (actual && "viaje" in actual && actual.viaje === id ? null : { viaje: id }))
+    const soltar = aislado === id
+    setAislado(soltar ? null : id)
+    setEleccion(soltar ? null : { viaje: id })
     alMapa()
+  }
+  const verTodo = () => {
+    setAislado(null)
+    setEleccion(null)
   }
   const delMapa = useCallback((id: string | null) => setEleccion(id ? { tramo: id } : null), [])
 
   return (
     <>
-      <div id="mapa-rutas">
-        <MapaRutas tramos={tramos} elegidos={elegidos} onElegir={delMapa} />
+      <div id="mapa-rutas" className="flex flex-col gap-2">
+        {viajeAislado ? (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border-2 border-primary bg-accent px-4 py-2">
+            <p className="text-sm">
+              Solo se ve el <span className="font-bold">{viajeAislado.titulo.replace(/^V/, "v")}</span> · {viajeAislado.horas}
+            </p>
+            <Button variant="outline" onClick={verTodo}>
+              Ver todo
+            </Button>
+          </div>
+        ) : null}
+        <MapaRutas tramos={enMapa} elegidos={elegidos} onElegir={delMapa} />
       </div>
       <section aria-labelledby="titulo-cronologia" className="flex flex-col gap-3">
         <div>
@@ -123,10 +144,10 @@ export function RutasVista({ tramos }: { tramos: Tramo[] }) {
                             <div
                               className={cn(
                                 "rounded-2xl border-2 border-dashed border-muted-foreground/40 bg-muted/40 p-2",
-                                viajeElegido === g.ciclo.id && "border-primary bg-accent/60"
+                                aislado === g.ciclo.id && "border-primary bg-accent/60"
                               )}
                             >
-                              <MarcoViaje ciclo={g.ciclo} elegido={viajeElegido === g.ciclo.id} onClick={() => escogerViaje(g.ciclo!.id)} />
+                              <MarcoViaje ciclo={g.ciclo} elegido={aislado === g.ciclo.id} onClick={() => escogerViaje(g.ciclo!.id)} />
                               <ol className="flex flex-col gap-1.5">{filas}</ol>
                             </div>
                           </li>

@@ -108,9 +108,10 @@ export function MapaRutas({ tramos, elegidos, onElegir }: { tramos: Tramo[]; ele
     const m = mapa.current
     const grupo = capa.current
     if (!listo || !leaflet || !m || !grupo) return
+    // Rehacer las capas cierra el popup abierto: no es que el admin lo cerró (no se avisa)
+    abierto.current = null
     grupo.clearLayers()
     capas.current.clear()
-    abierto.current = null
     enGrupo.current.clear()
     const todos: [number, number][] = []
     // Primero lo de fuera de un viaje, para que los viajes queden encima
