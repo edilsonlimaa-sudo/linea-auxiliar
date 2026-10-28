@@ -367,7 +367,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   recorridos"; apagado por defecto). En esa misma pantalla, un **mapa** dibuja **todo el recorrido grabado**: lo que va
   de la salida a la llegada de un viaje, del color de su sentido (donde se juntan muchas líneas está la ruta principal), y
   lo de **fuera de un viaje** (recoger gente antes de salir, ir a la salida, volver vacío) en gris punteado; cada punto
-  grabado se ve como un puntito. La línea se corta donde el GPS dejó de grabar más de 2 min (no se inventa el tramo) y
+  grabado se ve como un puntito, y **flechitas** a lo largo de cada línea dicen hacia dónde iba el carro (a la misma
+  distancia en la pantalla con cualquier zoom). La línea se corta donde el GPS dejó de grabar más de 2 min (no se inventa el tramo) y
   se descartan los puntos imprecisos (más de 50 m) y los saltos imposibles (más de 150 km/h). Filtros de período,
   sentido (escoger uno deja solo sus viajes), chofer y "Todo el recorrido / Solo viajes"; tocar una línea dice de quién es, cuándo
   fue y cuánto duró. Mientras comparte la posición (R40), el teléfono del chofer también **guarda cada punto
