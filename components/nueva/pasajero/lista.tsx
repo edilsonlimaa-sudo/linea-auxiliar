@@ -1,7 +1,6 @@
 "use client"
 
 import { ChevronRight, Hand, Loader2, MapPin, Route, TimerReset, Users } from "lucide-react"
-import Link from "next/link"
 import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
@@ -32,54 +31,115 @@ function useAhora() {
   return React.useSyncExternalStore(suscribir, () => Math.floor(Date.now() / 30_000) * 30_000, () => 0)
 }
 
-/** Mi viaje anotado en la lista hacia Valle Grande (§5.17): mi lugar, cuánto vale, los carros que vienen, Me fui */
-export function MiLista({ mio, carros }: { mio: MiListaVista; carros: UnidadVista[] }) {
+/**
+ * A Valle Grande (§5.17): una sola pantalla, anotado o no. Sin anotarse: cuántos esperan, los carros que vienen y Anotarme.
+ * Anotado (Inicio la muestra como su viaje): su lugar, cuánto vale, los carros que vienen y Me fui. La lista completa se abre
+ * en una hoja desde abajo.
+ */
+export function PantallaValle({
+  mio,
+  filas,
+  carros,
+  titulo,
+  backHref,
+}: {
+  mio: MiListaVista | null
+  filas: FilaVista[]
+  carros: UnidadVista[]
+  titulo: string
+  backHref?: string
+}) {
   return (
     <>
-      <AppHeader title="Mi viaje" />
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <section className="flex flex-col gap-4 rounded-3xl border bg-card p-4 text-card-foreground">
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary">{mio.diceQueSubio ? "Te montaste" : "En la lista"}</Badge>
-            <span className="text-sm text-muted-foreground">{personasLabel(mio.personas)}</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-3xl bg-primary/10 text-primary">
-              <span className="font-heading text-4xl leading-none font-semibold tabular-nums">{mio.posicion}</span>
-              <span className="text-[10px] font-medium tracking-wide uppercase opacity-80">lugar</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-heading text-lg font-semibold">
-                {mio.delante === 0 ? "Eres el siguiente" : mio.delante === 1 ? "1 persona antes que tú" : `${mio.delante} personas antes que tú`}
-              </p>
-              <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                <MapPin className="size-3.5" /> {mio.lugar}
-              </p>
-            </div>
-          </div>
-          {!mio.enGina ? <p className="text-sm text-muted-foreground">El carro te guarda puesto y te recoge al pasar.</p> : null}
-          <Link
-            href="/n/fila"
-            transitionTypes={["nav-forward"]}
-            className="flex items-center justify-between rounded-2xl bg-muted/60 px-3 py-2 text-sm font-medium transition-colors active:bg-muted"
-          >
-            Ver la lista completa
-            <ChevronRight className="size-4 text-muted-foreground" />
-          </Link>
-        </section>
+      <AppHeader title={titulo} backHref={backHref} />
+      <div className={cn("flex flex-1 flex-col gap-4 p-4", backHref && "pb-[max(1rem,env(safe-area-inset-bottom))]")}>
+        <div>
+          <p className="text-sm text-muted-foreground">Centro → Valle Grande</p>
+          <h2 className="font-heading text-2xl font-semibold">La lista en Gina</h2>
+        </div>
 
-        {!mio.diceQueSubio ? <SigoAquiCard venceEn={mio.venceEn} /> : null}
+        {mio ? <MiLugar mio={mio} filas={filas} /> : <CuantosEsperan filas={filas} />}
+        {mio && !mio.diceQueSubio ? <SigoAquiCard venceEn={mio.venceEn} /> : null}
 
         <section className="flex flex-col gap-3">
-          <h2 className="font-heading text-lg font-semibold">Carros que vienen</h2>
+          <h3 className="font-heading text-lg font-semibold">Carros que vienen</h3>
           <CarrosQueVienen carros={carros} />
         </section>
 
-        <div className="mt-auto flex flex-col gap-2 pt-2">
-          <MeFuiDrawer />
-        </div>
+        <div className="mt-auto flex flex-col gap-2 pt-2">{mio ? <MeFuiDrawer /> : <AnotarmeCta />}</div>
       </div>
     </>
+  )
+}
+
+/** Sin anotarse: cuántos esperan; tocarlo abre la lista */
+function CuantosEsperan({ filas }: { filas: FilaVista[] }) {
+  const esperan = filas.reduce((n, f) => n + f.personas, 0)
+  return (
+    <HojaLista filas={filas} className="flex w-full items-center gap-3 rounded-3xl border bg-card p-4 text-left transition-colors active:bg-muted">
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <Users className="size-6" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="font-heading font-semibold">
+          {esperan === 0 ? "Nadie esperando" : `${esperan === 1 ? "1 persona" : `${esperan} personas`} esperando`}
+        </p>
+        <p className="text-sm text-muted-foreground">El orden es por la hora en que cada uno se anota.</p>
+      </div>
+      <ChevronRight className="size-5 text-muted-foreground" />
+    </HojaLista>
+  )
+}
+
+/** Anotado: mi lugar en la lista */
+function MiLugar({ mio, filas }: { mio: MiListaVista; filas: FilaVista[] }) {
+  return (
+    <section className="flex flex-col gap-4 rounded-3xl border bg-card p-4 text-card-foreground">
+      <div className="flex items-center justify-between">
+        <Badge variant="secondary">{mio.diceQueSubio ? "Te montaste" : "En la lista"}</Badge>
+        <span className="text-sm text-muted-foreground">{personasLabel(mio.personas)}</span>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-3xl bg-primary/10 text-primary">
+          <span className="font-heading text-4xl leading-none font-semibold tabular-nums">{mio.posicion}</span>
+          <span className="text-[10px] font-medium tracking-wide uppercase opacity-80">lugar</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="font-heading text-lg font-semibold">
+            {mio.delante === 0 ? "Eres el siguiente" : mio.delante === 1 ? "1 persona antes que tú" : `${mio.delante} personas antes que tú`}
+          </p>
+          <p className="flex items-center gap-1 text-sm text-muted-foreground">
+            <MapPin className="size-3.5" /> {mio.lugar}
+          </p>
+        </div>
+      </div>
+      {!mio.enGina ? <p className="text-sm text-muted-foreground">El carro te guarda puesto y te recoge al pasar.</p> : null}
+      <HojaLista
+        filas={filas}
+        className="flex w-full items-center justify-between rounded-2xl bg-muted/60 px-3 py-2 text-sm font-medium transition-colors active:bg-muted"
+      >
+        Ver la lista completa
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </HojaLista>
+    </section>
+  )
+}
+
+/** La lista completa (R63) en una hoja desde abajo; children = lo que se toca para abrirla */
+function HojaLista({ filas, className, children }: { filas: FilaVista[]; className: string; children: React.ReactNode }) {
+  return (
+    <Drawer showSwipeHandle>
+      <DrawerTrigger className={className}>{children}</DrawerTrigger>
+      <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
+        <DrawerHeader>
+          <DrawerTitle className="font-heading text-xl">La lista en Gina</DrawerTitle>
+          <DrawerDescription>Parada Gina, Centro → Valle Grande. El orden es por la hora en que cada uno se anotó.</DrawerDescription>
+        </DrawerHeader>
+        <div className="max-h-[60dvh] overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <FilaLista filas={filas} />
+        </div>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

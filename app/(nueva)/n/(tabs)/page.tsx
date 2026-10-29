@@ -8,12 +8,12 @@ import { AvisosCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
-import { MiLista } from "@/components/nueva/pasajero/lista"
+import { PantallaValle } from "@/components/nueva/pasajero/lista"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
 import { ViajeTerminado } from "@/components/nueva/pasajero/viaje-terminado"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
-import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista, unidadVista } from "@/lib/nueva/vistas"
+import { ahoraDelPedido, filaVista, miListaVista, miViajeVista, servicioVista, unidadVista } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { aceptaReservas, carrosHaciaValle, ordenarParaPasajero } from "@/lib/viajes"
 
@@ -50,7 +50,7 @@ export default async function InicioNueva() {
     return (
       <Screen>
         <EnVivo />
-        <MiLista mio={mio} carros={carros} />
+        <PantallaValle mio={mio} filas={lista.map(filaVista)} carros={carros} titulo="Mi viaje" />
       </Screen>
     )
   }

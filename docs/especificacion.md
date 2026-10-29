@@ -541,7 +541,11 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   la misma lista: **nombre corto, cuántos van, dónde está** (Gina o el lugar escrito) y su posición ("Eres el 5").
   Los choferes y los pasajeros ven además **cuántos esperan en Gina** (la demanda).
   - **El pasajero la ve igual, en una franja** ("La lista · 21 personas · 15 en Gina · 6 en otro lugar") que abre la
-    lista completa en una hoja, con la suya destacada; su lugar en grande va arriba ("Eres el 11").
+    lista completa en una hoja, con la suya destacada; su lugar en grande va arriba ("Eres el 11"). En la interfaz
+    nueva, **A Valle Grande es una sola pantalla**, anotado o no (*oct. 2026: eran dos casi iguales más una página
+    para la lista*): arriba "Nadie esperando / N esperando" o, anotado, su lugar y cuánto vale; luego los carros que
+    vienen; abajo **Anotarme en la lista** o **Me fui**. La lista completa se abre en una **hoja desde abajo**, no en otra
+    página. Anotado, Inicio muestra esa misma pantalla como su viaje.
   - **Carros que vienen** dice: "Estos son los carros de la Línea hoy. Si un chofer que no aparece aquí te pregunta si
     estás en la lista, no está trabajando con la Línea."
   - **Anotado, va a Mi viaje** *(Oct. 2026)*: como quien aparta puesto, al anotarse pasa a **Mi viaje** (Inicio lo
