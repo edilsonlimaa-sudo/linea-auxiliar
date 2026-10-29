@@ -39,7 +39,7 @@ export default async function DetalleViaje({ params }: PageProps<"/n/viajes/[id]
             <span className="text-right text-sm text-muted-foreground first-letter:uppercase">{cuando(v.cuando)}</span>
           </div>
           <Link
-            href={`/n/choferes/${chofer.id}`}
+            href={`/n/choferes/${chofer.id}?volver=/n/viajes/${id}`}
             transitionTypes={["nav-forward"]}
             className="flex items-center gap-3 rounded-2xl bg-muted/60 p-3 transition-colors active:bg-muted"
           >

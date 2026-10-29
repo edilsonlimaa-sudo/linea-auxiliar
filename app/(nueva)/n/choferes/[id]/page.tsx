@@ -17,9 +17,12 @@ const fecha = (iso: string) =>
   new Intl.DateTimeFormat("es-VE", { day: "numeric", month: "short", timeZone: "America/Caracas" }).format(new Date(iso)).replace(/\./g, "")
 
 // El perfil de un chofer (R46): el carro, si trabaja y las opiniones de los pasajeros, sin nombres (R52)
-export default async function PerfilChofer({ params }: PageProps<"/n/choferes/[id]">) {
+export default async function PerfilChofer({ params, searchParams }: PageProps<"/n/choferes/[id]">) {
   await exigirCuentaAprobada({ interfaz: "nueva" })
   const { id } = await params
+  // Volver a donde estaba (p. ej. el viaje de Mis viajes); solo direcciones de la interfaz nueva
+  const { volver } = await searchParams
+  const atras = typeof volver === "string" && /^\/n(\/[\w-]+)*$/.test(volver) ? volver : "/n/choferes"
   const c = /^[0-9a-f-]{36}$/i.test(id) ? await cargarPerfilChofer(id) : null
   if (!c) notFound()
 
@@ -30,7 +33,7 @@ export default async function PerfilChofer({ params }: PageProps<"/n/choferes/[i
 
   return (
     <Screen>
-      <AppHeader title="Chofer" backHref="/n/choferes" />
+      <AppHeader title="Chofer" backHref={atras} />
       <div className="flex flex-col gap-4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <section className="flex flex-col items-center gap-3 py-2 text-center">
           <ViewTransition name={`chofer-${c.id}`} share="morph" default="none">
