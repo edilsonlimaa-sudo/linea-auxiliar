@@ -465,7 +465,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   anotado a mano, recogido en el camino), quién se bajó antes, quién **no vino** y las calificaciones de ese viaje.
 - **R51.** Pasajero: **Mis viajes** (los últimos 30 que viajó de verdad: subió o se bajó). Cada uno: sentido,
   fecha, chofer, unidad, **placa** y su calificación. Si no lo calificó ("Ahora no", R45), botón **Calificar**
-  ahí mismo.
+  ahí mismo. En la interfaz nueva van **por día** (Hoy, Ayer, fecha) y, si hay sin calificar, un aviso arriba dice
+  cuántos; sin viajes, la pantalla explica qué va a aparecer ahí y lleva a buscar un carro.
 - **R52.** Chofer: **Mis calificaciones**, su propio espacio (no va en el carnet): ★ promedio y cantidad,
   cuántas de cada estrella, las etiquetas que más le dan y los comentarios recientes. **Sin el nombre** de quien
   calificó (solo fecha y sentido), para que el pasajero califique con libertad.

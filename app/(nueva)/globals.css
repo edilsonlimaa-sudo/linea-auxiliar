@@ -146,6 +146,11 @@
   .bg-card, [data-slot="card"] {
     box-shadow: var(--sombra-card);
     }
+  /* Los vacíos con borde punteado: sobre el gris (y la aurora) necesitan un borde más firme y un poco de blanco */
+  :root:not(.dark) .border-dashed {
+    border-color: oklch(0.83 0.01 250);
+    background-color: oklch(1 0 0 / 70%);
+    }
 }
 
 /* ---------------------------------------------------------------------------
