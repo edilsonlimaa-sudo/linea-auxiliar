@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { redirect } from "next/navigation"
 
 import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
@@ -9,7 +10,6 @@ import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
-import { ViajeTerminado } from "@/components/nueva/pasajero/viaje-terminado"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista } from "@/lib/nueva/vistas"
@@ -43,6 +43,8 @@ export default async function InicioNueva() {
     cargarAvisoDeCierre(perfil.id),
     cargarListaGina(),
   ])
+  // Recién terminó un viaje sin calificar (R45): primero la pantalla de paso "Llegaste bien"
+  if (pendiente) redirect("/n/llegaste")
   // Anotado en la lista no es todavía un viaje (§5.17): su lugar vive en A Valle Grande; Mi viaje empieza al montarse
   const mio = miListaVista(lista)
 
@@ -55,7 +57,6 @@ export default async function InicioNueva() {
       <AppHeader title={`Hola, ${perfil.nombre.split(" ")[0]}`} />
       <div className="flex flex-col gap-6 p-4">
         <AvisosCelular recordatorio />
-        {pendiente ? <ViajeTerminado viaje={pendiente} /> : null}
         {cierre ? <AvisoCierre aviso={cierre} /> : null}
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
         <AvisoTarifa />

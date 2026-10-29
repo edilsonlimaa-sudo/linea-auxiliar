@@ -445,7 +445,9 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   calificación por pasajero y viaje.
 - **R45.** Al terminar su viaje (el chofer terminó el viaje **o marcó que se bajó**, R38) aparece "¿Cómo te fue con…?" (1 toque en las estrellas; etiquetas y comentario
   opcionales: Puntual, Seguro, Amable, Respetó el orden, Carro limpio). "Ahora no" la pospone: se puede
-  calificar después desde **Choferes** o **Mis viajes**.
+  calificar después desde **Choferes** o **Mis viajes**. En la interfaz nueva es una **pantalla de paso**, no una
+  tarjeta en Inicio (*oct. 2026*): "¡Llegaste bien!" con confeti, el viaje y las estrellas; tocar una abre el resto.
+  Calificar, "Ahora no" o la ✕ llevan a Inicio.
 - **R46. Choferes** (pasajero): todos los choferes verificados de la línea, para conocerlos y escoger con
   confianza. Primero los que **trabajan ahora**; después, por ★. Cada tarjeta: foto (R54), nombre, ✓ Verificado,
   el carro (placa, modelo, color, unidad, ❄️ con aire, R55), ★ promedio y cantidad, y **los dos comentarios más

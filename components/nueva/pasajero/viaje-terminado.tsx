@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2, Loader2, Star } from "lucide-react"
+import { CheckCircle2, Loader2, Star, X } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/nueva/ui/button"
@@ -15,30 +15,76 @@ const SIGNIFICADO = ["", "Muy mal", "Mal", "Regular", "Bien", "Excelente"]
 
 export type ViajePorCalificar = { reservaId: string; viajeId: string; choferId: string; chofer: string; sentido: Sentido }
 
+// Confeti fijo (mismo dibujo en el servidor y en el celular): posición, color, demora y giro de cada papelito
+const COLORES = ["var(--primary)", "#f59e0b", "#fb7185", "#10b981", "#a78bfa"]
+const CONFETI = Array.from({ length: 28 }, (_, i) => ({
+  "--x": `${(i * 37) % 100}%`,
+  "--c": COLORES[i % COLORES.length],
+  "--r": `${(i % 7) * 0.12}s`,
+  "--d": `${2.4 + (i % 5) * 0.25}s`,
+  "--g": `${360 + ((i * 53) % 360)}deg`,
+})) as React.CSSProperties[]
+
 /**
- * Al terminar el viaje (R45): "Llegaste bien" y "Calificar viaje" (estrellas; etiquetas y comentario opcionales).
- * "Ahora no" lo deja para Mis viajes. Sin Pago Móvil: en la nueva va solo a bordo (R74).
+ * Al terminar el viaje (R45): una pantalla de paso "¡Llegaste bien!" con confeti y las estrellas para calificar (tocar
+ * una abre el resto: etiquetas y comentario opcionales). "Ahora no" o la ✕ lo dejan para Mis viajes; las dos, igual
+ * que calificar, llevan a Inicio. Sin Pago Móvil: en la nueva va solo a bordo (R74).
  */
-export function ViajeTerminado({ viaje }: { viaje: ViajePorCalificar }) {
+export function LlegasteBien({ viaje }: { viaje: ViajePorCalificar }) {
   const [omitiendo, omitir] = React.useTransition()
+  const nombre = viaje.chofer.split(" ")[0]
+  const salir = () => omitir(async () => void (await omitirCalificacion(viaje.reservaId)))
+
   return (
-    <section className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4 text-card-foreground">
-      <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <CheckCircle2 className="size-5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <p className="font-heading font-semibold">Llegaste bien</p>
-          <p className="text-sm text-muted-foreground">
+    <div className="relative flex min-h-dvh flex-1 flex-col overflow-hidden px-6 pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <div aria-hidden className="confeti pantalla">
+        {CONFETI.map((c, i) => (
+          <i key={i} style={c} />
+        ))}
+      </div>
+
+      <div className="flex justify-end">
+        <Button variant="ghost" size="icon" aria-label="Cerrar" disabled={omitiendo} onClick={salir}>
+          <X className="size-5" />
+        </Button>
+      </div>
+
+      <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-24 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <CheckCircle2 className="size-12" />
+          </div>
+          <h1 className="font-heading text-3xl font-semibold">¡Llegaste bien!</h1>
+          <p className="text-muted-foreground">
             {SENTIDOS[viaje.sentido].largo} · con {viaje.chofer}
           </p>
         </div>
+
+        <section className="flex w-full flex-col items-center gap-3 rounded-3xl border bg-card p-5">
+          <p className="font-heading text-lg font-semibold">¿Cómo te fue con {nombre}?</p>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <CalificarDrawer
+                key={n}
+                viaje={viaje}
+                estrellasIniciales={n}
+                trigger={
+                  <button type="button" aria-label={`${n} ${n === 1 ? "estrella" : "estrellas"}`} className="rounded-full p-1 transition-transform active:scale-90">
+                    <Star className="size-10 text-amber-400" />
+                  </button>
+                }
+              />
+            ))}
+          </div>
+          <p className="text-sm text-muted-foreground">Toca las estrellas. Ayuda a todos a escoger con confianza.</p>
+        </section>
       </div>
-      <CalificarDrawer viaje={viaje} trigger={<Button size="lg">Calificar viaje</Button>} />
-      <Button variant="ghost" size="lg" disabled={omitiendo} onClick={() => omitir(async () => void (await omitirCalificacion(viaje.reservaId)))}>
+
+      <Button variant="ghost" size="lg" disabled={omitiendo} onClick={salir}>
+        {omitiendo ? <Loader2 className="animate-spin" /> : null}
         Ahora no
       </Button>
-    </section>
+    </div>
   )
 }
 
@@ -47,13 +93,15 @@ export function CalificarDrawer({
   viaje,
   trigger,
   volver,
+  estrellasIniciales = 0,
 }: {
   viaje: Pick<ViajePorCalificar, "viajeId" | "choferId" | "chofer">
   trigger: React.ReactElement
   volver?: string
+  estrellasIniciales?: number // la estrella que tocó para abrir (en "Llegaste bien")
 }) {
   const [open, setOpen] = React.useState(false)
-  const [estrellas, setEstrellas] = React.useState(0)
+  const [estrellas, setEstrellas] = React.useState(estrellasIniciales)
   const [etiquetas, setEtiquetas] = React.useState<string[]>([])
   const [comentario, setComentario] = React.useState("")
   const [error, setError] = React.useState<string | null>(null)

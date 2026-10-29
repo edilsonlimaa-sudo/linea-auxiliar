@@ -212,6 +212,8 @@
         animation: none;
     }
 }
+
+
 /* ---------------------------------------------------------------------------
  * View Transitions (navegacao mobile)
  * Ver CLAUDE.md > Navegacao mobile e a doc em
@@ -334,6 +336,23 @@
     100% {
         opacity: 0;
         transform: translateY(260px) rotate(var(--g));
+    }
+}
+/* En una pantalla entera ("¡Llegaste bien!" del pasajero, R45): cae hasta abajo */
+.confeti.pantalla i {
+    animation-name: confeti-cae-pantalla;
+}
+@keyframes confeti-cae-pantalla {
+    0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+    80% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(100dvh) rotate(var(--g));
     }
 }
 @media (prefers-reduced-motion: reduce) {
