@@ -15,16 +15,16 @@ export default function Menu() {
       <div className="flex flex-col gap-6 p-4">
         <MiCarnetLink />
 
-        <section className="divide-y rounded-3xl border bg-card">
+        <section className="divide-y overflow-hidden rounded-3xl border bg-card">
           <SugerenciaDrawer />
           <OpinionAppDrawer />
         </section>
 
-        <section className="rounded-3xl border bg-card">
+        <section className="overflow-hidden rounded-3xl border bg-card">
           <TemaSelector />
         </section>
 
-        <section className="rounded-3xl border bg-card">
+        <section className="overflow-hidden rounded-3xl border bg-card">
           <CerrarSesionDrawer />
         </section>
 

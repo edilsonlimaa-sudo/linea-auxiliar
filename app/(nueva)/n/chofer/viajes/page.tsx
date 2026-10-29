@@ -29,7 +29,7 @@ export default async function ViajesChofer() {
         ) : (
           <>
             <p className="text-sm text-muted-foreground">{viajes.length === 1 ? "Tu último viaje terminado." : `Tus últimos ${viajes.length} viajes terminados.`}</p>
-            <ul className="divide-y rounded-3xl border bg-card">
+            <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
               {viajes.map((v) => {
                 const llevo = sumaPersonas(v.llevo)
                 const estrellas = v.calificaciones.length ? v.calificaciones.reduce((s, c) => s + c.estrellas, 0) / v.calificaciones.length : null

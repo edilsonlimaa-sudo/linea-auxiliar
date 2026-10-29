@@ -39,7 +39,7 @@ export default async function Companeros() {
           {companeros.length === 0 ? (
             <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">Nadie más está trabajando ahora.</p>
           ) : (
-            <ul className="divide-y rounded-3xl border bg-card">
+            <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
               {companeros.map((c) => {
                 const s = situacionDe(c.id, viajesCompaneros, ahora)
                 return (
@@ -68,7 +68,7 @@ export default async function Companeros() {
         {fuera.length > 0 ? (
           <section className="flex flex-col gap-3">
             <Titulo texto="Fuera de servicio" n={fuera.length} />
-            <ul className="divide-y rounded-3xl border bg-card">
+            <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
               {fuera.map((c) => (
                 <li key={c.id} className="flex items-center gap-3 p-3">
                   <ChoferAvatar chofer={{ nombre: c.nombre, iniciales: iniciales(c.nombre), fotoUrl: c.fotoUrl }} className="opacity-70" />

@@ -62,7 +62,7 @@ export default async function CalificacionesChofer() {
           {r.recientes.length === 0 ? (
             <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">Todavía nadie te calificó.</p>
           ) : (
-            <ul className="divide-y rounded-3xl border bg-card">
+            <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
               {r.recientes.map((o, i) => (
                 <li key={i} className="flex flex-col gap-1 p-3">
                   <div className="flex items-center justify-between gap-2">

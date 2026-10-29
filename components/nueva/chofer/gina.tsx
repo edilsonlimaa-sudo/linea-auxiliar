@@ -211,7 +211,7 @@ export function ListaConAcciones({
   }
 
   if (!agrupada || !enGina) {
-    return <ol className="divide-y rounded-3xl border bg-card">{lista.map(fila)}</ol>
+    return <ol className="divide-y overflow-hidden rounded-3xl border bg-card">{lista.map(fila)}</ol>
   }
 
   // En Gina: primero quien dice que ya se montó, después Llama, Guarda puesto y Sigue
@@ -236,7 +236,7 @@ export function ListaConAcciones({
               </h4>
               {g.detalle ? <p className="text-xs text-muted-foreground">{g.detalle}</p> : null}
             </div>
-            <ol className="divide-y rounded-3xl border bg-card">{g.entradas.map(fila)}</ol>
+            <ol className="divide-y overflow-hidden rounded-3xl border bg-card">{g.entradas.map(fila)}</ol>
           </section>
         ))}
     </div>

@@ -20,7 +20,7 @@ export function EsqueletoPantalla({ titulo, children }: { titulo?: string; child
 /** Una lista en tarjeta, con avatar o ícono y dos líneas por fila */
 export function EsqueletoLista({ filas = 3, redondo = true }: { filas?: number; redondo?: boolean }) {
   return (
-    <div className="divide-y rounded-3xl border bg-card">
+    <div className="divide-y overflow-hidden rounded-3xl border bg-card">
       {Array.from({ length: filas }, (_, i) => (
         <div key={i} className="flex items-center gap-3 p-3">
           <Skeleton className={redondo ? "size-10 shrink-0 rounded-full" : "size-10 shrink-0 rounded-2xl"} />

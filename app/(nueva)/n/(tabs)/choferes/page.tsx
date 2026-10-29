@@ -43,7 +43,7 @@ function Grupo({ titulo, choferes, vacio }: { titulo: string; choferes: ChoferDe
       {choferes.length === 0 ? (
         vacio ? <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">{vacio}</p> : null
       ) : (
-        <ul className="divide-y rounded-3xl border bg-card">
+        <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
           {choferes.map((c) => (
             <li key={c.id}>
               <Link href={`/n/choferes/${c.id}`} transitionTypes={["nav-forward"]} className="flex items-center gap-3 p-3 transition-colors active:bg-muted">

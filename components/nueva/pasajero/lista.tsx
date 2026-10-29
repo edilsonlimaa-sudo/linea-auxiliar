@@ -202,7 +202,7 @@ export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
           Ningún carro va hacia Valle Grande ahora. Esta pantalla se actualiza sola.
         </p>
       ) : (
-        <ul className="divide-y rounded-3xl border bg-card">
+        <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
           {carros.map((u) => (
             <li key={u.id} className="flex items-center gap-3 p-3">
               <ChoferAvatar chofer={u.chofer} className="size-10" />
@@ -235,7 +235,7 @@ export function FilaLista({ filas }: { filas: FilaVista[] }) {
     return <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">Nadie está en la lista ahora.</p>
   }
   return (
-    <ol className="divide-y rounded-3xl border bg-card">
+    <ol className="divide-y overflow-hidden rounded-3xl border bg-card">
       {filas.map((f) => (
         <li key={f.id} className={cn("flex items-center gap-3 p-3", f.esMio && "bg-primary/5")}>
           <span className="w-6 text-center font-heading font-semibold text-muted-foreground tabular-nums">{f.posicion}</span>

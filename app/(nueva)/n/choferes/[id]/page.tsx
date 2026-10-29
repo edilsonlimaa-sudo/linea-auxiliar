@@ -99,7 +99,7 @@ export default async function PerfilChofer({ params }: PageProps<"/n/choferes/[i
               {c.opiniones.length === 0 ? "Todavía nadie ha opinado." : "Nadie ha dejado comentarios todavía."}
             </p>
           ) : (
-            <ul className="divide-y rounded-3xl border bg-card">
+            <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
               {conComentario.slice(0, 20).map((o, i) => (
                 <li key={i} className="flex flex-col gap-1 p-3">
                   <div className="flex items-center justify-between gap-2">

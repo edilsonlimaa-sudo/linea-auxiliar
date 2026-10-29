@@ -56,7 +56,7 @@ export default async function ViajeChofer({ params }: PageProps<"/n/chofer/viaje
           {v.llevo.length === 0 ? (
             <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">Nadie en este viaje.</p>
           ) : (
-            <ul className="divide-y rounded-3xl border bg-card">
+            <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
               {v.llevo.map((p, i) => (
                 <li key={i} className="flex items-center justify-between gap-3 p-3">
                   <span className="font-medium">{conAcompanantes(p.nombre, p.personas)}</span>

@@ -16,7 +16,7 @@ export function LineaAhora({ choferes }: { choferes: ServicioVista[] }) {
           Ningún chofer está trabajando ahora. Esta pantalla se actualiza sola.
         </p>
       ) : (
-        <ul className="divide-y rounded-3xl border bg-card">
+        <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
           {choferes.map((c) => (
             <li key={c.id} className="flex items-center gap-3 p-3">
               <ChoferAvatar chofer={c} className="size-10" />

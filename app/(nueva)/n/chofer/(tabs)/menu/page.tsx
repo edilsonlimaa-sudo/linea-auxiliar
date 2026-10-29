@@ -46,22 +46,22 @@ export default async function MenuChofer() {
           <ChevronRight className="size-5 text-muted-foreground" />
         </Link>
 
-        <section className="divide-y rounded-3xl border bg-card">
+        <section className="divide-y overflow-hidden rounded-3xl border bg-card">
           <Fila href="/n/chofer/viajes" icono={<History className="size-5" />} titulo="Mis viajes"
             detalle={!terminados ? "Todavía no terminaste ningún viaje" : terminados === 1 ? "1 viaje terminado" : `${terminados} viajes terminados`} />
           <Fila href="/n/chofer/cuota" icono={<Wallet className="size-5" />} titulo="Cuota del día" detalle="Pagar y ver el estado de tu pago" />
         </section>
 
-        <section className="divide-y rounded-3xl border bg-card">
+        <section className="divide-y overflow-hidden rounded-3xl border bg-card">
           <SugerenciaDrawer />
           <OpinionAppDrawer />
         </section>
 
-        <section className="rounded-3xl border bg-card">
+        <section className="overflow-hidden rounded-3xl border bg-card">
           <TemaSelector />
         </section>
 
-        <section className="rounded-3xl border bg-card">
+        <section className="overflow-hidden rounded-3xl border bg-card">
           <CerrarSesionDrawer />
         </section>
 
