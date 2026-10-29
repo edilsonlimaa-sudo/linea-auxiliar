@@ -15,7 +15,7 @@ import { aceptaReservas, libres, ordenarParaPasajero } from "@/lib/viajes"
 export const metadata: Metadata = { title: "Al Centro · Línea Auxiliar" }
 
 // Al Centro (§8, R16): las unidades que aceptan reservas, la que recoge primero con puesto destacada. Sin carro con
-// puesto, "Avisarme cuando haya un carro" (R94)
+// puesto, "¿Te avisamos cuando salga un carro?" (R94)
 export default async function AlCentro() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva" })
   const datos = await cargarInicioPasajero(perfil.id)
@@ -37,7 +37,6 @@ export default async function AlCentro() {
           <p className="text-sm text-muted-foreground">Valle Grande → Centro</p>
           <h2 className="font-heading text-2xl font-semibold">{unidades.length === 0 ? "Nadie en camino" : "Carros que vienen"}</h2>
         </div>
-        {conPuesto ? null : <AvisoAlCentro pedido={pedido} />}
         {unidades.length === 0 ? (
           <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">
             Ningún chofer va al Centro ahora. Esta pantalla se actualiza sola.
@@ -51,6 +50,8 @@ export default async function AlCentro() {
             ))}
           </ul>
         )}
+        {/* R94: discreto, debajo de los carros */}
+        {conPuesto ? null : <AvisoAlCentro pedido={pedido} />}
       </div>
     </Screen>
   )

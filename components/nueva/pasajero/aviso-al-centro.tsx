@@ -1,11 +1,11 @@
 "use client"
 
-import { BellRing, Loader2 } from "lucide-react"
+import { BellRing, Loader2, X } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
 
 import { Button } from "@/components/nueva/ui/button"
-import { cancelarAvisoAlCentro, pedirAvisoAlCentro } from "@/lib/acciones/pasajero"
+import { pedirAvisoAlCentro } from "@/lib/acciones/pasajero"
 import { pedirPermisoSiFalta } from "@/lib/avisos-celular"
 
 type Props = {
@@ -13,118 +13,89 @@ type Props = {
   pedido: { hasta: string; avisada: boolean } | null
 }
 
+// Cerrada con ✕, no vuelve a salir en este celular por 12 h
+const CERRADA = "aviso-centro-cerrado"
+const CERRADA_MS = 12 * 3_600_000
+
 /**
- * R94, en Al Centro cuando no hay carro con puesto: "Avisarme cuando haya un carro" por 1 h, 2 h o hasta una hora. El
- * aviso llega una sola vez; con el pedido vigente, lo dice y deja cancelarlo. Si el celular nunca respondió al permiso de
- * avisos, se pide en el mismo toque; si los rechazó, lleva a activarlos (sin ellos, lo ve al abrir la app).
+ * R94, en Al Centro cuando no hay carro con puesto: una línea discreta "¿Te avisamos cuando salga un carro?" con Avísame
+ * (la Línea fija el tiempo: 2 horas) y ✕ para cerrarla. El aviso llega una sola vez; con el pedido vigente, solo lo
+ * dice (sin botón: pedido es pedido). Si el celular nunca respondió al permiso de avisos, se pide en el mismo toque; si los rechazó, lleva a
+ * activarlos (sin ellos, lo ve al abrir la app).
  */
 export function AvisoAlCentro({ pedido }: Props) {
   const [error, setError] = React.useState<string>()
   const [pendiente, iniciar] = React.useTransition()
-  const [conHora, setConHora] = React.useState(false)
-  const [hora, setHora] = React.useState("")
   const [sinAvisos, setSinAvisos] = React.useState(false)
+  // null hasta leer el celular: así no aparece y desaparece al cargar
+  const [cerrada, setCerrada] = React.useState<boolean | null>(null)
 
   React.useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- el permiso solo se sabe en el navegador
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- el permiso y lo guardado solo se saben en el navegador
     setSinAvisos(!("Notification" in window) || Notification.permission !== "granted")
+    let desde = 0
+    try {
+      desde = Number(localStorage.getItem(CERRADA) ?? 0)
+    } catch {}
+    setCerrada(Date.now() - desde < CERRADA_MS)
   }, [])
 
-  const pedir = (hasta: { horas: number } | { hora: string }) =>
+  const pedir = () =>
     iniciar(async () => {
       setError(undefined)
       // Quien pide un aviso quiere que le llegue: si este celular nunca respondió al permiso, se pide ahora (mismo toque)
       const permiso = await pedirPermisoSiFalta().catch(() => null)
       if (permiso) setSinAvisos(permiso !== "activo")
-      const r = await pedirAvisoAlCentro(hasta)
-      if (r.error) setError(r.error)
-      else setConHora(false)
-    })
-  const cancelar = () =>
-    iniciar(async () => {
-      setError(undefined)
-      const r = await cancelarAvisoAlCentro()
+      const r = await pedirAvisoAlCentro()
       if (r.error) setError(r.error)
     })
+  const cerrar = () => {
+    try {
+      localStorage.setItem(CERRADA, String(Date.now()))
+    } catch {}
+    setCerrada(true)
+  }
 
   const esperando = pedido && !pedido.avisada
+  // Con un pedido vigente siempre se ve (confirma que quedó pedido); sin pedido, respeta la ✕
+  if (!esperando && cerrada !== false) return null
 
   return (
-    <section aria-labelledby="titulo-aviso-centro" className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4">
-      <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          {pendiente ? <Loader2 aria-hidden className="size-5 animate-spin" /> : <BellRing aria-hidden className="size-5" />}
+    <section aria-label="Aviso cuando salga un carro" className="flex flex-col gap-2 rounded-2xl border bg-card p-3">
+      <div className="flex items-center gap-3">
+        <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+          {pendiente ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <BellRing aria-hidden className="size-4" />}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 id="titulo-aviso-centro" className="font-heading font-semibold">
-            {esperando
-              ? "Te avisamos cuando haya un carro"
-              : pedido?.avisada
-                ? "Ya te avisamos de un carro, pero ya no tiene puesto"
-                : "¿Te avisamos cuando haya un carro?"}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {esperando
-              ? `Hasta las ${pedido.hasta} · te llega una sola vez, con el primer carro al Centro que tenga puesto.`
-              : "Te llega una sola vez, con el primer carro al Centro que tenga puesto. Escoge hasta cuándo:"}
+          <p className="text-sm font-medium">
+            {esperando ? "Te avisamos si sale un carro" : pedido?.avisada ? "Ese carro ya no tiene puesto" : "¿Te avisamos cuando salga un carro?"}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {esperando ? `Hasta las ${pedido.hasta} · una sola vez` : pedido?.avisada ? "¿Te avisamos del próximo?" : "Por las próximas 2 horas, una sola vez"}
           </p>
         </div>
+        {esperando ? null : (
+          <>
+            <Button size="sm" disabled={pendiente} onClick={pedir}>
+              Avísame
+            </Button>
+            <Button variant="ghost" size="icon-sm" aria-label="Cerrar" disabled={pendiente} onClick={cerrar} className="-mr-1 text-muted-foreground">
+              <X />
+            </Button>
+          </>
+        )}
       </div>
-
-      {esperando ? (
-        <div className="flex flex-col gap-2">
-          {sinAvisos ? (
-            <p className="rounded-2xl bg-muted px-3 py-2 text-sm">
-              Para que te llegue con la app cerrada,{" "}
-              <Link href="/n/notificaciones" className="font-semibold text-primary underline-offset-4 hover:underline">
-                activa los avisos en el celular
-              </Link>
-              .
-            </p>
-          ) : null}
-          <Button variant="outline" size="lg" disabled={pendiente} onClick={cancelar}>
-            Ya no
-          </Button>
-        </div>
-      ) : conHora ? (
-        <form
-          className="flex gap-2"
-          onSubmit={(e) => {
-            e.preventDefault()
-            pedir({ hora })
-          }}
-        >
-          <label className="sr-only" htmlFor="aviso-hasta">
-            Avisarme hasta las
-          </label>
-          <input
-            id="aviso-hasta"
-            type="time"
-            required
-            value={hora}
-            onChange={(e) => setHora(e.target.value)}
-            className="h-10 min-w-0 flex-1 rounded-4xl border border-border bg-input/30 px-4 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-          />
-          <Button type="submit" size="lg" disabled={pendiente || !hora}>
-            Avisarme
-          </Button>
-        </form>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          <Button size="lg" disabled={pendiente} onClick={() => pedir({ horas: 1 })}>
-            1 hora
-          </Button>
-          <Button size="lg" disabled={pendiente} onClick={() => pedir({ horas: 2 })}>
-            2 horas
-          </Button>
-          <Button variant="outline" size="lg" disabled={pendiente} onClick={() => setConHora(true)}>
-            Hasta las…
-          </Button>
-        </div>
-      )}
-
+      {esperando && sinAvisos ? (
+        <p className="text-xs text-muted-foreground">
+          Para que te llegue con la app cerrada,{" "}
+          <Link href="/n/notificaciones" className="font-semibold text-primary underline-offset-4 hover:underline">
+            activa los avisos en el celular
+          </Link>
+          .
+        </p>
+      ) : null}
       {error ? (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="text-xs text-destructive">
           {error}
         </p>
       ) : null}

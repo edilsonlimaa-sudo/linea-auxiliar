@@ -314,13 +314,15 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R94. Avísame cuando haya un carro al Centro [servidor].** *(Oct. 2026: en el sentido Al Centro el pasajero solo
   veía algo si ya había viajes; quien no encontraba carro se iba sin dejar rastro. Solo en la interfaz nueva, que tiene
   los avisos en el celular, R90. Usa las esperas de R31, sin pedir el lugar.)* En **Al Centro**, cuando no hay ningún
-  carro con puesto, la pantalla ofrece **Avisarme cuando haya un carro** y la persona escoge **por cuánto tiempo**: la
-  próxima hora, 2 horas (lo de siempre) o hasta las 12 m. / hasta una hora del día (como mucho 12 h). Mientras espera,
-  la pantalla lo dice ("Te avisamos hasta las 3:40 p. m.") con **Ya no** para cancelar. Reglas para no molestar a nadie:
+  carro con puesto, la pantalla ofrece, **discreta y en una línea** debajo de los carros, **¿Te avisamos cuando salga un
+  carro?** con **Avísame** y una ✕ para cerrarla (cerrada no vuelve a salir en ese celular por 12 h). **La Línea fija el
+  tiempo: 2 horas**; la persona no escoge (*oct. 2026: preguntar cuánto tiempo era una decisión de más*). Mientras
+  espera, la línea solo lo confirma ("Te avisamos hasta las 3:40 p. m."), **sin botón para cancelar**: pedido es
+  pedido, vence solo. Reglas para no molestar a nadie:
   - **Un pedido, un aviso:** llega una sola vez, con el primer viaje al Centro que se publique **con puesto** mientras
     el pedido vale; después ya no llega nada más. Si se le escapa, lo pide otra vez.
-  - **Vence solo** a la hora que escogió, sin aviso. Un viaje con **hora fija** después de esa hora no avisa.
-  - Se cierra solo si la persona **aparta puesto** (R35) o lo cancela; un pedido activo por persona.
+  - **Vence solo** a las 2 horas, sin aviso. Un viaje con **hora fija** después de esa hora no avisa.
+  - Se cierra solo si la persona **aparta puesto** (R35); un pedido activo por persona.
   - El aviso llega al celular si activó los avisos (R90): "Hay un carro al Centro", quién va y cuándo llega a recoger;
     tocarlo abre Al Centro. Sin avisos activados, lo ve al abrir la app. Un chofer de prueba solo avisa a cuentas de
     prueba (R91).
@@ -339,7 +341,7 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R33.** *(Eliminada.)* El chofer ya no agrega a su viaje a quien espera: duplicaba la reserva y saltaba el
   orden justo. Si encuentra a alguien en la calle, usa **Ocupar puesto** (R36).
 - **R34.** *(Eliminada.)* "Recogido" desde la espera; lo cubre Ocupar puesto (R36).
-- **R35 [servidor].** Una espera vence sola a las 2 h (el aviso de R94, a la hora que escogió la persona). También se
+- **R35 [servidor].** Una espera vence sola a las 2 h (el aviso de R94 también). También se
   cierra cuando la persona aparta (R18).
 
 ### 5.9 Puestos manuales (quien no usa la app)
@@ -739,7 +741,7 @@ choferes, la clásica y avisos automáticos.)*
     aparece si ya están activados o bloqueados.
   - **Recordatorio en Inicio:** quien dijo "Ahora no" ve arriba de Inicio la tarjeta de los avisos (la de la pestaña
     Notificaciones) **desde el día siguiente**; con ✕ vuelve a los **7 días**, como mucho **3 veces**.
-  - **En el momento de pedir un aviso** (R94): si el aparato nunca respondió, tocar 1 hora / 2 horas / Avisarme pide
+  - **En el momento de pedir un aviso** (R94): si el aparato nunca respondió, tocar **Avísame** pide
     el permiso en el mismo toque.
 - **En el panel** (**Notificaciones**, en Operación): el formulario para mandar y la lista de las enviadas, la más nueva
   primero, con tipo, título, a cuántos llegó, **a cuántos celulares llegó el aviso** (R90) y **cuántos la vieron**, y
