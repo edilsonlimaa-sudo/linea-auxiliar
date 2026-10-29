@@ -273,8 +273,6 @@ const MIN = 60_000
 const ATRASOS = [5, 10, 15, 20, 30, 45, 60] as const
 const atrasoTexto = (m: number) => (m === 60 ? "1 hora" : `${m} min`)
 
-const RAPIDOS = [5, 10, 15] as const
-
 /**
  * Los minutos desde ahora que pide me_atraso para quedar "m" después de la hora dicha (o de ahora, si ya pasó).
  * me_atraso redondea hacia arriba lo que ya pasó; aquí lo que falta, hacia abajo: queda justo +m.
@@ -283,8 +281,8 @@ const desdeAhora = (prometida: number, m: number) => Math.min(120, Math.max(0, M
 
 /**
  * La hora de llegada mientras va a recoger (R70), como herramienta del chofer: la hora que ven sus pasajeros en grande,
- * cuánto falta, y para ajustarla +5 / +10 / +15 (desde la hora dicha; si ya pasó, desde ahora) en un toque, u "Otra
- * hora" con la hoja. Si ya pasó la hora, en rojo: sus pasajeros ven "en cualquier momento".
+ * cuánto falta, y "Ajustar" abre la hoja: +5 min… +1 hora sobre la hora dicha (si ya pasó, desde ahora). Si ya pasó la
+ * hora, en rojo: sus pasajeros ven "en cualquier momento".
  */
 function HoraDeLlegada({ viajeId, estadoEn, etaMin, donde }: { viajeId: string; estadoEn: string; etaMin: number; donde: string }) {
   const [abierta, setAbierta] = React.useState(false)
@@ -295,73 +293,62 @@ function HoraDeLlegada({ viajeId, estadoEn, etaMin, donde }: { viajeId: string; 
   const prometida = new Date(estadoEn).getTime() + etaMin * MIN
   const vencido = ahora > 0 && ahora >= prometida
   const faltan = ahora > 0 ? Math.max(0, Math.ceil((prometida - ahora) / MIN)) : null
-  const ajustar = (minutos: number, alTerminar?: () => void) =>
-    ejecutar(
-      () => meAtraso(viajeId, minutos),
-      () => (alTerminar?.(), setListo(true), setTimeout(() => setListo(false), 3000))
-    )
+  const base = vencido ? ahora : prometida // desde dónde cuentan las opciones
 
   return (
-    <div className={cn("flex flex-col gap-3 rounded-2xl p-3", vencido ? "bg-destructive/10" : "bg-primary/5")}>
-      <div className="flex items-end justify-between gap-2">
+    <div className={cn("flex flex-col gap-2 rounded-2xl p-3", vencido ? "bg-destructive/10" : "bg-primary/5")}>
+      <p className="text-xs font-medium text-muted-foreground">{donde}</p>
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-muted-foreground">{donde}</p>
           {/* La hora, solo en el navegador: el formato del servidor no es igual al del celular */}
-          <p className={cn("font-heading text-3xl font-semibold tabular-nums", vencido && "text-destructive")}>
+          <p className={cn("font-heading text-3xl font-semibold whitespace-nowrap tabular-nums", vencido && "text-destructive")}>
             {ahora > 0 ? hora(new Date(prometida).toISOString()) : "—"}
           </p>
+          <p role="status" className={cn("text-sm font-medium", vencido ? "text-destructive" : "text-primary")}>
+            {listo ? "Avisado a tus pasajeros" : vencido ? "Ya pasó tu hora" : faltan === null ? "" : faltan === 0 ? "Ya" : `en ${faltan} min`}
+          </p>
         </div>
-        <p role="status" className={cn("pb-1 text-right text-sm font-medium", vencido ? "text-destructive" : "text-primary")}>
-          {listo ? "Avisado a tus pasajeros" : vencido ? "Ya pasó tu hora" : faltan === null ? "" : faltan === 0 ? "Ya" : `en ${faltan} min`}
-        </p>
+        <Drawer open={abierta} onOpenChange={(v) => !pendiente && setAbierta(v)} showSwipeHandle>
+          <DrawerTrigger render={<Button variant={vencido ? "default" : "outline"} className="shrink-0" disabled={ahora === 0} />}>
+            <Clock /> Ajustar
+          </DrawerTrigger>
+          <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
+            <DrawerHeader>
+              <DrawerTitle className="font-heading text-xl">{vencido ? "¿En cuánto llegas a recoger?" : "¿Cuánto más tarde llegas?"}</DrawerTitle>
+              <DrawerDescription>
+                {vencido ? "Ya pasó la hora que dijiste." : `Dijiste ${ahora > 0 ? hora(new Date(prometida).toISOString()) : "tu hora"}.`} Los
+                pasajeros ven la hora nueva al momento.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="grid grid-cols-2 gap-2 px-4 pb-6">
+              {ATRASOS.map((m) => (
+                <Button
+                  key={m}
+                  variant="outline"
+                  size="lg"
+                  className="h-auto min-h-14 flex-col gap-0 py-2"
+                  disabled={pendiente}
+                  onClick={() => (
+                    setEscogido(m),
+                    ejecutar(
+                      () => meAtraso(viajeId, vencido ? m : desdeAhora(prometida, m)),
+                      () => (setAbierta(false), setListo(true), setTimeout(() => setListo(false), 3000))
+                    )
+                  )}
+                >
+                  <span className="flex items-center gap-1.5 font-heading text-base font-semibold">
+                    {pendiente && escogido === m ? <Loader2 className="animate-spin" /> : null}
+                    {vencido ? atrasoTexto(m) : `+${atrasoTexto(m)}`}
+                  </span>
+                  {ahora > 0 ? <span className="text-xs text-muted-foreground">a las {hora(new Date(base + m * MIN).toISOString())}</span> : null}
+                </Button>
+              ))}
+              <ErrorAccion error={error} className="col-span-2" />
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
       {vencido ? <p className="text-sm">Tus pasajeros ven &quot;en cualquier momento&quot;: dales una hora nueva.</p> : null}
-      <div className="flex flex-col gap-1.5">
-        <p className="text-xs text-muted-foreground">{vencido ? "Llego en" : "Ajustar la hora"}</p>
-        <div className="grid grid-cols-4 gap-2">
-          {RAPIDOS.map((m) => (
-            <Button
-              key={m}
-              variant="outline"
-              disabled={pendiente || ahora === 0}
-              onClick={() => (setEscogido(m), ajustar(desdeAhora(prometida, m)))}
-              aria-label={vencido ? `Llego en ${m} minutos` : `${m} minutos más tarde`}
-            >
-              {pendiente && escogido === m && !abierta ? <Loader2 className="animate-spin" /> : null}
-              {vencido ? `${m} min` : `+${m}`}
-            </Button>
-          ))}
-          <Drawer open={abierta} onOpenChange={(v) => !pendiente && setAbierta(v)} showSwipeHandle>
-            <DrawerTrigger render={<Button variant="outline" disabled={ahora === 0} />}>Otra</DrawerTrigger>
-            <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
-              <DrawerHeader>
-                <DrawerTitle className="font-heading text-xl">¿En cuánto llegas a recoger?</DrawerTitle>
-                <DrawerDescription>Los pasajeros ven la hora nueva al momento.</DrawerDescription>
-              </DrawerHeader>
-              <div className="grid grid-cols-2 gap-2 px-4 pb-6">
-                {ATRASOS.map((m) => (
-                  <Button
-                    key={m}
-                    variant="outline"
-                    size="lg"
-                    className="h-auto min-h-14 flex-col gap-0 py-2"
-                    disabled={pendiente}
-                    onClick={() => (setEscogido(m), ajustar(m, () => setAbierta(false)))}
-                  >
-                    <span className="flex items-center gap-1.5 font-heading text-base font-semibold">
-                      {pendiente && escogido === m ? <Loader2 className="animate-spin" /> : null}
-                      {atrasoTexto(m)}
-                    </span>
-                    {ahora > 0 ? <span className="text-xs text-muted-foreground">a las {hora(new Date(ahora + m * MIN).toISOString())}</span> : null}
-                  </Button>
-                ))}
-                <ErrorAccion error={error} className="col-span-2" />
-              </div>
-            </DrawerContent>
-          </Drawer>
-        </div>
-      </div>
-      {!abierta ? <ErrorAccion error={error} /> : null}
     </div>
   )
 }

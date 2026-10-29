@@ -378,10 +378,10 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
     cualquier momento». Dales una hora nueva") con el botón **Me atraso** a mano. Antes de esa hora el botón está,
     más discreto.
   - **En la interfaz nueva** (*29 oct. 2026*) no es un botón "Me atraso" sino una **herramienta para ajustar la hora**,
-    dentro de la tarjeta del viaje: la hora que ven sus pasajeros en grande ("1:51 p. m." · "en 19 min") y debajo
-    **+5 · +10 · +15** (un toque corre la hora dicha esos minutos; si ya pasó, cuentan desde ahora: "5 min · 10 min ·
-    15 min") y **Otra** (la hoja con todas las opciones). Al tocar, "Avisado a tus pasajeros". Pasada la hora, el
-    bloque se pone rojo con "Ya pasó tu hora".
+    dentro de la tarjeta del viaje: la hora que ven sus pasajeros en grande ("1:51 p. m." · "en 19 min") y al lado
+    **Ajustar**, que abre la hoja "¿Cuánto más tarde llegas?" con +5 min … +1 hora sobre la hora dicha (cada una con
+    la hora nueva); si ya pasó, "¿En cuánto llegas a recoger?" desde ahora. Al escoger, "Avisado a tus pasajeros".
+    Pasada la hora, el bloque se pone rojo con "Ya pasó tu hora" y Ajustar resalta.
   - El pasajero ve la hora nueva ("Recoge en Valle Grande en ~15 min · a las 5:40 · avisó que se atrasa"). Los viajes
     encadenados se corren solos.
   - La **puntualidad** (R56) sigue comparando con lo **primero** que prometió; la línea de tiempo del panel muestra
