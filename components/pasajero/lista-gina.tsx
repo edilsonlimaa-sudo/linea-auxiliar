@@ -34,12 +34,12 @@ import { cn } from "@/lib/utils"
 import { iniciales, libres, type Viaje } from "@/lib/viajes"
 
 const LEJOS_M = 300 // más lejos que esto, "¿Ya estás en Gina?" (R62)
-const VALE_MIN = 30 // el aviso vence a los 30 min (R62; antes 45)
-const AVISAR_ANTES_MIN = 10 // "¿Sigues ahí?" a los 20 de 30 min (R62)
+const VALE_MIN = 60 // el aviso vence a los 60 min (R62; antes 30, y antes 45)
+const AVISAR_ANTES_MIN = 15 // "¿Sigues ahí?" a los 45 de 60 min (R62)
 // "18 min", "menos de 1 min" (el reloj de la pantalla avanza cada 15 s: redondear al más cercano)
 const minutos = (m: number) => (m < 1 ? "menos de 1 min" : `${Math.round(m)} min`)
 
-/** Lo que le queda al lugar, de 30 min a 0; en amarillo los últimos 10 */
+/** Lo que le queda al lugar, de 60 min a 0; en amarillo los últimos 15 */
 function BarraVence({ quedan }: { quedan: number }) {
   const porVencer = quedan <= AVISAR_ANTES_MIN
   return (

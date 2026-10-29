@@ -17,8 +17,8 @@ import type { FilaVista, MiListaVista, UnidadVista } from "@/lib/nueva/vistas"
 import { tarifaEn, textoTarifa } from "@/lib/tarifas"
 import { cn } from "@/lib/utils"
 
-const VALE_MS = 30 * 60_000 // el lugar vale 30 min (R62)
-const AVISAR_MS = 10 * 60_000 // a los 20 min, "¿Sigues ahí?" (faltan 10)
+const VALE_MS = 60 * 60_000 // el lugar vale 60 min (R62; antes 30)
+const AVISAR_MS = 15 * 60_000 // a los 45 min, "¿Sigues ahí?" (faltan 15)
 
 const hora = (iso: string | number) =>
   new Intl.DateTimeFormat("es-VE", { hour: "numeric", minute: "2-digit", timeZone: "America/Caracas" }).format(new Date(iso))
@@ -198,7 +198,7 @@ function SigoAquiCard({ venceEn }: { venceEn: string }) {
         }
       >
         {pendiente ? <Loader2 className="animate-spin" /> : null}
-        {urgente ? "Sí, sigo aquí" : "Sigo aquí: 30 min más"}
+        {urgente ? "Sí, sigo aquí" : "Sigo aquí: 1 hora más"}
       </Button>
       {error ? (
         <p role="alert" className="text-sm text-destructive">

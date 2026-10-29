@@ -134,7 +134,7 @@ puede ocultar botones, pero nunca es la única barrera.
     la tarjeta de Choferes de quien está conectado): **tenga o no viajes**, cierra **todos** sus viajes abiertos (también el que va en ruta, que el chofer no puede cerrar
     desconectándose, R8) y lo desconecta con "terminó por hoy" (R60).
   - **Nadie de la lista hacia Valle Grande pierde su lugar:** quien estaba ligado al carro (del camino, R66) o subió
-    en Gina en un viaje que no llegó a salir **vuelve a la lista en su mismo lugar**, con 30 min para que lo busque otro
+    en Gina en un viaje que no llegó a salir **vuelve a la lista en su mismo lugar**, con 60 min para que lo busque otro
     carro. Esto vale también cuando el chofer cancela o se desconecta.
   - Al pasajero con puesto se le explica en Inicio ("Tu viaje se canceló" o "Tu viaje se cerró sin pasar por ti").
 
@@ -533,10 +533,12 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   **cuántos van** (1–4, R57): el grupo **sube junto o no sube**. Una sola entrada activa por persona.
   - Avisar es estar ahí: no hay "llego en 5 min". Si el GPS dice que está a más de 300 m de Gina, la app pregunta
     "¿Ya estás en Gina?" y deja seguir igual; se guarda la distancia para medir abusos.
-  - El aviso **vence a los 30 min**. El pasajero **ve siempre cuánto le queda** (barra y "Tu lugar vale 18 min más ·
-    hasta las 3:45 p. m.") y puede renovarlo cuando quiera con **Sigo aquí** (vuelve a 30 min sin perder el lugar).
-    A los 20 el contador se vuelve un aviso amarillo **"¿Sigues ahí?"** con el mismo botón, grande. *(Oct. 2026: antes
-    45 min con aviso a los 35. En los primeros 71 avisos, dos tercios de quienes tocaron Me fui lo hicieron antes de los
+  - El aviso **vence a los 60 min**. El pasajero **ve siempre cuánto le queda** (barra y "Tu lugar vale 38 min más ·
+    hasta las 3:45 p. m.") y puede renovarlo cuando quiera con **Sigo aquí** (vuelve a 60 min sin perder el lugar).
+    A los 45 el contador se vuelve un aviso amarillo **"¿Sigues ahí?"** con el mismo botón, grande. *(29 oct. 2026:
+    antes 30 min con aviso a los 20. De 33 avisos vencidos con 30 min, 7 perdieron el lugar menos de 17 min antes de que
+    llegara un carro y en Gina pedían su puesto; 18 vencieron sin carro por más de 70 min (ya se habían ido). Con 60, se
+    salvan unos 10 de 33 y el chofer marca "No estaba" a quien se fue.)* *(Oct. 2026: antes 45 min con aviso a los 35. En los primeros 71 avisos, dos tercios de quienes tocaron Me fui lo hicieron antes de los
     20 min (mediana 13) y el 77 % de quienes subieron lo hizo antes de los 30 (nadie después de 35); el 21 % vencía sin
     avisar y ocupaba la lista 45 min. Revisar con más datos.)* **Me fui** está
     siempre a un toque y saca a la persona de la lista al instante.
