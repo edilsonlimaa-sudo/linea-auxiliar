@@ -167,7 +167,12 @@ export async function tieneViajeEnCurso(pasajeroId: string): Promise<boolean> {
   return data !== null || (count ?? 0) > 0 || (await cargarCalificacionPendiente(pasajeroId)) !== null
 }
 
-export type AvisoDeCierre = { reservaId: string; motivo: "salio_lleno" | "cancelo" | "cerrado" | "rechazo" | "no_llego"; chofer: string }
+export type AvisoDeCierre = {
+  reservaId: string
+  motivo: "salio_lleno" | "cancelo" | "cerrado" | "rechazo" | "no_llego"
+  chofer: string
+  sentido: Viaje["sentido"]
+}
 
 /** Si en los últimos 30 min otro cerró su reserva, se le explica qué pasó (R14, R21, R24, R29) */
 export async function cargarAvisoDeCierre(pasajeroId: string): Promise<AvisoDeCierre | null> {
@@ -197,7 +202,14 @@ export async function cargarAvisoDeCierre(pasajeroId: string): Promise<AvisoDeCi
           : despuesDeSalir
             ? "cerrado"
             : "salio_lleno"
-  return { reservaId: data.id, motivo, chofer: data.viaje.chofer?.nombre ?? "El chofer" }
+  return { reservaId: data.id, motivo, chofer: data.viaje.chofer?.nombre ?? "El chofer", sentido: data.viaje.sentido }
+}
+
+/** Quién cerró el viaje de su reserva y el motivo que escogió (nunca el detalle escrito): `motivo_de_cierre` */
+export async function cargarMotivoDeCierre(reservaId: string): Promise<{ por: string; motivo: string | null } | null> {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase.rpc("motivo_de_cierre", { p_reserva: reservaId })
+  return data?.[0] ?? null
 }
 
 type Pedido = { lugar: string | null; lat: number | null; creado_en: string }

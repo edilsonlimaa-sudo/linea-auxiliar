@@ -1,11 +1,20 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { cookies } from "next/headers"
 import { redirect, RedirectType } from "next/navigation"
+
+import { CIERRE_VISTO } from "@/lib/cierre-visto"
 
 import { esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
 import { destinoPara } from "@/lib/sesion"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
+
+/** Sale de la pantalla "Tu viaje se canceló": queda vista y va a Inicio o a buscar otro carro */
+export async function dejarCierre(reservaId: string, destino: "/n" | "/n/al-centro" | "/n/a-valle-grande") {
+  ;(await cookies()).set(CIERRE_VISTO, reservaId, { maxAge: 60 * 60 * 24, httpOnly: true, sameSite: "lax", path: "/" })
+  redirect(destino, RedirectType.replace)
+}
 
 // Resultado de las acciones del pasajero. Los errores de las funciones de la base ya vienen en español.
 export type Resultado = { ok?: boolean; error?: string; intento?: number }

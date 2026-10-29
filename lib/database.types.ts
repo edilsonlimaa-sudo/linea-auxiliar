@@ -1900,6 +1900,13 @@ export type Database = {
           lugar: string
         }[]
       }
+      motivo_de_cierre: {
+        Args: { p_reserva: string }
+        Returns: {
+          motivo: string
+          por: string
+        }[]
+      }
       no_estaba_en_lista: { Args: { p_entrada: string }; Returns: undefined }
       nombre_corto: { Args: { p_nombre: string }; Returns: string }
       normalizar_telefono: { Args: { p_telefono: string }; Returns: string }

@@ -268,7 +268,13 @@ programado ──(sale del anterior)──► en_camino ──► llegando ─�
 - **R22.** Si el carro escogido está lleno, la app ofrece **Cambiarme** a otro carro del mismo sentido con
   puestos libres.
 - **R23.** El pasajero puede tocar **✋ Ya estoy en el sitio** y el chofer lo ve en su lista.
-- **R24.** Si el chofer cancela el viaje, todos los anotados pasan a `sin_puesto` con aviso.
+- **R24.** Si el chofer cancela el viaje, todos los anotados pasan a `sin_puesto` con aviso. En la interfaz nueva el
+  aviso es una **pantalla de paso** (*oct. 2026: antes era una tarjeta en Inicio y la persona volvía a Inicio "de la
+  nada"*): "Tu viaje se canceló", **por qué** (el motivo que escogió el chofer, en palabras del pasajero: "Oscarelys
+  tuvo un problema con el carro"; nunca su texto libre; si lo cerró la Línea o se desconectó, eso) y **qué hacer
+  ahora**: ver el otro carro con puesto o, al Centro sin otro carro, **Avísame cuando salga un carro** (R94) en el mismo
+  toque; hacia Valle Grande, su lugar en la lista o anotarse. "Ir al inicio" o la ✕ cierran. Igual para salió lleno,
+  no puede pasar por ti y perdiste tu puesto (R14, R21, R29). Se ve una vez por reserva en ese celular.
 - **R72. Por qué se cancela [servidor].** *(Oct. 2026: los choferes cancelaban mucho y no se sabía por qué.)*
   - Al cancelar, el chofer escoge **por qué**, con un toque: **Quiero cambiar la hora** · **Me equivoqué al publicar**
     · **No había nadie para recoger** · **Se llenó por fuera de la app** · **Problema con el carro** · **Terminé por hoy

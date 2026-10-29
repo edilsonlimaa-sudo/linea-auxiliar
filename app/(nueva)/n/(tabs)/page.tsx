@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
-import { AvisoCierre, AvisoTarifa } from "@/components/nueva/pasajero/avisos"
+import { AvisoTarifa } from "@/components/nueva/pasajero/avisos"
 import { AvisosCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
@@ -13,6 +14,7 @@ import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista } from "@/lib/nueva/vistas"
+import { CIERRE_VISTO } from "@/lib/cierre-visto"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { aceptaReservas, ordenarParaPasajero } from "@/lib/viajes"
 
@@ -45,6 +47,8 @@ export default async function InicioNueva() {
   ])
   // Recién terminó un viaje sin calificar (R45): primero la pantalla de paso "Llegaste bien"
   if (pendiente) redirect("/n/llegaste")
+  // Otro cerró su reserva (canceló, salió lleno…) y no lo ha visto: primero la pantalla que explica qué pasó
+  if (cierre && (await cookies()).get(CIERRE_VISTO)?.value !== cierre.reservaId) redirect("/n/se-cerro")
   // Anotado en la lista no es todavía un viaje (§5.17): su lugar vive en A Valle Grande; Mi viaje empieza al montarse
   const mio = miListaVista(lista)
 
@@ -57,7 +61,6 @@ export default async function InicioNueva() {
       <AppHeader title={`Hola, ${perfil.nombre.split(" ")[0]}`} />
       <div className="flex flex-col gap-6 p-4">
         <AvisosCelular recordatorio />
-        {cierre ? <AvisoCierre aviso={cierre} /> : null}
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
         <AvisoTarifa />
         <DirectionPicker alCentro={alCentro} enGina={enGina} miLugar={mio?.posicion ?? null} />

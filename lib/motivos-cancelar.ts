@@ -36,4 +36,23 @@ export const QUIEN_CERRO: Record<CerradoPor, string> = {
   admin_desconectar: "El admin desconectó al chofer",
 }
 
+/** Por qué se canceló, contado al pasajero que tenía puesto (interfaz nueva, R24). "otra" no explica nada */
+export const MOTIVO_PARA_EL_PASAJERO: Record<MotivoCancelar, ((chofer: string) => string) | null> = {
+  cambiar_hora: (c) => `${c} cambió la hora del viaje.`,
+  me_equivoque: (c) => `${c} publicó el viaje por error.`,
+  nadie: (c) => `${c} no pudo salir con este viaje.`,
+  lleno_fuera: (c) => `El carro de ${c} se llenó por fuera de la app.`,
+  carro: (c) => `${c} tuvo un problema con el carro.`,
+  no_sigo: (c) => `${c} terminó por hoy.`,
+  otra: null,
+}
+
+/** Cuando no lo cerró el chofer con un motivo */
+export const CIERRE_PARA_EL_PASAJERO: Record<CerradoPor, ((chofer: string) => string) | null> = {
+  chofer: null,
+  chofer_desconectar: (c) => `${c} se desconectó.`,
+  admin: () => "La Línea cerró el viaje.",
+  admin_desconectar: () => "La Línea cerró el viaje.",
+}
+
 export const esMotivoCancelar = (m: unknown): m is MotivoCancelar => MOTIVOS_CANCELAR.includes(m as MotivoCancelar)
