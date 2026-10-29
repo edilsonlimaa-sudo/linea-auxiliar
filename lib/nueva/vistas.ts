@@ -20,6 +20,9 @@ import {
   type Viaje,
 } from "@/lib/viajes"
 
+const horaCorta = (ms: number) =>
+  new Intl.DateTimeFormat("es-VE", { hour: "numeric", minute: "2-digit", timeZone: "America/Caracas" }).format(new Date(ms))
+
 /** La hora del pedido, para todo lo que se calcula en una misma página (en el servidor) */
 export const ahoraDelPedido = () => Date.now()
 
@@ -63,6 +66,7 @@ export type UnidadVista = {
   etiqueta: string // "En camino", "Recogiendo"…
   llegada: { principal: string; detalle?: string }
   minutos: string | null // el número grande de la tarjeta: "8 min", "Ya"; en ruta, nada
+  hora: string | null // a qué hora recoge ("12:14 a. m."), si todavía no llegó
   libres: number
   puestos: number
   aceptaReservas: boolean
@@ -78,6 +82,7 @@ export function unidadVista(v: ViajeConChofer, porId: Map<string, Viaje>, ahora:
     etiqueta: ESTADO[v.estado],
     llegada: llegada(v, porId, ahora),
     minutos: v.estado === "en_parada" ? "Ya" : v.estado === "llegando" ? "2 min" : m === null ? null : m < 1 ? "Ya" : `${Math.round(m)} min`,
+    hora: m === null || m < 1 ? null : horaCorta(ahora + m * 60_000),
     libres: libres(v),
     puestos: v.puestos,
     aceptaReservas: aceptaReservas(v),

@@ -4,7 +4,7 @@ import { ChevronRight, Hand, Loader2, MapPin, Route, TimerReset, Users } from "l
 import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
-import { carroLabel, ChoferAvatar, personasLabel, puestosLabel } from "@/components/nueva/pasajero/comunes"
+import { ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/nueva/ui/avatar"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
@@ -250,6 +250,21 @@ function MeFuiDrawer() {
 }
 
 /** Los carros hacia Valle Grande (R63, R67), con el aviso de que solo estos son de la línea hoy */
+/** Cuándo pasa por Gina, en una línea: "12 min · a las 12:14 a. m.", "Ya · en Gina", "Ya salió" */
+function cuandoPasa(u: UnidadVista) {
+  const que = u.hora
+    ? `a las ${u.hora}`
+    : u.estado === "en_parada"
+      ? "en Gina"
+      : u.estado === "llegando"
+        ? "llegando a Gina"
+        : u.estado === "en_ruta"
+          ? "Ya salió"
+          : "en cualquier momento" // pasó la hora que dijo y todavía no avisa que llega
+  return u.minutos ? `${u.minutos} · ${que}` : que
+}
+
+/** Los carros del tramo (§5.17), limpios: quién, cuándo pasa por Gina y cuántos puestos le quedan */
 export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
   return (
     <div className="flex flex-col gap-2">
@@ -268,19 +283,11 @@ export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
               <ChoferAvatar chofer={u.chofer} className="size-10" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{u.chofer.nombre}</p>
-                <p className="truncate text-sm text-muted-foreground">
-                  {carroLabel(u.chofer.carro)}
-                  {u.chofer.carro ? ` · ${u.chofer.carro.placa}` : ""}
-                </p>
-                <p className="truncate text-sm text-muted-foreground">{u.llegada.principal}</p>
+                <p className="truncate text-sm text-muted-foreground">{cuandoPasa(u)}</p>
               </div>
-              <div className="flex shrink-0 flex-col items-end gap-1">
-                {u.minutos ? <span className="font-heading font-semibold tabular-nums">{u.minutos}</span> : null}
-                <Badge variant={u.libres > 0 ? "secondary" : "outline"}>
-                  <Users className="size-3.5" />
-                  {puestosLabel(u.libres)}
-                </Badge>
-              </div>
+              <span className={cn("shrink-0 text-sm font-medium", u.libres > 0 ? "text-primary" : "text-muted-foreground")}>
+                {u.libres > 0 ? `${u.libres} ${u.libres === 1 ? "libre" : "libres"}` : "Lleno"}
+              </span>
             </li>
           ))}
         </ul>
