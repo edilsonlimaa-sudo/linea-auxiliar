@@ -44,12 +44,42 @@ export const iconoCarro = (L: typeof import("leaflet")) =>
     iconAnchor: [28, 28],
   })
 
+/** Interfaz nueva: un carro visto desde arriba, con el frente hacia el norte; gira entero hacia donde va */
+export const iconoCarroArriba = (L: typeof import("leaflet")) =>
+  L.divIcon({
+    className: "",
+    html: `<div role="img" aria-label="El carro" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center">
+      <div data-giro style="transition:transform .6s ease-out;filter:drop-shadow(0 2px 3px rgb(0 0 0 / .35))">
+        <svg width="26" height="44" viewBox="0 0 26 44" aria-hidden="true">
+          <rect x="1" y="1" width="24" height="42" rx="9" style="fill:var(--primary)" stroke="#fff" stroke-width="2"/>
+          <rect x="0" y="13" width="3" height="5" rx="1.5" style="fill:var(--primary)"/>
+          <rect x="23" y="13" width="3" height="5" rx="1.5" style="fill:var(--primary)"/>
+          <path d="M5.5 13.5 Q13 9 20.5 13.5 L19.5 18.5 Q13 16.5 6.5 18.5 Z" fill="#dbe7ff"/>
+          <path d="M6.5 32 Q13 33.5 19.5 32 L20 36 Q13 38.5 6 36 Z" fill="#dbe7ff" opacity=".85"/>
+          <rect x="6.5" y="20" width="13" height="10.5" rx="2" fill="#fff" opacity=".18"/>
+          <circle cx="6" cy="4.5" r="1.6" fill="#fff7c2"/>
+          <circle cx="20" cy="4.5" r="1.6" fill="#fff7c2"/>
+        </svg>
+      </div>
+    </div>`,
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
+  })
+
 /**
  * Apunta la flecha al rumbo. `giro` acumula el ángulo para que la flecha gire por el lado corto (de 350° a 10°
  * avanza 20°, no retrocede 340°). El 🚐 de los emojis mira a la izquierda: hacia el este se refleja.
  */
 export function apuntar(marcador: Marker, grados: number, giro: { current: number | null }) {
   const el = marcador.getElement()
+  const entero = el?.querySelector<HTMLElement>("[data-giro]")
+  if (entero) {
+    // El carro visto desde arriba gira entero, por el lado corto
+    if (giro.current === null) giro.current = grados
+    else giro.current += ((grados - ((giro.current % 360) + 360) % 360 + 540) % 360) - 180
+    entero.style.transform = `rotate(${giro.current}deg)`
+    return
+  }
   const flecha = el?.querySelector<HTMLElement>("[data-flecha]")
   const emoji = el?.querySelector<HTMLElement>("[data-emoji]")
   if (!flecha || !emoji) return
@@ -85,7 +115,17 @@ export function deslizar(marcador: Marker, destino: Punto) {
  * Mapa en vivo (R41). Al abrir encuadra a nivel de calle; después sigue al carro sin tocar el zoom (solo se desliza
  * cuando el carro se acerca al borde). Si la persona mueve o acerca el mapa, deja de seguir y aparece "Seguir al carro".
  */
-function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; senal: { enVivo: boolean; texto: string } | null }) {
+export function Mapa({
+  carro,
+  yo,
+  senal,
+  nueva = false,
+}: {
+  carro: PosicionChofer
+  yo: Punto | null
+  senal: { enVivo: boolean; texto: string } | null
+  nueva?: boolean // interfaz nueva: el carro visto desde arriba y sus colores; arrastrar el mapa no mueve la hoja
+}) {
   const contenedor = useRef<HTMLDivElement>(null)
   const mapa = useRef<MapaLeaflet | null>(null)
   const marcadores = useRef<{ L: typeof import("leaflet"); carro?: Marker; yo?: Marker } | null>(null)
@@ -168,7 +208,7 @@ function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; s
 
     if (mk.carro) deslizar(mk.carro, carro)
     else {
-      mk.carro = L.marker(carro, { icon: iconoCarro(L), zIndexOffset: 1000 }).addTo(m)
+      mk.carro = L.marker(carro, { icon: nueva ? iconoCarroArriba(L) : iconoCarro(L), zIndexOffset: 1000 }).addTo(m)
       // Marcador nuevo (p. ej. volvió a compartir): retoma el último rumbo conocido
       if (giro.current !== null) apuntar(mk.carro, ((giro.current % 360) + 360) % 360, { current: null })
     }
@@ -190,7 +230,7 @@ function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; s
       // Se acerca al borde: deslizar el mapa sin cambiar el zoom que haya escogido
       mover(() => m.panTo(carro))
     }
-  }, [carro, yo, listo])
+  }, [carro, yo, listo, nueva])
 
   // Sin señal: el 🚐 queda gris y semitransparente en la última posición conocida (R42)
   const enVivo = senal?.enVivo ?? true
@@ -210,16 +250,24 @@ function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; s
   // isolate: los z-index de Leaflet (hasta 1000) quedan adentro; si no, el mapa tapa el menú lateral
   return (
     <div className="relative isolate">
-      <div ref={contenedor} className="h-[55svh] w-full overflow-hidden rounded-2xl border-2 bg-muted" />
+      <div
+        ref={contenedor}
+        data-base-ui-swipe-ignore={nueva ? "" : undefined}
+        className={cn("w-full overflow-hidden bg-muted", nueva ? "h-[50svh] rounded-3xl border" : "h-[55svh] rounded-2xl border-2")}
+      />
       {senal && (
         // Arriba a la derecha (el zoom está a la izquierda), encima de los controles de Leaflet
         <p
           className={cn(
-            "absolute top-3 right-3 z-[1001] flex items-center gap-1.5 rounded-full border-2 px-3 py-1 text-sm font-bold shadow-md",
-            senal.enVivo ? "border-success bg-success text-success-foreground" : "border-warning bg-warning-muted text-warning"
+            "absolute top-3 right-3 z-[1001] flex items-center gap-1.5 rounded-full px-3 py-1 text-sm shadow-md",
+            nueva
+              ? senal.enVivo
+                ? "bg-emerald-600 font-medium text-white"
+                : "bg-amber-100 font-medium text-amber-800"
+              : cn("border-2 font-bold", senal.enVivo ? "border-success bg-success text-success-foreground" : "border-warning bg-warning-muted text-warning")
           )}
         >
-          {senal.enVivo && <span aria-hidden className="size-2 animate-pulse rounded-full bg-success-foreground" />}
+          {senal.enVivo && <span aria-hidden className={cn("size-2 animate-pulse rounded-full", nueva ? "bg-white" : "bg-success-foreground")} />}
           {senal.texto}
         </p>
       )}
@@ -235,27 +283,10 @@ function Mapa({ carro, yo, senal }: { carro: PosicionChofer; yo: Punto | null; s
 }
 
 /**
- * "Ver en el mapa" (R41): por dónde viene el carro y, si compartió GPS, dónde está el pasajero y a qué distancia.
- * Solo mientras la hoja está abierta: lee la posición y después la recibe por Realtime cada vez que el chofer la envía.
+ * La posición del chofer mientras el mapa está abierto: se lee una vez, llega por Realtime cada vez que el chofer la
+ * envía y se vuelve a leer cada 60 s (R42). `ahora` es un reloj de 10 s para "hace N min" y "Sin señal".
  */
-export function VerEnMapa({
-  choferId,
-  chofer,
-  yo,
-  admin = false,
-  className = "w-full",
-  compacto = false,
-  children,
-}: {
-  choferId: string
-  chofer: string
-  yo: Punto | null
-  admin?: boolean // el panel del admin sigue a cualquier chofer conectado (§8): sin "viene" ni "comparte tu GPS"
-  className?: string
-  compacto?: boolean // botón chico, solo el ícono (en las tarjetas de unidad, §8)
-  children?: React.ReactNode // lo que se toca para abrirlo, en vez del botón (una fila entera, en la interfaz nueva)
-}) {
-  const [abierta, setAbierta] = useState(false)
+export function usePosicionEnVivo(choferId: string, abierta: boolean) {
   const [carro, setCarro] = useState<PosicionChofer | undefined>(undefined) // undefined = cargando
 
   useEffect(() => {
@@ -300,6 +331,31 @@ export function VerEnMapa({
   )
   const ahora = useSyncExternalStore(suscribir, () => Math.floor(Date.now() / 10_000) * 10_000, () => 0)
 
+  return { carro, setCarro, ahora }
+}
+
+/**
+ * "Ver en el mapa" (R41): por dónde viene el carro y, si compartió GPS, dónde está el pasajero y a qué distancia.
+ * Solo mientras la hoja está abierta: lee la posición y después la recibe por Realtime cada vez que el chofer la envía.
+ */
+export function VerEnMapa({
+  choferId,
+  chofer,
+  yo,
+  admin = false,
+  className = "w-full",
+  compacto = false,
+}: {
+  choferId: string
+  chofer: string
+  yo: Punto | null
+  admin?: boolean // el panel del admin sigue a cualquier chofer conectado (§8): sin "viene" ni "comparte tu GPS"
+  className?: string
+  compacto?: boolean // botón chico, solo el ícono (en las tarjetas de unidad, §8)
+}) {
+  const [abierta, setAbierta] = useState(false)
+  const { carro, setCarro, ahora } = usePosicionEnVivo(choferId, abierta)
+
   const nombre = chofer.split(" ")[0]
   const distancia = carro && yo ? distanciaTexto(distanciaMetros(carro, yo)) : null
   const enVivo = carro ? ahora - new Date(carro.actualizadaEn).getTime() < EN_VIVO_MS : false
@@ -308,9 +364,7 @@ export function VerEnMapa({
 
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), !v && setCarro(undefined))}>
-      {children ? (
-        <SheetTrigger className={className}>{children}</SheetTrigger>
-      ) : compacto ? (
+      {compacto ? (
         <SheetTrigger render={<Button variant="outline" size="icon" aria-label={`Ver en el mapa por dónde va ${chofer.split(" ")[0]}`} className="size-10 shrink-0" />}>
           <MapIcon aria-hidden className="size-6" />
         </SheetTrigger>
@@ -332,7 +386,7 @@ export function VerEnMapa({
                   ? `Sin señal: la última ubicación es de ${cuando}. Puede que ${nombre} haya cerrado la app o perdido la señal.`
                   : distancia
                     ? `El carro está a ${distancia} de ti · actualizado ${cuando}.`
-                    : admin || children
+                    : admin
                       ? `En vivo · actualizado ${cuando}.`
                       : `Actualizado ${cuando}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
           </SheetDescription>

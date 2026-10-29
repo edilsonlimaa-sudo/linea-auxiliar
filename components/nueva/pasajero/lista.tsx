@@ -4,7 +4,7 @@ import { ChevronRight, Map as MapIcon, Hand, Loader2, MapPin, Route, TimerReset,
 import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
-import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
+import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
 import { ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/nueva/ui/avatar"
 import { Badge } from "@/components/nueva/ui/badge"
@@ -284,10 +284,9 @@ export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
           {carros.map((u) => (
             <li key={u.id}>
               {/* Tocar el carro abre el mapa: por dónde viene (R41) */}
-              <VerEnMapa
+              <MapaCarro
                 choferId={u.chofer.id}
                 chofer={u.chofer.nombre}
-                yo={null}
                 className="flex w-full items-center gap-3 p-3 text-left transition-colors active:bg-muted"
               >
                 <ChoferAvatar chofer={u.chofer} className="size-10" />
@@ -299,7 +298,7 @@ export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
                   {u.libres > 0 ? `${u.libres} ${u.libres === 1 ? "libre" : "libres"}` : "Lleno"}
                 </span>
                 <MapIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
-              </VerEnMapa>
+              </MapaCarro>
             </li>
           ))}
         </ul>

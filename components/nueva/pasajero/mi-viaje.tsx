@@ -6,7 +6,7 @@ import * as React from "react"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { carroLabel, ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { PagoMovilCard } from "@/components/nueva/pasajero/pago-movil-card"
-import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
+import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import {
@@ -75,7 +75,7 @@ export function MiViaje({ viaje }: { viaje: MiViajeVista }) {
             {unidad.llegada.detalle ? <p className="text-sm opacity-90">{unidad.llegada.detalle}</p> : null}
           </div>
           {/* R41: por dónde viene el carro, en vivo (el mismo mapa de la clásica) */}
-          {!aBordo ? <VerEnMapa choferId={chofer.id} chofer={chofer.nombre} yo={viaje.yo} className="w-full rounded-4xl" /> : null}
+          {!aBordo ? <MapaCarro choferId={chofer.id} chofer={chofer.nombre} yo={viaje.yo} className="w-full" /> : null}
           {telefono ? (
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" size="lg" render={<a href={`tel:+${telefono}`} />} nativeButton={false}>
