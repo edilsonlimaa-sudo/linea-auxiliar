@@ -684,7 +684,7 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
 - **R85. Mismas reglas, mismos datos.** Las dos interfaces usan las mismas funciones de la base y los mismos datos: un
   pasajero en la nueva y un chofer en la clásica viajan juntos sin notarlo. **La clásica no cambia** mientras convivan;
   se apaga cuando todos estén en la nueva y no haga falta volver. La nueva sigue el **tema del teléfono** (claro u
-  oscuro) por defecto; en Menú → Apariencia se escoge Sistema, Claro u Oscuro (se guarda en el teléfono, aparte del
+  oscuro) por defecto; en Menú → **Apariencia** (una línea como las demás, que dice el tema actual y abre una hoja) se escoge Sistema, Claro u Oscuro (se guarda en el teléfono, aparte del
   tema de la clásica). **Fondo "aurora arriba"** (Oct. 2026): arriba de cada pantalla, manchas suaves con los colores
   de la tarde llanera (azul de la Línea, ámbar, coral) que se mueven despacio y se desvanecen hacia el fondo. En el
   claro el fondo es gris claro y las tarjetas blancas y opacas con sombra suave (contraste para leer en la calle); en el

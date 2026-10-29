@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2, ChevronRight, IdCard, Lightbulb, Loader2, LogOut, Moon, Palette, Star, Sun, SunMoon } from "lucide-react"
+import { Check, CheckCircle2, ChevronRight, IdCard, Lightbulb, Loader2, LogOut, Moon, Palette, Star, Sun, SunMoon } from "lucide-react"
 import Link from "next/link"
 import { useTheme } from "next-themes"
 import * as React from "react"
@@ -224,52 +224,61 @@ export function CerrarSesionDrawer() {
 }
 
 const TEMAS = [
-  { valor: "system", nombre: "Sistema", icon: SunMoon },
-  { valor: "light", nombre: "Claro", icon: Sun },
-  { valor: "dark", nombre: "Oscuro", icon: Moon },
+  { valor: "system", nombre: "Sistema", detalle: "Como el teléfono", icon: SunMoon },
+  { valor: "light", nombre: "Claro", detalle: "Fondo claro", icon: Sun },
+  { valor: "dark", nombre: "Oscuro", detalle: "Fondo oscuro, descansa la vista de noche", icon: Moon },
 ] as const
 
 const nada = () => () => {}
 
-/** Apariencia: sigue al teléfono (Sistema) o fija Claro u Oscuro; se guarda en el teléfono */
+/**
+ * Apariencia: una línea del Menú, como las demás, que abre una hoja con Sistema (sigue al teléfono), Claro u Oscuro.
+ * Se guarda en el teléfono; al escoger, la hoja se cierra
+ */
 export function TemaSelector() {
   const { theme, setTheme } = useTheme()
-  // En el servidor no se sabe el tema guardado: ninguna opción marcada hasta montar
+  const [open, setOpen] = React.useState(false)
+  // En el servidor no se sabe el tema guardado: nada marcado hasta montar
   const montado = React.useSyncExternalStore(nada, () => true, () => false)
   const actual = montado ? (theme ?? "system") : null
 
   return (
-    <div className="flex flex-col gap-3 p-3">
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-          <Palette className="size-5" />
+    <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
+      <MenuItem icon={Palette} titulo="Apariencia" detalle={TEMAS.find((t) => t.valor === actual)?.nombre} onClick={() => setOpen(true)} />
+      <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
+        <DrawerHeader>
+          <DrawerTitle className="font-heading text-xl">Apariencia</DrawerTitle>
+          <DrawerDescription>Se guarda en este teléfono.</DrawerDescription>
+        </DrawerHeader>
+        <div role="radiogroup" aria-label="Apariencia" className="mx-4 mb-[max(1rem,env(safe-area-inset-bottom))] divide-y overflow-hidden rounded-3xl border bg-card">
+          {TEMAS.map(({ valor, nombre, detalle, icon: Icon }) => {
+            const marcado = actual === valor
+            return (
+              <button
+                key={valor}
+                type="button"
+                role="radio"
+                aria-checked={marcado}
+                onClick={() => {
+                  setTheme(valor)
+                  setOpen(false)
+                }}
+                className="flex w-full items-center gap-3 p-3 text-left transition-colors active:bg-muted"
+              >
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <Icon className="size-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium">{nombre}</p>
+                  <p className="text-sm text-muted-foreground">{detalle}</p>
+                </div>
+                {marcado ? <Check aria-hidden className="size-5 shrink-0 text-primary" /> : null}
+              </button>
+            )
+          })}
         </div>
-        <p id="tema-titulo" className="font-medium">
-          Apariencia
-        </p>
-      </div>
-      <div role="radiogroup" aria-labelledby="tema-titulo" className="grid grid-cols-3 gap-1 rounded-2xl bg-muted p-1">
-        {TEMAS.map(({ valor, nombre, icon: Icon }) => {
-          const marcado = actual === valor
-          return (
-            <button
-              key={valor}
-              type="button"
-              role="radio"
-              aria-checked={marcado}
-              onClick={() => setTheme(valor)}
-              className={cn(
-                "flex items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-sm font-medium transition-colors",
-                marcado ? "bg-background text-foreground shadow-sm" : "text-muted-foreground active:bg-background/60",
-              )}
-            >
-              <Icon className="size-4" />
-              {nombre}
-            </button>
-          )
-        })}
-      </div>
-    </div>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
