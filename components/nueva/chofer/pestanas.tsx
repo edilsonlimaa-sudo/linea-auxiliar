@@ -159,7 +159,8 @@ export function PestanasViajes({
         ))}
       </div>
 
-      {pie ? <div className="sticky bottom-16 z-10 -mx-4 mt-auto border-t bg-background/90 px-4 py-3 backdrop-blur">{pie}</div> : null}
+      {/* Justo encima de la barra de la app: su alto (4rem), su borde y el área segura del celular */}
+      {pie ? <div className="sticky bottom-[calc(4rem+1px+env(safe-area-inset-bottom))] z-10 -mx-4 mt-auto border-t bg-background/90 px-4 py-3 backdrop-blur">{pie}</div> : null}
     </>
   )
 }

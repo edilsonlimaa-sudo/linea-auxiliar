@@ -21,6 +21,7 @@ import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import { ETAPA } from "@/lib/nueva/textos"
 import { ahoraDelPedido } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
+import { cn } from "@/lib/utils"
 import { duracion, estadoParaChofer, libres, SENTIDOS, sumaPersonas, type Viaje } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Línea Auxiliar" }
@@ -132,7 +133,8 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
     <Screen>
       <EnVivo />
       {cabecera}
-      <div className="flex flex-1 flex-col gap-4 px-4 pb-4">
+      {/* Sin padding abajo: la franja de la lista, pegada al fondo, queda en el mismo lugar al llegar al final */}
+      <div className={cn("flex flex-1 flex-col gap-4 px-4", sinCuota && "pb-4")}>
         {/* Con viajes, la cuota solo si falta (pagada no dice nada aquí); el GPS va en el badge de la cabecera */}
         {cuota && !cuota.habilitado ? (
           <div className="pt-4">
