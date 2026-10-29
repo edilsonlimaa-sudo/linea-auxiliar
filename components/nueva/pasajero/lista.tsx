@@ -125,17 +125,17 @@ function MiLugar({ mio, filas }: { mio: MiListaVista; filas: FilaVista[] }) {
   )
 }
 
-/** La lista completa (R63) en una hoja desde abajo; children = lo que se toca para abrirla */
+/** La lista completa (R63) en una hoja desde abajo, de alto fijo (la lista corre por dentro); children = lo que se toca para abrirla */
 function HojaLista({ filas, className, children }: { filas: FilaVista[]; className: string; children: React.ReactNode }) {
   return (
     <Drawer showSwipeHandle>
       <DrawerTrigger className={className}>{children}</DrawerTrigger>
-      <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
+      <DrawerContent className="[--drawer-height:75dvh] sm:mx-auto sm:max-w-[430px]">
         <DrawerHeader>
           <DrawerTitle className="font-heading text-xl">La lista en Gina</DrawerTitle>
           <DrawerDescription>Parada Gina, Centro → Valle Grande. El orden es por la hora en que cada uno se anotó.</DrawerDescription>
         </DrawerHeader>
-        <div className="max-h-[60dvh] overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <FilaLista filas={filas} />
         </div>
       </DrawerContent>
