@@ -137,11 +137,8 @@ function HojaLista({ filas, className, children }: { filas: FilaVista[]; classNa
           <DrawerTitle className="font-heading text-xl">La lista en Gina</DrawerTitle>
           <DrawerDescription>Parada Gina, Centro → Valle Grande. El orden es por la hora en que cada uno se anotó.</DrawerDescription>
         </DrawerHeader>
-        <div className="h-[55dvh] overflow-y-auto overscroll-contain px-4">
+        <div className="h-[55dvh] overflow-y-auto overscroll-contain px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <FilaLista filas={filas} />
-        </div>
-        <div className="p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <DrawerClose render={<Button variant="ghost" size="lg" className="w-full" />}>Cerrar</DrawerClose>
         </div>
       </DrawerContent>
     </Drawer>
