@@ -5,17 +5,24 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-    --background: oklch(1 0 0);
+    /* Gris claro de fondo y tarjetas blancas con sombra: en el claro el contraste viene de ahí (§5.21, aurora arriba) */
+    --background: oklch(0.967 0.003 240);
     --foreground: oklch(0.148 0.004 228.8);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.148 0.004 228.8);
+    --sombra-card: 0 1px 2px oklch(0.25 0.02 250 / 6%), 0 4px 14px oklch(0.25 0.02 250 / 6%);
     --popover: oklch(1 0 0);
     --popover-foreground: oklch(0.148 0.004 228.8);
     --primary: oklch(0.488 0.243 264.376);
     --primary-foreground: oklch(0.97 0.014 254.604);
-    --secondary: oklch(0.967 0.001 286.375);
+    /* Avisos sueltos sobre el fondo: un azul muy suave para que no se pierdan en el gris */
+    --secondary: oklch(0.94 0.018 262);
     --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.963 0.002 197.1);
+    --aurora-1: #ffb35c;
+    --aurora-2: #5b8cff;
+    --aurora-3: #ff8a7a;
+    --aurora-opacidad: 0.6;
+    --muted: oklch(0.945 0.004 240);
     --muted-foreground: oklch(0.56 0.021 213.5);
     --accent: oklch(0.963 0.002 197.1);
     --accent-foreground: oklch(0.218 0.008 223.9);
@@ -42,8 +49,14 @@
 .dark {
     --background: oklch(0.148 0.004 228.8);
     --foreground: oklch(0.987 0.002 197.1);
-    --card: oklch(0.218 0.008 223.9);
+    /* Un poco transparentes: dejan ver la aurora sin desenfoque (barato en celulares modestos) */
+    --card: oklch(0.218 0.008 223.9 / 0.82);
     --card-foreground: oklch(0.987 0.002 197.1);
+    --sombra-card: none;
+    --aurora-1: #c2410c;
+    --aurora-2: #1d4ed8;
+    --aurora-3: #9f1239;
+    --aurora-opacidad: 0.7;
     --popover: oklch(0.218 0.008 223.9);
     --popover-foreground: oklch(0.987 0.002 197.1);
     /* Más claro que el del prototipo para leerse sobre el fondo oscuro; texto oscuro encima (AA) */
@@ -129,6 +142,69 @@
     }
   html {
     @apply font-sans;
+    }
+  .bg-card, [data-slot="card"] {
+    box-shadow: var(--sombra-card);
+    }
+}
+
+/* ---------------------------------------------------------------------------
+ * Aurora arriba (§5.21): manchas de color detrás del principio de la pantalla.
+ * Degradados radiales (sin filter: blur) que se mueven con transform: lo barato.
+ * ------------------------------------------------------------------------- */
+.aurora {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    z-index: -1;
+    height: 28rem;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: var(--aurora-opacidad);
+    mask-image: linear-gradient(to bottom, black 35%, transparent);
+}
+.aurora > span {
+    position: absolute;
+    width: 24rem;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    will-change: transform;
+    animation: aurora-va 22s ease-in-out infinite alternate;
+}
+.aurora > span:nth-child(1) {
+    left: -9rem;
+    top: -10rem;
+    background: radial-gradient(closest-side, var(--aurora-1), transparent);
+}
+.aurora > span:nth-child(2) {
+    right: -10rem;
+    top: -8rem;
+    background: radial-gradient(closest-side, var(--aurora-2), transparent);
+    animation-duration: 27s;
+    animation-direction: alternate-reverse;
+}
+.aurora > span:nth-child(3) {
+    left: 20%;
+    top: 2rem;
+    width: 18rem;
+    background: radial-gradient(closest-side, var(--aurora-3), transparent);
+    opacity: 0.8;
+    animation-name: aurora-sube;
+    animation-duration: 19s;
+}
+@keyframes aurora-va {
+    to {
+        transform: translate(5rem, 2rem) scale(1.1);
+    }
+}
+@keyframes aurora-sube {
+    to {
+        transform: translate(-3rem, -3rem) scale(0.9);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .aurora > span {
+        animation: none;
     }
 }
 /* ---------------------------------------------------------------------------

@@ -17,11 +17,17 @@ export function AppShell({
       <div
         id="app-shell"
         className={cn(
-          "relative mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-background",
+          "relative isolate mx-auto flex min-h-dvh w-full max-w-[430px] flex-col bg-background",
           "sm:h-[calc(100dvh-3rem)] sm:min-h-0 sm:overflow-y-auto sm:rounded-[2.5rem] sm:border sm:shadow-2xl",
           className
         )}
       >
+        {/* Aurora arriba (§5.21): detrás de todo, solo decorativa */}
+        <div aria-hidden className="aurora">
+          <span />
+          <span />
+          <span />
+        </div>
         {children}
       </div>
     </div>

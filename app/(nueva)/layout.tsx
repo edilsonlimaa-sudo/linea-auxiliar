@@ -24,7 +24,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   // El fondo de cada tema (--background en globals.css)
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: light)", color: "#f3f4f7" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0d0e" },
   ],
 }

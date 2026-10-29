@@ -672,7 +672,11 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   pasajero en la nueva y un chofer en la clásica viajan juntos sin notarlo. **La clásica no cambia** mientras convivan;
   se apaga cuando todos estén en la nueva y no haga falta volver. La nueva sigue el **tema del teléfono** (claro u
   oscuro) por defecto; en Menú → Apariencia se escoge Sistema, Claro u Oscuro (se guarda en el teléfono, aparte del
-  tema de la clásica).
+  tema de la clásica). **Fondo "aurora arriba"** (Oct. 2026): arriba de cada pantalla, manchas suaves con los colores
+  de la tarde llanera (azul de la Línea, ámbar, coral) que se mueven despacio y se desvanecen hacia el fondo. En el
+  claro el fondo es gris claro y las tarjetas blancas y opacas con sombra suave (contraste para leer en la calle); en el
+  oscuro las tarjetas dejan ver un poco la aurora. Es solo CSS (sin imágenes) y se queda quieta si el teléfono pide
+  "reducir movimiento".
 
 ### 5.22 Demanda y oferta; cuentas de prueba
 
