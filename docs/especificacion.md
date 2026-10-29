@@ -1048,6 +1048,10 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
 
 - **Estado en una línea** arriba: "● Conectado · Ubicación activa". Tocarla deja desconectarse (con confirmación si
   cancela viajes, R8) después de "¿Vuelves a trabajar hoy?" (R60). Solo si el GPS falla se vuelve un aviso amarillo con "Intentar de nuevo" (R40).
+  En la interfaz nueva (*oct. 2026*) no hay línea en la pantalla: conectado es un **badge verde** en la cabecera que
+  abre un popover con la ubicación (y la nota del recorrido, R92) y **Desconectarme**; si el GPS falla, el badge dice
+  "Sin GPS" en rojo y el popover trae qué hacer e "Intentar de nuevo". Con viajes, la cuota del día solo aparece si
+  falta (pagada o en revisión, nada).
 - **Una sola acción principal a la vez**, grande y fija abajo (zona del pulgar), que cambia con el estado:
   en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando → **Ya llegué** · recogiendo → **Salir con N
   pasajeros** · en ruta → **Terminar viaje** (R71).

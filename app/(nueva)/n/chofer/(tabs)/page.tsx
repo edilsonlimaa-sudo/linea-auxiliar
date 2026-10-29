@@ -6,7 +6,7 @@ import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { AccionRecogida, TerminarViaje } from "@/components/nueva/chofer/accion"
-import { BotonDesconectarme, EstadoEnCabecera, Ubicacion } from "@/components/nueva/chofer/conexion"
+import { BotonDesconectarme, EstadoEnCabecera } from "@/components/nueva/chofer/conexion"
 import { CuotaAviso } from "@/components/nueva/chofer/cuota"
 import { DespuesTarjeta, PreguntaDespues, type Respuesta } from "@/components/nueva/chofer/despues"
 import { FaixaLista } from "@/components/nueva/chofer/gina"
@@ -46,7 +46,7 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
   const hoja = logro ? <ViajeTerminadoHoja resumen={logro} /> : null
   // Como el prototipo: el nombre de la app arriba
-  const cabecera = <AppHeader title="Línea Auxiliar" action={<EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} viajesAbiertos={publicados} />} />
+  const cabecera = <AppHeader title="Línea Auxiliar" action={<EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} viajesAbiertos={publicados} compartir={abiertos.length > 0} />} />
 
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
@@ -133,11 +133,12 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
       <EnVivo />
       {cabecera}
       <div className="flex flex-1 flex-col gap-4 px-4 pb-4">
-        {/* Lo que falla (GPS, la cuota), arriba de las pestañas; sin nada que decir, no ocupa lugar */}
-        <div className="flex flex-col gap-4 pt-4 empty:hidden">
-          <Ubicacion activa={conectado} />
-          {cuota ? <CuotaAviso cuota={cuota} /> : null}
-        </div>
+        {/* Con viajes, la cuota solo si falta (pagada no dice nada aquí); el GPS va en el badge de la cabecera */}
+        {cuota && !cuota.habilitado ? (
+          <div className="pt-4">
+            <CuotaAviso cuota={cuota} />
+          </div>
+        ) : null}
         <PestanasViajes
           pestanas={pestanas}
           inicial={(recogida ?? enRuta ?? proximos[0]).id}

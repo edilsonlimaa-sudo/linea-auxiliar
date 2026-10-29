@@ -10,35 +10,117 @@ import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle } from "@/components/nueva/ui/drawer"
 import { Input } from "@/components/nueva/ui/input"
+import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from "@/components/nueva/ui/popover"
 import { conectarme, desconectarme } from "@/lib/acciones/chofer"
 import { cn } from "@/lib/utils"
 
 /**
- * El estado del chofer en la cabecera (R6–R8): Conectado o Desconectado. Tocarlo conecta o abre "¿Vuelves a trabajar
- * hoy?" (R60). Sin la cuota del día no se ofrece conectarse (R76).
+ * El estado del chofer en la cabecera (R6–R8). Desconectado: tocarlo conecta (sin la cuota del día no se ofrece, R76).
+ * Conectado: un badge verde que abre un popover con la ubicación (R40) y "Desconectarme" ("¿Vuelves a trabajar hoy?",
+ * R60). Con viajes abiertos (`compartir`) el teléfono comparte por dónde va; si el GPS falla, el badge se pone rojo.
  */
-export function EstadoEnCabecera({ conectado, sinCuota, viajesAbiertos }: { conectado: boolean; sinCuota: boolean; viajesAbiertos: number }) {
+export function EstadoEnCabecera({
+  conectado,
+  sinCuota,
+  viajesAbiertos,
+  compartir = false,
+}: {
+  conectado: boolean
+  sinCuota: boolean
+  viajesAbiertos: number
+  compartir?: boolean
+}) {
   const { ejecutar, pendiente, error } = useAccion()
   const [hoja, setHoja] = React.useState(false)
-  const puedeTocar = conectado || !sinCuota
+  const [abierto, setAbierto] = React.useState(false)
+  const gps = useCompartirUbicacion(conectado && compartir)
+  const falla = conectado && compartir && (gps.estado === "sin_permiso" || gps.estado === "sin_gps")
+
+  if (!conectado) {
+    return (
+      <>
+        <button
+          type="button"
+          disabled={sinCuota || pendiente}
+          onClick={() => ejecutar(conectarme)}
+          aria-label="Desconectado. Tocar para conectarte"
+          className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Badge variant="outline" className="h-7 px-2.5 text-muted-foreground">
+            {pendiente ? <Loader2 className="size-3 animate-spin" /> : <Power className="size-3" />}
+            Desconectado
+          </Badge>
+        </button>
+        {error ? <span className="sr-only" role="alert">{error}</span> : null}
+      </>
+    )
+  }
 
   return (
     <>
-      <button
-        type="button"
-        disabled={!puedeTocar || pendiente}
-        onClick={() => (conectado ? setHoja(true) : ejecutar(conectarme))}
-        aria-label={conectado ? "Conectado. Tocar para desconectarte" : "Desconectado. Tocar para conectarte"}
-        className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Badge variant={conectado ? "default" : "outline"} className={cn("h-7 px-2.5", !conectado && "text-muted-foreground")}>
-          {pendiente ? <Loader2 className="size-3 animate-spin" /> : <Power className="size-3" />}
-          {conectado ? "Conectado" : "Desconectado"}
-        </Badge>
-      </button>
-      {error ? <span className="sr-only" role="alert">{error}</span> : null}
+      <Popover open={abierto} onOpenChange={setAbierto}>
+        <PopoverTrigger
+          aria-label={falla ? "Conectado, sin GPS. Ver detalles" : "Conectado. Ver detalles"}
+          className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        >
+          <Badge className={cn("h-7 gap-1.5 px-2.5", falla ? "bg-destructive text-white" : "bg-success text-success-foreground")}>
+            {falla ? (
+              <LocateOff className="size-3" />
+            ) : (
+              <span className="relative flex size-2">
+                <span className="absolute inline-flex size-full rounded-full bg-current opacity-60 motion-safe:animate-ping" />
+                <span className="relative inline-flex size-2 rounded-full bg-current" />
+              </span>
+            )}
+            {falla ? "Sin GPS" : "Conectado"}
+          </Badge>
+        </PopoverTrigger>
+        <PopoverContent className="flex flex-col gap-3">
+          <div>
+            <PopoverTitle>Estás conectado</PopoverTitle>
+            <p className="text-sm text-muted-foreground">Los pasajeros te ven trabajando.</p>
+          </div>
+          {compartir ? <EstadoGps {...gps} /> : null}
+          <Button variant="outline" onClick={() => (setAbierto(false), setHoja(true))}>
+            <Power /> Desconectarme
+          </Button>
+        </PopoverContent>
+      </Popover>
       <DesconectarDrawer abierta={hoja} onCambiar={setHoja} viajesAbiertos={viajesAbiertos} />
     </>
+  )
+}
+
+/** La ubicación (R40) dentro del popover: lo normal en una línea; si falla, qué hacer e "Intentar de nuevo" */
+function EstadoGps({ estado, reintentar, grabando }: ReturnType<typeof useCompartirUbicacion>) {
+  const falla = estado === "sin_permiso" || estado === "sin_gps"
+  return (
+    <div role="status" className={cn("flex flex-col gap-2 rounded-2xl p-3 text-sm", falla ? "bg-destructive/10" : "bg-muted")}>
+      <p className="flex items-start gap-2">
+        {estado === "pidiendo" ? (
+          <Loader2 className="mt-0.5 size-4 shrink-0 animate-spin" />
+        ) : falla ? (
+          <LocateOff className="mt-0.5 size-4 shrink-0 text-destructive" />
+        ) : (
+          <LocateFixed className="mt-0.5 size-4 shrink-0 text-success" />
+        )}
+        <span>
+          {estado === "pidiendo" ? "Buscando tu ubicación…" : falla ? "Tus pasajeros no ven por dónde vas" : "Tus pasajeros ven por dónde vas"}
+          {falla ? (
+            <span className="block text-xs text-muted-foreground">
+              {estado === "sin_permiso" ? "Permite la ubicación para esta app en tu navegador." : "Revisa que el GPS esté encendido."}
+            </span>
+          ) : null}
+        </span>
+      </p>
+      {/* R92 */}
+      {grabando && !falla ? <p className="pl-6 text-xs text-muted-foreground">También guardamos tu recorrido para mejorar la línea; solo lo ve la administración.</p> : null}
+      {falla ? (
+        <Button variant="outline" size="sm" onClick={reintentar}>
+          Intentar de nuevo
+        </Button>
+      ) : null}
+    </div>
   )
 }
 
@@ -52,44 +134,6 @@ export function BotonDesconectarme() {
       </Button>
       <DesconectarDrawer abierta={hoja} onCambiar={setHoja} viajesAbiertos={0} />
     </>
-  )
-}
-
-/**
- * La ubicación (R40): con viajes abiertos, el teléfono comparte por dónde va. Lo normal es una línea discreta; si el
- * GPS falla, un aviso con "Intentar de nuevo" (los pasajeros no ven por dónde va).
- */
-export function Ubicacion({ activa }: { activa: boolean }) {
-  const { estado, reintentar, grabando } = useCompartirUbicacion(activa)
-  if (!activa) return null
-  const falla = estado === "sin_permiso" || estado === "sin_gps"
-  if (!falla) {
-    return (
-      <div role="status" className="flex flex-col gap-0.5 px-1 text-sm text-muted-foreground">
-        <p className="flex items-center gap-2">
-          {estado === "pidiendo" ? <Loader2 className="size-4 animate-spin" /> : <LocateFixed className="size-4 text-primary" />}
-          {estado === "pidiendo" ? "Buscando tu ubicación…" : "Tus pasajeros ven por dónde vas"}
-        </p>
-        {/* R92 */}
-        {grabando ? <p className="pl-6 text-xs">También guardamos tu recorrido para mejorar la línea; solo lo ve la administración.</p> : null}
-      </div>
-    )
-  }
-  return (
-    <section role="alert" className="flex flex-col gap-3 rounded-3xl border border-destructive/30 bg-destructive/5 p-4">
-      <div className="flex items-start gap-3">
-        <LocateOff className="mt-0.5 size-5 shrink-0 text-destructive" />
-        <div className="min-w-0 flex-1">
-          <p className="font-medium">Tus pasajeros no ven por dónde vas</p>
-          <p className="text-sm text-muted-foreground">
-            {estado === "sin_permiso" ? "Permite la ubicación para esta app en tu navegador." : "Revisa que el GPS esté encendido."}
-          </p>
-        </div>
-      </div>
-      <Button variant="outline" onClick={reintentar}>
-        Intentar de nuevo
-      </Button>
-    </section>
   )
 }
 
