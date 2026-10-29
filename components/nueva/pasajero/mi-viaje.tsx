@@ -5,7 +5,7 @@ import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { carroLabel, ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
-import { PagoMovilCard } from "@/components/nueva/pasajero/pago-movil-card"
+import { PagarAlChofer } from "@/components/nueva/pasajero/pago-movil-card"
 import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
@@ -25,7 +25,8 @@ import type { MiViajeVista } from "@/lib/nueva/vistas"
 
 /**
  * Mi viaje con reserva (§8), en los dos sentidos: el estado, el chofer y cuándo llega, dónde lo recogen, "Ya estoy en
- * el sitio", llamar o escribir al chofer, el Pago Móvil (a la vista a bordo) y "Ya no voy". A bordo lo baja el chofer.
+ * el sitio", llamar o escribir al chofer y "Ya no voy". A bordo, sin llamar ni escribir: "Pagar a…" (el Pago Móvil en
+ * una hoja). A bordo lo baja el chofer.
  */
 export function MiViaje({ viaje }: { viaje: MiViajeVista }) {
   const { unidad } = viaje
@@ -76,7 +77,8 @@ export function MiViaje({ viaje }: { viaje: MiViajeVista }) {
           </div>
           {/* R41: por dónde viene el carro, en vivo (el mismo mapa de la clásica) */}
           {!aBordo ? <MapaCarro choferId={chofer.id} chofer={chofer.nombre} yo={viaje.yo} className="w-full" /> : null}
-          {telefono ? (
+          {/* A bordo ya no hace falta llamar ni escribir: lo importante es pagar */}
+          {telefono && !aBordo ? (
             <div className="grid grid-cols-2 gap-2">
               <Button variant="outline" size="lg" render={<a href={`tel:+${telefono}`} />} nativeButton={false}>
                 <Phone /> Llamar
@@ -110,7 +112,7 @@ export function MiViaje({ viaje }: { viaje: MiViajeVista }) {
           </section>
         ) : null}
 
-        {viaje.pago ? <PagoMovilCard datos={viaje.pago} chofer={chofer.nombre} pasaje={viaje.pasaje} /> : null}
+        {viaje.pago ? <PagarAlChofer datos={viaje.pago} chofer={chofer.nombre} pasaje={viaje.pasaje} /> : null}
 
         <div className="mt-auto flex flex-col gap-2 pt-2">
           {viaje.puedeAvisarListo ? <YaEstoyEnElSitio reservaId={viaje.reservaId} listo={viaje.listo} /> : null}

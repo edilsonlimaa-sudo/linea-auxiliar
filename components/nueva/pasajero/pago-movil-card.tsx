@@ -1,9 +1,10 @@
 "use client"
 
-import { Check, Copy } from "lucide-react"
+import { Check, ChevronRight, Copy, Wallet } from "lucide-react"
 import * as React from "react"
 
 import { Button } from "@/components/nueva/ui/button"
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/nueva/ui/drawer"
 import { type DatosPagoMovil, nombreBanco, textoPagoMovil } from "@/lib/bancos"
 import { type Tarifa, textoTarifa } from "@/lib/tarifas"
 
@@ -24,6 +25,40 @@ async function copiar(texto: string): Promise<boolean> {
     campo.remove()
     return ok
   }
+}
+
+/**
+ * A bordo (R74): lo primero que hace el pasajero es pagar. Un botón que brilla suave ("Pagar a Oscarelys · Pago Móvil")
+ * abre una hoja con los datos para copiar; no están abiertos en la pantalla.
+ */
+export function PagarAlChofer({ datos, chofer, pasaje }: { datos: DatosPagoMovil; chofer: string; pasaje?: Tarifa }) {
+  const nombre = chofer.split(" ")[0]
+  return (
+    <Drawer showSwipeHandle>
+      <DrawerTrigger className="group relative isolate w-full rounded-3xl text-left">
+        {/* La luz: un halo que late despacio detrás del botón (quieto si el teléfono pide reducir movimiento) */}
+        <span aria-hidden className="absolute -inset-1 -z-10 rounded-[1.75rem] bg-primary/30 blur-md motion-safe:animate-pulse" />
+        <span className="flex items-center gap-3 rounded-3xl bg-primary p-4 text-primary-foreground transition-transform group-active:scale-[0.98]">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+            <Wallet className="size-6" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-heading text-lg font-semibold">Pagar a {nombre}</span>
+            <span className="block text-sm opacity-90">Pago Móvil{pasaje ? ` · ${textoTarifa(pasaje)}` : ""}</span>
+          </span>
+          <ChevronRight className="size-5 shrink-0 opacity-80" />
+        </span>
+      </DrawerTrigger>
+      <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
+        <DrawerHeader>
+          <DrawerTitle className="font-heading text-xl">Pagar a {nombre}</DrawerTitle>
+        </DrawerHeader>
+        <div className="px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <PagoMovilCard datos={datos} chofer={chofer} pasaje={pasaje} />
+        </div>
+      </DrawerContent>
+    </Drawer>
+  )
 }
 
 /**
