@@ -11,7 +11,7 @@ import { avanzarViaje } from "@/lib/acciones/chofer"
 import type { EntradaTramo, ViajeChofer } from "@/lib/datos/inicio-chofer"
 import { conAcompanantes, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
-// La acción principal del chofer, que `PestanasViajes` pega abajo con la lista de Gina. Reglas de
+// La acción principal del chofer, al final de su pestaña (`PestanasViajes`). Reglas de
 // components/chofer/barra-accion.tsx y boton-terminar.tsx: una sola por estado, y las que no se deshacen preguntan antes.
 
 const BARRA = "flex flex-col gap-2"

@@ -12,13 +12,13 @@ export type PestanaViaje = {
   titulo: string // el sentido corto
   enCurso: boolean // en ruta o recogiendo: el punto que late
   contenido: React.ReactNode
-  accion?: React.ReactNode // la acción principal, pegada abajo encima de la lista de Gina
+  accion?: React.ReactNode // la acción principal, al final de la pestaña
 }
 
 /**
  * Los viajes abiertos del chofer en pestañas (§5.21): la barra queda pegada arriba con un viaje por pestaña, en orden
  * (en ruta, el que recoge, los próximos), y al final "+" para dejar el siguiente publicado (R11). Cada pestaña
- * muestra solo lo de su viaje; abajo, pegados, su acción y la lista de Gina (`pie`). Al cambiar el viaje en foco (salió,
+ * muestra solo lo de su viaje, con su acción al final; abajo, pegada, solo la lista de Gina (`pie`). Al cambiar el viaje en foco (salió,
  * terminó) vuelve a él.
  */
 export function PestanasViajes({
@@ -90,14 +90,10 @@ export function PestanasViajes({
 
       <div role="tabpanel" id={`panel-${activa.id}`} aria-labelledby={`pestana-${activa.id}`} className="flex flex-col gap-4">
         {activa.contenido}
+        {activa.accion}
       </div>
 
-      {activa.accion || pie ? (
-        <div className="sticky bottom-16 z-10 -mx-4 mt-auto flex flex-col gap-2 border-t bg-background/90 p-4 pt-3 backdrop-blur">
-          {activa.accion}
-          {pie}
-        </div>
-      ) : null}
+      {pie ? <div className="sticky bottom-16 z-10 -mx-4 mt-auto border-t bg-background/90 px-4 py-3 backdrop-blur">{pie}</div> : null}
     </>
   )
 }

@@ -30,7 +30,7 @@ const RESPUESTAS: Respuesta[] = ["vuelta", "pausa", "ultimo"]
 /**
  * Inicio del chofer en la interfaz nueva (§5.21, §8). Sin viajes: "¿Sales a trabajar?" (o la cuota del día, R76). Con
  * viajes: una pestaña por viaje (en ruta, el que recoge, los próximos; se abre en el que recoge) con "+" al final,
- * y abajo, pegadas, la acción del viaje y la lista de Gina. Las reglas son las de la clásica
+ * con la acción del viaje al final, y abajo, pegada, la lista de Gina. Las reglas son las de la clásica
  * (components/chofer/inicio-chofer.tsx).
  */
 export default async function InicioChofer({ searchParams }: PageProps<"/n/chofer">) {
