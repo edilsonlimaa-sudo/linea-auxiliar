@@ -34,28 +34,52 @@ export const ROL: Record<EntradaGina["rol"], { titulo: string; detalle: string }
 }
 
 /** La franja del Inicio: cuántos esperan y dónde; lleva a la lista completa. En Gina o con alguien que dice que ya se montó, destacada */
-/** `compacta`: la de abajo del Inicio con viajes, pegada encima de las pestañas */
+/** `compacta`: la de abajo del Inicio con viajes, pegada encima de la barra: una sola línea */
 export function FaixaLista({ lista, destacada = false, compacta = false }: { lista: EntradaTramo[]; destacada?: boolean; compacta?: boolean }) {
   const total = suma(lista)
   const dicen = destacada ? lista.filter((e) => e.diceQueSubio) : []
+  if (compacta) {
+    return (
+      <Link
+        href="/n/chofer/lista"
+        transitionTypes={["nav-forward"]}
+        className={cn(
+          "flex h-10 items-center gap-2 rounded-xl border bg-card px-3 text-sm transition-colors active:bg-muted",
+          dicen.length > 0 && "border-primary/40 bg-primary/5"
+        )}
+      >
+        <Users className="size-4 shrink-0 text-primary" />
+        <span className="min-w-0 flex-1 truncate">
+          {dicen.length > 0 ? (
+            <span className="font-semibold">{dicen.length === 1 ? `${dicen[0].nombre} dice que ya se montó` : `${dicen.length} dicen que ya se montaron`}</span>
+          ) : (
+            <>
+              <span className="font-semibold">La lista en Gina</span>
+              <span className="text-muted-foreground"> · {lista.length === 0 ? "nadie esperando" : personasTexto(total)}</span>
+            </>
+          )}
+        </span>
+        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+      </Link>
+    )
+  }
   return (
     <Link
       href="/n/chofer/lista"
       transitionTypes={["nav-forward"]}
       className={cn(
-        "flex items-center gap-3 border bg-card transition-colors active:bg-muted",
-        compacta ? "rounded-2xl p-2.5" : "rounded-3xl p-4",
+        "flex items-center gap-3 rounded-3xl border bg-card p-4 transition-colors active:bg-muted",
         destacada && "border-primary/40 bg-primary/5"
       )}
     >
-      <div className={cn("flex shrink-0 items-center justify-center bg-primary/10 text-primary", compacta ? "size-9 rounded-xl" : "size-12 rounded-2xl")}>
-        <Users className={compacta ? "size-5" : "size-6"} />
+      <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <Users className="size-6" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-heading font-semibold">
           {dicen.length > 0 ? `${dicen.length === 1 ? `${dicen[0].nombre} dice que ya se montó` : `${dicen.length} dicen que ya se montaron`}` : "La lista en Gina"}
         </p>
-        <p className={cn("text-muted-foreground", compacta ? "truncate text-xs" : "text-sm")}>
+        <p className="text-sm text-muted-foreground">
           {dicen.length > 0 ? "Márcalo Subió en la lista" : lista.length === 0 ? "Nadie esperando ahora" : `${personasTexto(total)} · ${resumen(lista)}`}
         </p>
       </div>

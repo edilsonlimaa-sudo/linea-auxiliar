@@ -90,7 +90,7 @@ export function PestanasViajes({
   return (
     <>
       <div className="sticky top-14 z-10 -mx-4 border-b bg-background/80 backdrop-blur">
-        <div ref={barra} role="tablist" aria-label="Tus viajes" className="flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none]">
+        <div ref={barra} role="tablist" aria-label="Tus viajes" className="flex gap-1.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none]">
           {pestanas.map((p, i) => {
             const sel = i === indice
             return (
@@ -104,20 +104,18 @@ export function PestanasViajes({
                 data-pestana={p.id}
                 onClick={() => (setId(p.id), irA(i, true))}
                 className={cn(
-                  "flex shrink-0 flex-col items-start rounded-2xl border px-3 py-1.5 text-left transition-colors",
+                  "flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-sm whitespace-nowrap transition-colors",
                   sel ? "border-primary bg-primary text-primary-foreground" : "bg-card text-foreground active:bg-muted"
                 )}
               >
-                <span className={cn("flex items-center gap-1.5 text-xs font-medium", sel ? "text-primary-foreground/80" : "text-muted-foreground")}>
-                  {p.enCurso ? (
-                    <span className="relative flex size-2">
-                      <span className="absolute inline-flex size-full rounded-full bg-current opacity-60 motion-safe:animate-ping" />
-                      <span className="relative inline-flex size-2 rounded-full bg-current" />
-                    </span>
-                  ) : null}
-                  {p.etapa}
-                </span>
-                <span className="font-heading text-sm font-semibold whitespace-nowrap">{p.titulo}</span>
+                {p.enCurso ? (
+                  <span className="relative flex size-1.5">
+                    <span className="absolute inline-flex size-full rounded-full bg-current opacity-60 motion-safe:animate-ping" />
+                    <span className="relative inline-flex size-1.5 rounded-full bg-current" />
+                  </span>
+                ) : null}
+                <span className={cn("text-xs", sel ? "text-primary-foreground/80" : "text-muted-foreground")}>{p.etapa}</span>
+                <span className="font-heading font-semibold">{p.titulo}</span>
               </button>
             )
           })}
@@ -126,9 +124,9 @@ export function PestanasViajes({
               href={agregar.href}
               transitionTypes={["nav-forward"]}
               aria-label="Publicar otro viaje"
-              className="flex w-12 shrink-0 items-center justify-center rounded-2xl border border-dashed text-primary transition-colors active:bg-muted"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full border border-dashed text-primary transition-colors active:bg-muted"
             >
-              <Plus className="size-5" />
+              <Plus className="size-4" />
             </Link>
           ) : null}
         </div>
@@ -160,7 +158,7 @@ export function PestanasViajes({
       </div>
 
       {/* Justo encima de la barra de la app: su alto (4rem), su borde y el área segura del celular */}
-      {pie ? <div className="sticky bottom-[calc(4rem+1px+env(safe-area-inset-bottom))] z-10 -mx-4 mt-auto border-t bg-background/90 px-4 py-3 backdrop-blur">{pie}</div> : null}
+      {pie ? <div className="sticky bottom-[calc(4rem+1px+env(safe-area-inset-bottom))] z-10 -mx-4 mt-auto border-t bg-background/90 px-4 py-2 backdrop-blur">{pie}</div> : null}
     </>
   )
 }
