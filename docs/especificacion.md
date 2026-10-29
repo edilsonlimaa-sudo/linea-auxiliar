@@ -450,7 +450,8 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   confianza. Primero los que **trabajan ahora**; después, por ★. Cada tarjeta: foto (R54), nombre, ✓ Verificado,
   el carro (placa, modelo, color, unidad, ❄️ con aire, R55), ★ promedio y cantidad, y **los dos comentarios más
   recientes** (sin el nombre de quien opinó, R52). Si el pasajero tiene un viaje sin calificar con ese chofer,
-  la tarjeta ofrece **Calificar** (R45). Sin teléfono: solo lo ve quien tiene reserva con él (§6).
+  la tarjeta ofrece **Calificar** (R45; en la interfaz nueva no: la fila solo abre el perfil, y lo pendiente se
+  califica en Mis viajes). Sin teléfono: solo lo ve quien tiene reserva con él (§6).
 
 ### 5.14 Transparencia y avisos
 

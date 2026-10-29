@@ -7,7 +7,6 @@ import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
 import { promedio } from "@/components/nueva/pasajero/estrellas"
-import { Badge } from "@/components/nueva/ui/badge"
 import { cargarChoferes, type ChoferDeLaLinea } from "@/lib/datos/historial"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { iniciales } from "@/lib/viajes"
@@ -65,7 +64,6 @@ function Grupo({ titulo, choferes, vacio }: { titulo: string; choferes: ChoferDe
                     {c.vehiculo ? ` · ${c.vehiculo.placa}` : ""}
                   </p>
                 </div>
-                {c.porCalificar ? <Badge>Calificar</Badge> : null}
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
               </Link>
             </li>
