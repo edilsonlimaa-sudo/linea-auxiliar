@@ -1,6 +1,6 @@
 "use client"
 
-import { CarFront, Check, ChevronRight, Loader2, MapPin, Navigation, Phone, Users, UserX } from "lucide-react"
+import { CarFront, Check, ChevronRight, Loader2, MapPin, Navigation, Phone, Users, X } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
 
@@ -143,7 +143,7 @@ export function FilaLista({
           ) : null}
           {conNoEstaba ? (
             <Button variant="outline" disabled={pendiente} onClick={() => setConfirmar(true)}>
-              <UserX /> No estaba
+              <X /> No estaba
             </Button>
           ) : null}
         </div>

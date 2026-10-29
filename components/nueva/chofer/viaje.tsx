@@ -16,17 +16,31 @@ import { cambiarPuestos, cancelarViaje, meAtraso } from "@/lib/acciones/chofer"
 import type { EntradaTramo, FilaChofer, ViajeChofer } from "@/lib/datos/inicio-chofer"
 import { hora } from "@/lib/fechas"
 import { MOTIVOS_CANCELAR, type MotivoCancelar, OPCION_CANCELAR } from "@/lib/motivos-cancelar"
-import { tarifaEn, textoTarifa } from "@/lib/tarifas"
+import { bolivares } from "@/lib/bancos"
+import { tarifaEn } from "@/lib/tarifas"
 import { cn } from "@/lib/utils"
 import { duracion, enEspera, libres, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
 // El viaje del chofer en la interfaz nueva. Reglas de components/chofer/viaje-chofer.tsx y en-ruta-compacto.tsx
 
+// Los nombres de los estados, como en el prototipo
 const ETIQUETA: Partial<Record<ViajeChofer["estado"], string>> = {
-  en_camino: "Vas a recoger",
-  llegando: "Llegando",
-  en_parada: "Recogiendo",
+  en_camino: "Publicado",
+  llegando: "Llegando a la zona",
+  en_parada: "Recogiendo pasajeros",
   en_ruta: "En ruta",
+}
+
+const personasEsperando = (n: number) => (n === 0 ? "Nadie esperando" : n === 1 ? "1 persona esperando" : `${n} personas esperando`)
+
+/** "4 puestos", discreto, arriba a la derecha de la tarjeta del viaje (la ocupación va en la lista) */
+function Puestos({ n }: { n: number }) {
+  return (
+    <span className="flex items-center gap-1 text-sm text-muted-foreground">
+      <Users className="size-3.5" />
+      {n === 1 ? "1 puesto" : `${n} puestos`}
+    </span>
+  )
 }
 
 /** El reloj del celular, redondeado: en el servidor 0 (así no cambia al hidratar) */
@@ -80,20 +94,22 @@ export function TarjetaViaje({
       <section className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4">
         <div className="flex items-center justify-between gap-2">
           <Badge>{ETIQUETA[viaje.estado] ?? "Tu viaje"}</Badge>
-          <Ocupacion viaje={viaje} />
+          <Puestos n={viaje.puestos} />
         </div>
         <div>
           <p className="text-sm text-muted-foreground">{SENTIDOS[viaje.sentido].largo}</p>
           <h2 className="font-heading text-2xl font-semibold">{SENTIDOS[viaje.sentido].corto}</h2>
         </div>
-        <p className="flex items-start gap-2 text-sm">
-          <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
-          <span>
-            <span className="font-medium">{texto.titulo}</span>
-            {texto.detalle ? <span className="block text-muted-foreground">{texto.detalle}</span> : null}
-          </span>
-        </p>
-        {viaje.estado === "en_camino" ? <MeAtrasoBoton viajeId={viaje.id} estadoEn={viaje.estado_en} etaMin={viaje.eta_min} /> : null}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+          <p className="flex min-w-0 flex-1 items-start gap-2">
+            <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span>
+              {texto.titulo}
+              {texto.detalle ? <span className="block text-xs text-muted-foreground">{texto.detalle}</span> : null}
+            </span>
+          </p>
+          {viaje.estado === "en_camino" ? <MeAtrasoBoton viajeId={viaje.id} estadoEn={viaje.estado_en} etaMin={viaje.eta_min} /> : null}
+        </div>
         {recogerEnCamino.length > 0 ? (
           <p role="status" className="rounded-2xl bg-primary/10 p-3 text-sm text-primary">
             <strong>Al salir, recoges en el camino:</strong> {recogerEnCamino.map((e) => `${e.nombre} · ${e.lugar}`).join(", ")}
@@ -116,12 +132,17 @@ export function TarjetaViaje({
             </section>
           ) : (
             <section className="flex flex-col gap-3">
-              <h3 className="font-heading text-lg font-semibold">La lista en Gina</h3>
+              <div className="flex items-center justify-between">
+                <h3 className="font-heading text-lg font-semibold">La lista en Gina</h3>
+                <span className="text-sm text-muted-foreground">
+                  {personasEsperando(listaTramo.reduce((n, e) => n + e.personas, 0))}
+                </span>
+              </div>
               <FaixaLista lista={listaTramo} destacada={dicenQueSubieron > 0} />
               <p className="text-xs text-muted-foreground">Al tocar &quot;Ya llegué&quot; en Gina, la app arma tu plan con tus {viaje.puestos} puestos.</p>
             </section>
           )}
-          {conPuesto.length > 0 ? <Lista titulo="A bordo" filas={conPuesto} viaje={viaje} /> : null}
+          {conPuesto.length > 0 ? <Lista titulo="A bordo" filas={conPuesto} viaje={viaje} ocupacion /> : null}
         </>
       ) : (
         <>
@@ -129,6 +150,7 @@ export function TarjetaViaje({
             titulo="Reservaron"
             filas={conPuesto}
             viaje={viaje}
+            ocupacion
             vacio="Todavía nadie apartó puesto. Los pasajeros ya te ven en camino."
             pie="El orden es el de la reserva. Al salir, suben los que caben."
           />
@@ -164,34 +186,35 @@ export function TarjetaEnRuta({
 
   return (
     <>
-      <section className="flex flex-col gap-3 rounded-3xl bg-primary p-4 text-primary-foreground">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-sm opacity-90">{SENTIDOS[viaje.sentido].largo}</p>
-            <h2 className="font-heading text-2xl font-semibold">En ruta</h2>
-          </div>
-          <span className="text-right text-sm opacity-90">
+      <section className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4">
+        <div className="flex items-center justify-between gap-2">
+          <Badge>En ruta</Badge>
+          <Puestos n={viaje.puestos} />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">{SENTIDOS[viaje.sentido].largo}</p>
+          <h2 className="font-heading text-2xl font-semibold">{SENTIDOS[viaje.sentido].corto}</h2>
+        </div>
+        <p className="flex items-start gap-2 text-sm">
+          <Clock className="mt-0.5 size-4 shrink-0 text-primary" />
+          <span>
+            En ruta al destino
             {/* La hora, solo en el navegador: el formato del servidor no es igual al del celular */}
             {ahora > 0 ? (
-              <>
-                Salió {hora(salio)}
-                <span className="block">hace {duracion(Math.max(0, (ahora - new Date(salio).getTime()) / 60_000))}</span>
-              </>
+              <span className="block text-xs text-muted-foreground">
+                Salió {hora(salio)} · hace {duracion(Math.max(0, (ahora - new Date(salio).getTime()) / 60_000))}
+              </span>
             ) : null}
           </span>
-        </div>
-        <p className="flex items-center gap-2 font-medium">
-          <Users className="size-5" />
-          {sumaPersonas(aBordo) === 1 ? "1 a bordo" : `${sumaPersonas(aBordo)} a bordo`}
-          <span className="font-normal opacity-90">· {n === 0 ? "carro lleno" : n === 1 ? "1 libre" : `${n} libres`}</span>
         </p>
         {tarifa.tipo !== "normal" ? (
-          <p className="flex items-center gap-2 rounded-2xl bg-primary-foreground/10 p-3">
+          <div className="flex items-center gap-3 rounded-2xl bg-primary/10 p-3 text-primary">
             {tarifa.tipo === "nocturna" ? <Moon className="size-5 shrink-0" /> : <Ticket className="size-5 shrink-0" />}
-            <span>
-              Pasaje <strong>{textoTarifa(tarifa)}</strong>
-            </span>
-          </p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium tracking-wide uppercase opacity-80">{tarifa.tipo === "nocturna" ? "Tarifa nocturna" : "Tarifa de domingo"}</p>
+              <p className="font-heading text-lg font-semibold">Pasaje {bolivares(tarifa.monto)} por puesto</p>
+            </div>
+          </div>
         ) : null}
       </section>
 
@@ -210,11 +233,16 @@ export function TarjetaEnRuta({
           </ol>
         </section>
       ) : null}
-      <Lista titulo="Van contigo" filas={aBordo} viaje={viaje} vacio="Vas vacío. Si alguien se anota en el camino, aparece aquí." />
-      <div className="grid grid-cols-2 gap-2">
-        {n > 0 ? <SubioAlguienDrawer viajeId={viaje.id} enRuta libres={n} /> : null}
-        <OpcionesDrawer viajeId={viaje.id} puestos={viaje.puestos} ocupados={viaje.ocupados} enRuta grande />
-      </div>
+      <Lista
+        titulo="Van contigo"
+        filas={aBordo}
+        viaje={viaje}
+        ocupacion
+        vacio="Vas vacío. Si alguien se anota en el camino, aparece aquí."
+        pie={n > 0 ? "Puedes aceptar reservas en el camino con “Voy”." : undefined}
+      />
+      {n > 0 ? <SubioAlguienDrawer viajeId={viaje.id} enRuta libres={n} /> : null}
+      <OpcionesDrawer viajeId={viaje.id} puestos={viaje.puestos} ocupados={viaje.ocupados} enRuta />
       {terminar}
     </>
   )
@@ -228,6 +256,7 @@ function Lista({
   vacio,
   pie,
   destacada = false,
+  ocupacion = false,
 }: {
   titulo: string
   detalle?: string
@@ -236,15 +265,19 @@ function Lista({
   vacio?: string
   pie?: string
   destacada?: boolean
+  ocupacion?: boolean // a la derecha del título, "2 de 4 puestos" del carro
 }) {
   if (filas.length === 0 && !vacio) return null
   return (
     <section className="flex flex-col gap-2">
-      <div>
-        <h3 className="font-heading text-lg font-semibold">
-          {titulo} {filas.length > 0 ? <span className="text-muted-foreground">· {sumaPersonas(filas)}</span> : null}
-        </h3>
-        {detalle ? <p className="text-xs text-muted-foreground">{detalle}</p> : null}
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <h3 className="font-heading text-lg font-semibold">
+            {titulo} {!ocupacion && filas.length > 0 ? <span className="text-muted-foreground">· {sumaPersonas(filas)}</span> : null}
+          </h3>
+          {detalle ? <p className="text-xs text-muted-foreground">{detalle}</p> : null}
+        </div>
+        {ocupacion ? <Ocupacion viaje={viaje} /> : null}
       </div>
       {filas.length === 0 ? (
         <p className="rounded-3xl border border-dashed p-6 text-center text-sm text-muted-foreground">{vacio}</p>
@@ -279,7 +312,7 @@ function MeAtrasoBoton({ viajeId, estadoEn, etaMin }: { viajeId: string; estadoE
   return (
     <Drawer open={abierta} onOpenChange={(v) => !pendiente && setAbierta(v)} showSwipeHandle>
       {vencido ? (
-        <div role="status" className="flex flex-col gap-2 rounded-2xl bg-destructive/10 p-3 text-sm">
+        <div role="status" className="flex w-full flex-col gap-2 rounded-2xl bg-destructive/10 p-3 text-sm">
           <p>
             <strong>Ya pasó la hora que dijiste ({hora(new Date(prometida).toISOString())}).</strong> Tus pasajeros ven &quot;en cualquier
             momento&quot;: dales una hora nueva.
@@ -289,7 +322,7 @@ function MeAtrasoBoton({ viajeId, estadoEn, etaMin }: { viajeId: string; estadoE
           </DrawerTrigger>
         </div>
       ) : (
-        <DrawerTrigger render={<Button variant="outline" className="self-start" />}>
+        <DrawerTrigger render={<Button variant="ghost" size="sm" className="shrink-0" />}>
           <Clock /> Me atraso
         </DrawerTrigger>
       )}

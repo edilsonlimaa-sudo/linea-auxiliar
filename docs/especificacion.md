@@ -1051,6 +1051,9 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
 - **Una sola acción principal a la vez**, grande y fija abajo (zona del pulgar), que cambia con el estado:
   en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando → **Ya llegué** · recogiendo → **Salir con N
   pasajeros** · en ruta → **Terminar viaje** (R71).
+  En la interfaz nueva, como el prototipo (*oct. 2026*): **un solo botón por paso**, Avisar que llego → Ya llegué →
+  Salir → Terminar, sin "Ya llegué" directo desde en camino; la tarjeta del viaje (también en ruta) es la misma: estado,
+  puestos, ruta, la hora con **Me atraso** al lado; la ocupación ("2 de 4 puestos") va junto a la lista.
 - **El viaje en foco**: ruta, qué hace ahora en grande ("Recogiendo en Valle Grande") con su detalle, una **barra de
   pasos** (En camino · Llegando · Recogiendo · En ruta) en vez de más texto, y los puestos dibujados ("3 de 4").
 - **La lista es el centro**, en el orden justo (R17): **una fila por reserva**, corta: puesto en grande ("2–4" si es

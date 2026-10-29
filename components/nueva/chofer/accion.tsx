@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, BellRing, Flag, Loader2, MapPinCheck, MessageCircle, Play, TriangleAlert } from "lucide-react"
+import { ArrowRight, Loader2, MessageCircle, TriangleAlert } from "lucide-react"
 import { useRouter } from "next/navigation"
 import * as React from "react"
 
@@ -32,7 +32,7 @@ function mensajeGrupo(v: ViajeChofer, vehiculo: { unidad: string | null; placa: 
 }
 
 /**
- * Recogiendo: en camino → Avisar que llego (o Ya llegué) · llegando → Ya llegué (y avisar al grupo) · en Gina o en la
+ * Recogiendo, un botón por estado como el prototipo: en camino → Avisar que llego · llegando → Ya llegué (y avisar al grupo) · en Gina o en la
  * parada → Salir con N, que confirma con lo que no se puede olvidar (quien no avisó que está en el sitio, a quién recoge
  * en el camino y, en Gina, quien dice que ya se montó, R66). Al salir, Inicio pregunta qué hace después (R73).
  */
@@ -63,29 +63,26 @@ export function AccionRecogida({
         ? "Nadie está marcado Subió. Si se montó alguien, márcalo antes de salir: así cuenta su puesto."
         : null
     : null
-  const icono = (i: React.ReactNode) => (pendiente ? <Loader2 className="animate-spin" /> : i)
 
   return (
     <div className={BARRA}>
       <ErrorAccion error={salir ? undefined : error} />
+      {/* Como el prototipo: un solo botón, que dice el paso siguiente (avisar → llegué → salir) */}
       {viaje.estado === "en_camino" ? (
-        <>
-          <Button size="lg" disabled={pendiente} onClick={() => avanzar("llegando")}>
-            {icono(<BellRing />)}
-            Avisar que llego en 3 min
-          </Button>
-          <Button size="lg" variant="ghost" disabled={pendiente} onClick={() => avanzar("en_parada")}>
-            <MapPinCheck /> Ya llegué
-          </Button>
-        </>
+        <Button size="lg" disabled={pendiente} onClick={() => avanzar("llegando")}>
+          {pendiente ? <Loader2 className="animate-spin" /> : null}
+          Avisar que llego
+          <ArrowRight />
+        </Button>
       ) : viaje.estado === "llegando" ? (
         <>
           <Button size="lg" disabled={pendiente} onClick={() => avanzar("en_parada")}>
-            {icono(<MapPinCheck />)}
+            {pendiente ? <Loader2 className="animate-spin" /> : null}
             Ya llegué
+            <ArrowRight />
           </Button>
           <Button
-            size="lg"
+            size="sm"
             variant="ghost"
             render={<a href={`https://wa.me/?text=${encodeURIComponent(mensajeGrupo(viaje, vehiculo))}`} target="_blank" rel="noreferrer" />}
             nativeButton={false}
@@ -95,8 +92,7 @@ export function AccionRecogida({
         </>
       ) : viaje.estado === "en_parada" ? (
         <Button size="lg" disabled={pendiente} onClick={() => setSalir(true)}>
-          <Play />
-          {personas === 0 ? "Salir sin pasajeros" : personas === 1 ? "Salir con 1 pasajero" : `Salir con ${personas} pasajeros`}
+          Salir
           <ArrowRight />
         </Button>
       ) : null}
@@ -162,8 +158,9 @@ export function TerminarViaje({
 
   const boton = (
     <Button size="lg" variant={fija ? "default" : "outline"} className="w-full" disabled={pendiente} onClick={terminar}>
-      {pendiente && haceMin === null ? <Loader2 className="animate-spin" /> : <Flag />}
-      Terminar viaje
+      {pendiente && haceMin === null ? <Loader2 className="animate-spin" /> : null}
+      Terminar
+      <ArrowRight />
     </Button>
   )
 
@@ -173,7 +170,6 @@ export function TerminarViaje({
         <div className={BARRA}>
           <ErrorAccion error={haceMin === null ? error : undefined} />
           {boton}
-          <p className="text-center text-xs text-muted-foreground">Termínalo al dejar al último pasajero.</p>
         </div>
       ) : (
         <div className="flex flex-col gap-2">

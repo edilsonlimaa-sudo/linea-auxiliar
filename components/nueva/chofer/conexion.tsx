@@ -42,6 +42,19 @@ export function EstadoEnCabecera({ conectado, sinCuota, viajesAbiertos }: { cone
   )
 }
 
+/** "Desconectarme" bajo "¿Sales a trabajar?" (como el prototipo): abre "¿Vuelves a trabajar hoy?" (R60) */
+export function BotonDesconectarme() {
+  const [hoja, setHoja] = React.useState(false)
+  return (
+    <>
+      <Button variant="ghost" size="lg" onClick={() => setHoja(true)}>
+        <Power /> Desconectarme
+      </Button>
+      <DesconectarDrawer abierta={hoja} onCambiar={setHoja} viajesAbiertos={0} />
+    </>
+  )
+}
+
 /**
  * La ubicación (R40): con viajes abiertos, el teléfono comparte por dónde va. Lo normal es una línea discreta; si el
  * GPS falla, un aviso con "Intentar de nuevo" (los pasajeros no ven por dónde va).

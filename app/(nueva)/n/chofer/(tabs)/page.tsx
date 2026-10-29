@@ -6,7 +6,7 @@ import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { AccionRecogida, TerminarViaje } from "@/components/nueva/chofer/accion"
-import { EstadoEnCabecera, Ubicacion } from "@/components/nueva/chofer/conexion"
+import { BotonDesconectarme, EstadoEnCabecera, Ubicacion } from "@/components/nueva/chofer/conexion"
 import { CuotaAviso } from "@/components/nueva/chofer/cuota"
 import { DespuesTarjeta, PreguntaDespues, type Respuesta } from "@/components/nueva/chofer/despues"
 import { FaixaLista } from "@/components/nueva/chofer/gina"
@@ -41,9 +41,9 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
-  const nombre = perfil.nombre.split(" ")[0]
   const hoja = logro ? <ViajeTerminadoHoja resumen={logro} /> : null
-  const cabecera = <AppHeader title={`Hola, ${nombre}`} action={<EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} viajesAbiertos={publicados} />} />
+  // Como el prototipo: el nombre de la app arriba
+  const cabecera = <AppHeader title="Línea Auxiliar" action={<EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} viajesAbiertos={publicados} />} />
 
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
@@ -65,6 +65,7 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
                 <CirclePlus className="size-5" />
                 Publicar un viaje
               </Button>
+              {conectado ? <BotonDesconectarme /> : null}
             </section>
           ) : null}
           {/* R76: sin la cuota, la lista de Gina no es para él */}

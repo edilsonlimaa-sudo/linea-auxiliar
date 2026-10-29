@@ -228,9 +228,9 @@ export function SubioAlguienDrawer({ viajeId, enRuta, libres }: { viajeId: strin
 
   return (
     <Drawer open={abierta} onOpenChange={(v) => (setAbierta(v), limpiar())} showSwipeHandle>
-      <DrawerTrigger render={<Button variant="outline" size="lg" className="w-full" disabled={libres <= 0} />}>
+      <DrawerTrigger render={<Button variant="secondary" size="lg" className="w-full" disabled={libres <= 0} />}>
         <UserPlus />
-        {enRuta ? "Subió alguien" : "Ocupar puesto"}
+        Subió alguien
       </DrawerTrigger>
       <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
         <form onSubmit={guardar} className="flex flex-col">
