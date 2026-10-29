@@ -549,6 +549,7 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     página.
   - **Carros que vienen** dice: "Estos son los carros de la Línea hoy. Si un chofer que no aparece aquí te pregunta si
     estás en la lista, no está trabajando con la Línea."
+    En la interfaz nueva, **tocar un carro abre el mapa** (R41): por dónde viene, en vivo.
   - **Anotado, va a Mi viaje** *(Oct. 2026; en la interfaz nueva cambió, ver abajo)*: como quien aparta puesto, al
     anotarse pasa a **Mi viaje** (Inicio lo lleva ahí mientras siga en la lista, y el menú muestra "Mi viaje" de
     primero), sin el "¿Hacia dónde vas?". En orden

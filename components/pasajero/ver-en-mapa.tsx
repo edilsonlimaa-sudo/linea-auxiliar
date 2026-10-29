@@ -245,6 +245,7 @@ export function VerEnMapa({
   admin = false,
   className = "w-full",
   compacto = false,
+  children,
 }: {
   choferId: string
   chofer: string
@@ -252,6 +253,7 @@ export function VerEnMapa({
   admin?: boolean // el panel del admin sigue a cualquier chofer conectado (§8): sin "viene" ni "comparte tu GPS"
   className?: string
   compacto?: boolean // botón chico, solo el ícono (en las tarjetas de unidad, §8)
+  children?: React.ReactNode // lo que se toca para abrirlo, en vez del botón (una fila entera, en la interfaz nueva)
 }) {
   const [abierta, setAbierta] = useState(false)
   const [carro, setCarro] = useState<PosicionChofer | undefined>(undefined) // undefined = cargando
@@ -306,7 +308,9 @@ export function VerEnMapa({
 
   return (
     <Sheet open={abierta} onOpenChange={(v) => (setAbierta(v), !v && setCarro(undefined))}>
-      {compacto ? (
+      {children ? (
+        <SheetTrigger className={className}>{children}</SheetTrigger>
+      ) : compacto ? (
         <SheetTrigger render={<Button variant="outline" size="icon" aria-label={`Ver en el mapa por dónde va ${chofer.split(" ")[0]}`} className="size-10 shrink-0" />}>
           <MapIcon aria-hidden className="size-6" />
         </SheetTrigger>
@@ -328,7 +332,7 @@ export function VerEnMapa({
                   ? `Sin señal: la última ubicación es de ${cuando}. Puede que ${nombre} haya cerrado la app o perdido la señal.`
                   : distancia
                     ? `El carro está a ${distancia} de ti · actualizado ${cuando}.`
-                    : admin
+                    : admin || children
                       ? `En vivo · actualizado ${cuando}.`
                       : `Actualizado ${cuando}. Comparte tu GPS al avisar que esperas para ver a qué distancia está.`}
           </SheetDescription>

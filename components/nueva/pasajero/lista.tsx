@@ -1,9 +1,10 @@
 "use client"
 
-import { ChevronRight, Hand, Loader2, MapPin, Route, TimerReset, Users } from "lucide-react"
+import { ChevronRight, Map as MapIcon, Hand, Loader2, MapPin, Route, TimerReset, Users } from "lucide-react"
 import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
+import { VerEnMapa } from "@/components/pasajero/ver-en-mapa"
 import { ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/nueva/ui/avatar"
 import { Badge } from "@/components/nueva/ui/badge"
@@ -281,15 +282,24 @@ export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
       ) : (
         <ul className="divide-y overflow-hidden rounded-3xl border bg-card">
           {carros.map((u) => (
-            <li key={u.id} className="flex items-center gap-3 p-3">
-              <ChoferAvatar chofer={u.chofer} className="size-10" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium">{u.chofer.nombre}</p>
-                <p className="truncate text-sm text-muted-foreground">{cuandoPasa(u)}</p>
-              </div>
-              <span className={cn("shrink-0 text-sm font-medium", u.libres > 0 ? "text-primary" : "text-muted-foreground")}>
-                {u.libres > 0 ? `${u.libres} ${u.libres === 1 ? "libre" : "libres"}` : "Lleno"}
-              </span>
+            <li key={u.id}>
+              {/* Tocar el carro abre el mapa: por dónde viene (R41) */}
+              <VerEnMapa
+                choferId={u.chofer.id}
+                chofer={u.chofer.nombre}
+                yo={null}
+                className="flex w-full items-center gap-3 p-3 text-left transition-colors active:bg-muted"
+              >
+                <ChoferAvatar chofer={u.chofer} className="size-10" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium">{u.chofer.nombre}</p>
+                  <p className="truncate text-sm text-muted-foreground">{cuandoPasa(u)}</p>
+                </div>
+                <span className={cn("shrink-0 text-sm font-medium", u.libres > 0 ? "text-primary" : "text-muted-foreground")}>
+                  {u.libres > 0 ? `${u.libres} ${u.libres === 1 ? "libre" : "libres"}` : "Lleno"}
+                </span>
+                <MapIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+              </VerEnMapa>
             </li>
           ))}
         </ul>
