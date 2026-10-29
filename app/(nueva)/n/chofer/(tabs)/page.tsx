@@ -10,13 +10,15 @@ import { BotonDesconectarme, EstadoEnCabecera, Ubicacion } from "@/components/nu
 import { CuotaAviso } from "@/components/nueva/chofer/cuota"
 import { DespuesTarjeta, PreguntaDespues, type Respuesta } from "@/components/nueva/chofer/despues"
 import { FaixaLista } from "@/components/nueva/chofer/gina"
-import { Proximos } from "@/components/nueva/chofer/siguiente"
+import { type PestanaViaje, PestanasViajes } from "@/components/nueva/chofer/pestanas"
+import { TarjetaProximo } from "@/components/nueva/chofer/siguiente"
 import { type Resumen, ViajeTerminadoHoja } from "@/components/nueva/chofer/terminado"
 import { TarjetaEnRuta, TarjetaViaje } from "@/components/nueva/chofer/viaje"
 import { Button } from "@/components/nueva/ui/button"
 import { cargarCuotaChofer } from "@/lib/datos/cuota"
 import { cargarViajesChofer } from "@/lib/datos/historial"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
+import { ETAPA } from "@/lib/nueva/textos"
 import { ahoraDelPedido } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { duracion, estadoParaChofer, libres, SENTIDOS, sumaPersonas, type Viaje } from "@/lib/viajes"
@@ -27,8 +29,9 @@ const RESPUESTAS: Respuesta[] = ["vuelta", "pausa", "ultimo"]
 
 /**
  * Inicio del chofer en la interfaz nueva (§5.21, §8). Sin viajes: "¿Sales a trabajar?" (o la cuota del día, R76). Con
- * viajes: el viaje en ruta arriba (R75), el que está recogiendo con su acción pegada abajo, los próximos y la lista de
- * Gina. Las reglas son las de la clásica (components/chofer/inicio-chofer.tsx).
+ * viajes: una pestaña por viaje (en ruta, el que recoge, los próximos; se abre en el que recoge) con "+" al final,
+ * y abajo, pegadas, la acción del viaje y la lista de Gina. Las reglas son las de la clásica
+ * (components/chofer/inicio-chofer.tsx).
  */
 export default async function InicioChofer({ searchParams }: PageProps<"/n/chofer">) {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva-chofer" })
@@ -83,49 +86,72 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
   const soloEnRuta = enRuta !== null && abiertos.length === 1
   // R73: al salir (?despues=1), qué hace después; solo si no tiene otro viaje publicado
   const respuesta = RESPUESTAS.find((x) => x === r) ?? null
-  const recogiendoEnGina = recogida?.sentido === "centro_a_vg"
+
+  const pestanas: PestanaViaje[] = [
+    ...(enRuta
+      ? [
+          {
+            id: enRuta.id,
+            etapa: ETAPA.en_ruta,
+            titulo: SENTIDOS[enRuta.sentido].corto,
+            enCurso: true,
+            contenido: (
+              <>
+                <TarjetaEnRuta viaje={enRuta} esperanEnCamino={esperanEnCamino} />
+                {soloEnRuta ? <DespuesTarjeta viaje={enRuta} /> : null}
+              </>
+            ),
+            accion: <TerminarViaje viaje={enRuta} sinVuelta={soloEnRuta} />,
+          },
+        ]
+      : []),
+    ...(recogida
+      ? [
+          {
+            id: recogida.id,
+            etapa: ETAPA[recogida.estado as keyof typeof ETAPA] ?? ETAPA.en_camino,
+            titulo: SENTIDOS[recogida.sentido].corto,
+            enCurso: true,
+            contenido: <TarjetaViaje viaje={recogida} texto={texto(recogida)} listaTramo={listaTramo} />,
+            accion: <AccionRecogida viaje={recogida} vehiculo={vehiculo} listaTramo={listaTramo} />,
+          },
+        ]
+      : []),
+    ...proximos.map((v) => ({
+      id: v.id,
+      etapa: ETAPA.programado,
+      titulo: SENTIDOS[v.sentido].corto,
+      enCurso: false,
+      contenido: <TarjetaProximo viaje={v} texto={mayuscula(texto(v).titulo.replace(/^Próximo: /, ""))} cadena={recogida !== null} />,
+    })),
+  ]
+  // Hacia Valle Grande (recogiendo o en ruta), quien dice que ya se montó resalta la lista
+  const listaDestacada = (recogida ?? enRuta)?.sentido === "centro_a_vg" && listaTramo.some((e) => e.diceQueSubio)
 
   return (
     <Screen>
       <EnVivo />
       {cabecera}
-      <div className="flex flex-1 flex-col gap-4 p-4">
-        <Ubicacion activa={conectado} />
-        {cuota ? <CuotaAviso cuota={cuota} /> : null}
-        {enRuta ? (
-          <TarjetaEnRuta
-            viaje={enRuta}
-            esperanEnCamino={esperanEnCamino}
-            terminar={recogida ? <TerminarViaje viaje={enRuta} sinVuelta={false} fija={false} /> : undefined}
-          />
-        ) : null}
-        {soloEnRuta ? <DespuesTarjeta viaje={enRuta} /> : null}
-        {recogida ? (
-          <TarjetaViaje
-            viaje={recogida}
-            texto={texto(recogida)}
-            listaTramo={listaTramo}
-            dicenQueSubieron={listaTramo.filter((e) => e.diceQueSubio).length}
-          />
-        ) : null}
-        <Proximos
-          proximos={proximos}
-          textos={Object.fromEntries(proximos.map((v) => [v.id, texto(v).titulo.replace(/^Próximo: /, "")]))}
-          modo={recogida ? "cadena" : "desde_ruta"}
-          puedeAgregar={!sinCuota}
+      <div className="flex flex-1 flex-col gap-4 px-4 pb-4">
+        {/* Lo que falla (GPS, la cuota), arriba de las pestañas; sin nada que decir, no ocupa lugar */}
+        <div className="flex flex-col gap-4 pt-4 empty:hidden">
+          <Ubicacion activa={conectado} />
+          {cuota ? <CuotaAviso cuota={cuota} /> : null}
+        </div>
+        <PestanasViajes
+          pestanas={pestanas}
+          inicial={(recogida ?? enRuta ?? proximos[0]).id}
+          agregar={sinCuota ? null : { href: `/n/chofer/publicar?modo=${recogida ? "cadena" : "desde_ruta"}` }}
+          pie={!sinCuota ? <FaixaLista lista={listaTramo} destacada={listaDestacada} compacta /> : null}
         />
-        {!sinCuota && !recogiendoEnGina ? <FaixaLista lista={listaTramo} destacada={Boolean(enRuta?.sentido === "centro_a_vg")} /> : null}
-        {recogida ? (
-          <AccionRecogida viaje={recogida} vehiculo={vehiculo} listaTramo={listaTramo} />
-        ) : enRuta ? (
-          <TerminarViaje viaje={enRuta} sinVuelta={soloEnRuta} />
-        ) : null}
       </div>
       {despues === "1" && soloEnRuta ? <PreguntaDespues viaje={enRuta} inicial={respuesta} /> : null}
       {hoja}
     </Screen>
   )
 }
+
+const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 const diaCaracas = (iso: string) => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Caracas" }).format(new Date(iso))
 

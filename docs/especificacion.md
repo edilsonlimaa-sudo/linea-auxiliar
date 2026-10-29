@@ -1054,6 +1054,14 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
   En la interfaz nueva, como el prototipo (*oct. 2026*): **un solo botón por paso**, Avisar que llego → Ya llegué →
   Salir → Terminar, sin "Ya llegué" directo desde en camino; la tarjeta del viaje (también en ruta) es la misma: estado,
   puestos, ruta, la hora con **Me atraso** al lado; la ocupación ("2 de 4 puestos") va junto a la lista.
+  **Los viajes en pestañas** (interfaz nueva, *oct. 2026*): con viajes abiertos, en vez de apilarlos uno debajo del
+  otro, una barra de pestañas pegada arriba (bajo la cabecera) con un viaje por pestaña, en orden: el que va en ruta,
+  el que recoge y los siguientes (cada una dice su etapa —En ruta, Publicado, Llegando, Recogiendo, Siguiente— y su
+  sentido; las en curso con un punto que late). Al final, **"+"** publica el siguiente viaje (R11; sin la cuota del
+  día no aparece, R76). Se abre en el que recoge (si no hay, en el de ruta) y vuelve a él cuando cambia (al salir o
+  terminar). Dentro de cada pestaña, solo lo de ese viaje (tarjeta, pasajeros, opciones). Abajo, pegadas encima de la
+  barra de la app, la acción de esa pestaña y **la lista de Gina siempre visible** (una franja compacta que abre la
+  lista; destacada si alguien dice que ya se montó).
 - **El viaje en foco**: ruta, qué hace ahora en grande ("Recogiendo en Valle Grande") con su detalle, una **barra de
   pasos** (En camino · Llegando · Recogiendo · En ruta) en vez de más texto, y los puestos dibujados ("3 de 4").
 - **La lista es el centro**, en el orden justo (R17): **una fila por reserva**, corta: puesto en grande ("2–4" si es

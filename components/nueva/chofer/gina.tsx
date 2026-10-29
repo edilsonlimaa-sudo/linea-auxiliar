@@ -34,23 +34,28 @@ export const ROL: Record<EntradaGina["rol"], { titulo: string; detalle: string }
 }
 
 /** La franja del Inicio: cuántos esperan y dónde; lleva a la lista completa. En Gina o con alguien que dice que ya se montó, destacada */
-export function FaixaLista({ lista, destacada = false }: { lista: EntradaTramo[]; destacada?: boolean }) {
+/** `compacta`: la de abajo del Inicio con viajes, pegada encima de las pestañas */
+export function FaixaLista({ lista, destacada = false, compacta = false }: { lista: EntradaTramo[]; destacada?: boolean; compacta?: boolean }) {
   const total = suma(lista)
   const dicen = destacada ? lista.filter((e) => e.diceQueSubio) : []
   return (
     <Link
       href="/n/chofer/lista"
       transitionTypes={["nav-forward"]}
-      className={cn("flex items-center gap-3 rounded-3xl border bg-card p-4 transition-colors active:bg-muted", destacada && "border-primary/40 bg-primary/5")}
+      className={cn(
+        "flex items-center gap-3 border bg-card transition-colors active:bg-muted",
+        compacta ? "rounded-2xl p-2.5" : "rounded-3xl p-4",
+        destacada && "border-primary/40 bg-primary/5"
+      )}
     >
-      <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Users className="size-6" />
+      <div className={cn("flex shrink-0 items-center justify-center bg-primary/10 text-primary", compacta ? "size-9 rounded-xl" : "size-12 rounded-2xl")}>
+        <Users className={compacta ? "size-5" : "size-6"} />
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-heading font-semibold">
           {dicen.length > 0 ? `${dicen.length === 1 ? `${dicen[0].nombre} dice que ya se montó` : `${dicen.length} dicen que ya se montaron`}` : "La lista en Gina"}
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className={cn("text-muted-foreground", compacta ? "truncate text-xs" : "text-sm")}>
           {dicen.length > 0 ? "Márcalo Subió en la lista" : lista.length === 0 ? "Nadie esperando ahora" : `${personasTexto(total)} · ${resumen(lista)}`}
         </p>
       </div>

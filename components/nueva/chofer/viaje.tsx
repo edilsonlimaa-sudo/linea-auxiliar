@@ -5,8 +5,8 @@ import * as React from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
 import { ErrorAccion, Opcion } from "@/components/nueva/chofer/comun"
-import { puestosTexto } from "@/lib/nueva/textos"
-import { FaixaLista, FilaLista, ListaConAcciones } from "@/components/nueva/chofer/gina"
+import { ETIQUETA, puestosTexto } from "@/lib/nueva/textos"
+import { FilaLista, ListaConAcciones } from "@/components/nueva/chofer/gina"
 import { FilaPasajero, SubioAlguienDrawer } from "@/components/nueva/chofer/pasajeros"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
@@ -22,14 +22,6 @@ import { cn } from "@/lib/utils"
 import { duracion, enEspera, libres, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
 // El viaje del chofer en la interfaz nueva. Reglas de components/chofer/viaje-chofer.tsx y en-ruta-compacto.tsx
-
-// Los nombres de los estados, como en el prototipo
-const ETIQUETA: Partial<Record<ViajeChofer["estado"], string>> = {
-  en_camino: "Publicado",
-  llegando: "Llegando a la zona",
-  en_parada: "Recogiendo pasajeros",
-  en_ruta: "En ruta",
-}
 
 const personasEsperando = (n: number) => (n === 0 ? "Nadie esperando" : n === 1 ? "1 persona esperando" : `${n} personas esperando`)
 
@@ -76,12 +68,10 @@ export function TarjetaViaje({
   viaje,
   texto,
   listaTramo,
-  dicenQueSubieron,
 }: {
   viaje: ViajeChofer
   texto: { titulo: string; detalle: string } // calculado en el servidor (depende de la hora)
   listaTramo: EntradaTramo[]
-  dicenQueSubieron: number
 }) {
   const haciaValle = viaje.sentido === "centro_a_vg"
   const conPuesto = viaje.lista.filter((f) => f.confirmado && !f.pendiente)
@@ -93,7 +83,7 @@ export function TarjetaViaje({
     <>
       <section className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4">
         <div className="flex items-center justify-between gap-2">
-          <Badge>{ETIQUETA[viaje.estado] ?? "Tu viaje"}</Badge>
+          <Badge>{ETIQUETA[viaje.estado as keyof typeof ETIQUETA] ?? "Tu viaje"}</Badge>
           <Puestos n={viaje.puestos} />
         </div>
         <div>
@@ -131,16 +121,10 @@ export function TarjetaViaje({
               <p className="text-xs text-muted-foreground">Al salir, los de &quot;Guarda puesto&quot; quedan contigo y los de &quot;Sigue&quot; esperan el próximo carro.</p>
             </section>
           ) : (
-            <section className="flex flex-col gap-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-heading text-lg font-semibold">La lista en Gina</h3>
-                <span className="text-sm text-muted-foreground">
-                  {personasEsperando(listaTramo.reduce((n, e) => n + e.personas, 0))}
-                </span>
-              </div>
-              <FaixaLista lista={listaTramo} destacada={dicenQueSubieron > 0} />
-              <p className="text-xs text-muted-foreground">Al tocar &quot;Ya llegué&quot; en Gina, la app arma tu plan con tus {viaje.puestos} puestos.</p>
-            </section>
+            <p className="rounded-2xl bg-primary/5 p-3 text-sm text-muted-foreground">
+              <strong className="text-foreground">{personasEsperando(listaTramo.reduce((n, e) => n + e.personas, 0))} en Gina.</strong> Al tocar
+              &quot;Ya llegué&quot;, la app arma tu plan con tus {viaje.puestos} puestos. La lista va abajo.
+            </p>
           )}
           {conPuesto.length > 0 ? <Lista titulo="A bordo" filas={conPuesto} viaje={viaje} ocupacion /> : null}
         </>
@@ -165,17 +149,9 @@ export function TarjetaViaje({
 /**
  * El viaje en ruta (R75): cuándo salió, cuántos van y cuántos caben, el pasaje si rige la tarifa especial (R80) y la
  * gente: primero lo que no puede esperar (pedidos, a quién recoger en el camino, quien espera en el camino hacia Valle
- * Grande, R67) y después quienes van a bordo. `terminar` va dentro si hay otro viaje en foco.
+ * Grande, R67) y después quienes van a bordo.
  */
-export function TarjetaEnRuta({
-  viaje,
-  esperanEnCamino = [],
-  terminar,
-}: {
-  viaje: ViajeChofer
-  esperanEnCamino?: EntradaTramo[]
-  terminar?: React.ReactNode
-}) {
+export function TarjetaEnRuta({ viaje, esperanEnCamino = [] }: { viaje: ViajeChofer; esperanEnCamino?: EntradaTramo[] }) {
   const ahora = useAhora(30_000)
   const salio = viaje.salida_en ?? viaje.estado_en
   const pedidos = viaje.lista.filter((f) => f.pendiente)
@@ -243,7 +219,6 @@ export function TarjetaEnRuta({
       />
       {n > 0 ? <SubioAlguienDrawer viajeId={viaje.id} enRuta libres={n} /> : null}
       <OpcionesDrawer viajeId={viaje.id} puestos={viaje.puestos} ocupados={viaje.ocupados} enRuta />
-      {terminar}
     </>
   )
 }

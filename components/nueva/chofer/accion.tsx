@@ -11,10 +11,10 @@ import { avanzarViaje } from "@/lib/acciones/chofer"
 import type { EntradaTramo, ViajeChofer } from "@/lib/datos/inicio-chofer"
 import { conAcompanantes, SENTIDOS, sumaPersonas } from "@/lib/viajes"
 
-// La acción principal del chofer, fija abajo encima de las pestañas. Reglas de components/chofer/barra-accion.tsx y
-// boton-terminar.tsx: una sola por estado, y las que no se deshacen preguntan antes.
+// La acción principal del chofer, que `PestanasViajes` pega abajo con la lista de Gina. Reglas de
+// components/chofer/barra-accion.tsx y boton-terminar.tsx: una sola por estado, y las que no se deshacen preguntan antes.
 
-const BARRA = "sticky bottom-16 z-10 -mx-4 mt-auto flex flex-col gap-2 border-t bg-background/90 p-4 backdrop-blur"
+const BARRA = "flex flex-col gap-2"
 const MIN_EN_RUTA = 10 // antes de esto, Terminar pide confirmación (R71)
 
 /** Mensaje listo para el grupo de WhatsApp al avisar llegada (R15) */
@@ -129,18 +129,13 @@ export function AccionRecogida({
   )
 }
 
-/**
- * Terminar el viaje en ruta (R14): a los pocos minutos de salir, confirma (R71). `fija`: el botón pegado abajo (en ruta
- * sin otro viaje); si no, dentro de la tarjeta del viaje en ruta.
- */
+/** Terminar el viaje en ruta (R14): a los pocos minutos de salir, confirma (R71) */
 export function TerminarViaje({
   viaje,
   sinVuelta,
-  fija = true,
 }: {
   viaje: Pick<ViajeChofer, "id" | "sentido" | "salida_en" | "estado_en">
   sinVuelta: boolean
-  fija?: boolean
 }) {
   const router = useRouter()
   const { ejecutar, pendiente, error } = useAccion()
@@ -156,27 +151,16 @@ export function TerminarViaje({
     else ejecutar(() => avanzarViaje(viaje.id, "finalizado"), celebrar)
   }
 
-  const boton = (
-    <Button size="lg" variant={fija ? "default" : "outline"} className="w-full" disabled={pendiente} onClick={terminar}>
-      {pendiente && haceMin === null ? <Loader2 className="animate-spin" /> : null}
-      Terminar
-      <ArrowRight />
-    </Button>
-  )
-
   return (
     <>
-      {fija ? (
-        <div className={BARRA}>
-          <ErrorAccion error={haceMin === null ? error : undefined} />
-          {boton}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {boton}
-          <ErrorAccion error={haceMin === null ? error : undefined} />
-        </div>
-      )}
+      <div className={BARRA}>
+        <ErrorAccion error={haceMin === null ? error : undefined} />
+        <Button size="lg" className="w-full" disabled={pendiente} onClick={terminar}>
+          {pendiente && haceMin === null ? <Loader2 className="animate-spin" /> : null}
+          Terminar
+          <ArrowRight />
+        </Button>
+      </div>
       <ConfirmarDrawer
         abierto={haceMin !== null}
         onCambiar={(v) => !v && setHaceMin(null)}
