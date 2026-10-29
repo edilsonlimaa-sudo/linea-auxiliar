@@ -1,3 +1,4 @@
+import { SeguirNavegacion } from "@/components/nueva/app/volver"
 import { cn } from "@/lib/utils"
 
 /**
@@ -22,6 +23,7 @@ export function AppShell({
           className
         )}
       >
+        <SeguirNavegacion />
         {/* Aurora arriba (§5.21): detrás de todo, solo decorativa */}
         <div aria-hidden className="aurora">
           <span />

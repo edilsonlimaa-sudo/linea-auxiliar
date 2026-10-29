@@ -1,7 +1,4 @@
-import Link from "next/link"
-import { ChevronLeft } from "lucide-react"
-
-import { Button } from "@/components/nueva/ui/button"
+import { BotonVolver } from "@/components/nueva/app/volver"
 import { cn } from "@/lib/utils"
 
 export function AppHeader({
@@ -11,7 +8,7 @@ export function AppHeader({
   className,
 }: {
   title: React.ReactNode
-  /** Quando presente, mostra o botão de voltar com transição nav-back. */
+  /** Quando presente, mostra o botão de voltar: volta no histórico como o do Android; sem tela anterior no app, vai aqui. */
   backHref?: string
   action?: React.ReactNode
   className?: string
@@ -24,15 +21,7 @@ export function AppHeader({
       )}
     >
       {backHref ? (
-        <Button
-          render={<Link href={backHref} transitionTypes={["nav-back"]} />}
-          nativeButton={false}
-          variant="ghost"
-          size="icon"
-          aria-label="Voltar"
-        >
-          <ChevronLeft className="size-5" />
-        </Button>
+        <BotonVolver href={backHref} />
       ) : (
         <span className="w-2" />
       )}

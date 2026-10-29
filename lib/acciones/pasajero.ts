@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
+import { redirect, RedirectType } from "next/navigation"
 
 import { esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
 import { destinoPara } from "@/lib/sesion"
@@ -193,7 +193,9 @@ export async function estoyEnLista(d: {
   // Anotado (§5.17): en la nueva se queda en A Valle Grande (su lugar; Mi viaje empieza al montarse); en la clásica, Mi viaje
   if (r.ok) {
     const destino = await destinoPara("/mi-viaje")
-    redirect(destino.startsWith("/n") ? "/n/a-valle-grande" : destino)
+    // En la nueva ya está en A Valle Grande: reemplaza, para no dejarla dos veces en el historial (volver)
+    if (destino.startsWith("/n")) redirect("/n/a-valle-grande", RedirectType.replace)
+    redirect(destino)
   }
   return r
 }
