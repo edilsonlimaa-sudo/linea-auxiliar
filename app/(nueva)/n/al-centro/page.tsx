@@ -7,7 +7,6 @@ import { Screen } from "@/components/nueva/app/screen"
 import { AvisoAlCentro } from "@/components/nueva/pasajero/aviso-al-centro"
 import { UnidadCard } from "@/components/nueva/pasajero/unidad-card"
 import { cargarInicioPasajero } from "@/lib/datos/inicio-pasajero"
-import { hora } from "@/lib/fechas"
 import { ahoraDelPedido, unidadVista } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { aceptaReservas, libres, ordenarParaPasajero } from "@/lib/viajes"
@@ -26,7 +25,7 @@ export default async function AlCentro() {
   const primera = unidades.find((v) => libres(v) > 0 && v.estado !== "en_ruta")
   const conPuesto = unidades.some((v) => libres(v) > 0)
   const espera = datos.miEspera?.sentido === "vg_a_centro" && datos.miEspera.vence_en ? datos.miEspera : null
-  const pedido = espera ? { hasta: hora(espera.vence_en!), avisada: espera.avisado_en !== null } : null
+  const pedido = espera ? { avisada: espera.avisado_en !== null } : null
 
   return (
     <Screen>

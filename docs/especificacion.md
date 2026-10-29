@@ -316,9 +316,9 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
   los avisos en el celular, R90. Usa las esperas de R31, sin pedir el lugar.)* En **Al Centro**, cuando no hay ningún
   carro con puesto, la pantalla ofrece, **discreta y en una línea** debajo de los carros, **¿Te avisamos cuando salga un
   carro?** con **Avísame** y una ✕ para cerrarla (cerrada no vuelve a salir en ese celular por 12 h). **La Línea fija el
-  tiempo: 2 horas**; la persona no escoge (*oct. 2026: preguntar cuánto tiempo era una decisión de más*). Mientras
-  espera, la línea solo lo confirma ("Te avisamos hasta las 3:40 p. m."), **sin botón para cancelar**: pedido es
-  pedido, vence solo. Reglas para no molestar a nadie:
+  tiempo: 2 horas**; la persona no escoge (*oct. 2026: preguntar cuánto tiempo era una decisión de más*). Al
+  tocar, un breve **"Listo, te avisamos"** y la línea **desaparece**: pedido es pedido, sin tarjeta de "estás esperando"
+  ni botón para cancelar; vence solo. Reglas para no molestar a nadie:
   - **Un pedido, un aviso:** llega una sola vez, con el primer viaje al Centro que se publique **con puesto** mientras
     el pedido vale; después ya no llega nada más. Si se le escapa, lo pide otra vez.
   - **Vence solo** a las 2 horas, sin aviso. Un viaje con **hora fija** después de esa hora no avisa.
