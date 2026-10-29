@@ -190,8 +190,11 @@ export async function estoyEnLista(d: {
       ...(d.distanciaM !== null ? { p_distancia_m: Math.round(d.distanciaM) } : {}),
     })
   )
-  // Anotado, su viaje es Mi viaje (§5.17)
-  if (r.ok) redirect(await destinoPara("/mi-viaje"))
+  // Anotado (§5.17): en la nueva se queda en A Valle Grande (su lugar; Mi viaje empieza al montarse); en la clásica, Mi viaje
+  if (r.ok) {
+    const destino = await destinoPara("/mi-viaje")
+    redirect(destino.startsWith("/n") ? "/n/a-valle-grande" : destino)
+  }
   return r
 }
 

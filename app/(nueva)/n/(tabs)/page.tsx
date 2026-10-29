@@ -8,14 +8,13 @@ import { AvisosCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
-import { PantallaValle } from "@/components/nueva/pasajero/lista"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
 import { ViajeTerminado } from "@/components/nueva/pasajero/viaje-terminado"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
-import { ahoraDelPedido, filaVista, miListaVista, miViajeVista, servicioVista, unidadVista } from "@/lib/nueva/vistas"
+import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
-import { aceptaReservas, carrosHaciaValle, ordenarParaPasajero } from "@/lib/viajes"
+import { aceptaReservas, ordenarParaPasajero } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Línea Auxiliar" }
 
@@ -44,16 +43,8 @@ export default async function InicioNueva() {
     cargarAvisoDeCierre(perfil.id),
     cargarListaGina(),
   ])
+  // Anotado en la lista no es todavía un viaje (§5.17): su lugar vive en A Valle Grande; Mi viaje empieza al montarse
   const mio = miListaVista(lista)
-  if (mio) {
-    const carros = carrosHaciaValle(datos.viajes, datos.porId).map((v) => unidadVista(v, datos.porId, ahora))
-    return (
-      <Screen>
-        <EnVivo />
-        <PantallaValle mio={mio} filas={lista.map(filaVista)} carros={carros} titulo="Mi viaje" />
-      </Screen>
-    )
-  }
 
   const alCentro = ordenarParaPasajero(datos.viajes.filter((v) => v.sentido === "vg_a_centro" && aceptaReservas(v)), datos.porId).length
   const enGina = lista.reduce((n, e) => n + e.personas, 0)
@@ -68,7 +59,7 @@ export default async function InicioNueva() {
         {cierre ? <AvisoCierre aviso={cierre} /> : null}
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
         <AvisoTarifa />
-        <DirectionPicker alCentro={alCentro} enGina={enGina} />
+        <DirectionPicker alCentro={alCentro} enGina={enGina} miLugar={mio?.posicion ?? null} />
         <LineaAhora choferes={datos.enServicio.map(servicioVista)} />
       </div>
     </Screen>

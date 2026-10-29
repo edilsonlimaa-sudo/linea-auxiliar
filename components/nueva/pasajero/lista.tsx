@@ -33,7 +33,7 @@ function useAhora() {
 
 /**
  * A Valle Grande (§5.17): una sola pantalla, anotado o no. Sin anotarse: cuántos esperan, los carros que vienen y Anotarme.
- * Anotado (Inicio la muestra como su viaje): su lugar, cuánto vale, los carros que vienen y Me fui. La lista completa se abre
+ * Anotado (todavía no es un viaje: Mi viaje empieza al montarse): su lugar, cuánto vale, los carros que vienen y Me fui. La lista completa se abre
  * en una hoja desde abajo.
  */
 export function PantallaValle({

@@ -545,14 +545,19 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
     nueva, **A Valle Grande es una sola pantalla**, anotado o no (*oct. 2026: eran dos casi iguales más una página
     para la lista*): arriba "Nadie esperando / N esperando" o, anotado, su lugar y cuánto vale; luego los carros que
     vienen; abajo **Anotarme en la lista** o **Me fui**. La lista completa se abre en una **hoja desde abajo**, no en otra
-    página. Anotado, Inicio muestra esa misma pantalla como su viaje.
+    página.
   - **Carros que vienen** dice: "Estos son los carros de la Línea hoy. Si un chofer que no aparece aquí te pregunta si
     estás en la lista, no está trabajando con la Línea."
-  - **Anotado, va a Mi viaje** *(Oct. 2026)*: como quien aparta puesto, al anotarse pasa a **Mi viaje** (Inicio lo
-    lleva ahí mientras siga en la lista, y el menú muestra "Mi viaje" de primero), sin el "¿Hacia dónde vas?". En orden
+  - **Anotado, va a Mi viaje** *(Oct. 2026; en la interfaz nueva cambió, ver abajo)*: como quien aparta puesto, al
+    anotarse pasa a **Mi viaje** (Inicio lo lleva ahí mientras siga en la lista, y el menú muestra "Mi viaje" de
+    primero), sin el "¿Hacia dónde vas?". En orden
     de lo que necesita: **su lugar** ("Eres el 3 · en Gina · Antes que tú: 2 personas") → "¿Sigues ahí?" si está por
     vencer → **Carros que vienen** (lo más útil: cuándo pasa el próximo y con cuántos puestos) → cuánto vale su lugar
     y **Sigo aquí** → la lista → **Me fui**. Al salir de la lista (Me fui, venció o subió) vuelve a Inicio o a su viaje.
+  - **En la interfaz nueva, anotarse no es un viaje** *(oct. 2026: el viaje empieza cuando se monta; mientras espera,
+    es el chofer quien lo monta)*: al anotarse **se queda en A Valle Grande**, que muestra su lugar, la lista (hoja) y
+    cuánto vale su lugar. Inicio sigue siendo Inicio: "¿Hacia dónde vas?" con **A Valle Grande · Estás en la lista ·
+    lugar 3** destacado para volver. **Mi viaje** aparece recién cuando el chofer lo marca **Subió** (su reserva).
   - **Los choferes la ven siempre, fuera de sus viajes**: es del tramo, no de un carro. En su Inicio, una franja
     "Lista hacia Valle Grande" (caras, cuántos y dónde: "En Gina: 4 · En otro lugar: 1") abre la **lista completa** en
     una hoja: posición, nombre, cuántos van, **dónde espera**, desde cuándo, teléfono (si está conectado) y "Cómo
