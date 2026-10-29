@@ -1,3 +1,4 @@
+import { EstadoDeRed } from "@/components/nueva/app/estado-de-red"
 import { SeguirNavegacion } from "@/components/nueva/app/volver"
 import { cn } from "@/lib/utils"
 
@@ -24,6 +25,7 @@ export function AppShell({
         )}
       >
         <SeguirNavegacion />
+        <EstadoDeRed />
         {/* Aurora arriba (§5.21): detrás de todo, solo decorativa */}
         <div aria-hidden className="aurora">
           <span />

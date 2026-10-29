@@ -708,6 +708,20 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   claro el fondo es gris claro y las tarjetas blancas y opacas con sombra suave (contraste para leer en la calle); en el
   oscuro las tarjetas dejan ver un poco la aurora. Es solo CSS (sin imágenes) y se queda quieta si el teléfono pide
   "reducir movimiento".
+- **Con mala señal** (*29 oct. 2026*: en el Centro sin luz, la app "no reaccionaba" al tocar). Las pantallas se arman en
+  el servidor, así que con poca señal la app nunca debe quedarse muda:
+  - **Toda pantalla tiene su esqueleto** (la forma de la pantalla, sin datos): el toque la cambia al momento y los
+    datos llegan después. Con flecha para volver mientras carga.
+  - **Una barrita arriba** apenas se toca un enlace, hasta que llega la pantalla nueva.
+  - **Un aviso chico bajo la cabecera**: "Sin conexión · seguimos intentando" (el celular no tiene red, o lo último que
+    pidió no llegó), "Conexión lenta · ya casi" (algo tarda más de 4 s, o la red es 2G) y "Conexión de nuevo" un
+    momento al volver. Con antena pero sin internet el celular dice que tiene red: por eso también se mira si los
+    pedidos llegan.
+  - **Una acción que no sale** (Subió, Salir…) lo dice junto al botón ("No se pudo enviar: no hay conexión. Toca otra
+    vez cuando vuelva la señal") en vez de la pantalla de error; nada se registra a medias. Si una pantalla no carga
+    por la señal, la de error dice "Sin conexión" con "Volver a intentar" primero.
+  - Pendiente: que el celular guarde los archivos de la app (service worker) para abrirla aun sin señal, y mostrar los
+    últimos datos vistos.
 
 ### 5.22 Demanda y oferta; cuentas de prueba
 

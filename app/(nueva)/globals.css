@@ -366,3 +366,44 @@
         display: none;
     }
 }
+
+/* Con mala señal (EstadoDeRed): la barrita de arriba al tocar un enlace. Aparece a los 150 ms (en un toque rápido no
+   se ve) y corre de lado mientras llega la pantalla */
+.barra-navegando {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 60;
+    height: 3px;
+    overflow: hidden;
+    opacity: 0;
+    animation: barra-aparece 0.2s ease 0.15s forwards;
+}
+.barra-navegando::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    border-radius: 9999px;
+    background: var(--primary);
+    animation: barra-corre 1.1s ease-in-out infinite;
+}
+@keyframes barra-aparece {
+    to {
+        opacity: 1;
+    }
+}
+@keyframes barra-corre {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(250%);
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    .barra-navegando::after {
+        width: 100%;
+        animation: none;
+        opacity: 0.6;
+    }
+}

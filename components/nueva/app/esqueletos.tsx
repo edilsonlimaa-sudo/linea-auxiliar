@@ -2,13 +2,15 @@ import { AppHeader } from "@/components/nueva/app/app-header"
 import { Skeleton } from "@/components/nueva/ui/skeleton"
 
 /**
- * Lo que se ve mientras llega una pestaña (los `loading.tsx` de `(tabs)`): el toque responde al momento con la forma
- * de la pantalla y, por tener este límite, Next deja la pestaña lista de antemano hasta aquí. Sin `Screen` (no anima).
+ * Lo que se ve mientras llega una pantalla (los `loading.tsx`): el toque responde al momento con la forma de la
+ * pantalla y, por tener este límite, Next la deja lista de antemano hasta aquí (también con mala señal: los datos
+ * siguen en el servidor, solo la forma llega antes). `backHref`: la flecha, para poder volver mientras carga. Sin
+ * `Screen` (no anima).
  */
-export function EsqueletoPantalla({ titulo, children }: { titulo?: string; children: React.ReactNode }) {
+export function EsqueletoPantalla({ titulo, backHref, children }: { titulo?: string; backHref?: string; children: React.ReactNode }) {
   return (
     <main className="flex flex-1 flex-col" aria-busy="true">
-      <AppHeader title={titulo ?? <Skeleton className="h-5 w-32" />} />
+      <AppHeader title={titulo ?? <Skeleton className="h-5 w-32" />} backHref={backHref} />
       <div className="flex flex-col gap-6 p-4">
         {children}
         <span className="sr-only">Cargando…</span>
@@ -29,6 +31,19 @@ export function EsqueletoLista({ filas = 3, redondo = true }: { filas?: number; 
             <Skeleton className="h-3 w-3/5" />
           </div>
         </div>
+      ))}
+    </div>
+  )
+}
+
+/** Una tarjeta: etiqueta, título y unas líneas (el viaje, el chofer, un formulario) */
+export function EsqueletoTarjeta({ lineas = 2 }: { lineas?: number }) {
+  return (
+    <div className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
+      <Skeleton className="h-5 w-24 rounded-full" />
+      <Skeleton className="h-7 w-1/2" />
+      {Array.from({ length: lineas }, (_, i) => (
+        <Skeleton key={i} className={i % 2 ? "h-4 w-2/3" : "h-4 w-4/5"} />
       ))}
     </div>
   )
