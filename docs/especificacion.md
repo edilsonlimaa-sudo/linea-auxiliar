@@ -314,10 +314,10 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R94. Avísame cuando haya un carro al Centro [servidor].** *(Oct. 2026: en el sentido Al Centro el pasajero solo
   veía algo si ya había viajes; quien no encontraba carro se iba sin dejar rastro. Solo en la interfaz nueva, que tiene
   los avisos en el celular, R90. Usa las esperas de R31, sin pedir el lugar.)* En **Al Centro**, cuando no hay ningún
-  carro con puesto, la pantalla ofrece, **discreta y en una línea** debajo de los carros, **¿Te avisamos cuando salga un
-  carro?** con **Avísame** y una ✕ para cerrarla (cerrada no vuelve a salir en ese celular por 12 h). **La Línea fija el
+  carro con puesto, la pantalla ofrece **abajo**, como "Anotarme en la lista" en A Valle Grande, el botón **Avísame cuando salga
+  un carro** ("Por las próximas 2 horas, una sola vez"). **La Línea fija el
   tiempo: 2 horas**; la persona no escoge (*oct. 2026: preguntar cuánto tiempo era una decisión de más*). Al
-  tocar, un breve **"Listo, te avisamos"** y la línea **desaparece**: pedido es pedido, sin tarjeta de "estás esperando"
+  tocar, un breve **"Listo, te avisamos"** y el botón **desaparece**: pedido es pedido, sin tarjeta de "estás esperando"
   ni botón para cancelar; vence solo. Reglas para no molestar a nadie:
   - **Un pedido, un aviso:** llega una sola vez, con el primer viaje al Centro que se publique **con puesto** mientras
     el pedido vale; después ya no llega nada más. Si se le escapa, lo pide otra vez.

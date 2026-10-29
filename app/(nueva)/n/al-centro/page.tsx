@@ -31,7 +31,7 @@ export default async function AlCentro() {
     <Screen>
       <EnVivo />
       <AppHeader title="Al Centro" backHref="/n" />
-      <div className="flex flex-col gap-4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <div className="flex flex-1 flex-col gap-4 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div>
           <p className="text-sm text-muted-foreground">Valle Grande → Centro</p>
           <h2 className="font-heading text-2xl font-semibold">{unidades.length === 0 ? "Nadie en camino" : "Carros que vienen"}</h2>
@@ -49,8 +49,12 @@ export default async function AlCentro() {
             ))}
           </ul>
         )}
-        {/* R94: discreto, debajo de los carros */}
-        {conPuesto ? null : <AvisoAlCentro pedido={pedido} />}
+        {/* R94: abajo, como "Anotarme en la lista" en A Valle Grande */}
+        {conPuesto ? null : (
+          <div className="mt-auto flex flex-col pt-2">
+            <AvisoAlCentro pedido={pedido} />
+          </div>
+        )}
       </div>
     </Screen>
   )
