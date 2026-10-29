@@ -1063,7 +1063,8 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
   el que recoge y los siguientes (cada una dice su etapa —En ruta, Publicado, Llegando, Recogiendo, Siguiente— y su
   sentido; las en curso con un punto que late). Al final, **"+"** publica el siguiente viaje (R11; sin la cuota del
   día no aparece, R76). Se abre en el que recoge (si no hay, en el de ruta) y vuelve a él cuando cambia (al salir o
-  terminar). Dentro de cada pestaña, solo lo de ese viaje (tarjeta, pasajeros, opciones) y, al final, su
+  terminar). Todos los viajes ya están en la página, uno al lado del otro: se pasa de uno a otro **deslizando de lado**
+  o tocando la pestaña, sin cargar nada, y la barra sigue al que se ve. Dentro de cada pestaña, solo lo de ese viaje (tarjeta, pasajeros, opciones) y, al final, su
   acción, en la página (no pegada abajo). Abajo, pegada encima de la barra de la app, solo **la lista de Gina siempre
   visible** (una franja compacta que abre la
   lista; destacada si alguien dice que ya se montó).
