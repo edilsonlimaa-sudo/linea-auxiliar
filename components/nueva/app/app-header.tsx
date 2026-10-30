@@ -1,3 +1,4 @@
+import { FranjaDeRed } from "@/components/nueva/app/estado-de-red"
 import { BotonVolver } from "@/components/nueva/app/volver"
 import { cn } from "@/lib/utils"
 
@@ -16,19 +17,17 @@ export function AppHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-20 flex h-14 items-center gap-1 border-b bg-background/70 px-2 pt-[env(safe-area-inset-top)] backdrop-blur",
+        "sticky top-0 z-20 border-b bg-background/70 pt-[env(safe-area-inset-top)] backdrop-blur",
         className
       )}
     >
-      {backHref ? (
-        <BotonVolver href={backHref} />
-      ) : (
-        <span className="w-2" />
-      )}
-      <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold">
-        {title}
-      </h1>
-      {action ? <div className="flex items-center">{action}</div> : null}
+      <div className="flex h-14 items-center gap-1 px-2">
+        {backHref ? <BotonVolver href={backHref} /> : <span className="w-2" />}
+        <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-semibold">{title}</h1>
+        {action ? <div className="flex items-center">{action}</div> : null}
+      </div>
+      {/* Con mala señal, la franja de la conexión: parte de la cabecera, no un aviso suelto (§5.21) */}
+      <FranjaDeRed />
     </header>
   )
 }

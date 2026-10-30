@@ -713,7 +713,8 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   - **Toda pantalla tiene su esqueleto** (la forma de la pantalla, sin datos): el toque la cambia al momento y los
     datos llegan después. Con flecha para volver mientras carga.
   - **Una barrita arriba** apenas se toca un enlace, hasta que llega la pantalla nueva.
-  - **Un aviso chico bajo la cabecera**: "Sin conexión · seguimos intentando" (el celular no tiene red, o lo último que
+  - **Una franja en la cabecera** (a todo lo ancho bajo el título, parte de la cabecera: no un aviso suelto, que se
+    confunde con una notificación; solo mientras hay algo que decir): "Sin conexión · seguimos intentando" (el celular no tiene red, o lo último que
     pidió no llegó), "Conexión lenta · ya casi" (algo tarda más de 4 s, o la red es 2G) y "Conexión de nuevo" un
     momento al volver. Con antena pero sin internet el celular dice que tiene red: por eso también se mira si los
     pedidos llegan.

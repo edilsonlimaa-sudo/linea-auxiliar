@@ -89,7 +89,8 @@ export function PestanasViajes({
 
   return (
     <>
-      <div className="sticky top-14 z-10 -mx-4 border-b bg-background/80 backdrop-blur">
+      {/* Bajo la cabecera: su alto, el área segura del celular y la franja de la conexión si está */}
+      <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top)+var(--franja-red,0px))] z-10 -mx-4 border-b bg-background/80 backdrop-blur">
         <div ref={barra} role="tablist" aria-label="Tus viajes" className="flex gap-1.5 overflow-x-auto px-4 py-1.5 [scrollbar-width:none]">
           {pestanas.map((p, i) => {
             const sel = i === indice
