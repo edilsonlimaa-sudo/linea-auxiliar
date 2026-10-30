@@ -499,6 +499,7 @@ export type Database = {
         Row: {
           autor_id: string
           creada_en: string
+          de_bienvenida: boolean
           id: string
           push_enviados: number
           retirada_en: string | null
@@ -509,6 +510,7 @@ export type Database = {
         Insert: {
           autor_id?: string
           creada_en?: string
+          de_bienvenida?: boolean
           id?: string
           push_enviados?: number
           retirada_en?: string | null
@@ -519,6 +521,7 @@ export type Database = {
         Update: {
           autor_id?: string
           creada_en?: string
+          de_bienvenida?: boolean
           id?: string
           push_enviados?: number
           retirada_en?: string | null

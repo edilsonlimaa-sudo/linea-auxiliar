@@ -768,7 +768,10 @@ choferes, la clásica y avisos automáticos.)*
 - **R88. El admin manda notificaciones [servidor].** Desde el panel escribe una: **tipo** (Aviso · Consejo · Novedad),
   **título** (hasta 60 caracteres) y **texto** (hasta 280), y escoge a quién: **todos los pasajeros de la interfaz
   nueva** o **personas escogidas** (de entre ellos). Cada destinatario recibe su copia; quien entra a la nueva después
-  no recibe las anteriores. Una enviada no se edita; el admin la puede **retirar** (desaparece para todos).
+  no recibe las anteriores, **salvo la novedad de bienvenida**: una (a lo sumo) queda marcada así y cada pasajero que
+  el admin pasa a la nueva la recibe en ese momento, sin aviso al celular (todavía no lo activó) y una sola vez aunque
+  vuelva a pasar. *(Oct. 2026: la de bienvenida es la que el admin mandó el 29/10 a los primeros de la nueva.)* Una
+  enviada no se edita; el admin la puede **retirar** (desaparece para todos, y deja de llegar a los que pasan).
 - **R89. El pasajero las ve [servidor].** Cada uno ve **solo las suyas**. En la interfaz nueva hay una pestaña
   **Notificaciones** (campana) con un **número** de no leídas, que se actualiza solo en cualquier pestaña. La lista
   va de la más nueva a la más vieja, agrupada en **Hoy · Esta semana · Antes**; las no leídas, con fondo destacado.
