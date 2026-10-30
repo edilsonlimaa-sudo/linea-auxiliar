@@ -25,6 +25,7 @@ const texto = (fd: FormData, campo: string) => {
 }
 // Inicio, Mi viaje y el menú (que muestra "Mi viaje" solo con reserva activa) dependen de la reserva
 const actualizarApp = () => revalidatePath("/", "layout")
+const YA_EN_LISTA = "Ya estás en la lista" // estoy_en_lista (R62: una sola entrada activa)
 
 const numero = (fd: FormData, campo: string) => {
   const v = texto(fd, campo)
@@ -199,8 +200,10 @@ export async function estoyEnLista(d: {
       ...(d.distanciaM !== null ? { p_distancia_m: Math.round(d.distanciaM) } : {}),
     })
   )
+  // Con mala señal la primera vez pudo llegar y la respuesta no: si toca otra vez, ya está anotado, y eso es lo que quería
+  if (r.error === YA_EN_LISTA) actualizarApp()
   // Anotado (§5.17): en la nueva se queda en A Valle Grande (su lugar; Mi viaje empieza al montarse); en la clásica, Mi viaje
-  if (r.ok) {
+  if (r.ok || r.error === YA_EN_LISTA) {
     const destino = await destinoPara("/mi-viaje")
     // En la nueva ya está en A Valle Grande: reemplaza, para no dejarla dos veces en el historial (volver)
     if (destino.startsWith("/n")) redirect("/n/a-valle-grande", RedirectType.replace)

@@ -27,6 +27,17 @@ export function EstadoDeRed() {
   )
 }
 
+/** true cuando una acción lleva más de `ms` pendiente (para decir junto al botón que la señal está lenta) */
+export function useTardando(pendiente: boolean, ms = 8000) {
+  const [tarda, setTarda] = React.useState(false)
+  React.useEffect(() => {
+    if (!pendiente) return
+    const t = setTimeout(() => setTarda(true), ms)
+    return () => (clearTimeout(t), setTarda(false))
+  }, [pendiente, ms])
+  return pendiente && tarda
+}
+
 /** La ruta cambió: llegó la pantalla nueva y la barrita se va */
 function FinDeNavegacion() {
   const ruta = usePathname()

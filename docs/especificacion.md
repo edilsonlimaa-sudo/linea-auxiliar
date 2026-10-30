@@ -721,6 +721,15 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   - **Una acción que no sale** (Subió, Salir…) lo dice junto al botón ("No se pudo enviar: no hay conexión. Toca otra
     vez cuando vuelva la señal") en vez de la pantalla de error; nada se registra a medias. Si una pantalla no carga
     por la señal, la de error dice "Sin conexión" con "Volver a intentar" primero.
+  - **Lo que la persona toca va primero** (*29 oct. 2026*: en Gina a la hora pico "Anotarme" se quedaba cargando
+    para siempre y mucha gente llamó; la anotación sí llegaba). La app hace los refrescos y las acciones de a uno, en
+    fila, y con la lista cambiando a cada rato el refresco en vivo (§4) dejaba la acción esperando detrás. El refresco
+    en vivo no corre mientras va un pedido de la persona ni con la red caída (refresca al volver), y como mucho cada 3 s
+    (cada 15 s con la red lenta). Prueba con la lista cambiando cada segundo y 2,5 s de señal: antes no respondía en
+    60 s (ya anotada en la base); ahora, unos 3 s.
+  - **Anotarse dos veces no es un error** (R62): si el primer toque llegó y la respuesta no, el segundo deja a la persona
+    en su lugar en vez de "Ya estás en la lista". Si tarda más de 8 s, el botón dice "Anotándote…" y debajo "La señal
+    está lenta: seguimos intentando. Si ya quedaste anotado, no se repite".
   - Pendiente: que el celular guarde los archivos de la app (service worker) para abrirla aun sin señal, y mostrar los
     últimos datos vistos.
 

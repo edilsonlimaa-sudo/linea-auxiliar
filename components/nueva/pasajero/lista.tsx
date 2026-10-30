@@ -11,7 +11,9 @@ import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/nueva/ui/drawer"
 import { Input } from "@/components/nueva/ui/input"
+import { useTardando } from "@/components/nueva/app/estado-de-red"
 import { estoyEnLista, meFui, sigoEnLista } from "@/lib/acciones/pasajero"
+import { conSenal } from "@/lib/nueva/red"
 import { MOTIVOS_SALIDA, OPCION_ME_FUI } from "@/lib/motivos-salida"
 import type { FilaVista, MiListaVista, UnidadVista } from "@/lib/nueva/vistas"
 import { tarifaEn, textoTarifa } from "@/lib/tarifas"
@@ -153,7 +155,7 @@ function SigoAquiCard({ venceEn }: { venceEn: string }) {
   const [error, setError] = React.useState<string>()
   const restante = ahora > 0 ? new Date(venceEn).getTime() - ahora : VALE_MS
   const urgente = restante <= AVISAR_MS
-  const minutos = Math.max(0, Math.ceil(restante / 60_000))
+  const minutos = Math.min(VALE_MS / 60_000, Math.max(0, Math.ceil(restante / 60_000))) // el reloj del celular puede ir unos segundos atrás: nunca "61"
   const fraccion = Math.min(1, Math.max(0, restante / VALE_MS))
 
   return (
@@ -192,7 +194,7 @@ function SigoAquiCard({ venceEn }: { venceEn: string }) {
         disabled={pendiente}
         onClick={() =>
           iniciar(async () => {
-            const r = await sigoEnLista()
+            const r = await conSenal(sigoEnLista)
             setError(r.error)
           })
         }
@@ -230,7 +232,7 @@ function MeFuiDrawer() {
               disabled={pendiente}
               onClick={() =>
                 iniciar(async () => {
-                  const r = await meFui(m)
+                  const r = await conSenal(() => meFui(m))
                   setError(r.error)
                 })
               }
@@ -344,6 +346,7 @@ export function AnotarmeCta() {
   const [cuantos, setCuantos] = React.useState(1)
   const [error, setError] = React.useState<string | null>(null)
   const [pendiente, iniciar] = React.useTransition()
+  const tarda = useTardando(pendiente)
   // R80: el pasaje solo si rige la tarifa especial
   const [tarifa] = React.useState(() => tarifaEn(new Date()))
 
@@ -351,15 +354,17 @@ export function AnotarmeCta() {
     e.preventDefault()
     if (lugar === "otro" && !otro.trim()) return setError("Dinos en qué punto de la ruta estás.")
     iniciar(async () => {
-      // Si sale bien, la acción lleva a /n (Mi viaje)
-      const r = await estoyEnLista({
-        enGina: lugar === "gina",
-        lugar: lugar === "gina" ? null : otro.trim(),
-        lat: null,
-        lng: null,
-        personas: cuantos,
-        distanciaM: null,
-      })
+      // Si sale bien, la acción deja en A Valle Grande con su lugar
+      const r = await conSenal(() =>
+        estoyEnLista({
+          enGina: lugar === "gina",
+          lugar: lugar === "gina" ? null : otro.trim(),
+          lat: null,
+          lng: null,
+          personas: cuantos,
+          distanciaM: null,
+        })
+      )
       if (r?.error) setError(r.error)
     })
   }
@@ -455,8 +460,14 @@ export function AnotarmeCta() {
           <div className="flex flex-col gap-2 p-4">
             <Button type="submit" size="lg" disabled={pendiente}>
               {pendiente ? <Loader2 className="animate-spin" /> : null}
-              Anotarme
+              {tarda ? "Anotándote…" : "Anotarme"}
             </Button>
+            {/* Con mala señal: que sepa que sigue y que tocar de nuevo no la anota dos veces */}
+            {tarda ? (
+              <p role="status" className="text-center text-sm text-muted-foreground">
+                La señal está lenta: seguimos intentando. Si ya quedaste anotado, no se repite.
+              </p>
+            ) : null}
             <DrawerClose render={<Button type="button" variant="ghost" size="lg" />}>Cancelar</DrawerClose>
           </div>
         </form>

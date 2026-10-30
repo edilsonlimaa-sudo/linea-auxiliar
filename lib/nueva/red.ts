@@ -111,6 +111,21 @@ export function terminoNavegacion() {
   cambiar({ navegando: false })
 }
 
+/** Cuántos pedidos a la app van en camino (EnVivo no refresca mientras haya uno: el de la persona va primero) */
+export const pedidosEnCurso = () => pendientes.size
+
+export const SIN_CONEXION = "No se pudo enviar: no hay conexión. Toca otra vez cuando vuelva la señal."
+
+/** Una acción que, si no llega al servidor por la señal, devuelve el error para mostrarlo junto al botón */
+export async function conSenal<T>(accion: () => Promise<T>): Promise<T | { error: string; ok?: undefined }> {
+  try {
+    return await accion()
+  } catch (e) {
+    if (!esErrorDeRed(e)) throw e
+    return { error: SIN_CONEXION }
+  }
+}
+
 /** El error es de la red (no llegó al servidor): lo usan las acciones y la pantalla de error */
 export function esErrorDeRed(error: unknown) {
   if (typeof navigator !== "undefined" && !navigator.onLine) return true

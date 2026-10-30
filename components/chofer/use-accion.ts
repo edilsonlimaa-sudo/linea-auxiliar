@@ -3,9 +3,7 @@
 import { useState, useTransition } from "react"
 
 import type { Resultado } from "@/lib/acciones/chofer"
-import { esErrorDeRed } from "@/lib/nueva/red"
-
-const SIN_CONEXION = "No se pudo enviar: no hay conexión. Toca otra vez cuando vuelva la señal."
+import { esErrorDeRed, SIN_CONEXION } from "@/lib/nueva/red"
 
 /**
  * Ejecuta una acción del chofer en una transición y guarda su error (para mostrarlo junto al botón). Si no llegó al
