@@ -34,6 +34,8 @@ select throws_ok($$ select public.admin_cambiar_interfaz(array[auth.uid()], 'nue
 reset role;
 update public.perfiles set estado = 'aprobado', aprobado_en = now()
  where id in ('00000000-0000-4000-a000-000000000078', '00000000-0000-4000-a000-000000000079');
+-- Solo una a la vez: la que ya exista deja de serlo dentro de la prueba
+update public.notificaciones set de_bienvenida = false where de_bienvenida;
 insert into public.notificaciones (id, tipo, titulo, texto, autor_id, de_bienvenida)
 values ('00000000-0000-4000-c000-000000000001', 'novedad', 'Bienvenida', 'Ya estás en la nueva', '00000000-0000-4000-a000-000000000006', true);
 set local role authenticated;

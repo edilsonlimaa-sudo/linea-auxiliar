@@ -690,7 +690,9 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
 - **R83. Cada cuenta tiene su interfaz [servidor].** **Clásica** (la de siempre, por defecto) o **nueva**. **Solo el admin
   la cambia**, por persona o en grupo; el usuario no puede volver por su cuenta. Orden: **primero pasajeros**, después
   choferes. En Pasajeros, **Pasar a todos a la nueva** (el lanzamiento, nov. 2026) y **Volver a todos a la clásica**
-  (por si algo sale mal), los dos con confirmación; los choferes no cambian.
+  (por si algo sale mal), los dos con confirmación; los choferes no cambian. Para ese paso, la novedad de bienvenida (R88)
+  es **"✨ La app se renovó"** (qué es más fácil, que su cuenta sigue igual y que active los avisos); la de los primeros
+  (acceso anticipado) queda solo para quien ya la recibió.
 - **R84. La app lleva a cada uno a la suya.** La nueva vive en `/n` (pasajero) y en `/n/chofer` (chofer, con las mismas
   pantallas de la clásica: Inicio con su viaje, Publicar, la lista de Gina, la cuota, Mis viajes, Calificaciones, Mi carnet y
   los compañeros). Pestañas del chofer en la nueva: **Inicio · Compañeros · Calificaciones · Menú**. **Compañeros**
