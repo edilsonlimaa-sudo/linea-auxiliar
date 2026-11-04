@@ -709,7 +709,9 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   tema de la clásica). **Ícono de la app** (el instalado, el de la pantalla de inicio y el de la pestaña): la **L de
   Línea hecha camino**, blanca con la parada final celeste, sobre el mismo fondo oscuro de la pantalla de inicio. La
   cabecera de la clásica conserva su logo del bus. **Fondo "aurora arriba"** (Oct. 2026): arriba de cada pantalla, manchas suaves con los colores
-  de la tarde llanera (azul de la Línea, ámbar, coral) que se mueven despacio y se desvanecen hacia el fondo. En el
+  de la Línea (el azul de la app y el celeste de la parada final del ícono) que se mueven despacio y se desvanecen
+  hacia el fondo. *(Nov. 2026: antes llevaba ámbar y coral, que en el oscuro se veían rojos; en la app el rojo es aviso
+  ("Sin GPS", cancelar) y el fondo no debe parecerse.)* En el
   claro el fondo es gris claro y las tarjetas blancas y opacas con sombra suave (contraste para leer en la calle); en el
   oscuro las tarjetas dejan ver un poco la aurora. Es solo CSS (sin imágenes) y se queda quieta si el teléfono pide
   "reducir movimiento".

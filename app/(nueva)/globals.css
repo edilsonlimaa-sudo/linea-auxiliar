@@ -18,9 +18,10 @@
     /* Avisos sueltos sobre el fondo: un azul muy suave para que no se pierdan en el gris */
     --secondary: oklch(0.94 0.018 262);
     --secondary-foreground: oklch(0.21 0.006 285.885);
-    --aurora-1: #ffb35c;
+    /* Solo los colores de la Línea: celeste de la parada final del ícono y azules de la app (nada de rojos: el rojo es aviso) */
+    --aurora-1: #7ccbf5;
     --aurora-2: #5b8cff;
-    --aurora-3: #ff8a7a;
+    --aurora-3: #a9c4ff;
     --aurora-opacidad: 0.6;
     --muted: oklch(0.945 0.004 240);
     --muted-foreground: oklch(0.56 0.021 213.5);
@@ -55,10 +56,10 @@
     --card: oklch(0.218 0.008 223.9 / 0.82);
     --card-foreground: oklch(0.987 0.002 197.1);
     --sombra-card: none;
-    --aurora-1: #c2410c;
+    --aurora-1: #1f6e9c;
     --aurora-2: #1d4ed8;
-    --aurora-3: #9f1239;
-    --aurora-opacidad: 0.7;
+    --aurora-3: #2b8fc7;
+    --aurora-opacidad: 0.6;
     --popover: oklch(0.218 0.008 223.9);
     --popover-foreground: oklch(0.987 0.002 197.1);
     /* Más claro que el del prototipo para leerse sobre el fondo oscuro; texto oscuro encima (AA) */
