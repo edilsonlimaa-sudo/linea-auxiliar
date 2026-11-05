@@ -1,6 +1,6 @@
 "use client"
 
-import { CarFront, Check, ChevronRight, Loader2, MapPin, MessageCircle, Navigation, Phone, Users, X } from "lucide-react"
+import { ArrowRight, CarFront, Check, ChevronRight, Loader2, MapPin, MessageCircle, Navigation, Phone, Users, X } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
 
@@ -97,6 +97,7 @@ export function FilaLista({
   puedeIr = false,
   puedeSubir,
   conNoEstaba,
+  onSigo,
 }: {
   entrada: EntradaTramo
   rol?: EntradaGina["rol"] | null
@@ -104,6 +105,7 @@ export function FilaLista({
   puedeIr?: boolean // en ruta (R67): "Voy" la liga a este carro
   puedeSubir: boolean
   conNoEstaba: boolean
+  onSigo?: () => void // en el aviso del viaje (R67): "Sigo": no pasa por ella, la saca del aviso
 }) {
   const { ejecutar, pendiente, error } = useAccion()
   const [confirmar, setConfirmar] = React.useState(false)
@@ -169,7 +171,18 @@ export function FilaLista({
         ) : null}
       </div>
 
-      {viajeId && (puedeIr || puedeSubir || conNoEstaba) ? (
+      {viajeId && puedeIr && onSigo ? (
+        // Aviso en ruta (R67): solo la decisión, como en R29. Subió / No vino vienen después de Voy ("Recoge en el camino")
+        <div className="flex gap-2 *:flex-1">
+          <Button disabled={pendiente} onClick={() => ejecutar(() => voyPorEl(e.id, viajeId))}>
+            {pendiente ? <Loader2 className="animate-spin" /> : <CarFront />}
+            Voy
+          </Button>
+          <Button variant="outline" disabled={pendiente} onClick={onSigo}>
+            <ArrowRight /> Sigo
+          </Button>
+        </div>
+      ) : viajeId && (puedeIr || puedeSubir || conNoEstaba) ? (
         <div className="flex gap-2 *:flex-1">
           {puedeIr ? (
             <Button disabled={pendiente} onClick={() => ejecutar(() => voyPorEl(e.id, viajeId))}>

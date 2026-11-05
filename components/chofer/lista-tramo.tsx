@@ -1,6 +1,6 @@
 "use client"
 
-import { CarFrontIcon, CheckIcon, ChevronRightIcon, Loader2Icon, MapPinIcon, MessageCircleIcon, NavigationIcon, PhoneIcon, UserXIcon } from "lucide-react"
+import { ArrowRightIcon, CarFrontIcon, CheckIcon, ChevronRightIcon, Loader2Icon, MapPinIcon, MessageCircleIcon, NavigationIcon, PhoneIcon, UserXIcon } from "lucide-react"
 import { useState, useSyncExternalStore } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -170,6 +170,7 @@ export function FilaLista({
   puedeSubir,
   conNoEstaba,
   compacta = false,
+  onSigo,
 }: {
   entrada: EntradaTramo
   rol?: EntradaGina["rol"] | null
@@ -178,6 +179,7 @@ export function FilaLista({
   puedeSubir: boolean
   conNoEstaba: boolean
   compacta?: boolean // en el aviso del viaje (angosto): sin el número y con llamar / cómo llegar abajo
+  onSigo?: () => void // en el aviso del viaje (R67): "Sigo": no pasa por ella, la saca del aviso
 }) {
   const { ejecutar, pendiente, error } = useAccion()
   const [confirmar, setConfirmar] = useState(false)
@@ -270,7 +272,22 @@ export function FilaLista({
         {!compacta && contacto}
       </div>
 
-      {viajeId && puedeIr ? (
+      {viajeId && puedeIr && onSigo ? (
+        // Aviso en ruta (R67): solo la decisión, como en R29. Subió / No vino vienen después de Voy ("Recoge en el camino")
+        <>
+          <div className="flex gap-2">
+            <Button size="sm" className="flex-1" disabled={pendiente} onClick={() => ejecutar(() => voyPorEl(e.id, viajeId))}>
+              {pendiente ? <Loader2Icon aria-hidden className="animate-spin" /> : <CarFrontIcon aria-hidden />}
+              Voy
+            </Button>
+            <Button size="sm" variant="outline" className="flex-1" disabled={pendiente} onClick={onSigo}>
+              <ArrowRightIcon aria-hidden />
+              Sigo
+            </Button>
+          </div>
+          {compacta && <div className="flex gap-2">{contacto}</div>}
+        </>
+      ) : viajeId && puedeIr ? (
         // En ruta (R67): Voy y Subió lado a lado; abajo, No estaba
         <>
           <div className="flex gap-2">

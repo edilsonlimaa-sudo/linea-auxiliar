@@ -8,6 +8,7 @@ import { FilaPasajero } from "@/components/chofer/fila-pasajero"
 import { FilaLista } from "@/components/chofer/lista-tramo"
 import { MasOpciones } from "@/components/chofer/mas-opciones"
 import { OcuparPuesto } from "@/components/chofer/ocupar-puesto"
+import { marcarSigo, useSigo } from "@/components/chofer/sigo"
 import type { EntradaTramo, ViajeChofer } from "@/lib/datos/inicio-chofer"
 import { hora } from "@/lib/fechas"
 import { tarifaEn, textoTarifa } from "@/lib/tarifas"
@@ -20,13 +21,16 @@ import { contrario, duracion, libres, SENTIDOS, sumaPersonas } from "@/lib/viaje
  */
 export function EnRutaCompacto({
   viaje,
-  esperanEnCamino = [],
+  esperanEnCamino: todosEnCamino = [],
   sinVuelta,
 }: {
   viaje: ViajeChofer
   esperanEnCamino?: EntradaTramo[] // R67: hacia Valle Grande, anotados en el camino sin carro que caben
   sinVuelta: boolean // sin otro viaje publicado
 }) {
+  // R67 "Sigo": sale del aviso de este viaje (sigue en la lista para el siguiente carro)
+  const sigo = useSigo(viaje.id)
+  const esperanEnCamino = todosEnCamino.filter((e) => !sigo.includes(e.id))
   // "hace N min": con la hora del celular (en el servidor no se muestra)
   const suscribirReloj = useCallback((avisar: () => void) => {
     const id = setInterval(avisar, 30_000)
@@ -85,10 +89,19 @@ export function EnRutaCompacto({
         {/* R67: anotados en el camino después de salir de Gina; "Voy" los liga a este carro */}
         {esperanEnCamino.length > 0 && (
           <section className="my-1 flex flex-col gap-2 rounded-xl bg-warning-muted p-2">
-            <h3 className="text-sm font-bold">Espera en el camino ({esperanEnCamino.length}): toca Voy si pasas por ahí</h3>
+            <h3 className="text-sm font-bold">Espera en el camino ({esperanEnCamino.length}): Voy si pasas por ahí, Sigo si no</h3>
             <ol className="flex flex-col gap-2">
               {esperanEnCamino.map((e) => (
-                <FilaLista key={e.id} entrada={e} viajeId={viaje.id} puedeIr puedeSubir conNoEstaba compacta />
+                <FilaLista
+                  key={e.id}
+                  entrada={e}
+                  viajeId={viaje.id}
+                  puedeIr
+                  puedeSubir
+                  conNoEstaba
+                  compacta
+                  onSigo={() => marcarSigo(viaje.id, e.id)}
+                />
               ))}
             </ol>
           </section>

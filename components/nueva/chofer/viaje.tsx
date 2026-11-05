@@ -4,6 +4,7 @@ import { Clock, Ellipsis, Lightbulb, Loader2, Minus, Moon, Plus, Ticket, Trash2,
 import * as React from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
+import { marcarSigo, useSigo } from "@/components/chofer/sigo"
 import { ErrorAccion, Opcion } from "@/components/nueva/chofer/comun"
 import { ETIQUETA, puestosTexto } from "@/lib/nueva/textos"
 import { FilaLista, ListaConAcciones } from "@/components/nueva/chofer/gina"
@@ -152,8 +153,11 @@ export function TarjetaViaje({
  * gente: primero lo que no puede esperar (pedidos, a quién recoger en el camino, quien espera en el camino hacia Valle
  * Grande, R67) y después quienes van a bordo.
  */
-export function TarjetaEnRuta({ viaje, esperanEnCamino = [] }: { viaje: ViajeChofer; esperanEnCamino?: EntradaTramo[] }) {
+export function TarjetaEnRuta({ viaje, esperanEnCamino: todosEnCamino = [] }: { viaje: ViajeChofer; esperanEnCamino?: EntradaTramo[] }) {
   const ahora = useAhora(30_000)
+  // R67 "Sigo": sale del aviso de este viaje (sigue en la lista para el siguiente carro)
+  const sigo = useSigo(viaje.id)
+  const esperanEnCamino = todosEnCamino.filter((e) => !sigo.includes(e.id))
   const salio = viaje.salida_en ?? viaje.estado_en
   const pedidos = viaje.lista.filter((f) => f.pendiente)
   const porRecoger = viaje.lista.filter((f) => f.estado === "activa" && !f.pendiente)
@@ -201,11 +205,11 @@ export function TarjetaEnRuta({ viaje, esperanEnCamino = [] }: { viaje: ViajeCho
         <section className="flex flex-col gap-2">
           <div>
             <h3 className="font-heading text-lg font-semibold">Esperan en el camino</h3>
-            <p className="text-xs text-muted-foreground">Toca Voy si pasas por ahí: los demás choferes dejan de verlos.</p>
+            <p className="text-xs text-muted-foreground">Toca Voy si pasas por ahí: los demás choferes dejan de verlos. Si no pasas (o ya pasaste), Sigo: siguen en la lista para otro carro.</p>
           </div>
           <ol className="divide-y rounded-3xl border border-primary/30 bg-card">
             {esperanEnCamino.map((e) => (
-              <FilaLista key={e.id} entrada={e} viajeId={viaje.id} puedeIr puedeSubir conNoEstaba />
+              <FilaLista key={e.id} entrada={e} viajeId={viaje.id} puedeIr puedeSubir conNoEstaba onSigo={() => marcarSigo(viaje.id, e.id)} />
             ))}
           </ol>
         </section>

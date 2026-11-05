@@ -620,7 +620,12 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   - **Voy**: el chofer que va por esa persona la toma: queda **ligada a su carro** (como al salir de Gina, R66), sale
     de la lista y del aviso de los demás choferes, y la persona ve "José va por ti". El primero que toca **Voy** (o
     **Subió**) se la lleva; el otro ve que ya no está en la lista. Solo si cabe en el carro.
-  - **Subió** directo, si paró sin avisar antes.
+  - **Sigo** (como en el pedido en el camino, R29) *(nov. 2026: una chofer ya había pasado el lugar y solo tenía Voy)*:
+    no pasa por esa persona. La saca del aviso **de ese viaje y en ese teléfono**; la persona **sigue en la lista en su
+    lugar** para el siguiente carro (no cuenta como "No estaba") y los demás choferes la siguen viendo.
+  - **Un momento, una decisión:** el aviso solo pregunta si pasa (**Voy / Sigo**). Lo de cuando llega va después de
+    Voy, en "Recoge en el camino": **Subió / No vino** (si paró sin avisar, Voy y Subió). La hoja de la lista (fuera del
+    aviso) sigue dejando Subió y No estaba.
   - El pasajero en el camino ve también los **carros en ruta con puesto** en "Carros que vienen" ("Ya salió de Gina
     con 1 puesto: puede recogerte al pasar").
   - Si nadie va por esa persona, espera al siguiente carro, que le guarda puesto como en R64.
