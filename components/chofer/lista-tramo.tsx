@@ -1,6 +1,6 @@
 "use client"
 
-import { CarFrontIcon, CheckIcon, ChevronRightIcon, Loader2Icon, MapPinIcon, NavigationIcon, PhoneIcon, UserXIcon } from "lucide-react"
+import { CarFrontIcon, CheckIcon, ChevronRightIcon, Loader2Icon, MapPinIcon, MessageCircleIcon, NavigationIcon, PhoneIcon, UserXIcon } from "lucide-react"
 import { useState, useSyncExternalStore } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -10,6 +10,7 @@ import { Avatar as AvatarUi, AvatarFallback, AvatarGroup, AvatarGroupCount, Avat
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { noEstabaEnLista, subioDeLista, voyPorEl } from "@/lib/acciones/chofer"
+import { whatsappDeLista } from "@/lib/contacto"
 import type { EntradaGina, EntradaTramo } from "@/lib/datos/inicio-chofer"
 import { hace } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
@@ -189,12 +190,23 @@ export function FilaLista({
   const telefono = e.telefono?.replace(/\D/g, "")
   const gps = e.lat !== null && e.lng !== null ? `${e.lat},${e.lng}` : null
 
-  // Llamar y cómo llegar: arriba, junto al nombre; en el aviso del viaje (angosto), abajo con No estaba
+  // Llamar, WhatsApp y cómo llegar: arriba, junto al nombre; en el aviso del viaje (angosto), abajo con No estaba
   const contacto = (
     <>
       {telefono && (
         <a href={`tel:+${telefono}`} aria-label={`Llamar a ${e.nombre}`} className={buttonVariants({ variant: "outline", size: "icon-sm", className: "rounded-full" })}>
           <PhoneIcon aria-hidden />
+        </a>
+      )}
+      {telefono && (
+        <a
+          href={whatsappDeLista(telefono)}
+          target="_blank"
+          rel="noreferrer"
+          aria-label={`Escribirle por WhatsApp a ${e.nombre}`}
+          className={buttonVariants({ variant: "whatsapp", size: "icon-sm", className: "rounded-full" })}
+        >
+          <MessageCircleIcon aria-hidden />
         </a>
       )}
       {!e.enGina && gps && (

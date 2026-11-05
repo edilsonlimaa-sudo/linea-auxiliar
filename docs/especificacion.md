@@ -598,6 +598,10 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
   el chofer no lo marca: **conserva su lugar arriba** para el siguiente carro, y el plan ofrece ese puesto al que
   sigue en la lista. Si el chofer lo llamó y no apareció ni respondió, puede marcar **No estaba**: sale de la
   lista (cuenta para medir, como "No vino").
+  - **Llamar o escribirle** *(Nov. 2026: los choferes pidieron WhatsApp; con ruido o sin saldo, escribir es más fácil
+    que llamar)*: cada persona de la lista lleva **Llamar** y **WhatsApp** juntos (el mismo teléfono, solo para el
+    chofer conectado, §6). WhatsApp abre el chat con un saludo listo: "Hola, te escribo de la Línea Auxiliar: estás
+    en la lista hacia Valle Grande."
 - **R66. Al salir, el carro se lleva a los del camino [servidor].** Al tocar **Salir**, quienes tenían puesto
   guardado en el camino quedan **vinculados a ese carro**: ven "José va por ti con tu puesto · ya salió de Gina",
   y el siguiente carro **no** les guarda puesto otra vez. Al pasar, el chofer marca **Subió** o **No estaba**.
@@ -715,6 +719,11 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   claro el fondo es gris claro y las tarjetas blancas y opacas con sombra suave (contraste para leer en la calle); en el
   oscuro las tarjetas dejan ver un poco la aurora. Es solo CSS (sin imágenes) y se queda quieta si el teléfono pide
   "reducir movimiento".
+- **Puestos en casillas** *(Nov. 2026: varios pasajeros extrañaron los cuadritos de la clásica; el texto solo "2
+  puestos libres" no dice de un vistazo cuán lleno va el carro)*. Como en la clásica, cada carro muestra **una casilla
+  por puesto**: llenas (azul) las ocupadas, vacías con borde verde las libres, y al lado el texto ("2 libres" /
+  "Lleno"), que dice lo mismo para quien no ve los colores. En la tarjeta de la unidad, en la hoja del chofer y,
+  más chicas, en **Carros que vienen** (Gina).
 - **Con mala señal** (*29 oct. 2026*: en el Centro sin luz, la app "no reaccionaba" al tocar). Las pantallas se arman en
   el servidor, así que con poca señal la app nunca debe quedarse muda:
   - **Toda pantalla tiene su esqueleto** (la forma de la pantalla, sin datos): el toque la cambia al momento y los

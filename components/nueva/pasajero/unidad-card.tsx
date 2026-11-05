@@ -1,9 +1,9 @@
 "use client"
 
-import { Loader2, Snowflake, Star, Users } from "lucide-react"
+import { Loader2, Snowflake, Star } from "lucide-react"
 import * as React from "react"
 
-import { carroLabel, ChoferAvatar, puestosLabel } from "@/components/nueva/pasajero/comunes"
+import { Asientos, carroLabel, ChoferAvatar, libresLabel, puestosLabel } from "@/components/nueva/pasajero/comunes"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/nueva/ui/drawer"
@@ -60,13 +60,13 @@ export function UnidadCard({ unidad, destacada = false }: { unidad: UnidadVista;
           {unidad.llegada.principal}
           {unidad.llegada.detalle ? ` · ${unidad.llegada.detalle}` : ""}
         </p>
-        <div className="flex items-center gap-2 text-sm">
-          <Badge variant={sinPuestos ? "outline" : "secondary"}>
-            <Users className="size-3.5" />
-            {puestosLabel(unidad.libres)}
-          </Badge>
+        <div className="flex items-center gap-2.5 text-sm">
+          <Asientos puestos={unidad.puestos} libres={unidad.libres} />
+          <span className={cn("font-medium", unidad.libres > 0 ? "text-success" : "text-muted-foreground")}>
+            {libresLabel(unidad.libres)}
+          </span>
           {chofer.carro?.aire ? (
-            <Badge variant="outline">
+            <Badge variant="outline" className="ml-auto">
               <Snowflake className="size-3.5" />
               Aire
             </Badge>
@@ -118,7 +118,10 @@ export function UnidadCard({ unidad, destacada = false }: { unidad: UnidadVista;
                   <img src={chofer.carro.fotoUrl} alt={`Carro de ${chofer.nombre}`} className="aspect-video w-full rounded-2xl object-cover" />
                 ) : null}
                 <Separator />
-                <p className="font-medium">{puestosLabel(unidad.libres)}</p>
+                <div className="flex items-center gap-2.5">
+                  <Asientos puestos={unidad.puestos} libres={unidad.libres} />
+                  <p className="font-medium">{puestosLabel(unidad.libres)}</p>
+                </div>
               </div>
               <div className="flex flex-col gap-2 p-4">
                 <Button size="lg" disabled={sinPuestos} onClick={() => setPaso("apartar")}>

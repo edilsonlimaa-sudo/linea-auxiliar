@@ -1,6 +1,6 @@
 "use client"
 
-import { CarFront, Check, ChevronRight, Loader2, MapPin, Navigation, Phone, Users, X } from "lucide-react"
+import { CarFront, Check, ChevronRight, Loader2, MapPin, MessageCircle, Navigation, Phone, Users, X } from "lucide-react"
 import Link from "next/link"
 import * as React from "react"
 
@@ -11,6 +11,7 @@ import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import { noEstabaEnLista, subioDeLista, voyPorEl } from "@/lib/acciones/chofer"
+import { whatsappDeLista } from "@/lib/contacto"
 import type { EntradaGina, EntradaTramo } from "@/lib/datos/inicio-chofer"
 import { hace } from "@/lib/fechas"
 import { cn } from "@/lib/utils"
@@ -127,9 +128,10 @@ export function FilaLista({
           </div>
           <p className={cn("flex items-center gap-1 truncate text-sm", e.enGina ? "text-muted-foreground" : "font-medium text-primary")}>
             <MapPin className="size-3.5 shrink-0" />
-            {e.enGina ? "En Gina" : e.lugar}
-            {montado ? <span className="font-normal text-muted-foreground"> · {hace(e.creadaEn)}</span> : null}
+            <span className="truncate">{e.enGina ? "En Gina" : e.lugar}</span>
           </p>
+          {/* Desde cuándo, en su línea: con Llamar y WhatsApp al lado no cabe junto al lugar */}
+          {montado ? <p className="text-xs text-muted-foreground">{hace(e.creadaEn)}</p> : null}
         </div>
         {e.diceQueSubio ? (
           <Badge>Dice que ya se montó</Badge>
@@ -141,6 +143,17 @@ export function FilaLista({
         {telefono ? (
           <Button size="icon-sm" variant="outline" className="rounded-full" render={<a href={`tel:+${telefono}`} aria-label={`Llamar a ${e.nombre}`} />} nativeButton={false}>
             <Phone />
+          </Button>
+        ) : null}
+        {telefono ? (
+          <Button
+            size="icon-sm"
+            variant="outline"
+            className="rounded-full border-success/40 text-success"
+            render={<a href={whatsappDeLista(telefono)} target="_blank" rel="noreferrer" aria-label={`Escribirle por WhatsApp a ${e.nombre}`} />}
+            nativeButton={false}
+          >
+            <MessageCircle />
           </Button>
         ) : null}
         {!e.enGina && gps ? (

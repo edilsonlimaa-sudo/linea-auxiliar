@@ -5,7 +5,7 @@ import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
-import { ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
+import { Asientos, ChoferAvatar, libresLabel, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/nueva/ui/avatar"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
@@ -296,8 +296,11 @@ export function CarrosQueVienen({ carros }: { carros: UnidadVista[] }) {
                   <p className="truncate font-medium">{u.chofer.nombre}</p>
                   <p className="truncate text-sm text-muted-foreground">{cuandoPasa(u)}</p>
                 </div>
-                <span className={cn("shrink-0 text-sm font-medium", u.libres > 0 ? "text-primary" : "text-muted-foreground")}>
-                  {u.libres > 0 ? `${u.libres} ${u.libres === 1 ? "libre" : "libres"}` : "Lleno"}
+                <span className="flex shrink-0 flex-col items-end gap-1">
+                  <Asientos puestos={u.puestos} libres={u.libres} chicas />
+                  <span className={cn("text-xs font-medium", u.libres > 0 ? "text-success" : "text-muted-foreground")}>
+                    {libresLabel(u.libres)}
+                  </span>
                 </span>
                 <MapIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
               </MapaCarro>
