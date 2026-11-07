@@ -696,8 +696,10 @@ muestra donde sirve.)*
 *(Oct. 2026: el diseño nuevo, pensado para el celular (pestañas abajo, hojas inferiores, transiciones), llega de a poco y
 con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia la presentación.)*
 
-- **R83. Cada cuenta tiene su interfaz [servidor].** **Clásica** (la de siempre, por defecto) o **nueva**. **Solo el admin
-  la cambia**, por persona o en grupo; el usuario no puede volver por su cuenta. Orden: **primero pasajeros**, después
+- **R83. Cada cuenta tiene su interfaz [servidor].** **Clásica** (la de siempre) o **nueva**. **Desde nov. 2026 toda
+  cuenta que se registra (pasajero o chofer) empieza en la nueva**; las que ya existían siguen donde estaban. **Solo el admin
+  la cambia**, por persona o en grupo; el usuario no puede volver por su cuenta. Quien nace en la nueva no recibe la novedad
+  "La app se renovó" (nunca vio la clásica). Orden: **primero pasajeros**, después
   choferes. En Pasajeros, **Pasar a todos a la nueva** (el lanzamiento, nov. 2026) y **Volver a todos a la clásica**
   (por si algo sale mal), los dos con confirmación; los choferes no cambian. Para ese paso, la novedad de bienvenida (R88)
   es **"✨ La app se renovó"** (qué es más fácil, que su cuenta sigue igual y que active los avisos); la de los primeros
@@ -710,7 +712,9 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   no hay franja de compañeros. **Mis viajes** (R50) se abre desde el Menú.
   Quien está en la nueva y abre una dirección de la clásica (un enlace viejo, la app instalada) va a la pantalla
   equivalente de la nueva, y al revés. Un cambio hecho en el panel se aplica **al siguiente toque** (cada pantalla mira la
-  interfaz de la cuenta en la base). Entrar (teléfono + PIN), registrarse y el panel son los mismos para las dos.
+  interfaz de la cuenta en la base). Entrar (teléfono + PIN), registrarse, la cuenta en revisión y escoger el PIN nuevo
+  (R4) son los mismos para las dos y, desde nov. 2026, **con el aspecto de la nueva** (mismas direcciones, campos, textos y
+  reglas; la entrada escondida del admin sigue en 5 toques al logo). El panel sigue con el de la clásica.
 - **R85. Mismas reglas, mismos datos.** Las dos interfaces usan las mismas funciones de la base y los mismos datos: un
   pasajero en la nueva y un chofer en la clásica viajan juntos sin notarlo. **La clásica no cambia** mientras convivan;
   se apaga cuando todos estén en la nueva y no haga falta volver. La nueva sigue el **tema del teléfono** (claro u

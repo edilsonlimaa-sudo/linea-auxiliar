@@ -25,14 +25,15 @@ select pg_temp.crear_cuenta('00000000-0000-4000-a000-000000000079', '0414-000007
 set local role authenticated;
 
 select pg_temp.yo('78');
-select is(public.mi_interfaz(), 'clasica', 'R83: por defecto, la clásica');
+select is(public.mi_interfaz(), 'nueva', 'R83: la cuenta que se registra empieza en la nueva');
 select throws_ok($$ update public.perfiles set interfaz = 'nueva' where id = auth.uid() $$, '42501', null, 'R83: el usuario no la cambia solo');
 select throws_ok($$ select public.admin_cambiar_interfaz(array[auth.uid()], 'nueva') $$,
   'P0001', 'Solo el administrador cambia la interfaz', 'R83: solo el admin la cambia');
 
--- R88: la novedad de bienvenida (marcada como postgres, como en la migración); llega a los pasajeros aprobados
+-- R88: la novedad de bienvenida (marcada como postgres, como en la migración); llega a los pasajeros aprobados.
+-- Como cuentas de antes (en la clásica), para probar el paso a la nueva.
 reset role;
-update public.perfiles set estado = 'aprobado', aprobado_en = now()
+update public.perfiles set estado = 'aprobado', aprobado_en = now(), interfaz = 'clasica'
  where id in ('00000000-0000-4000-a000-000000000078', '00000000-0000-4000-a000-000000000079');
 -- Solo una a la vez: la que ya exista deja de serlo dentro de la prueba
 update public.notificaciones set de_bienvenida = false where de_bienvenida;

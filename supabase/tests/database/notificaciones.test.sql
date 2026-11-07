@@ -23,6 +23,8 @@ select public.crear_admin('prueba-notif', 'una-clave-segura', '00000000-0000-400
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-0000000000b1', '0414-00000b1', '{"rol": "pasajero", "nombre": "Ana Pérez"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-0000000000b2', '0414-00000b2', '{"rol": "pasajero", "nombre": "Bea Díaz"}');
 select pg_temp.crear_cuenta('00000000-0000-4000-a000-0000000000b3', '0414-00000b3', '{"rol": "pasajero", "nombre": "Rosa Tovar"}');
+-- Rosa es una cuenta de antes, en la clásica (las nuevas ya empiezan en la nueva, R83)
+update public.perfiles set interfaz = 'clasica' where id = '00000000-0000-4000-a000-0000000000b3';
 update public.perfiles set interfaz = 'nueva'
  where id in ('00000000-0000-4000-a000-0000000000b1', '00000000-0000-4000-a000-0000000000b2');
 -- Para contar solo las de esta prueba, sin importar quién más esté en la nueva en esta base
