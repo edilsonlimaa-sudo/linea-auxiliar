@@ -5,6 +5,7 @@ import Link from "next/link"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { ChoferAvatar } from "@/components/nueva/pasajero/comunes"
+import { SeguirInstagramItem } from "@/components/nueva/pasajero/instagram"
 import { CerrarSesionDrawer, OpinionAppDrawer, SugerenciaDrawer, TemaSelector } from "@/components/nueva/pasajero/menu"
 import { firmarFotos } from "@/lib/fotos"
 import { exigirCuentaAprobada } from "@/lib/sesion"
@@ -55,6 +56,7 @@ export default async function MenuChofer() {
         <section className="divide-y overflow-hidden rounded-3xl border bg-card">
           <SugerenciaDrawer />
           <OpinionAppDrawer />
+          <SeguirInstagramItem />
         </section>
 
         <section className="overflow-hidden rounded-3xl border bg-card">

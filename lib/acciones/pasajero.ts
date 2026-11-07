@@ -5,6 +5,7 @@ import { cookies } from "next/headers"
 import { redirect, RedirectType } from "next/navigation"
 
 import { CIERRE_VISTO } from "@/lib/cierre-visto"
+import { PARAM_SEGUIR } from "@/lib/instagram"
 
 import { esMotivoMeFui, type MotivoMeFui } from "@/lib/motivos-salida"
 import { destinoPara } from "@/lib/sesion"
@@ -119,8 +120,12 @@ export async function calificarViaje(anterior: Resultado, fd: FormData): Promise
   const volver = fd.get("volver")
   // Interfaz nueva: vuelve a la pantalla desde donde calificó (solo direcciones de /n)
   if (typeof volver === "string" && /^\/n(\/[\w-]+)*$/.test(volver)) redirect(volver)
-  // R82: contento con el viaje (4–5 estrellas), Inicio puede pedir su opinión sobre la app
-  redirect(volver === "mis-viajes" ? "/mis-viajes" : volver === "choferes" ? "/choferes" : await destinoPara(estrellas >= 4 ? "/inicio?valorar=1" : "/inicio"))
+  if (volver === "mis-viajes") redirect("/mis-viajes")
+  if (volver === "choferes") redirect("/choferes")
+  // Contento con el viaje (4–5 estrellas): en la clásica, Inicio puede pedir su opinión sobre la app (R82); en la nueva,
+  // ofrece seguirnos en Instagram (R95)
+  const destino = await destinoPara(estrellas >= 4 ? "/inicio?valorar=1" : "/inicio")
+  redirect(destino === "/n" && estrellas >= 4 ? `/n?${PARAM_SEGUIR}=1` : destino)
 }
 
 /** "Ahora no": se puede calificar después desde Choferes o Mis viajes (R45) */

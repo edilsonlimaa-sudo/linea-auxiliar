@@ -9,12 +9,14 @@ import { AvisoTarifa } from "@/components/nueva/pasajero/avisos"
 import { AvisosCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
+import { SeguirInstagramHoja } from "@/components/nueva/pasajero/instagram"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista } from "@/lib/nueva/vistas"
 import { CIERRE_VISTO } from "@/lib/cierre-visto"
+import { COOKIE_INSTAGRAM, PARAM_SEGUIR } from "@/lib/instagram"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { aceptaReservas, ordenarParaPasajero } from "@/lib/viajes"
 
@@ -24,7 +26,7 @@ export const metadata: Metadata = { title: "Línea Auxiliar" }
  * Inicio de la interfaz nueva (§5.21, §8). Con reserva o anotado en la lista hacia Valle Grande, la misma dirección es
  * Mi viaje; si no, "¿Hacia dónde vas?" con el viaje recién terminado arriba (calificar), los avisos y la línea.
  */
-export default async function InicioNueva() {
+export default async function InicioNueva({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva" })
   const ahora = ahoraDelPedido()
   const datos = await cargarInicioPasajero(perfil.id)
@@ -52,6 +54,8 @@ export default async function InicioNueva() {
   // Anotado en la lista no es todavía un viaje (§5.17): su lugar vive en A Valle Grande; Mi viaje empieza al montarse
   const mio = miListaVista(lista)
 
+  const ofrecerInstagram = Boolean((await searchParams)[PARAM_SEGUIR]) && !(await cookies()).has(COOKIE_INSTAGRAM)
+
   const alCentro = ordenarParaPasajero(datos.viajes.filter((v) => v.sentido === "vg_a_centro" && aceptaReservas(v)), datos.porId).length
   const enGina = lista.reduce((n, e) => n + e.personas, 0)
 
@@ -59,6 +63,8 @@ export default async function InicioNueva() {
     <Screen>
       <EnVivo />
       <AppHeader title={`Hola, ${perfil.nombre.split(" ")[0]}`} />
+      {/* R95: tras calificar con 4–5 estrellas (?seguir=1), una vez por teléfono */}
+      <SeguirInstagramHoja ofrecer={ofrecerInstagram} />
       <div className="flex flex-col gap-6 p-4">
         <AvisosCelular recordatorio />
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}

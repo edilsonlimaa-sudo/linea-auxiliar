@@ -690,6 +690,13 @@ muestra donde sirve.)*
   - **Pasajero:** justo después de calificar un viaje con 4 o 5 estrellas, si ya hizo 3 viajes o más.
   - **Chofer:** en Inicio sin viajes abiertos, si ya terminó 10 viajes o más.
   - Nadie la ve si opinó en los últimos **60 días**. **Ahora no** la esconde **14 días** en ese teléfono.
+- **R95. Síguenos en Instagram (@lineaauxiliar).** *(Nov. 2026: la línea abrió su perfil.)* Solo en la interfaz nueva y
+  nunca en medio de un viaje ni en las pantallas de pedir carro o de la lista:
+  - **Menú** (pasajeros y choferes): una línea **"Síguenos en Instagram"** junto a Sugerencias y "¿Qué tal la app?";
+    abre el perfil (app de Instagram o navegador).
+  - **Pasajero, después de calificar un viaje con 4 o 5 estrellas:** al volver a Inicio, una hoja "¡Gracias! ¿Nos sigues
+    en Instagram?" con **Seguir a @lineaauxiliar** y **Ahora no**. Se muestra **una sola vez por teléfono**, toque lo
+    que toque.
 
 ### 5.21 Interfaz nueva: migración controlada
 

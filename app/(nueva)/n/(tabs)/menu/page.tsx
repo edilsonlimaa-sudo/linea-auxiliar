@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
+import { SeguirInstagramItem } from "@/components/nueva/pasajero/instagram"
 import { CerrarSesionDrawer, MiCarnetLink, OpinionAppDrawer, SugerenciaDrawer, TemaSelector } from "@/components/nueva/pasajero/menu"
 
 export const metadata: Metadata = { title: "Menú · Línea Auxiliar" }
@@ -18,6 +19,7 @@ export default function Menu() {
         <section className="divide-y overflow-hidden rounded-3xl border bg-card">
           <SugerenciaDrawer />
           <OpinionAppDrawer />
+          <SeguirInstagramItem />
         </section>
 
         <section className="overflow-hidden rounded-3xl border bg-card">
