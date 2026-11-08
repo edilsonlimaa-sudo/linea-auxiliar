@@ -3,10 +3,12 @@
 import { CheckCircle2, Loader2, Star, X } from "lucide-react"
 import * as React from "react"
 
+import { Arbolito } from "@/components/nueva/pasajero/navidad"
 import { Button } from "@/components/nueva/ui/button"
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/nueva/ui/drawer"
 import { Textarea } from "@/components/nueva/ui/textarea"
 import { calificarViaje, omitirCalificacion } from "@/lib/acciones/pasajero"
+import { NAVIDAD } from "@/lib/temporada"
 import { cn } from "@/lib/utils"
 import { SENTIDOS, type Sentido } from "@/lib/viajes"
 
@@ -16,7 +18,8 @@ const SIGNIFICADO = ["", "Muy mal", "Mal", "Regular", "Bien", "Excelente"]
 export type ViajePorCalificar = { reservaId: string; viajeId: string; choferId: string; chofer: string; sentido: Sentido }
 
 // Confeti fijo (mismo dibujo en el servidor y en el celular): posición, color, demora y giro de cada papelito
-const COLORES = ["var(--primary)", "#f59e0b", "#fb7185", "#10b981", "#a78bfa"]
+// Los colores salen de globals.css (--confeti-*): en la temporada navideña son los de la fiesta (R99)
+const COLORES = ["var(--confeti-1)", "var(--confeti-2)", "var(--confeti-3)", "var(--confeti-4)", "var(--confeti-5)"]
 const CONFETI = Array.from({ length: 28 }, (_, i) => ({
   "--x": `${(i * 37) % 100}%`,
   "--c": COLORES[i % COLORES.length],
@@ -30,7 +33,7 @@ const CONFETI = Array.from({ length: 28 }, (_, i) => ({
  * una abre el resto: etiquetas y comentario opcionales). "Ahora no" o la ✕ lo dejan para Mis viajes; las dos, igual
  * que calificar, llevan a Inicio. Sin Pago Móvil: en la nueva va solo a bordo (R74).
  */
-export function LlegasteBien({ viaje }: { viaje: ViajePorCalificar }) {
+export function LlegasteBien({ viaje, esferas = null }: { viaje: ViajePorCalificar; esferas?: number | null }) {
   const [omitiendo, omitir] = React.useTransition()
   const nombre = viaje.chofer.split(" ")[0]
   const salir = () => omitir(async () => void (await omitirCalificacion(viaje.reservaId)))
@@ -51,14 +54,30 @@ export function LlegasteBien({ viaje }: { viaje: ViajePorCalificar }) {
 
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex size-24 items-center justify-center rounded-full bg-primary/10 text-primary">
-            <CheckCircle2 className="size-12" />
-          </div>
+          {esferas ? (
+            <Arbolito esferas={esferas} nueva className="h-[124px] w-[96px]" />
+          ) : (
+            <div className="flex size-24 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <CheckCircle2 className="size-12" />
+            </div>
+          )}
           <h1 className="font-heading text-3xl font-semibold">¡Llegaste bien!</h1>
           <p className="text-muted-foreground">
             {SENTIDOS[viaje.sentido].largo} · con {viaje.chofer}
           </p>
         </div>
+
+        {/* R101: la temporada navideña (hasta el 24/12) */}
+        {esferas ? (
+          <p className="w-full rounded-3xl border border-[var(--navidad-oro)]/40 bg-[var(--navidad-oro)]/10 p-4 text-left">
+            <span className="block font-heading text-lg font-semibold">
+              {esferas >= NAVIDAD.esferas ? "¡Completaste tu arbolito!" : "¡Nueva esfera en tu arbolito!"}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              {esferas >= NAVIDAD.esferas ? "Tus 24 esferas ya brillan. ¡Felices fiestas!" : `Ya van ${esferas} de ${NAVIDAD.esferas}.`}
+            </span>
+          </p>
+        ) : null}
 
         <section className="flex w-full flex-col items-center gap-3 rounded-3xl border bg-card p-5">
           <p className="font-heading text-lg font-semibold">¿Cómo te fue con {nombre}?</p>

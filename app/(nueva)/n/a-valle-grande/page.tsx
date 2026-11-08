@@ -8,6 +8,7 @@ import { cargarInicioPasajero } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { ahoraDelPedido, filaVista, miListaVista, unidadVista } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
+import { fraseDelDia, temporadaNavidad } from "@/lib/temporada"
 import { carrosHaciaValle } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "A Valle Grande · Línea Auxiliar" }
@@ -24,7 +25,14 @@ export default async function AValleGrande() {
   return (
     <Screen>
       <EnVivo />
-      <PantallaValle mio={miListaVista(lista)} filas={lista.map(filaVista)} carros={carros} titulo="A Valle Grande" backHref="/n" />
+      <PantallaValle
+        mio={miListaVista(lista)}
+        filas={lista.map(filaVista)}
+        carros={carros}
+        titulo="A Valle Grande"
+        backHref="/n"
+        frase={temporadaNavidad() ? fraseDelDia() : null}
+      />
     </Screen>
   )
 }

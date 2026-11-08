@@ -37,7 +37,7 @@ export function Asientos({ puestos, libres, chicas = false }: { puestos: number;
 /** La foto del chofer o sus iniciales */
 export function ChoferAvatar({ chofer, className }: { chofer: Pick<ChoferVista, "nombre" | "iniciales" | "fotoUrl">; className?: string }) {
   return (
-    <Avatar className={cn("size-12", className)}>
+    <Avatar data-chofer-avatar className={cn("size-12", className)}>
       {chofer.fotoUrl ? <AvatarImage src={chofer.fotoUrl} alt={`Foto de ${chofer.nombre}`} /> : null}
       <AvatarFallback className="bg-primary/10 font-heading font-semibold text-primary">{chofer.iniciales}</AvatarFallback>
     </Avatar>

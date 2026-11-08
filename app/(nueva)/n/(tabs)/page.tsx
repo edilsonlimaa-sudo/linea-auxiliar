@@ -11,13 +11,16 @@ import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
 import { SeguirInstagramHoja } from "@/components/nueva/pasajero/instagram"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
+import { ArbolitoCard } from "@/components/nueva/pasajero/navidad"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
+import { contarEsferas } from "@/lib/datos/navidad"
 import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista } from "@/lib/nueva/vistas"
 import { CIERRE_VISTO } from "@/lib/cierre-visto"
 import { COOKIE_INSTAGRAM, PARAM_SEGUIR } from "@/lib/instagram"
 import { exigirCuentaAprobada } from "@/lib/sesion"
+import { temporadaNavidad } from "@/lib/temporada"
 import { aceptaReservas, ordenarParaPasajero } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Línea Auxiliar" }
@@ -42,10 +45,12 @@ export default async function InicioNueva({ searchParams }: { searchParams: Prom
     )
   }
 
-  const [pendiente, cierre, lista] = await Promise.all([
+  const temporada = temporadaNavidad()
+  const [pendiente, cierre, lista, esferas] = await Promise.all([
     cargarCalificacionPendiente(perfil.id),
     cargarAvisoDeCierre(perfil.id),
     cargarListaGina(),
+    temporada ? contarEsferas(perfil.id) : 0,
   ])
   // Recién terminó un viaje sin calificar (R45): primero la pantalla de paso "Llegaste bien"
   if (pendiente) redirect("/n/llegaste")
@@ -69,6 +74,8 @@ export default async function InicioNueva({ searchParams }: { searchParams: Prom
         <AvisosCelular recordatorio />
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
         <AvisoTarifa />
+        {/* R100: la temporada navideña */}
+        {temporada ? <ArbolitoCard temporada={temporada} esferas={esferas} /> : null}
         <DirectionPicker alCentro={alCentro} enGina={enGina} miLugar={mio?.posicion ?? null} />
         <LineaAhora choferes={datos.enServicio.map(servicioVista)} />
       </div>

@@ -1,6 +1,7 @@
 import "server-only"
 
 import { redirect } from "next/navigation"
+import { cache } from "react"
 
 import type { Database } from "@/lib/database.types"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
@@ -12,14 +13,15 @@ export async function obtenerPerfil(): Promise<Perfil | null> {
   return (await obtenerSesion()).perfil
 }
 
-async function obtenerSesion(): Promise<{ conSesion: boolean; perfil: Perfil | null }> {
+// Una vez por petición (cache): el layout y la página la piden los dos
+const obtenerSesion = cache(async (): Promise<{ conSesion: boolean; perfil: Perfil | null }> => {
   const supabase = await crearClienteServidor()
   const { data } = await supabase.auth.getClaims()
   const id = data?.claims?.sub
   if (!id) return { conSesion: false, perfil: null }
   const { data: perfil } = await supabase.from("perfiles").select("*").eq("id", id).maybeSingle()
   return { conSesion: true, perfil }
-}
+})
 
 /** Sin sesión va a la entrada; con sesión pero sin cuenta, se cierra esa sesión (si no, proxy.ts la devuelve aquí) */
 function sacar(conSesion: boolean, admin = false): never {

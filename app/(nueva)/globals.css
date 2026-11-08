@@ -408,3 +408,137 @@
         opacity: 0.6;
     }
 }
+
+/* ---------------------------------------------------------------------------
+ * Temporada navideña (§5.25, R98–R99). Se enciende con la marca [data-temporada="navidad"] que pone
+ * app/(nueva)/n/layout.tsx solo para el pasajero y solo en las fechas. Todo es presentación: sin la marca, nada aplica.
+ * ------------------------------------------------------------------------- */
+:root {
+    --navidad-rojo: #e5484d;
+    --navidad-verde: #1f7a4d;
+    --navidad-oro: #f5b400;
+    --navidad-nieve: #f5f5f5;
+    --navidad-texto: #a16207;
+    /* El confeti de "¡Llegaste bien!" (fuera de temporada, los de siempre) */
+    --confeti-1: var(--primary);
+    --confeti-2: #f59e0b;
+    --confeti-3: #fb7185;
+    --confeti-4: #10b981;
+    --confeti-5: #a78bfa;
+}
+.dark {
+    --navidad-texto: #ffd76a;
+}
+:root:has([data-temporada="navidad"]) {
+    --aurora-1: #f6b3b0;
+    --aurora-2: #a8dfc0;
+    --aurora-3: #ffe39a;
+    --confeti-1: var(--navidad-rojo);
+    --confeti-2: #30a46c;
+    --confeti-3: var(--navidad-oro);
+    --confeti-4: var(--navidad-nieve);
+    --confeti-5: var(--navidad-rojo);
+}
+:root.dark:has([data-temporada="navidad"]) {
+    --aurora-1: #8a1c24;
+    --aurora-2: #145c3a;
+    --aurora-3: #9a7410;
+}
+
+/* La guirnalda de luces cuelga de la cabecera, entre la barra y la franja de la conexión */
+:root:has([data-temporada="navidad"]) [data-app-header] > div:first-child {
+    margin-bottom: 14px;
+}
+:root:has([data-temporada="navidad"]) [data-app-header]::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: calc(env(safe-area-inset-top) + 3.5rem - 3px);
+    height: 20px;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='20' viewBox='0 0 120 20'%3E%3Cpath d='M0 2 Q15 10 30 2 Q45 10 60 2 Q75 10 90 2 Q105 10 120 2' fill='none' stroke='%2394a3b8' stroke-width='1.2'/%3E%3Crect x='13.5' y='5' width='3' height='3' rx='.8' fill='%2364748b'/%3E%3Cellipse cx='15' cy='12' rx='3.2' ry='4.6' fill='%23e5484d'/%3E%3Crect x='43.5' y='5' width='3' height='3' rx='.8' fill='%2364748b'/%3E%3Cellipse cx='45' cy='12' rx='3.2' ry='4.6' fill='%2330a46c'/%3E%3Crect x='73.5' y='5' width='3' height='3' rx='.8' fill='%2364748b'/%3E%3Cellipse cx='75' cy='12' rx='3.2' ry='4.6' fill='%23f5b400'/%3E%3Crect x='103.5' y='5' width='3' height='3' rx='.8' fill='%2364748b'/%3E%3Cellipse cx='105' cy='12' rx='3.2' ry='4.6' fill='%235aa2f8'/%3E%3C/svg%3E")
+        repeat-x left top / 120px 20px;
+    animation: luces-titilan 2.4s ease-in-out infinite alternate;
+}
+@keyframes luces-titilan {
+    from {
+        filter: brightness(0.85) saturate(0.9);
+    }
+    to {
+        filter: brightness(1.2) saturate(1.25) drop-shadow(0 0 3px rgb(255 215 106 / 0.45));
+    }
+}
+
+/* Los choferes con gorrito */
+:root:has([data-temporada="navidad"]) [data-chofer-avatar]::before {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    top: -30%;
+    right: -20%;
+    width: 68%;
+    aspect-ratio: 64 / 56;
+    rotate: 20deg;
+    pointer-events: none;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 56'%3E%3Cpath d='M8 44 C14 22 30 6 52 10 C44 18 42 30 46 44 Z' fill='%23c62f37'/%3E%3Crect x='2' y='40' width='50' height='12' rx='6' fill='%23f5f5f5' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3Ccircle cx='54' cy='10' r='7' fill='%23f5f5f5' stroke='%23cbd5e1' stroke-width='1.5'/%3E%3C/svg%3E")
+        no-repeat center / contain;
+}
+
+/* Mi lugar en la lista es una caja de regalo */
+:root:has([data-temporada="navidad"]) [data-lugar] {
+    position: relative;
+    color: #fff;
+    background: linear-gradient(160deg, #2a3a7a, #1d2a5a);
+}
+:root:has([data-temporada="navidad"]) [data-lugar]::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    width: 12px;
+    margin-left: -6px;
+    background: var(--navidad-rojo);
+}
+:root:has([data-temporada="navidad"]) [data-lugar]::after {
+    content: "";
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    width: 52px;
+    height: 22px;
+    translate: -50% 0;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 26'%3E%3Cpath d='M32 22 C20 2 4 4 8 16 C10 22 22 22 32 22 Z' fill='%23e5484d'/%3E%3Cpath d='M32 22 C44 2 60 4 56 16 C54 22 42 22 32 22 Z' fill='%23e5484d'/%3E%3Ccircle cx='32' cy='21' r='5' fill='%23c3323a'/%3E%3C/svg%3E")
+        no-repeat center / contain;
+}
+:root:has([data-temporada="navidad"]) [data-lugar] > span {
+    position: relative;
+    text-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+}
+
+/* El carro del mapa con su arbolito en el techo */
+:root:has([data-temporada="navidad"]) .arbol-techo {
+    display: inline;
+}
+
+/* La esfera nueva del arbolito (R101) brilla */
+.esfera-nueva {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: esfera-brilla 1.4s ease-in-out infinite alternate;
+}
+@keyframes esfera-brilla {
+    from {
+        opacity: 0.15;
+        scale: 0.8;
+    }
+    to {
+        opacity: 0.45;
+        scale: 1.15;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    :root:has([data-temporada="navidad"]) [data-app-header]::after,
+    .esfera-nueva {
+        animation: none;
+    }
+}

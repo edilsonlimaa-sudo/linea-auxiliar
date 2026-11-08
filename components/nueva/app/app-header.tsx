@@ -16,6 +16,7 @@ export function AppHeader({
 }) {
   return (
     <header
+      data-app-header
       className={cn(
         "sticky top-0 z-20 border-b bg-background/70 pt-[env(safe-area-inset-top)] backdrop-blur",
         className

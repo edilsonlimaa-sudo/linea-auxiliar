@@ -59,6 +59,12 @@ export const iconoCarroArriba = (L: typeof import("leaflet")) =>
           <rect x="6.5" y="20" width="13" height="10.5" rx="2" fill="#fff" opacity=".18"/>
           <circle cx="6" cy="4.5" r="1.6" fill="#fff7c2"/>
           <circle cx="20" cy="4.5" r="1.6" fill="#fff7c2"/>
+          <g class="arbol-techo" display="none">
+            <path d="M13 15.5 l2.2 4 4.3-1-2.4 3.8 3.4 2.9-4.4.6.4 4.4-3.5-2.7-3.5 2.7.4-4.4-4.4-.6 3.4-2.9-2.4-3.8 4.3 1Z" fill="#1f7a4d" stroke="#14532d" stroke-width=".6"/>
+            <circle cx="10.5" cy="22" r="1.2" fill="#e5484d"/><circle cx="15.8" cy="21" r="1.2" fill="#5aa2f8"/>
+            <circle cx="12" cy="27" r="1.2" fill="#f5f5f5"/><circle cx="16" cy="26.5" r="1.2" fill="#e5484d"/>
+            <circle cx="13" cy="23.8" r="1.6" fill="#f5b400"/>
+          </g>
         </svg>
       </div>
     </div>`,

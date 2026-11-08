@@ -863,6 +863,27 @@ microcondominios en la Zona Industrial. Antes de abrir, se mide cuántos pasajer
 - **R97. El admin ve los interesados.** En el panel, **Interesados** (Personas): cuántos pasajeros y choferes, por
   microcondominio y por franja, y la lista (la más nueva primero) con **WhatsApp** a cada uno. Solo el admin los ve.
 
+### 5.25 Temporada navideña
+
+*(Nov. 2026: en Venezuela la Navidad empieza temprano. Un tema de temporada para el pasajero de la interfaz nueva,
+solo de presentación: no cambia ninguna regla y al terminar el app vuelve sola a como era.)*
+
+- **R98. Fechas.** El tema rige del **9 de noviembre de 2026 al 6 de enero de 2027** (día de Reyes), por la fecha de
+  Caracas. Lo decide el servidor; no hay botón para encenderlo ni apagarlo. Solo el **pasajero de la interfaz nueva**:
+  el chofer, la clásica, el acceso y el panel no cambian.
+- **R99. El aspecto.** La aurora de arriba pasa a rojo, verde y dorado (en el claro, más suaves); una guirnalda de
+  luces cuelga de la cabecera y titila despacio (quieta si el teléfono pide menos movimiento); los choferes llevan
+  gorrito en su foto; en el mapa de Mi viaje el carro lleva un arbolito en el techo; en A Valle Grande el número de mi
+  lugar es una caja de regalo y una frase del día acompaña la espera; en "¡Llegaste bien!" el confeti es rojo, verde,
+  dorado y blanco. Botones, textos y estados siguen en el azul de la app.
+- **R100. Tu arbolito de la Línea.** En Inicio, una tarjeta con un arbolito: **cada viaje** del pasajero desde el
+  9/11 hasta el **24 de diciembre** cuelga una esfera, y con **24** queda completo. Cuenta los viajes en que se montó
+  (`subio` en un viaje terminado, o `bajo`), uno por reserva aunque fuera en grupo. Arriba, cuántos días faltan para
+  Navidad. Del 25/12 al 6/1 el arbolito queda como quedó, con "¡Feliz Navidad!". No se guarda nada nuevo: se cuenta de
+  las reservas; no hay premio ni regla, es solo el gusto de completarlo.
+- **R101. La esfera al llegar.** En "¡Llegaste bien!", hasta el 24/12, el arbolito aparece grande con la esfera nueva
+  resaltada y "¡Nueva esfera en tu arbolito! Ya van N de 24" ("¡Completaste tu arbolito!" al llegar a 24).
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |

@@ -6,6 +6,7 @@ import * as React from "react"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
 import { Asientos, ChoferAvatar, libresLabel, personasLabel } from "@/components/nueva/pasajero/comunes"
+import { FraseDelDia } from "@/components/nueva/pasajero/navidad"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/nueva/ui/avatar"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
@@ -45,12 +46,15 @@ export function PantallaValle({
   carros,
   titulo,
   backHref,
+  frase = null,
 }: {
   mio: MiListaVista | null
   filas: FilaVista[]
   carros: UnidadVista[]
   titulo: string
   backHref?: string
+  /** Temporada navideña (R99): la frase del día */
+  frase?: string | null
 }) {
   return (
     <>
@@ -63,6 +67,7 @@ export function PantallaValle({
 
         {mio ? <MiLugar mio={mio} filas={filas} /> : <CuantosEsperan filas={filas} />}
         {mio && !mio.diceQueSubio ? <SigoAquiCard venceEn={mio.venceEn} /> : null}
+        {frase ? <FraseDelDia frase={frase} /> : null}
 
         <section className="flex flex-col gap-3">
           <h3 className="font-heading text-lg font-semibold">Carros que vienen</h3>
@@ -103,7 +108,7 @@ function MiLugar({ mio, filas }: { mio: MiListaVista; filas: FilaVista[] }) {
         <span className="text-sm text-muted-foreground">{personasLabel(mio.personas)}</span>
       </div>
       <div className="flex items-center gap-4">
-        <div className="flex size-20 shrink-0 flex-col items-center justify-center rounded-3xl bg-primary/10 text-primary">
+        <div data-lugar className="flex size-20 shrink-0 flex-col items-center justify-center rounded-3xl bg-primary/10 text-primary">
           <span className="font-heading text-4xl leading-none font-semibold tabular-nums">{mio.posicion}</span>
           <span className="text-[10px] font-medium tracking-wide uppercase opacity-80">lugar</span>
         </div>
