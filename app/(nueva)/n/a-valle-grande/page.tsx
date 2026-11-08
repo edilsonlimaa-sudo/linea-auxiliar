@@ -31,7 +31,7 @@ export default async function AValleGrande() {
         carros={carros}
         titulo="A Valle Grande"
         backHref="/n"
-        frase={temporadaNavidad() ? fraseDelDia() : null}
+        frase={temporadaNavidad(new Date(), perfil.de_prueba) ? fraseDelDia() : null}
       />
     </Screen>
   )

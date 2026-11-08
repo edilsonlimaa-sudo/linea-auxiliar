@@ -24,10 +24,10 @@ function hoyDeTemporada(ahora: Date): string {
   return fingida && /^\d{4}-\d{2}-\d{2}$/.test(fingida) ? fingida : diaDeHoy(ahora)
 }
 
-/** La temporada de hoy, o null fuera de las fechas (R98) */
-export function temporadaNavidad(ahora = new Date()): Temporada | null {
+/** La temporada de hoy, o null fuera de las fechas (R98). `anticipada`: las cuentas de prueba (R86) la ven desde antes */
+export function temporadaNavidad(ahora = new Date(), anticipada = false): Temporada | null {
   const hoy = hoyDeTemporada(ahora)
-  if (hoy < NAVIDAD.desde || hoy > NAVIDAD.hasta) return null
+  if ((!anticipada && hoy < NAVIDAD.desde) || hoy > NAVIDAD.hasta) return null
   const dias = diasEntre(hoy, NAVIDAD.navidad)
   const cuentaRegresiva =
     dias < 0 ? null : dias === 0 ? "¡Hoy es Navidad!" : dias === 1 ? "¡Mañana es Navidad!" : `Faltan ${dias} días para Navidad`

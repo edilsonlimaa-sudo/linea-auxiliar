@@ -45,7 +45,7 @@ export default async function InicioNueva({ searchParams }: { searchParams: Prom
     )
   }
 
-  const temporada = temporadaNavidad()
+  const temporada = temporadaNavidad(new Date(), perfil.de_prueba)
   const [pendiente, cierre, lista, esferas] = await Promise.all([
     cargarCalificacionPendiente(perfil.id),
     cargarAvisoDeCierre(perfil.id),

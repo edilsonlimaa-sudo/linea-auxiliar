@@ -869,7 +869,8 @@ microcondominios en la Zona Industrial. Antes de abrir, se mide cuántos pasajer
 solo de presentación: no cambia ninguna regla y al terminar el app vuelve sola a como era.)*
 
 - **R98. Fechas.** El tema rige del **9 de noviembre de 2026 al 6 de enero de 2027** (día de Reyes), por la fecha de
-  Caracas. Lo decide el servidor; no hay botón para encenderlo ni apagarlo. Solo el **pasajero de la interfaz nueva**:
+  Caracas. Lo decide el servidor; no hay botón para encenderlo ni apagarlo. Las **cuentas de prueba** (R86) lo ven desde
+  antes, para revisarlo (sus esferas igual cuentan desde el 9/11). Solo el **pasajero de la interfaz nueva**:
   el chofer, la clásica, el acceso y el panel no cambian.
 - **R99. El aspecto.** La aurora de arriba pasa a rojo, verde y dorado (en el claro, más suaves); una guirnalda de
   luces cuelga de la cabecera y titila despacio (quieta si el teléfono pide menos movimiento); los choferes llevan

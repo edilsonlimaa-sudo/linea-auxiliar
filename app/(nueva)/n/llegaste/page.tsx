@@ -16,7 +16,7 @@ export default async function Llegaste() {
   const pendiente = await cargarCalificacionPendiente(perfil.id)
   if (!pendiente) redirect("/n")
   // R101: hasta el 24/12, la esfera que colgó este viaje
-  const temporada = temporadaNavidad()
+  const temporada = temporadaNavidad(new Date(), perfil.de_prueba)
   const esferas = temporada?.cuentaEsferas ? await contarEsferas(perfil.id) : null
 
   return (
