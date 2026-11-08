@@ -842,6 +842,27 @@ choferes, la clásica y avisos automáticos.)*
   pendiente y recién creada (15 min); si el aviso falla, el registro sigue igual. Al salir del panel, ese aparato deja
   de recibirlos.
 
+### 5.24 Rutas nuevas: medir el interés antes de abrirlas
+
+*(Nov. 2026: la línea quiere abrir **El Faro ⇄ Centro**, igual a Valle Grande ⇄ Centro. El Faro es un complejo de 8
+microcondominios en la Zona Industrial. Antes de abrir, se mide cuántos pasajeros y choferes hay.)*
+
+- **R96. Me interesa la ruta [servidor].** Una página pública por ruta nueva (**`/faro`**), sin cuenta ni PIN, con el
+  aspecto de la interfaz nueva. Dice qué es la Línea y que la ruta todavía no existe, y pregunta:
+  - **¿Cómo la usarías?** Pasajero o chofer.
+  - **Nombre y apellido** y **WhatsApp** (obligatorios; el celular venezolano, como en el registro).
+  - **¿En qué microcondominio vives?** (texto, obligatorio).
+  - **¿A qué hora?** Una o varias franjas: temprano (5–8 a. m.), mañana (8 a. m.–12 m.), tarde (12 m.–6 p. m.) y noche
+    (6–10 p. m.). Al pasajero: cuándo viajaría; al chofer: cuándo podría trabajar.
+  - Pasajero: **¿cuántos días a la semana?** (1–2, 3–4 o casi todos). Chofer: **tu carro** (modelo y color, opcional).
+  - **Comentario** (opcional, hasta 280 letras).
+  Al enviar: "¡Listo!", que le escribiremos por WhatsApp cuando arranque la ruta, y **Compartir por WhatsApp** (la misma
+  página). Mismo teléfono en la misma ruta = **la misma persona**: un nuevo envío actualiza sus datos, no se duplica.
+  No crea cuenta ni da acceso a la app. Como cualquiera la puede abrir, la base limita los envíos (como mucho 300 por
+  hora por ruta) y un campo trampa escondido descarta robots.
+- **R97. El admin ve los interesados.** En el panel, **Interesados** (Personas): cuántos pasajeros y choferes, por
+  microcondominio y por franja, y la lista (la más nueva primero) con **WhatsApp** a cada uno. Solo el admin los ve.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -860,6 +881,7 @@ choferes, la clásica y avisos automáticos.)*
 | Alertas de auxilio | Solo choferes |
 | Avisos de pago de la cuota (R77) | El propio chofer y el admin |
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
+| Interesados en una ruta nueva (R96–R97) | Solo el admin (quien lo envía no puede volver a leerlo) |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 | Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |

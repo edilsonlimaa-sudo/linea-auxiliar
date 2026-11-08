@@ -363,6 +363,51 @@ export type Database = {
           },
         ]
       }
+      interesados: {
+        Row: {
+          actualizado_en: string
+          carro: string | null
+          comentario: string | null
+          creado_en: string
+          frecuencia: string | null
+          horarios: string[]
+          id: string
+          nombre: string
+          rol: string
+          ruta: string
+          sector: string
+          telefono: string
+        }
+        Insert: {
+          actualizado_en?: string
+          carro?: string | null
+          comentario?: string | null
+          creado_en?: string
+          frecuencia?: string | null
+          horarios?: string[]
+          id?: string
+          nombre: string
+          rol: string
+          ruta: string
+          sector: string
+          telefono: string
+        }
+        Update: {
+          actualizado_en?: string
+          carro?: string | null
+          comentario?: string | null
+          creado_en?: string
+          frecuencia?: string | null
+          horarios?: string[]
+          id?: string
+          nombre?: string
+          rol?: string
+          ruta?: string
+          sector?: string
+          telefono?: string
+        }
+        Relationships: []
+      }
       lista_gina: {
         Row: {
           cerrada_en: string | null
@@ -1527,6 +1572,29 @@ export type Database = {
           viajes: number
         }[]
       }
+      admin_interesados: {
+        Args: { p_ruta: string }
+        Returns: {
+          actualizado_en: string
+          carro: string | null
+          comentario: string | null
+          creado_en: string
+          frecuencia: string | null
+          horarios: string[]
+          id: string
+          nombre: string
+          rol: string
+          ruta: string
+          sector: string
+          telefono: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "interesados"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_marcar_prueba: {
         Args: { p_id: string; p_prueba: boolean }
         Returns: undefined
@@ -1979,6 +2047,20 @@ export type Database = {
       quitar_anotado: { Args: { p_reserva: string }; Returns: undefined }
       quitar_pago_movil: { Args: never; Returns: undefined }
       quitar_suscripcion: { Args: { p_endpoint: string }; Returns: undefined }
+      registrar_interes: {
+        Args: {
+          p_carro?: string
+          p_comentario?: string
+          p_frecuencia?: string
+          p_horarios?: string[]
+          p_nombre: string
+          p_rol: string
+          p_ruta: string
+          p_sector: string
+          p_telefono: string
+        }
+        Returns: undefined
+      }
       reservar: {
         Args: {
           p_lat?: number

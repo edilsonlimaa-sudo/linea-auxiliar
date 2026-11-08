@@ -12,6 +12,7 @@ import {
   LayoutDashboardIcon,
   ListOrderedIcon,
   LogOutIcon,
+  MapPinPlusIcon,
   MoonIcon,
   RouteIcon,
   StarIcon,
@@ -66,6 +67,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
       { href: "/admin/choferes", titulo: "Choferes", icono: CarFrontIcon },
       { href: "/admin/pasajeros", titulo: "Pasajeros", icono: UsersIcon },
       { href: "/admin/cuotas", titulo: "Cuotas", icono: BanknoteIcon, contador: "cuotas", accion: true },
+      { href: "/admin/interesados", titulo: "Interesados (El Faro)", icono: MapPinPlusIcon },
     ],
   },
   {
