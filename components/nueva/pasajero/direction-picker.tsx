@@ -1,13 +1,25 @@
 import { ArrowRight, Building2, Home } from "lucide-react"
 import Link from "next/link"
+import type * as React from "react"
 
 import { cn } from "@/lib/utils"
 
 /**
  * "¿Hacia dónde vas?" (§8): nunca viene un sentido escogido; cada uno es su pantalla. Con cuántas unidades van al Centro
- * y cuántos esperan en Gina; anotado en la lista, su lugar (se ve en A Valle Grande).
+ * y cuántos esperan en Gina; anotado en la lista, su lugar (se ve en A Valle Grande). `contexto`: los chips debajo del
+ * título (tarifa especial, viajes gratis), solo cuando valen.
  */
-export function DirectionPicker({ alCentro, enGina, miLugar }: { alCentro: number; enGina: number; miLugar: number | null }) {
+export function DirectionPicker({
+  alCentro,
+  enGina,
+  miLugar,
+  contexto,
+}: {
+  alCentro: number
+  enGina: number
+  miLugar: number | null
+  contexto?: React.ReactNode
+}) {
   const opciones = [
     {
       href: "/n/al-centro",
@@ -33,6 +45,8 @@ export function DirectionPicker({ alCentro, enGina, miLugar }: { alCentro: numbe
   return (
     <section className="flex flex-col gap-3">
       <h2 className="font-heading text-2xl font-semibold">¿Hacia dónde vas?</h2>
+      {/* Vacía (ningún chip vale ahora), no ocupa lugar */}
+      {contexto ? <div className="flex flex-wrap gap-2 empty:hidden">{contexto}</div> : null}
       {opciones.map(({ href, titulo, detalle, icon: Icon, mio }) => (
         <Link
           key={href}

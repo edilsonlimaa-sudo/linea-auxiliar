@@ -43,6 +43,8 @@ export function AvisosCelular({ recordatorio = false }: { recordatorio?: boolean
 
   // Activados, la tarjeta no aparece: la app no ofrece apagarlos (quien no los quiera, los bloquea en el teléfono)
   if (cerrado || estado === "cargando" || estado === "sin-soporte" || estado === "activo") return null
+  // Bloqueados no se arreglan con un toque: Inicio no los recuerda, solo lo dice la pestaña Notificaciones (§8, R90)
+  if (recordatorio && estado === "bloqueado") return null
 
   const textos: Record<"iphone" | "bloqueado" | "inactivo", { icono: React.ReactNode; titulo: string; texto: string }> = {
     inactivo: {

@@ -18,18 +18,27 @@ import { pagarConViajeGratis } from "@/lib/acciones/pasajero"
 
 const viajesTexto = (n: number) => (n === 1 ? "1 viaje gratis" : `${n} viajes gratis`)
 
-/** R103: en Inicio, cuántos le regalaron y cuándo se usan */
-export function TienesViajesGratis({ cuantos }: { cuantos: number }) {
+/** R103: en Inicio, un chip debajo de "¿Hacia dónde vas?" (§8); al tocarlo explica cómo se usan */
+export function ChipViajesGratis({ cuantos }: { cuantos: number }) {
   return (
-    <section className="flex items-center gap-3 rounded-3xl border border-success/30 bg-success/10 p-4">
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-success text-success-foreground">
-        <Gift className="size-6" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="font-heading text-lg font-semibold">Tienes {viajesTexto(cuantos)}</p>
-        <p className="text-sm text-muted-foreground">Úsalos al pagar, cuando vayas a bordo.</p>
-      </div>
-    </section>
+    <Drawer showSwipeHandle>
+      <DrawerTrigger className="inline-flex items-center gap-1.5 rounded-full bg-success/15 px-3 py-1.5 text-sm font-medium text-success outline-none focus-visible:ring-3 focus-visible:ring-ring/50">
+        <Gift className="size-4" />
+        {viajesTexto(cuantos)}
+      </DrawerTrigger>
+      <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
+        <DrawerHeader>
+          <DrawerTitle className="font-heading text-xl">Tienes {viajesTexto(cuantos)}</DrawerTitle>
+          <DrawerDescription>
+            Úsalos al pagar, cuando vayas a bordo: en Mi viaje, debajo de Pagar, toca &quot;Pagar con un viaje gratis&quot;. El chofer
+            lo ve al momento. No vencen.
+          </DrawerDescription>
+        </DrawerHeader>
+        <DrawerFooter>
+          <DrawerClose render={<Button size="lg" />}>Entendido</DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 

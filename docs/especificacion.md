@@ -676,6 +676,8 @@ muestra donde sirve.)*
   - **Al pagar**, siempre: en Mi viaje, en el Pago Móvil del chofer: "Pasaje: Bs. 1.300 · tarifa nocturna".
   - **Aviso de tarifa especial** en Inicio del pasajero, **solo cuando rige** (o 30 min antes de que empiece la
     nocturna: "Desde las 6:00 p. m. el pasaje es Bs. 1.300"). Se cierra con ✕ y no vuelve en esa noche o ese domingo.
+    En la interfaz nueva es un **chip** debajo de "¿Hacia dónde vas?" ("Domingo · Bs. 1.300"), sin ✕: se va solo
+    cuando deja de regir (§8, Inicio de la interfaz nueva).
   - **Al apartar o anotarse en la lista**, una línea en la hoja solo si rige la especial.
   - **Chofer**: en la tarjeta del viaje en ruta, una línea solo si rige la especial, para cobrar bien.
   - La tarifa normal no se anuncia fuera del momento de pagar.
@@ -826,8 +828,9 @@ choferes, la clásica y avisos automáticos.)*
     celular?" dice para qué sirven (el carro al Centro que pidió, R94, y las novedades de la línea) con **Activar
     avisos** y **Ahora no**. En un iPhone sin la app instalada, explica cómo instalarla. Una sola vez por aparato; no
     aparece si ya están activados o bloqueados.
-  - **Recordatorio en Inicio:** quien dijo "Ahora no" ve arriba de Inicio la tarjeta de los avisos (la de la pestaña
-    Notificaciones) **desde el día siguiente**; con ✕ vuelve a los **7 días**, como mucho **3 veces**.
+  - **Recordatorio en Inicio:** quien dijo "Ahora no" ve en Inicio (al final, debajo de la línea) la tarjeta de los
+    avisos (la de la pestaña Notificaciones) **desde el día siguiente**; con ✕ vuelve a los **7 días**, como mucho
+    **3 veces**. Si están **bloqueados** no se recuerda en Inicio (no se arregla con un toque): lo dice la pestaña.
   - **En el momento de pedir un aviso** (R94): si el aparato nunca respondió, tocar **Avísame** pide
     el permiso en el mismo toque.
 - **En el panel** (**Notificaciones**, en Operación): el formulario para mandar y la lista de las enviadas, la más nueva
@@ -895,7 +898,7 @@ los choferes: quien lleva al premiado no le cobra ese pasaje y nadie se lo devue
   el motivo ("Premio de la semana 3"). Un regalo mal puesto se puede quitar si todavía no se usó. Solo el admin regala;
   los viajes gratis **no vencen**.
 - **R103. El pasajero paga con su viaje gratis [servidor].** Solo en la interfaz nueva. Con viajes gratis, Inicio lo
-  dice ("Tienes 3 viajes gratis · úsalos al pagar, cuando vayas a bordo"). Es una **forma de pagar**: a bordo, en Mi
+  dice con un chip ("3 viajes gratis"; al tocarlo: "úsalos al pagar, cuando vayas a bordo"). Es una **forma de pagar**: a bordo, en Mi
   viaje, debajo de **Pagar a X** (Pago Móvil) está **Pagar con un viaje gratis** (dice cuántos le quedan), en los dos
   sentidos (también al montarse desde la lista hacia Valle Grande). Pide confirmar y **no se deshace**, como un pago.
   Antes de subir no se ofrece nada. Uno por reserva: en un grupo (R57) es gratis **solo su pasaje**; para los
@@ -1098,6 +1101,14 @@ que tiene su propia página (también es adonde llevan los avisos de §7):
 de salir de casa) y **acompañar su viaje** (Mi viaje, con reserva). Lo demás (Choferes, Mis viajes, Mi carnet) está
 en el menú. *(Oct. 2026: antes Inicio mezclaba todo — lista de choferes, mapas, unidades, atajos — y el mismo chofer
 aparecía dos veces.)*
+
+**Inicio de la interfaz nueva: la pregunta primero** *(Nov. 2026: los avisos llenaban casi toda la primera pantalla y
+"¿Hacia dónde vas?" quedaba abajo)*. En orden: el saludo; **¿Hacia dónde vas?** con, debajo del título, una fila de
+**chips** solo cuando valen (la tarifa especial, R80: "Domingo · Bs. 1.300", "Tarifa nocturna · Bs. 1.300", "Desde las
+6 p. m. · Bs. 1.300"; los viajes gratis, R103: "3 viajes gratis", que al tocarlo explica cómo se usan) y los dos
+sentidos; el **arbolito** (R100, la tarjeta de siempre); **La línea ahora**; al final, el recordatorio de los avisos
+en el celular (R90). Encima de la pregunta, solo lo que pide actuar ya (el aviso del admin), como mucho uno. **Nada
+nuevo entra arriba de la pregunta.**
 
 **Inicio del pasajero = "quiero viajar".** Mirar primero, comprometerse después: el lugar y cuántos van se preguntan
 recién al apartar (R27, R57). Una pregunta, una respuesta, una acción:

@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
-import { AvisoTarifa } from "@/components/nueva/pasajero/avisos"
+import { ChipTarifa } from "@/components/nueva/pasajero/avisos"
 import { AvisosCelular } from "@/components/nueva/pasajero/avisos-celular"
 import { AvisoCard } from "@/components/nueva/pasajero/comunes"
 import { DirectionPicker } from "@/components/nueva/pasajero/direction-picker"
@@ -13,7 +13,7 @@ import { SeguirInstagramHoja } from "@/components/nueva/pasajero/instagram"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
 import { ArbolitoCard } from "@/components/nueva/pasajero/navidad"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
-import { TienesViajesGratis } from "@/components/nueva/pasajero/viaje-gratis"
+import { ChipViajesGratis } from "@/components/nueva/pasajero/viaje-gratis"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { contarEsferas } from "@/lib/datos/navidad"
@@ -77,15 +77,25 @@ export default async function InicioNueva({ searchParams }: { searchParams: Prom
       {/* R95: tras calificar con 4–5 estrellas (?seguir=1), una vez por teléfono */}
       <SeguirInstagramHoja ofrecer={ofrecerInstagram} />
       <div className="flex flex-col gap-6 p-4">
-        <AvisosCelular recordatorio />
+        {/* §8: la pregunta primero. Encima, solo lo que pide actuar ya (el aviso del admin); nada nuevo entra arriba */}
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
-        <AvisoTarifa />
-        {/* R103: los viajes gratis que le regalaron */}
-        {gratis > 0 ? <TienesViajesGratis cuantos={gratis} /> : null}
+        <DirectionPicker
+          alCentro={alCentro}
+          enGina={enGina}
+          miLugar={mio?.posicion ?? null}
+          contexto={
+            <>
+              {/* R80: la tarifa especial; R103: los viajes gratis que le regalaron */}
+              <ChipTarifa />
+              {gratis > 0 ? <ChipViajesGratis cuantos={gratis} /> : null}
+            </>
+          }
+        />
         {/* R100: la temporada navideña */}
         {temporada ? <ArbolitoCard temporada={temporada} esferas={esferas} /> : null}
-        <DirectionPicker alCentro={alCentro} enGina={enGina} miLugar={mio?.posicion ?? null} />
         <LineaAhora choferes={datos.enServicio.map(servicioVista)} />
+        {/* R90: el recordatorio de los avisos en el celular, al final */}
+        <AvisosCelular recordatorio />
       </div>
     </Screen>
   )
