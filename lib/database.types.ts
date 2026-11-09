@@ -865,6 +865,7 @@ export type Database = {
           creado_en: string
           en_camino: boolean
           estado: Database["public"]["Enums"]["estado_reserva"]
+          gratis: boolean
           id: string
           lat: number | null
           listo: boolean
@@ -884,6 +885,7 @@ export type Database = {
           creado_en?: string
           en_camino?: boolean
           estado?: Database["public"]["Enums"]["estado_reserva"]
+          gratis?: boolean
           id?: string
           lat?: number | null
           listo?: boolean
@@ -903,6 +905,7 @@ export type Database = {
           creado_en?: string
           en_camino?: boolean
           estado?: Database["public"]["Enums"]["estado_reserva"]
+          gratis?: boolean
           id?: string
           lat?: number | null
           listo?: boolean
@@ -1245,6 +1248,48 @@ export type Database = {
           },
         ]
       }
+      viajes_gratis: {
+        Row: {
+          cantidad: number
+          creado_en: string
+          creado_por: string | null
+          id: string
+          motivo: string
+          pasajero_id: string
+        }
+        Insert: {
+          cantidad: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          motivo: string
+          pasajero_id: string
+        }
+        Update: {
+          cantidad?: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          motivo?: string
+          pasajero_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viajes_gratis_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viajes_gratis_pasajero_id_fkey"
+            columns: ["pasajero_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1417,6 +1462,7 @@ export type Database = {
           creado_en: string
           en_camino: boolean
           estado: Database["public"]["Enums"]["estado_reserva"]
+          gratis: boolean
           id: string
           lat: number | null
           listo: boolean
@@ -1435,6 +1481,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      _saldo_gratis: { Args: { p_pasajero: string }; Returns: number }
       _sin_abuso_sugerencias: { Args: never; Returns: undefined }
       _trabaja_hoy: { Args: { p_chofer: string }; Returns: boolean }
       _validar_lugar: {
@@ -1617,6 +1664,7 @@ export type Database = {
           vistas: number
         }[]
       }
+      admin_quitar_regalo: { Args: { p_regalo: string }; Returns: undefined }
       admin_recorridos_resumen: {
         Args: never
         Returns: {
@@ -1626,6 +1674,10 @@ export type Database = {
           puntos: number
           ultimo: string
         }[]
+      }
+      admin_regalar_viajes: {
+        Args: { p_cantidad: number; p_motivo: string; p_pasajero: string }
+        Returns: string
       }
       admin_registrar_push: {
         Args: {
@@ -1649,6 +1701,7 @@ export type Database = {
         }[]
       }
       admin_retirar_notificacion: { Args: { p_id: string }; Returns: undefined }
+      admin_saldo_gratis: { Args: { p_pasajero: string }; Returns: number }
       admin_suscripciones_de: {
         Args: { p_notificacion: string }
         Returns: {
@@ -1971,6 +2024,7 @@ export type Database = {
           lugar: string
         }[]
       }
+      mis_viajes_gratis: { Args: never; Returns: number }
       motivo_de_cierre: {
         Args: { p_reserva: string }
         Returns: {
@@ -2082,6 +2136,7 @@ export type Database = {
         Args: { p_entrada: string; p_viaje: string }
         Returns: string
       }
+      usar_viaje_gratis: { Args: { p_reserva: string }; Returns: undefined }
       valorar_app: {
         Args: { p_comentario?: string; p_estrellas: number }
         Returns: string

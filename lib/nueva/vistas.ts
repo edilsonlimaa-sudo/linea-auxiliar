@@ -119,9 +119,12 @@ export type MiViajeVista = {
   pago: DatosPagoMovil | null
   pasaje: Tarifa
   yo: { lat: number; lng: number } | null // para el mapa (R41), si la reserva tiene ubicación
+  // R103: pagó este viaje con un viaje gratis; cuántos le quedan
+  gratis: boolean
+  gratisQuedan: number
 }
 
-export function miViajeVista(m: MiReserva, porId: Map<string, Viaje>, pago: DatosPagoMovil | null, ahora: number): MiViajeVista {
+export function miViajeVista(m: MiReserva, porId: Map<string, Viaje>, pago: DatosPagoMovil | null, ahora: number, gratisQuedan = 0): MiViajeVista {
   const { reserva, viaje, desde, hasta } = m
   const nombre = viaje.chofer.nombre.split(" ")[0]
   const grupo = reserva.personas > 1
@@ -170,6 +173,8 @@ export function miViajeVista(m: MiReserva, porId: Map<string, Viaje>, pago: Dato
     pago: aBordo ? pago : null, // R74 en la nueva: solo a bordo
     pasaje: tarifaEn(viaje.salida_en ? new Date(viaje.salida_en) : new Date(ahora)),
     yo: reserva.lat !== null && reserva.lng !== null ? { lat: reserva.lat, lng: reserva.lng } : null,
+    gratis: reserva.gratis,
+    gratisQuedan,
   }
 }
 

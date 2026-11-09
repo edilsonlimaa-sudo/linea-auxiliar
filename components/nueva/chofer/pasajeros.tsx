@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, Hand, Loader2, MapPin, MessageCircle, Navigation, Phone, UserPlus, UserX, X } from "lucide-react"
+import { Check, Gift, Hand, Loader2, MapPin, MessageCircle, Navigation, Phone, UserPlus, UserX, X } from "lucide-react"
 import * as React from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -13,7 +13,7 @@ import { Input } from "@/components/nueva/ui/input"
 import { marcarNoVino, marcarSeBajo, marcarSubio, ocuparPuesto, quitarAnotado, responderPedido } from "@/lib/acciones/chofer"
 import type { FilaChofer } from "@/lib/datos/inicio-chofer"
 import { cn } from "@/lib/utils"
-import { iniciales, PERSONAS_MAX, textoPersonas, textoPuestos, type EstadoViaje } from "@/lib/viajes"
+import { iniciales, PERSONAS_MAX, textoGratis, textoPersonas, textoPuestos, type EstadoViaje } from "@/lib/viajes"
 
 type Pregunta = {
   titulo: string
@@ -99,6 +99,13 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
                 {fila.lugar}
               </p>
             ) : null}
+            {/* R105: pagó con un viaje gratis */}
+            {fila.gratis ? (
+              <p className="flex items-center gap-1 text-sm font-semibold text-success">
+                <Gift className="size-3.5 shrink-0" />
+                {textoGratis(fila.personas)}
+              </p>
+            ) : null}
           </div>
           <Badge variant={estado.variante}>{estado.texto}</Badge>
         </DrawerTrigger>
@@ -110,6 +117,7 @@ export function FilaPasajero({ fila, estadoViaje }: { fila: FilaChofer; estadoVi
               {textoPuestos(fila.desde, fila.hasta)}
               {fila.personas > 1 ? ` · ${textoPersonas(fila.personas)}` : ""}
               {fila.lugar && !porLugar ? ` · ${fila.lugar}` : ""}
+              {fila.gratis ? ` · ${fila.personas > 1 ? `pagó con viaje gratis; los otros ${fila.personas - 1} pagan` : "pagó con viaje gratis"}` : ""}
             </DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-col gap-2 px-4 pb-6">

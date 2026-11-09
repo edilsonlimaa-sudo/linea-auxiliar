@@ -27,6 +27,7 @@ export type FilaChofer = {
   aceptada: boolean
   telefono: string | null
   fotoUrl: string | null // foto de perfil del pasajero (R54): ayuda a reconocerlo
+  gratis: boolean // pagó su pasaje con un viaje gratis (R105; en un grupo, los acompañantes pagan)
 }
 
 /**
@@ -146,6 +147,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
         aceptada: r.aceptada_en !== null,
         telefono: r.pasajero_id ? (telefonoDe.get(r.pasajero_id) ?? null) : null,
         fotoUrl: r.pasajero?.foto_path ? (fotos.get(r.pasajero.foto_path) ?? null) : null,
+        gratis: r.gratis,
       })),
     }
   }

@@ -7,6 +7,7 @@ import { AppHeader } from "@/components/nueva/app/app-header"
 import { carroLabel, ChoferAvatar, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { PagarAlChofer } from "@/components/nueva/pasajero/pago-movil-card"
 import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
+import { PagarConViajeGratis, PagasteConViajeGratis } from "@/components/nueva/pasajero/viaje-gratis"
 import { Badge } from "@/components/nueva/ui/badge"
 import { Button } from "@/components/nueva/ui/button"
 import {
@@ -112,7 +113,15 @@ export function MiViaje({ viaje }: { viaje: MiViajeVista }) {
           </section>
         ) : null}
 
-        {viaje.pago ? <PagarAlChofer datos={viaje.pago} chofer={chofer.nombre} pasaje={viaje.pasaje} /> : null}
+        {/* R103–R105: a bordo se paga con Pago Móvil o con un viaje gratis (si le regalaron). Pagado así y solo, no hay
+            nada más que pagar; con acompañantes, Pagar a… sigue para ellos */}
+        {aBordo && viaje.gratis ? <PagasteConViajeGratis quedan={viaje.gratisQuedan} personas={viaje.personas} chofer={chofer.nombre} /> : null}
+        {viaje.pago && !(viaje.gratis && viaje.personas === 1) ? (
+          <PagarAlChofer datos={viaje.pago} chofer={chofer.nombre} pasaje={viaje.pasaje} />
+        ) : null}
+        {aBordo && !viaje.gratis && viaje.gratisQuedan > 0 ? (
+          <PagarConViajeGratis reservaId={viaje.reservaId} quedan={viaje.gratisQuedan} personas={viaje.personas} chofer={chofer.nombre} />
+        ) : null}
 
         <div className="mt-auto flex flex-col gap-2 pt-2">
           {viaje.puedeAvisarListo ? <YaEstoyEnElSitio reservaId={viaje.reservaId} listo={viaje.listo} /> : null}

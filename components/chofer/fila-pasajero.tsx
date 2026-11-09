@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckIcon, HandIcon, Loader2Icon, MapPinIcon, MessageCircleIcon, NavigationIcon, PhoneIcon, UserXIcon, XIcon } from "lucide-react"
+import { CheckIcon, GiftIcon, HandIcon, Loader2Icon, MapPinIcon, MessageCircleIcon, NavigationIcon, PhoneIcon, UserXIcon, XIcon } from "lucide-react"
 import { useState } from "react"
 
 import { useAccion } from "@/components/chofer/use-accion"
@@ -11,7 +11,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { marcarNoVino, marcarSeBajo, marcarSubio, quitarAnotado, responderPedido } from "@/lib/acciones/chofer"
 import type { FilaChofer } from "@/lib/datos/inicio-chofer"
 import { cn } from "@/lib/utils"
-import { textoPersonas, textoPuestos, type EstadoViaje } from "@/lib/viajes"
+import { textoGratis, textoPersonas, textoPuestos, type EstadoViaje } from "@/lib/viajes"
 
 type Pregunta = {
   titulo: string
@@ -154,6 +154,7 @@ export function FilaPasajero({
             {fila.pendiente && <span className="font-bold"> · pide que pases</span>}
             {!porLugar && fila.lugar && <span className="text-sm text-muted-foreground"> · {fila.lugar}</span>}
             {!fila.conApp && <span className="text-sm text-muted-foreground"> · sin app</span>}
+            {fila.gratis && <span className="text-sm font-bold text-success"> · 🎁 {textoGratis(fila.personas)}</span>}
           </p>
           <span className="flex shrink-0 items-center gap-2">
             {acciones}
@@ -190,6 +191,13 @@ export function FilaPasajero({
               <span className="rounded-full bg-primary px-2 py-0.5 text-sm font-bold text-primary-foreground">+{fila.personas - 1}</span>
             )}
             {!fila.conApp && (fila.nombre !== "Pasajero sin app" || porLugar) && <span className="rounded-full bg-muted px-2 py-0.5 text-sm">Sin app</span>}
+            {/* R105: pagó con un viaje gratis */}
+            {fila.gratis && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">
+                <GiftIcon aria-hidden className="size-4" />
+                {textoGratis(fila.personas)}
+              </span>
+            )}
             {fila.listo && fila.conApp && !enRuta && (
               <span className="inline-flex items-center gap-1 rounded-full bg-success-muted px-2 py-0.5 text-sm font-bold text-success">
                 <HandIcon aria-hidden className="size-4" />

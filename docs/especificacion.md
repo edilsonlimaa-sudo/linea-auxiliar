@@ -885,6 +885,28 @@ solo de presentación: no cambia ninguna regla y al terminar el app vuelve sola 
 - **R101. La esfera al llegar.** En "¡Llegaste bien!", hasta el 24/12, el arbolito aparece grande con la esfera nueva
   resaltada y "¡Nueva esfera en tu arbolito! Ya van N de 24" ("¡Completaste tu arbolito!" al llegar a 24).
 
+### 5.26 Viajes gratis
+
+*(Nov. 2026: en los premios de la semana se regalaron viajes gratis a los pasajeros que más viajaron. El regalo es de
+los choferes: quien lleva al premiado no le cobra ese pasaje y nadie se lo devuelve.)*
+
+- **R102. El admin regala viajes [servidor].** En el detalle del pasajero, **Viajes gratis**: cuántos le quedan, los
+  regalos que recibió (cuántos, por qué y cuándo) y los viajes en que los usó. **Regalar viajes**: cuántos (1 a 10) y
+  el motivo ("Premio de la semana 3"). Un regalo mal puesto se puede quitar si todavía no se usó. Solo el admin regala;
+  los viajes gratis **no vencen**.
+- **R103. El pasajero paga con su viaje gratis [servidor].** Solo en la interfaz nueva. Con viajes gratis, Inicio lo
+  dice ("Tienes 3 viajes gratis · úsalos al pagar, cuando vayas a bordo"). Es una **forma de pagar**: a bordo, en Mi
+  viaje, debajo de **Pagar a X** (Pago Móvil) está **Pagar con un viaje gratis** (dice cuántos le quedan), en los dos
+  sentidos (también al montarse desde la lista hacia Valle Grande). Pide confirmar y **no se deshace**, como un pago.
+  Antes de subir no se ofrece nada. Uno por reserva: en un grupo (R57) es gratis **solo su pasaje**; para los
+  acompañantes sigue Pagar a X.
+- **R104. Cuándo se gasta [servidor].** Le quedan = los regalados menos las reservas pagadas con viaje gratis en que
+  viajó (`subio` o `bajo`, en un viaje que no se canceló). Si el viaje se cancela antes de salir, el viaje gratis
+  **vuelve** solo.
+- **R105. El chofer lo sabe.** Al momento (tiempo real), en su lista la persona lleva la marca **"Pagó con viaje
+  gratis"** (en un grupo, "1 de N pagó con viaje gratis"), en la clásica y en la nueva. El pasajero ve, en lugar de
+  Pagar a X, "Pagaste con un viaje gratis" y cuántos le quedan.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -904,6 +926,7 @@ solo de presentación: no cambia ninguna regla y al terminar el app vuelve sola 
 | Avisos de pago de la cuota (R77) | El propio chofer y el admin |
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
 | Interesados en una ruta nueva (R96–R97) | Solo el admin (quien lo envía no puede volver a leerlo) |
+| Viajes gratis de un pasajero (R102–R104) | Él y el admin. Que una reserva es gratis, también el chofer de ese viaje (R105) |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 | Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |

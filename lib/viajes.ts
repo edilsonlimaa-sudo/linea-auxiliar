@@ -290,3 +290,6 @@ export function puestosEnOrden<T extends { personas: number }>(filas: T[]): (T &
 
 /** Cuántas personas, sumando los acompañantes de cada reserva o espera (R57) */
 export const sumaPersonas = (filas: { personas: number }[]) => filas.reduce((n, f) => n + f.personas, 0)
+
+/** La marca para el chofer (R105): "Pagó con viaje gratis"; en un grupo, "1 de 3 pagó con viaje gratis" */
+export const textoGratis = (personas: number) => (personas > 1 ? `1 de ${personas} pagó con viaje gratis` : "Pagó con viaje gratis")

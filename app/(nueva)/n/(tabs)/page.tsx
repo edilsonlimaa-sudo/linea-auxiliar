@@ -13,9 +13,11 @@ import { SeguirInstagramHoja } from "@/components/nueva/pasajero/instagram"
 import { LineaAhora } from "@/components/nueva/pasajero/linea-ahora"
 import { ArbolitoCard } from "@/components/nueva/pasajero/navidad"
 import { MiViaje } from "@/components/nueva/pasajero/mi-viaje"
+import { TienesViajesGratis } from "@/components/nueva/pasajero/viaje-gratis"
 import { cargarAvisoDeCierre, cargarCalificacionPendiente, cargarInicioPasajero, cargarPagoMovilDe } from "@/lib/datos/inicio-pasajero"
 import { cargarListaGina } from "@/lib/datos/lista-gina"
 import { contarEsferas } from "@/lib/datos/navidad"
+import { misViajesGratis } from "@/lib/datos/viajes-gratis"
 import { ahoraDelPedido, miListaVista, miViajeVista, servicioVista } from "@/lib/nueva/vistas"
 import { CIERRE_VISTO } from "@/lib/cierre-visto"
 import { COOKIE_INSTAGRAM, PARAM_SEGUIR } from "@/lib/instagram"
@@ -36,21 +38,25 @@ export default async function InicioNueva({ searchParams }: { searchParams: Prom
 
   if (datos.miReserva) {
     // El Pago Móvil solo a bordo (R74 en la nueva)
-    const pago = datos.miReserva.reserva.estado === "subio" ? await cargarPagoMovilDe(datos.miReserva.viaje.chofer_id) : null
+    const [pago, gratis] = await Promise.all([
+      datos.miReserva.reserva.estado === "subio" ? cargarPagoMovilDe(datos.miReserva.viaje.chofer_id) : null,
+      misViajesGratis(), // R103
+    ])
     return (
       <Screen>
         <EnVivo />
-        <MiViaje viaje={miViajeVista(datos.miReserva, datos.porId, pago, ahora)} />
+        <MiViaje viaje={miViajeVista(datos.miReserva, datos.porId, pago, ahora, gratis)} />
       </Screen>
     )
   }
 
   const temporada = temporadaNavidad(new Date(), perfil.de_prueba)
-  const [pendiente, cierre, lista, esferas] = await Promise.all([
+  const [pendiente, cierre, lista, esferas, gratis] = await Promise.all([
     cargarCalificacionPendiente(perfil.id),
     cargarAvisoDeCierre(perfil.id),
     cargarListaGina(),
     temporada ? contarEsferas(perfil.id) : 0,
+    misViajesGratis(),
   ])
   // Recién terminó un viaje sin calificar (R45): primero la pantalla de paso "Llegaste bien"
   if (pendiente) redirect("/n/llegaste")
@@ -74,6 +80,8 @@ export default async function InicioNueva({ searchParams }: { searchParams: Prom
         <AvisosCelular recordatorio />
         {datos.aviso ? <AvisoCard texto={datos.aviso.texto} /> : null}
         <AvisoTarifa />
+        {/* R103: los viajes gratis que le regalaron */}
+        {gratis > 0 ? <TienesViajesGratis cuantos={gratis} /> : null}
         {/* R100: la temporada navideña */}
         {temporada ? <ArbolitoCard temporada={temporada} esferas={esferas} /> : null}
         <DirectionPicker alCentro={alCentro} enGina={enGina} miLugar={mio?.posicion ?? null} />

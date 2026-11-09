@@ -94,6 +94,15 @@ export async function avisarQueLlegue(reservaId: string, listo: boolean): Promis
   return { ok: true }
 }
 
+/** R103: a bordo, pagar su pasaje con un viaje gratis (no se deshace). El chofer lo ve al momento (R105) */
+export async function pagarConViajeGratis(reservaId: string): Promise<Resultado> {
+  const supabase = await crearClienteServidor()
+  const { error } = await supabase.rpc("usar_viaje_gratis", { p_reserva: reservaId })
+  if (error) return { error: error.message }
+  revalidatePath("/n")
+  return { ok: true }
+}
+
 
 const ETIQUETAS = ["Puntual", "Seguro", "Amable", "Respetó el orden", "Carro limpio"]
 
