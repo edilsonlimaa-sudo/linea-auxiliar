@@ -40,18 +40,45 @@ export const VENTANA_ESFERAS = {
   hasta: `${NAVIDAD.navidad}T00:00:00-04:00`,
 } as const
 
-// R99: una frase del día mientras espera en la lista (cambia cada día, la misma para todos)
-const FRASES = [
-  "¿Ya compraste el pan de jamón?",
-  "¿Ya hiciste las hallacas este año?",
-  "Ponle gaitas a la espera: el carro ya viene.",
-  "¿Ya armaste el arbolito en tu casa?",
-  "¿Quién trae el dulce de lechosa este año?",
-  "Diciembre se vive con los vecinos.",
-  "¿Ya estrenaste algo para las fiestas?",
-] as const
+// R99: una frase del día mientras espera en la lista (cambia cada día, la misma para todos). Las que dependen de la
+// fecha llevan su ventana (desde/hasta, inclusive); la rueda gira entre las que valen ese día
+type Frase = { texto: string; desde?: string; hasta?: string }
+const FRASES: readonly Frase[] = [
+  { texto: "¿Ya compraste el pan de jamón?" },
+  { texto: "¿Ya probaste el ponche crema de este año?" },
+  { texto: "Diciembre llega rapidito… igual que tu carro.", hasta: "2026-11-30" },
+  { texto: "¿Ya hiciste las hallacas este año?" },
+  { texto: "Si suena Guaco o Billo's, ya llegó diciembre." },
+  { texto: "Cada viaje es una esfera más para tu arbolito. 🎄", hasta: NAVIDAD.arbolHasta },
+  { texto: "Ponle gaitas a la espera: el carro ya viene." },
+  { texto: "¿Quién amarra las hallacas en tu casa?" },
+  { texto: "Faltan pocos días: ve sacando las luces del closet.", hasta: "2026-12-15" },
+  { texto: "¿Ya armaste el arbolito en tu casa?" },
+  { texto: "¿Ya pusiste el pesebre con el Niño Jesús?" },
+  { texto: "¿Hallaca de la abuela o de la tía? Aquí no juzgamos." },
+  { texto: "Mientras esperas: ¿qué le vas a pedir al Niño Jesús?", hasta: NAVIDAD.arbolHasta },
+  { texto: "¿Quién trae el dulce de lechosa este año?" },
+  { texto: "¿Ensalada de gallina con o sin manzana? 🤔" },
+  { texto: "El Niño Jesús toma nota de quién espera con paciencia. 😇", hasta: NAVIDAD.arbolHasta },
+  { texto: "Diciembre se vive con los vecinos." },
+  { texto: "Un carro, un pan de jamón y una gaita: diciembre completo." },
+  { texto: "¿Ya fuiste a misa de aguinaldo?", desde: "2026-12-16", hasta: NAVIDAD.arbolHasta },
+  { texto: "¿Ya estrenaste algo para las fiestas?" },
+  { texto: "¿Pernil o hallaca? ¿Por qué no los dos?" },
+  { texto: "Pana, ya viene el carro. Y también diciembre.", hasta: "2026-12-31" },
+  { texto: "¿Ya tienes tus estrenos para el 24?", hasta: NAVIDAD.arbolHasta },
+  { texto: "Esta Navidad, comparte el puesto y la conversa." },
+  { texto: "¿Ya tienes las maletas listas para darle la vuelta a la manzana? 🧳", desde: "2026-12-26", hasta: "2026-12-31" },
+  { texto: "Las uvas del 31 ya se están vendiendo. ¿Ya pediste tus deseos?", desde: "2026-12-26", hasta: "2026-12-31" },
+]
 
 export function fraseDelDia(ahora = new Date()): string {
-  const dia = diasEntre(NAVIDAD.desde, hoyDeTemporada(ahora))
-  return FRASES[((dia % FRASES.length) + FRASES.length) % FRASES.length]
+  const hoy = hoyDeTemporada(ahora)
+  const valen = FRASES.filter((f) => (!f.desde || hoy >= f.desde) && (!f.hasta || hoy <= f.hasta))
+  const dia = diasEntre(NAVIDAD.desde, hoy)
+  // Las de pocos días (con desde: aguinaldos, Año Nuevo) salen día por medio en su ventana: si no, la rueda las salta
+  const deSusDias = valen.filter((f) => f.desde)
+  const rueda = deSusDias.length > 0 && dia % 2 === 0 ? deSusDias : valen
+  const vuelta = deSusDias.length > 0 && dia % 2 === 0 ? Math.floor(dia / 2) : dia
+  return rueda[((vuelta % rueda.length) + rueda.length) % rueda.length].texto
 }

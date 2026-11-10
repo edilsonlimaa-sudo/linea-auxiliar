@@ -878,7 +878,9 @@ solo de presentación: no cambia ninguna regla y al terminar el app vuelve sola 
 - **R99. El aspecto.** La aurora de arriba pasa a rojo, verde y dorado (en el claro, más suaves); una guirnalda de
   luces cuelga de la cabecera y titila despacio (quieta si el teléfono pide menos movimiento); los choferes llevan
   gorrito en su foto; en el mapa de Mi viaje el carro lleva un arbolito en el techo; en A Valle Grande el número de mi
-  lugar es una caja de regalo y una frase del día acompaña la espera; en "¡Llegaste bien!" el confeti es rojo, verde,
+  lugar es una caja de regalo y una frase del día acompaña la espera (la misma para todos ese día, en rueda; las que
+  dependen de la fecha solo salen en sus días, día por medio: las misas de aguinaldo del 16 al 24/12, las de Año Nuevo del 26 al 31/12, lo
+  del 24 hasta el 24); en "¡Llegaste bien!" el confeti es rojo, verde,
   dorado y blanco. Botones, textos y estados siguen en el azul de la app.
 - **R100. Tu arbolito de la Línea.** En Inicio, una tarjeta con un arbolito: **cada viaje** del pasajero desde el
   9/11 hasta el **24 de diciembre** cuelga una esfera, y con **24** queda completo. Cuenta los viajes en que se montó
