@@ -5,6 +5,7 @@ import "./globals.css"
 import { AppShell } from "@/components/nueva/app/app-shell"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { VigiaDeErrores } from "@/components/vigia-de-errores"
 
 // La interfaz nueva (docs/especificacion.md §5.21, R83–R85): su propio layout raíz, con su paleta y sus fuentes, para que
 // nada de la clásica se mezcle. Pasar de una a otra recarga la página (cada cuenta vive en una sola).
@@ -37,6 +38,7 @@ export default function LayoutNueva({ children }: Readonly<{ children: React.Rea
       className={cn("antialiased", fontSans.variable, fontHeading.variable, fontMono.variable, "font-sans")}
     >
       <body>
+        <VigiaDeErrores />
         {/* Sigue al sistema; Menú → Apariencia lo fija. Clave propia: el tema de la clásica no se arrastra */}
         <ThemeProvider storageKey="tema-nueva">
           <AppShell>{children}</AppShell>

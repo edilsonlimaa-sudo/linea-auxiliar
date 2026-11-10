@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react"
 
+import { registrarError, type InterfazError } from "@/lib/registro-errores"
+
 // Errores de versión: la app quedó abierta con el código de un despliegue anterior y el servidor ya es otro (un archivo
 // de la app que ya no existe, una acción con el id viejo). Recargar los arregla.
 const DE_VERSION =
@@ -17,13 +19,16 @@ const ESPERA_MS = 60_000 // como mucho una recarga sola por minuto: si el error 
 
 /**
  * Pantallas de error (error.tsx, global-error.tsx): si el error es de versión, recarga la app una vez, sola, sin que la
- * persona vea nada; si no (o si ya recargó hace poco), deja ver la pantalla con sus botones.
+ * persona vea nada; si no (o si ya recargó hace poco), deja ver la pantalla con sus botones. Todo error queda anotado para
+ * el admin (R106, `registrarError`), también los de versión.
  */
-export function useRecargarSiEsDeVersion(error: unknown) {
+export function useRecargarSiEsDeVersion(error: unknown, interfaz: InterfazError) {
   const [recargando, setRecargando] = useState(false)
   useEffect(() => {
     console.error(error)
-    if (!esErrorDeVersion(error)) return
+    const deVersion = esErrorDeVersion(error)
+    registrarError(error, interfaz, deVersion)
+    if (!deVersion) return
     try {
       const ultima = Number(sessionStorage.getItem(CLAVE) ?? 0)
       if (Date.now() - ultima < ESPERA_MS) return
@@ -34,6 +39,6 @@ export function useRecargarSiEsDeVersion(error: unknown) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- muestra "Actualizando la app…" mientras recarga
     setRecargando(true)
     window.location.reload()
-  }, [error])
+  }, [error, interfaz])
   return recargando
 }

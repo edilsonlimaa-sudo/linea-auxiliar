@@ -8,7 +8,7 @@ import { useRecargarSiEsDeVersion } from "@/lib/error-de-version"
 // Interfaz clásica: si una pantalla falla, esto en lugar de la pantalla cruda de Next. Un error de versión (la app quedó
 // abierta durante un despliegue) se arregla recargando, y se recarga sola.
 export default function ErrorClasica({ error, retry }: { error: unknown; retry: () => void }) {
-  const recargando = useRecargarSiEsDeVersion(error)
+  const recargando = useRecargarSiEsDeVersion(error, "clasica")
 
   return (
     <main className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center gap-4 px-4 py-10 text-center">

@@ -17,6 +17,7 @@ import {
   RouteIcon,
   StarIcon,
   SunIcon,
+  TriangleAlertIcon,
   UserCheckIcon,
   UsersIcon,
   type LucideIcon,
@@ -78,6 +79,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
       { href: "/admin/rutas", titulo: "Rutas", icono: RouteIcon },
       { href: "/admin/calificaciones", titulo: "Calificaciones", icono: StarIcon },
       { href: "/admin/sugerencias", titulo: "Sugerencias", icono: LightbulbIcon, contador: "sugerencias", accion: true },
+      { href: "/admin/errores", titulo: "Errores de la app", icono: TriangleAlertIcon },
     ],
   },
 ]

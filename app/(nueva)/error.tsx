@@ -10,7 +10,7 @@ import { esErrorDeRed } from "@/lib/nueva/red"
 // versión (la app quedó abierta durante un despliegue) se arregla recargando, y se recarga sola. Sin señal, lo dice:
 // el problema es la internet, y "Volver a intentar" es lo primero.
 export default function ErrorNueva({ error, retry }: { error: unknown; retry: () => void }) {
-  const recargando = useRecargarSiEsDeVersion(error)
+  const recargando = useRecargarSiEsDeVersion(error, "nueva")
   const sinRed = esErrorDeRed(error)
 
   return (

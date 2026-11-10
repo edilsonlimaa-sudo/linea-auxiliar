@@ -300,6 +300,62 @@ export type Database = {
           },
         ]
       }
+      errores_app: {
+        Row: {
+          aparato: string | null
+          creado_en: string
+          digest: string | null
+          en_linea: boolean | null
+          id: string
+          interfaz: string
+          mensaje: string
+          ocurrio_en: string | null
+          pantalla: string
+          perfil_id: string | null
+          tipo: string
+          version: string | null
+          volvio_hace: number | null
+        }
+        Insert: {
+          aparato?: string | null
+          creado_en?: string
+          digest?: string | null
+          en_linea?: boolean | null
+          id?: string
+          interfaz: string
+          mensaje: string
+          ocurrio_en?: string | null
+          pantalla: string
+          perfil_id?: string | null
+          tipo: string
+          version?: string | null
+          volvio_hace?: number | null
+        }
+        Update: {
+          aparato?: string | null
+          creado_en?: string
+          digest?: string | null
+          en_linea?: boolean | null
+          id?: string
+          interfaz?: string
+          mensaje?: string
+          ocurrio_en?: string | null
+          pantalla?: string
+          perfil_id?: string | null
+          tipo?: string
+          version?: string | null
+          volvio_hace?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errores_app_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       esperas: {
         Row: {
           avisado_en: string | null
@@ -1299,6 +1355,7 @@ export type Database = {
         Args: { v: Database["public"]["Tables"]["viajes"]["Row"] }
         Returns: boolean
       }
+      _borrar_errores_viejos: { Args: never; Returns: undefined }
       _cerrar_espera: {
         Args: {
           p_estado: Database["public"]["Enums"]["estado_espera"]
@@ -2101,6 +2158,21 @@ export type Database = {
       quitar_anotado: { Args: { p_reserva: string }; Returns: undefined }
       quitar_pago_movil: { Args: never; Returns: undefined }
       quitar_suscripcion: { Args: { p_endpoint: string }; Returns: undefined }
+      registrar_error: {
+        Args: {
+          p_aparato?: string
+          p_digest?: string
+          p_en_linea?: boolean
+          p_interfaz: string
+          p_mensaje: string
+          p_ocurrio_en?: string
+          p_pantalla: string
+          p_tipo: string
+          p_version?: string
+          p_volvio_hace?: number
+        }
+        Returns: undefined
+      }
       registrar_interes: {
         Args: {
           p_carro?: string

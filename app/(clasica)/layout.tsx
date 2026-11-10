@@ -4,6 +4,7 @@ import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from "next/fon
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
+import { VigiaDeErrores } from "@/components/vigia-de-errores"
 
 // Atkinson Hyperlegible: diseñada para baja visión (distingue l, I y 1). Mono para las placas.
 // Next no tiene métricas de estas fuentes para generar el respaldo automático: se declara uno a mano.
@@ -39,6 +40,7 @@ export default function RootLayout({
       className={cn("antialiased", fontSans.variable, fontMono.variable, "font-sans")}
     >
       <body>
+        <VigiaDeErrores />
         {/* Claro por defecto; el modo oscuro solo se activa a mano (docs/especificacion.md §4) */}
         <ThemeProvider defaultTheme="light" enableSystem={false}>
           {children}

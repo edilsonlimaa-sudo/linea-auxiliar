@@ -6,7 +6,7 @@ import { useRecargarSiEsDeVersion } from "@/lib/error-de-version"
 // de la app, así que lleva los suyos (colores de la marca, claro u oscuro según el sistema). Un error de versión se
 // recarga solo, como en las pantallas de error de cada interfaz.
 export default function ErrorGlobal({ error, retry }: { error: unknown; retry: () => void }) {
-  const recargando = useRecargarSiEsDeVersion(error)
+  const recargando = useRecargarSiEsDeVersion(error, "global")
 
   return (
     <html lang="es-VE">

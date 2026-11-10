@@ -912,6 +912,24 @@ los choferes: quien lleva al premiado no le cobra ese pasaje y nadie se lo devue
   gratis"** (en un grupo, "1 de N pagó con viaje gratis"), en la clásica y en la nueva. El pasajero ve, en lugar de
   Pagar a X, "Pagaste con un viaje gratis" y cuántos le quedan.
 
+### 5.27 Registro de errores
+
+*(Nov. 2026: choferes vieron "Algo salió mal" al salir de la app y volver, y no quedaba nada para saber qué pasó: la
+pantalla de error solo escribía en la consola del teléfono. Los registros de Supabase estaban limpios y los de Vercel
+duran una hora y no ven lo que pasa en el teléfono.)*
+
+- **R106. Cada pantalla de error queda anotada [servidor].** Cuando aparece una pantalla de error (§10: la de cada
+  interfaz o la general), la app anota en la base, sin que la persona haga nada: cuándo, quién (si tiene sesión), en
+  qué pantalla, en qué interfaz, qué error (el mensaje y el código que da el servidor), de qué tipo (de versión, sin
+  señal u otro), la versión de la app, el teléfono y el navegador, si tenía internet y **cuántos segundos hacía que
+  había vuelto a la app** (si salió a otra app y volvió). Sin señal, la anotación espera en el teléfono y sale cuando la
+  app vuelve a abrir con internet. Funciona también sin sesión (al entrar o registrarse). Para no llenar la base, el
+  mismo error en la misma pantalla se anota una vez por minuto por teléfono, cada persona como mucho 30 por hora y en
+  total como mucho 600 por hora. Se borran solos a los 30 días.
+- **R107. El admin ve los errores.** En el panel, **Errores de la app** (Análisis): de los últimos 7 días, cuántos y a
+  cuántas personas, agrupados por error (con su última vez y las pantallas), y la lista de los más recientes con quién,
+  dónde, el teléfono y cuánto hacía que había vuelto a la app. Solo el admin los ve.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -932,6 +950,7 @@ los choferes: quien lleva al premiado no le cobra ese pasaje y nadie se lo devue
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
 | Interesados en una ruta nueva (R96–R97) | Solo el admin (quien lo envía no puede volver a leerlo) |
 | Viajes gratis de un pasajero (R102–R104) | Él y el admin. Que una reserva es gratis, también el chofer de ese viaje (R105) |
+| Errores de la app (R106) | Solo el admin (quien lo anota no puede volver a leerlo) |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 | Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |
@@ -1262,7 +1281,7 @@ definitivo, con RLS y funciones, vive en `supabase/migrations/`.
   app** y Volver a intentar), y si falla el layout, una general con estilo propio. *(Oct. 2026: el chofer que deja la app
   abierta y vuelve después de un despliegue tenía el código viejo y la pantalla se rompía.)* Un **error de versión**
   (un archivo de la app o una acción que ya no existen en el servidor) **recarga la app sola**, como mucho una vez por
-  minuto; si el error sigue, se ve la pantalla.
+  minuto; si el error sigue, se ve la pantalla. Toda pantalla de error queda anotada para el admin (R106).
 
 ## 11. Fuera de alcance (por ahora)
 
