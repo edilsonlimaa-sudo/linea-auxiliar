@@ -1281,7 +1281,12 @@ definitivo, con RLS y funciones, vive en `supabase/migrations/`.
   app** y Volver a intentar), y si falla el layout, una general con estilo propio. *(Oct. 2026: el chofer que deja la app
   abierta y vuelve después de un despliegue tenía el código viejo y la pantalla se rompía.)* Un **error de versión**
   (un archivo de la app o una acción que ya no existen en el servidor) **recarga la app sola**, como mucho una vez por
-  minuto; si el error sigue, se ve la pantalla. Toda pantalla de error queda anotada para el admin (R106).
+  minuto; si el error sigue, se ve la pantalla. Un **error de red con el teléfono en línea** (Android congela la app en
+  otra app y, al volver, la actualización que iba por la mitad muere) **se reintenta solo**, dos veces (a los 0,6 s y a
+  los 2 s), con "Reconectando…" en lugar de la pantalla; sin internet de verdad se ve "Sin conexión" y se reintenta solo
+  cuando vuelve la red. *(Nov. 2026: el registro de R106 mostró que todas las pantallas de error eran "network error" con
+  internet, casi siempre en el primer minuto después de volver a la app.)* Toda pantalla de error queda anotada para el
+  admin (R106); si el reintento no alcanza, se anota además como "Tras reintentar".
 
 ## 11. Fuera de alcance (por ahora)
 

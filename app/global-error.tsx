@@ -1,12 +1,14 @@
 "use client"
 
 import { useRecargarSiEsDeVersion } from "@/lib/error-de-version"
+import { useReintentarSiEsDeRed } from "@/lib/reintentar-red"
 
 // Si falla un layout raíz (clásica o nueva), Next reemplaza todo por esto: trae su propio <html> y no tiene los estilos
 // de la app, así que lleva los suyos (colores de la marca, claro u oscuro según el sistema). Un error de versión se
 // recarga solo, como en las pantallas de error de cada interfaz.
 export default function ErrorGlobal({ error, retry }: { error: unknown; retry: () => void }) {
   const recargando = useRecargarSiEsDeVersion(error, "global")
+  const reintentando = useReintentarSiEsDeRed(error, retry, "global")
 
   return (
     <html lang="es-VE">
@@ -27,8 +29,8 @@ export default function ErrorGlobal({ error, retry }: { error: unknown; retry: (
           .otro { background: transparent; color: var(--marca); border: 2px solid currentColor; }
         `}</style>
         <main>
-          {recargando ? (
-            <p>Actualizando la app…</p>
+          {recargando || reintentando ? (
+            <p>{recargando ? "Actualizando la app…" : "Reconectando…"}</p>
           ) : (
             <>
               <h1>Algo salió mal</h1>

@@ -5,20 +5,23 @@ import { Loader2, RotateCw, TriangleAlert, WifiOff } from "lucide-react"
 import { Button } from "@/components/nueva/ui/button"
 import { useRecargarSiEsDeVersion } from "@/lib/error-de-version"
 import { esErrorDeRed } from "@/lib/nueva/red"
+import { useReintentarSiEsDeRed } from "@/lib/reintentar-red"
 
 // Interfaz nueva (pasajero y chofer): si una pantalla falla, esto en lugar de la pantalla cruda de Next. Un error de
 // versión (la app quedó abierta durante un despliegue) se arregla recargando, y se recarga sola. Sin señal, lo dice:
-// el problema es la internet, y "Volver a intentar" es lo primero.
+// el problema es la internet, y "Volver a intentar" es lo primero. Un error de red con internet (al volver de otra app)
+// se reintenta solo antes de mostrar nada (useReintentarSiEsDeRed).
 export default function ErrorNueva({ error, retry }: { error: unknown; retry: () => void }) {
   const recargando = useRecargarSiEsDeVersion(error, "nueva")
+  const reintentando = useReintentarSiEsDeRed(error, retry, "nueva")
   const sinRed = esErrorDeRed(error)
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-4 px-6 py-10 text-center">
-      {recargando ? (
+      {recargando || reintentando ? (
         <>
           <Loader2 aria-hidden className="size-8 animate-spin text-primary" />
-          <p className="font-heading font-semibold">Actualizando la app…</p>
+          <p className="font-heading font-semibold">{recargando ? "Actualizando la app…" : "Reconectando…"}</p>
         </>
       ) : (
         <>

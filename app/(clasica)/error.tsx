@@ -4,18 +4,21 @@ import { Loader2Icon, RotateCwIcon, TriangleAlertIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useRecargarSiEsDeVersion } from "@/lib/error-de-version"
+import { useReintentarSiEsDeRed } from "@/lib/reintentar-red"
 
 // Interfaz clásica: si una pantalla falla, esto en lugar de la pantalla cruda de Next. Un error de versión (la app quedó
-// abierta durante un despliegue) se arregla recargando, y se recarga sola.
+// abierta durante un despliegue) se arregla recargando, y se recarga sola. Un error de red con internet (al volver de otra
+// app) se reintenta solo antes de mostrar nada.
 export default function ErrorClasica({ error, retry }: { error: unknown; retry: () => void }) {
   const recargando = useRecargarSiEsDeVersion(error, "clasica")
+  const reintentando = useReintentarSiEsDeRed(error, retry, "clasica")
 
   return (
     <main className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center gap-4 px-4 py-10 text-center">
-      {recargando ? (
+      {recargando || reintentando ? (
         <>
           <Loader2Icon aria-hidden className="size-8 animate-spin text-primary" />
-          <p className="font-bold">Actualizando la app…</p>
+          <p className="font-bold">{recargando ? "Actualizando la app…" : "Reconectando…"}</p>
         </>
       ) : (
         <>

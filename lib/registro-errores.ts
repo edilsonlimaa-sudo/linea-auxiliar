@@ -62,14 +62,15 @@ function aPendientes(a: Anotacion) {
 
 /**
  * Anota una pantalla de error (una vez por minuto el mismo error en la misma pantalla). Nunca lanza. `deVersion`: lo
- * dice useRecargarSiEsDeVersion (que lo llama)
+ * dice useRecargarSiEsDeVersion (que lo llama). `nota` va delante del mensaje: "Tras reintentar" (useReintentarSiEsDeRed)
+ * separa los errores de red que la persona llegó a ver de los que se arreglaron solos
  */
-export function registrarError(error: unknown, interfaz: InterfazError, deVersion: boolean) {
+export function registrarError(error: unknown, interfaz: InterfazError, deVersion: boolean, nota?: string) {
   if (typeof window === "undefined") return
   try {
     const e = error instanceof Error ? error : new Error(String(error))
     const pantalla = window.location.pathname
-    const mensaje = `${e.name}: ${e.message}`.slice(0, 500)
+    const mensaje = `${nota ? `${nota}: ` : ""}${e.name}: ${e.message}`.slice(0, 500)
     const clave = `${pantalla}|${mensaje}`
     const recientes = leer<Record<string, number>>(sessionStorage, RECIENTES, {})
     if (Date.now() - (recientes[clave] ?? 0) < 60_000) return
