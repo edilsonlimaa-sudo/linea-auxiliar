@@ -20,7 +20,7 @@ self.addEventListener("push", (evento) => {
   )
 })
 
-// Tocar el aviso abre la pestaña Notificaciones: en la app si ya está abierta, si no, una nueva
+// Tocar el aviso abre la pestaña Notificaciones (o el destino del botón, R88): en la app si ya está abierta, si no, una nueva
 self.addEventListener("notificationclick", (evento) => {
   evento.notification.close()
   const url = (evento.notification.data && evento.notification.data.url) || "/n/notificaciones"

@@ -6,6 +6,7 @@ import {
   BellIcon,
   ChartColumnIcon,
   BusIcon,
+  CalendarClockIcon,
   CarFrontIcon,
   KeyRoundIcon,
   LightbulbIcon,
@@ -69,6 +70,7 @@ const GRUPOS: { titulo?: string; destinos: Destino[] }[] = [
       { href: "/admin/pasajeros", titulo: "Pasajeros", icono: UsersIcon },
       { href: "/admin/cuotas", titulo: "Cuotas", icono: BanknoteIcon, contador: "cuotas", accion: true },
       { href: "/admin/interesados", titulo: "Interesados (El Faro)", icono: MapPinPlusIcon },
+      { href: "/admin/salida-fija", titulo: "Salida fija", icono: CalendarClockIcon },
     ],
   },
   {

@@ -1,10 +1,18 @@
 // Notificaciones (docs/especificacion.md §5.23, R88–R89): las de cada pasajero y las que mandó el admin
 import type { Database } from "@/lib/database.types"
 import { fechaHora } from "@/lib/fechas"
-import type { TipoNotificacion } from "@/lib/notificaciones"
+import type { BotonNotificacion, TipoNotificacion } from "@/lib/notificaciones"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 
-export type MiNotificacion = { id: string; tipo: TipoNotificacion; titulo: string; texto: string; creadaEn: string; leida: boolean }
+export type MiNotificacion = {
+  id: string
+  tipo: TipoNotificacion
+  titulo: string
+  texto: string
+  creadaEn: string
+  leida: boolean
+  boton: BotonNotificacion | null
+}
 // `cuando` ya formateada en el servidor: el navegador formatea la hora con otros espacios y React avisa que no coincide
 export type NotificacionEnviada = Database["public"]["Functions"]["admin_notificaciones"]["Returns"][number] & { cuando: string }
 
@@ -13,7 +21,7 @@ export async function cargarMisNotificaciones(personaId: string): Promise<MiNoti
   const supabase = await crearClienteServidor()
   const { data } = await supabase
     .from("notificacion_destinos")
-    .select("leida_en, notificacion:notificaciones!inner(id, tipo, titulo, texto, creada_en)")
+    .select("leida_en, notificacion:notificaciones!inner(id, tipo, titulo, texto, creada_en, boton_texto, boton_destino)")
     .eq("persona_id", personaId)
   return (data ?? [])
     .map(({ leida_en, notificacion: n }) => ({
@@ -23,6 +31,7 @@ export async function cargarMisNotificaciones(personaId: string): Promise<MiNoti
       texto: n.texto,
       creadaEn: n.creada_en,
       leida: leida_en !== null,
+      boton: n.boton_texto && n.boton_destino ? { texto: n.boton_texto, destino: n.boton_destino } : null,
     }))
     .sort((a, b) => b.creadaEn.localeCompare(a.creadaEn))
 }

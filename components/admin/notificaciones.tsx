@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { enviarNotificacion, retirarNotificacion } from "@/lib/acciones/notificaciones"
 import type { EnLaNueva } from "@/lib/datos/interfaz"
 import type { NotificacionEnviada } from "@/lib/datos/notificaciones"
-import { TIPOS_NOTIFICACION, type TipoNotificacion } from "@/lib/notificaciones"
+import { DESTINOS_BOTON, MAX_BOTON, TIPOS_NOTIFICACION, type TipoNotificacion } from "@/lib/notificaciones"
 import { cn } from "@/lib/utils"
 
 const MAX_TITULO = 60
@@ -33,13 +33,25 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
   const [texto, setTexto] = useState("")
   const [todos, setTodos] = useState(true)
   const [escogidas, setEscogidas] = useState<string[]>([])
+  // R88: botón opcional (texto + una pantalla de la app)
+  const [conBoton, setConBoton] = useState(false)
+  const [destino, setDestino] = useState(DESTINOS_BOTON[0].destino)
+  const [textoBoton, setTextoBoton] = useState(DESTINOS_BOTON[0].texto)
   const [confirmando, setConfirmando] = useState(false)
   const [error, setError] = useState<string>()
   const [enviadas, setEnviadas] = useState<{ personas: number; celulares: number }>()
   const [pendiente, iniciar] = useTransition()
 
   const cuantas = todos ? personas.length : escogidas.length
-  const falta = !titulo.trim() ? "Escribe el título." : !texto.trim() ? "Escribe el texto." : cuantas === 0 ? "Escoge al menos una persona." : null
+  const falta = !titulo.trim()
+    ? "Escribe el título."
+    : !texto.trim()
+      ? "Escribe el texto."
+      : conBoton && !textoBoton.trim()
+        ? "Escribe el texto del botón."
+        : cuantas === 0
+          ? "Escoge al menos una persona."
+          : null
 
   function revisar(e: React.FormEvent) {
     e.preventDefault()
@@ -50,7 +62,13 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
 
   const enviar = () =>
     iniciar(async () => {
-      const r = await enviarNotificacion({ tipo, titulo, texto, ids: todos ? null : escogidas })
+      const r = await enviarNotificacion({
+        tipo,
+        titulo,
+        texto,
+        ids: todos ? null : escogidas,
+        boton: conBoton ? { texto: textoBoton.trim(), destino } : null,
+      })
       setError(r.error)
       if (r.error) return
       setConfirmando(false)
@@ -58,6 +76,7 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
       setTitulo("")
       setTexto("")
       setEscogidas([])
+      setConBoton(false)
     })
 
   return (
@@ -110,6 +129,57 @@ export function NuevaNotificacion({ personas }: { personas: EnLaNueva[] }) {
           {texto.length}/{MAX_TEXTO}
         </p>
       </div>
+
+      <fieldset className="flex flex-col gap-2">
+        <legend className="mb-2 font-bold">Botón (opcional)</legend>
+        <div className="flex flex-wrap gap-2">
+          <label className={chip(!conBoton)}>
+            <input type="radio" name="boton" checked={!conBoton} onChange={() => setConBoton(false)} className="sr-only" />
+            Sin botón
+          </label>
+          <label className={chip(conBoton)}>
+            <input type="radio" name="boton" checked={conBoton} onChange={() => setConBoton(true)} className="sr-only" />
+            Con botón
+          </label>
+        </div>
+        {conBoton && (
+          <div className="flex flex-col gap-3 pt-1">
+            <div className="flex flex-col gap-2">
+              <p className="font-bold">¿A dónde lleva?</p>
+              <div className="flex flex-wrap gap-2">
+                {DESTINOS_BOTON.map((d) => (
+                  <label key={d.destino} className={chip(destino === d.destino)}>
+                    <input
+                      type="radio"
+                      name="destino"
+                      checked={destino === d.destino}
+                      onChange={() => {
+                        // Al cambiar de destino, propone su texto si el admin no escribió otro
+                        if (DESTINOS_BOTON.some((x) => x.texto === textoBoton)) setTextoBoton(d.texto)
+                        setDestino(d.destino)
+                      }}
+                      className="sr-only"
+                    />
+                    {d.titulo}
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor={`${id}-boton`} className="font-bold">
+                Texto del botón
+              </label>
+              <input id={`${id}-boton`} value={textoBoton} onChange={(e) => setTextoBoton(e.target.value)} maxLength={MAX_BOTON} className={campo} />
+              <p className="text-right text-sm text-muted-foreground tabular-nums">
+                {textoBoton.length}/{MAX_BOTON}
+              </p>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              El botón sale debajo del texto. Si llega como aviso al celular, tocarlo abre esa pantalla.
+            </p>
+          </div>
+        )}
+      </fieldset>
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 font-bold">Para</legend>
@@ -208,6 +278,11 @@ function Enviada({ n }: { n: NotificacionEnviada }) {
       </p>
       <p className="font-bold">{n.titulo}</p>
       <p className="whitespace-pre-line">{n.texto}</p>
+      {n.boton_texto ? (
+        <p className="text-sm text-muted-foreground">
+          Botón: <b className="text-foreground">{n.boton_texto}</b> → {DESTINOS_BOTON.find((d) => d.destino === n.boton_destino)?.titulo ?? n.boton_destino}
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3 pt-1">
         <p className="flex-1 text-sm">
           Llegó a <b className="tabular-nums">{n.destinatarios}</b> · aviso en <b className="tabular-nums">{n.push_enviados}</b>{" "}

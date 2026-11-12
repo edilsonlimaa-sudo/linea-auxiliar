@@ -806,6 +806,11 @@ choferes, la clásica y avisos automáticos.)*
   el admin pasa a la nueva la recibe en ese momento, sin aviso al celular (todavía no lo activó) y una sola vez aunque
   vuelva a pasar. *(Oct. 2026: la de bienvenida es la que el admin mandó el 29/10 a los primeros de la nueva.)* Una
   enviada no se edita; el admin la puede **retirar** (desaparece para todos, y deja de llegar a los que pasan).
+  **Botón (opcional)** *(nov. 2026: para llevar a la persona directo a donde se le pide algo, sin "escríbenos por
+  WhatsApp")*: el admin puede agregarle un botón con su **texto** (hasta 24 letras, ej. "Quiero mi puesto") y su
+  **destino**, escogido de una lista de pantallas de la propia app (nunca un enlace de afuera). El botón sale debajo del
+  texto en la pestaña Notificaciones, y el aviso del celular (R90) de una notificación con botón abre ese destino en vez
+  de la pestaña. Abrir el destino cuenta como haberla visto.
 - **R89. El pasajero las ve [servidor].** Cada uno ve **solo las suyas**. En la interfaz nueva hay una pestaña
   **Notificaciones** (campana) con un **número** de no leídas, que se actualiza solo en cualquier pestaña. La lista
   va de la más nueva a la más vieja, agrupada en **Hoy · Esta semana · Antes**; las no leídas, con fondo destacado.
@@ -930,6 +935,28 @@ duran una hora y no ven lo que pasa en el teléfono.)*
   cuántas personas, agrupados por error (con su última vez y las pantallas), y la lista de los más recientes con quién,
   dónde, el teléfono y cuánto hacía que había vuelto a la app. Solo el admin los ve.
 
+### 5.28 Salida fija: preguntar antes de armarla
+
+*(Nov. 2026: de 4 a 6 p. m. en Gina se quedan más personas de las que se montan, y hay pasajeros que vuelven a Valle
+Grande todos los días a la misma hora (unos 9 entre las 5:00 y las 5:50 p. m.) y se montan solo la mitad de las veces.
+La idea: una **salida fija** desde Gina, de lunes a viernes, con el puesto garantizado y la semana pagada por
+adelantado al chofer, al mismo precio. Antes de armarla, se pregunta a quiénes les serviría; la salida en sí todavía no
+existe en la app.)*
+
+- **R108. ¿Te sirve la salida fija? [servidor].** Una pantalla de la interfaz nueva (**`/n/salida-fija`**), solo para
+  pasajeros con cuenta aprobada, a la que se llega con el botón de una notificación (R88). Explica la idea en pocas
+  líneas y pregunta, con toques:
+  - **¿Te anotamos para la prueba?** "Sí, pago la semana por adelantado" · "Me interesa, pero no ahora" · "No me sirve".
+    Va primero: con "No me sirve" no pide hora ni días.
+  - **¿A qué hora?** 5:15 p. m. · 5:45 p. m. · Otra (la escribe, hasta 40 letras).
+  - **¿Qué días?** Lunes a viernes, los que sirvan (al menos uno).
+  - **Comentario** (opcional, hasta 280 letras).
+  No pide nombre ni teléfono: ya tiene cuenta. Una respuesta por persona: si vuelve, ve la suya y la puede cambiar.
+  Al enviar: "¡Gracias!" y que, si se arma, le escribimos por WhatsApp. No aparta ningún puesto ni cobra nada.
+- **R109. El admin ve las respuestas.** En el panel, **Salida fija** (Personas): cuántos dicen que sí por horario (con
+  4 en un mismo horario se llena un carro), cuántos "más adelante" y cuántos "no", y la lista (la más nueva primero) con
+  nombre, horario, días, comentario y **WhatsApp** a cada uno. Solo el admin las ve.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -951,6 +978,7 @@ duran una hora y no ven lo que pasa en el teléfono.)*
 | Interesados en una ruta nueva (R96–R97) | Solo el admin (quien lo envía no puede volver a leerlo) |
 | Viajes gratis de un pasajero (R102–R104) | Él y el admin. Que una reserva es gratis, también el chofer de ese viaje (R105) |
 | Errores de la app (R106) | Solo el admin (quien lo anota no puede volver a leerlo) |
+| Respuesta a la salida fija (R108) | Quien respondió y el admin |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 | Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |

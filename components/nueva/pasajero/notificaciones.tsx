@@ -1,8 +1,10 @@
 "use client"
 
-import { Bell, Lightbulb, Megaphone, Sparkles } from "lucide-react"
+import { Bell, ChevronRight, Lightbulb, Megaphone, Sparkles } from "lucide-react"
+import Link from "next/link"
 import * as React from "react"
 
+import { buttonVariants } from "@/components/nueva/ui/button"
 import { marcarNotificacionesLeidas } from "@/lib/acciones/notificaciones"
 import type { TipoNotificacion } from "@/lib/notificaciones"
 import type { NotificacionVista } from "@/lib/nueva/vistas"
@@ -74,6 +76,11 @@ export function ListaNotificaciones({ items }: { items: NotificacionVista[] }) {
                       </p>
                       <p className="font-heading font-semibold">{n.titulo}</p>
                       <p className="text-sm whitespace-pre-line text-muted-foreground">{n.texto}</p>
+                      {n.boton ? (
+                        <Link href={n.boton.destino} className={buttonVariants({ size: "lg", className: "mt-3" })}>
+                          {n.boton.texto} <ChevronRight data-icon="inline-end" />
+                        </Link>
+                      ) : null}
                     </div>
                   </li>
                 )

@@ -599,6 +599,8 @@ export type Database = {
       notificaciones: {
         Row: {
           autor_id: string
+          boton_destino: string | null
+          boton_texto: string | null
           creada_en: string
           de_bienvenida: boolean
           id: string
@@ -610,6 +612,8 @@ export type Database = {
         }
         Insert: {
           autor_id?: string
+          boton_destino?: string | null
+          boton_texto?: string | null
           creada_en?: string
           de_bienvenida?: boolean
           id?: string
@@ -621,6 +625,8 @@ export type Database = {
         }
         Update: {
           autor_id?: string
+          boton_destino?: string | null
+          boton_texto?: string | null
           creada_en?: string
           de_bienvenida?: boolean
           id?: string
@@ -993,6 +999,47 @@ export type Database = {
             columns: ["viaje_id"]
             isOneToOne: false
             referencedRelation: "viajes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salida_fija_respuestas: {
+        Row: {
+          actualizada_en: string
+          comentario: string | null
+          compromiso: string
+          creada_en: string
+          dias: number[] | null
+          horario: string | null
+          horario_otro: string | null
+          persona_id: string
+        }
+        Insert: {
+          actualizada_en?: string
+          comentario?: string | null
+          compromiso: string
+          creada_en?: string
+          dias?: number[] | null
+          horario?: string | null
+          horario_otro?: string | null
+          persona_id: string
+        }
+        Update: {
+          actualizada_en?: string
+          comentario?: string | null
+          compromiso?: string
+          creada_en?: string
+          dias?: number[] | null
+          horario?: string | null
+          horario_otro?: string | null
+          persona_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salida_fija_respuestas_persona_id_fkey"
+            columns: ["persona_id"]
+            isOneToOne: true
+            referencedRelation: "perfiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1643,6 +1690,8 @@ export type Database = {
       admin_desconectar: { Args: { p_chofer: string }; Returns: undefined }
       admin_enviar_notificacion: {
         Args: {
+          p_boton_destino?: string
+          p_boton_texto?: string
           p_ids?: string[]
           p_texto: string
           p_tipo: string
@@ -1710,6 +1759,8 @@ export type Database = {
       admin_notificaciones: {
         Args: never
         Returns: {
+          boton_destino: string
+          boton_texto: string
           creada_en: string
           destinatarios: number
           id: string
@@ -1759,6 +1810,20 @@ export type Database = {
       }
       admin_retirar_notificacion: { Args: { p_id: string }; Returns: undefined }
       admin_saldo_gratis: { Args: { p_pasajero: string }; Returns: number }
+      admin_salida_fija: {
+        Args: never
+        Returns: {
+          actualizada_en: string
+          comentario: string
+          compromiso: string
+          dias: number[]
+          horario: string
+          horario_otro: string
+          nombre: string
+          persona_id: string
+          telefono: string
+        }[]
+      }
       admin_suscripciones_de: {
         Args: { p_notificacion: string }
         Returns: {
@@ -2050,6 +2115,7 @@ export type Database = {
         }
         Returns: string
       }
+      marcar_leidas_de_destino: { Args: { p_destino: string }; Returns: number }
       marcar_listo: {
         Args: { p_listo?: boolean; p_reserva: string }
         Returns: undefined
@@ -2200,6 +2266,16 @@ export type Database = {
       resolver_alerta: { Args: { p_alerta: string }; Returns: undefined }
       responder_pedido: {
         Args: { p_acepta: boolean; p_reserva: string }
+        Returns: undefined
+      }
+      responder_salida_fija: {
+        Args: {
+          p_comentario?: string
+          p_compromiso: string
+          p_dias?: number[]
+          p_horario?: string
+          p_horario_otro?: string
+        }
         Returns: undefined
       }
       sigo_aqui: { Args: never; Returns: undefined }
