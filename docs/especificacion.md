@@ -887,13 +887,16 @@ solo de presentación: no cambia ninguna regla y al terminar el app vuelve sola 
   dependen de la fecha solo salen en sus días, día por medio: las misas de aguinaldo del 16 al 24/12, las de Año Nuevo del 26 al 31/12, lo
   del 24 hasta el 24); en "¡Llegaste bien!" el confeti es rojo, verde,
   dorado y blanco. Botones, textos y estados siguen en el azul de la app.
-- **R100. Tu arbolito de la Línea.** En Inicio, una tarjeta con un arbolito: **cada viaje** del pasajero desde el
-  9/11 hasta el **24 de diciembre** cuelga una esfera, y con **24** queda completo. Cuenta los viajes en que se montó
-  (`subio` en un viaje terminado, o `bajo`), uno por reserva aunque fuera en grupo. Arriba, cuántos días faltan para
+- **R100. Tu arbolito de la Línea.** En Inicio, una tarjeta con un arbolito: **cada puesto** que el pasajero viajó
+  desde el 9/11 hasta el **24 de diciembre** cuelga una esfera, y con **24** queda completo. Cuenta los viajes en que
+  se montó (`subio` en un viaje terminado, o `bajo`), **una esfera por persona de la reserva**: en grupo (R57), quien
+  aparta para 3 cuelga 3. *(Nov. 2026: antes una por viaje; una pasajera que viaja con su familia lo pidió, y
+  premia a quien trae más vecinos. Se cuenta de nuevo desde el 9/11, para todos.)* Arriba, cuántos días faltan para
   Navidad. Del 25/12 al 6/1 el arbolito queda como quedó, con "¡Feliz Navidad!". No se guarda nada nuevo: se cuenta de
   las reservas; no hay premio ni regla, es solo el gusto de completarlo.
 - **R101. La esfera al llegar.** En "¡Llegaste bien!", hasta el 24/12, el arbolito aparece grande con la esfera nueva
-  resaltada y "¡Nueva esfera en tu arbolito! Ya van N de 24" ("¡Completaste tu arbolito!" al llegar a 24).
+  resaltada y "¡Nueva esfera en tu arbolito! Ya van N de 24" (en grupo, "¡3 esferas nuevas en tu arbolito!";
+  "¡Completaste tu arbolito!" al llegar a 24).
 
 ### 5.26 Viajes gratis
 

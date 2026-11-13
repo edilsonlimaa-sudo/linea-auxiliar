@@ -15,7 +15,7 @@ import { SENTIDOS, type Sentido } from "@/lib/viajes"
 const ETIQUETAS = ["Puntual", "Seguro", "Amable", "Respetó el orden", "Carro limpio"] as const
 const SIGNIFICADO = ["", "Muy mal", "Mal", "Regular", "Bien", "Excelente"]
 
-export type ViajePorCalificar = { reservaId: string; viajeId: string; choferId: string; chofer: string; sentido: Sentido }
+export type ViajePorCalificar = { reservaId: string; viajeId: string; choferId: string; chofer: string; sentido: Sentido; personas?: number }
 
 // Confeti fijo (mismo dibujo en el servidor y en el celular): posición, color, demora y giro de cada papelito
 // Los colores salen de globals.css (--confeti-*): en la temporada navideña son los de la fiesta (R99)
@@ -55,7 +55,7 @@ export function LlegasteBien({ viaje, esferas = null }: { viaje: ViajePorCalific
       <div className="flex flex-1 flex-col items-center justify-center gap-8 text-center">
         <div className="flex flex-col items-center gap-3">
           {esferas ? (
-            <Arbolito esferas={esferas} nueva className="h-[124px] w-[96px]" />
+            <Arbolito esferas={esferas} nueva={viaje.personas ?? 1} className="h-[124px] w-[96px]" />
           ) : (
             <div className="flex size-24 items-center justify-center rounded-full bg-primary/10 text-primary">
               <CheckCircle2 className="size-12" />
@@ -71,7 +71,11 @@ export function LlegasteBien({ viaje, esferas = null }: { viaje: ViajePorCalific
         {esferas ? (
           <p className="w-full rounded-3xl border border-[var(--navidad-oro)]/40 bg-[var(--navidad-oro)]/10 p-4 text-left">
             <span className="block font-heading text-lg font-semibold">
-              {esferas >= NAVIDAD.esferas ? "¡Completaste tu arbolito!" : "¡Nueva esfera en tu arbolito!"}
+              {esferas >= NAVIDAD.esferas
+                ? "¡Completaste tu arbolito!"
+                : (viaje.personas ?? 1) > 1
+                  ? `¡${viaje.personas} esferas nuevas en tu arbolito!`
+                  : "¡Nueva esfera en tu arbolito!"}
             </span>
             <span className="text-sm text-muted-foreground">
               {esferas >= NAVIDAD.esferas ? "Tus 24 esferas ya brillan. ¡Felices fiestas!" : `Ya van ${esferas} de ${NAVIDAD.esferas}.`}

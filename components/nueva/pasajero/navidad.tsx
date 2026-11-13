@@ -17,25 +17,31 @@ const ESFERAS: [number, number][] = [
 ]
 const COLOR_ESFERA = ["var(--navidad-rojo)", "var(--navidad-oro)", "var(--primary)", "var(--navidad-nieve)"]
 
-/** El arbolito (R100): las primeras `esferas` encendidas; `nueva` resalta la última (R101) */
-export function Arbolito({ esferas, nueva = false, className }: { esferas: number; nueva?: boolean; className?: string }) {
-  const ultima = nueva && esferas > 0 ? ESFERAS[esferas - 1] : null
+/**
+ * El arbolito (R100): las primeras `esferas` encendidas. `nueva` resalta las últimas (R101): `true` = una; un número =
+ * esas (un viaje en grupo cuelga una por puesto)
+ */
+export function Arbolito({ esferas, nueva = false, className }: { esferas: number; nueva?: boolean | number; className?: string }) {
+  const nuevas = Math.min(esferas, nueva === true ? 1 : nueva || 0)
+  const esNueva = (i: number) => i < esferas && i >= esferas - nuevas
   return (
     <svg viewBox="0 0 100 130" aria-hidden className={cn("shrink-0", className)}>
       <path d="M50 22 L74 60 L62 60 L84 96 L68 96 L92 124 L8 124 L32 96 L16 96 L38 60 L26 60 Z" style={{ fill: "var(--navidad-verde)" }} />
       <path d="M50 22 L74 60 L62 60 L84 96 L68 96 L92 124 L50 124 Z" fill="#000" opacity=".14" />
       <rect x="43" y="124" width="14" height="6" rx="1" fill="#7a4a24" />
       <path d="M50 6 l4 9 10 1-7.5 6.5 2.3 9.8L50 27l-8.8 5.3 2.3-9.8L36 16l10-1Z" style={{ fill: "var(--navidad-oro)" }} />
-      {ultima ? <circle cx={ultima[0]} cy={ultima[1]} r="13" style={{ fill: "var(--navidad-oro)" }} opacity=".3" className="esfera-nueva" /> : null}
+      {ESFERAS.map(([x, y], i) =>
+        esNueva(i) ? <circle key={`brillo-${i}`} cx={x} cy={y} r="13" style={{ fill: "var(--navidad-oro)" }} opacity=".3" className="esfera-nueva" /> : null
+      )}
       {ESFERAS.map(([x, y], i) =>
         i < esferas ? (
           <circle
             key={i}
             cx={x}
             cy={y}
-            r={ultima && i === esferas - 1 ? 6 : 4.5}
+            r={esNueva(i) ? 6 : 4.5}
             style={{ fill: COLOR_ESFERA[i % COLOR_ESFERA.length] }}
-            stroke={ultima && i === esferas - 1 ? "#fff" : undefined}
+            stroke={esNueva(i) ? "#fff" : undefined}
             strokeWidth={1.5}
           />
         ) : (

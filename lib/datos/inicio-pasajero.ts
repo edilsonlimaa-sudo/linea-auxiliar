@@ -95,6 +95,7 @@ export type CalificacionPendiente = {
   chofer: string
   sentido: Viaje["sentido"]
   salidaEn?: string | null // para la tarifa del pasaje (R79)
+  personas?: number // cuántos puestos (R57): las esferas nuevas del arbolito (R101)
 }
 
 /**
@@ -104,7 +105,7 @@ export type CalificacionPendiente = {
 export async function cargarCalificacionPendiente(pasajeroId: string): Promise<CalificacionPendiente | null> {
   const supabase = await crearClienteServidor()
   const hace12h = new Date(Date.now() - 12 * 3_600_000).toISOString()
-  const campos = "id, viaje_id, cerrada_en, viaje:viajes!inner(estado, llegada_en, salida_en, sentido, chofer_id, chofer:perfiles!viajes_chofer_id_fkey(nombre))"
+  const campos = "id, viaje_id, cerrada_en, personas, viaje:viajes!inner(estado, llegada_en, salida_en, sentido, chofer_id, chofer:perfiles!viajes_chofer_id_fkey(nombre))"
   const [seBajo, llego] = await Promise.all([
     // El chofer marcó "Se bajó": termina en ese momento (cerrada_en)
     supabase
@@ -148,6 +149,7 @@ export async function cargarCalificacionPendiente(pasajeroId: string): Promise<C
     chofer: data.viaje.chofer?.nombre ?? "tu chofer",
     sentido: data.viaje.sentido,
     salidaEn: data.viaje.salida_en,
+    personas: data.personas,
   }
 }
 
