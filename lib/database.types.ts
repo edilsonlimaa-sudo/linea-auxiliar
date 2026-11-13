@@ -2183,6 +2183,7 @@ export type Database = {
           telefono: string
         }[]
       }
+      pantalla_chofer: { Args: never; Returns: Json }
       pedir_aviso: {
         Args: {
           p_hasta: string
@@ -2284,6 +2285,7 @@ export type Database = {
         Args: { p_entrada: string; p_viaje: string }
         Returns: string
       }
+      tablero_chofer: { Args: never; Returns: Json }
       usar_viaje_gratis: { Args: { p_reserva: string }; Returns: undefined }
       valorar_app: {
         Args: { p_comentario?: string; p_estrellas: number }

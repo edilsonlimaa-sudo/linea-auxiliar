@@ -960,6 +960,29 @@ existe en la app.)*
   4 en un mismo horario se llena un carro), cuántos "más adelante" y cuántos "no", y la lista (la más nueva primero) con
   nombre, horario, días, comentario y **WhatsApp** a cada uno. Solo el admin las ve.
 
+### 5.29 App del chofer: el tablero y sus viajes
+
+*(Nov. 2026: en la app nativa del chofer (`../linea-apps`), el Inicio deja de ser el viaje y pasa a ser un
+**tablero de su trabajo**: cómo le va, qué opinan de él, cuánto lleva. Lo de trabajar (publicar y manejar) va en su
+propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual.)*
+
+- **R110. Viajes: el lugar de trabajo.** Una pestaña con los viajes abiertos del chofer, como la nueva (§5.21): uno al
+  lado del otro, se pasa de uno a otro **deslizando de lado** o tocando su píldora (en ruta, el que recoge, los
+  próximos). Arriba, siempre, **Publicar viaje** (mientras la app no publica, lo hace en la app web). Sin viajes:
+  "¿Sales a trabajar?" con el mismo botón. La lista hacia Valle Grande va pegada abajo.
+- **R111. Inicio: el tablero del chofer [servidor].** Solo sus propios números, de la función `tablero_chofer()`:
+  - **Hoy:** viajes terminados y pasajeros llevados; si tiene viajes abiertos, un botón a **Viajes**. Sin ninguno:
+    **Publicar viaje** (lleva a Viajes).
+  - **El mes** (calendario, hora de Caracas): viajes terminados, pasajeros llevados y cuántos más o menos que el mes
+    pasado **a la misma fecha**; las barras de pasajeros de cada día del mes.
+  - **Lo que lleva cobrado (estimado):** pasajes del mes según la tarifa a la hora de salida de cada viaje (R79), por
+    cada persona que viajó (`subio` o `bajo`, R57), menos los pasajes pagados con viaje gratis (R103), menos las
+    cuotas del mes que el admin aprobó (R77). Dice "estimado": la línea no ve los pagos entre pasajero y chofer.
+  - **Las opiniones:** ★ promedio y cuántas (de siempre y del mes), lo que más destacan (etiquetas) y los dos
+    comentarios más recientes, sin nombres (R52). Al tocarlas: **Mis calificaciones** (R52).
+  Un viaje cuenta si **terminó** (`finalizado`); un pasajero, si subió o se bajó en el camino, con su grupo.
+- **R112. Lo de cada chofer es suyo.** El tablero no compara choferes ni muestra los números de otro. Lo cobrado no
+  sale de la app del chofer (§6).
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -982,6 +1005,7 @@ existe en la app.)*
 | Viajes gratis de un pasajero (R102–R104) | Él y el admin. Que una reserva es gratis, también el chofer de ese viaje (R105) |
 | Errores de la app (R106) | Solo el admin (quien lo anota no puede volver a leerlo) |
 | Respuesta a la salida fija (R108) | Quien respondió y el admin |
+| Tablero del chofer: sus viajes, pasajeros y lo cobrado estimado (R111) | Solo el propio chofer (el admin ya tiene sus números en el panel) |
 | Pago Móvil de la línea (para la cuota) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 | Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |
