@@ -968,21 +968,54 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
 
 - **R110. Viajes: el lugar de trabajo.** Una pestaña con los viajes abiertos del chofer, como la nueva (§5.21): uno al
   lado del otro, se pasa de uno a otro **deslizando de lado** o tocando su píldora (en ruta, el que recoge, los
-  próximos). Arriba, siempre, **Publicar viaje** (mientras la app no publica, lo hace en la app web). Sin viajes:
-  "¿Sales a trabajar?" con el mismo botón. La lista hacia Valle Grande va pegada abajo.
-- **R111. Inicio: el tablero del chofer [servidor].** Solo sus propios números, de la función `tablero_chofer()`:
-  - **Hoy:** viajes terminados y pasajeros llevados; si tiene viajes abiertos, un botón a **Viajes**. Sin ninguno:
-    **Publicar viaje** (lleva a Viajes).
+  próximos), y "+" para publicar otro. Sin viajes: "¿Sales a trabajar?" con Publicar viaje, repetir el último viaje y
+  cómo está la línea. La lista hacia Valle Grande va pegada abajo.
+  - **Publicar en la app [servidor],** igual que en la nueva: ¿hacia dónde vas? (nunca viene escogido, R10), ¿cuántos
+    puestos? (1 a 8; los del último de la cadena o del último viaje), ¿cuándo llegas a recoger? (Ya estoy aquí, 5–20
+    min, Otro o Hora fija; encadenado, cuánto tarda después de salir, R11–R12; en ruta, empieza ya en camino) e **Ida y
+    vuelta** (R61). Sin la cuota del día no se publica (R76): manda a pagarla. Las reglas son las de `publicar_viaje`.
+  - **Las acciones del viaje en la app [servidor],** iguales a las de la nueva y con las mismas funciones de la base:
+    avanzar (Avisar que llego · Ya llegué con "Avisar también al grupo" · Salir con su confirmación · Terminar, que pide
+    confirmar antes de 10 min, R12–R15, R71), ajustar la hora (R70), las opciones del viaje (puestos y cancelar con su
+    motivo, R24, R59, R72), lo de cada pasajero (Voy / Sigo a un pedido en el camino, Subió, No vino, Se bajó, Quitar y
+    su contacto: Llamar, WhatsApp, Cómo llegar, Waze; R21, R29, R38) y ocupar un puesto a mano (R36–R37). Después, "¿Qué
+    haces después?" (R73), el viaje terminado, conectarse y desconectarse (R60) y la lista de Gina (R62–R68).
+  - **El aviso a quien espera (R94)** sale del servidor de la web, no de la app (las claves de los avisos no van en el
+    teléfono): después de publicar, la app llama a **`/api/avisar-esperas`** con la sesión del chofer y el servidor hace
+    lo mismo que al publicar desde la web. Si falla, el viaje ya quedó publicado igual.
+- **R111. Inicio: el tablero del chofer [servidor].** Solo sus propios números, de la función
+  `tablero_chofer(mes)`. Arriba, fija al bajar, una fila con su foto, su nombre, la fecha de hoy y el **mes que mira**
+  (se toca y se escoge el año y el mes en una hoja, o se desliza el tablero de lado: a la derecha el mes anterior, a la izquierda el siguiente): abre en el mes actual y puede **volver a los meses anteriores**, hasta el mes de su primer
+  viaje terminado (no hay meses futuros). Todo lo de abajo es de ese mes:
+  - **Hoy** (siempre de hoy, no del mes que mira): viajes terminados y pasajeros llevados; si tiene viajes abiertos, el
+    viaje de ahora con un botón a **Viajes**. Si todavía no trabajó hoy: **¿Sales hoy?** con publicar (lleva a Viajes); si ya trabajó y no tiene viajes abiertos, nada.
   - **El mes** (calendario, hora de Caracas): viajes terminados, pasajeros llevados y cuántos más o menos que el mes
-    pasado **a la misma fecha**; las barras de pasajeros de cada día del mes.
+    anterior **a la misma fecha** (un mes ya cerrado se compara entero con el anterior); sus días: cuánto lleva por día
+    trabajado (pasajeros y pasajes), el promedio de cada día de la semana (cuál le rinde más) y su mejor día del mes.
   - **Lo que lleva cobrado (estimado):** pasajes del mes según la tarifa a la hora de salida de cada viaje (R79), por
     cada persona que viajó (`subio` o `bajo`, R57), menos los pasajes pagados con viaje gratis (R103), menos las
     cuotas del mes que el admin aprobó (R77). Dice "estimado": la línea no ve los pagos entre pasajero y chofer.
-  - **Las opiniones:** ★ promedio y cuántas (de siempre y del mes), lo que más destacan (etiquetas) y los dos
-    comentarios más recientes, sin nombres (R52). Al tocarlas: **Mis calificaciones** (R52).
-  Un viaje cuenta si **terminó** (`finalizado`); un pasajero, si subió o se bajó en el camino, con su grupo.
+  - **Las opiniones,** en una línea: ★ promedio, cuántas hasta el final de ese mes y lo que más destacan. Al tocarla:
+    **Mis calificaciones** (R52), con el detalle.
+  Un viaje cuenta si **terminó** (`finalizado`), en el día en que salió; un pasajero, si subió o se bajó en el camino,
+  con su grupo.
+  - **Hoy · Semana · Mes** (escoge cómo mirar, debajo del viaje de ahora): **Hoy** (o un día anterior, con ‹ ›): lo cobrado
+    ese día, pasajeros, viajes y la lista de sus viajes del día (hora, sentido, cuántos y cuánto); **Semana** (lunes a
+    domingo, la actual o anteriores): lo cobrado, pasajeros, viajes, días trabajados, cada día en una barra y
+    cuántos más o menos que la semana anterior; **Mes**: lo de arriba. Hoy y Semana salen de
+    `tablero_chofer_rango(desde, hasta)` [servidor] (hasta 31 días, nunca futuros), con las mismas cuentas que el mes.
 - **R112. Lo de cada chofer es suyo.** El tablero no compara choferes ni muestra los números de otro. Lo cobrado no
   sale de la app del chofer (§6).
+- **R113. Compañeros: coordinarse entre ellos.** La pestaña Compañeros de la app sirve para que los choferes se
+  repartan la ruta sin llamarse: arriba, **La ruta ahora**: por sentido (Al Centro / A Valle Grande), las próximas
+  recogidas de toda la línea en orden de hora, con quién (incluido él, "Tú"), cuántos puestos libres y si ya va en
+  ruta. Debajo, **Trabajando ahora**: cada compañero con su foto, ★, carro y la **línea de sus viajes** (lo de ahora y
+  los próximos encadenados, con la hora en que recoge); al tocarlo, su detalle con WhatsApp y Llamar. Al final, **Fuera
+  de servicio** y cuándo vuelven (R60). Solo viajes abiertos (lo que ya ven los choferes, §6); nada de lo cobrado (R112).
+- **R114. Las fotos en la app nativa** (R54) son las reales (perfil, carro, pasajeros) y se bajan **una sola vez por
+  teléfono**: el nombre de la foto lleva la hora de subida, así que la app la guarda por ese nombre y no vuelve a
+  pedirla hasta que la persona la cambie (como `/foto/…` de la web, inmutable).
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |

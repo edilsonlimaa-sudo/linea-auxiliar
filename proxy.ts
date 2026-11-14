@@ -2,7 +2,8 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 // Rutas que se ven sin sesión. Todo lo demás exige haber entrado.
-const RUTAS_PUBLICAS = ["/", "/entrar", "/registro", "/admin/entrar", "/salir", "/faro"]
+// /api/avisar-esperas: la llama la app nativa sin cookie; se autentica sola con el token (R110)
+const RUTAS_PUBLICAS = ["/", "/entrar", "/registro", "/admin/entrar", "/salir", "/faro", "/api/avisar-esperas"]
 // Con sesión no tiene sentido volver a estas: se va directo a la app.
 const RUTAS_SOLO_SIN_SESION = ["/", "/entrar", "/registro"]
 

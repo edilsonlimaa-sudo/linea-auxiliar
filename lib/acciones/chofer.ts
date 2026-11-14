@@ -1,11 +1,11 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { after } from "next/server"
+
 
 import type { Database } from "@/lib/database.types"
-import { hora, horaDeCaracas } from "@/lib/fechas"
-import { mandarPush } from "@/lib/push"
+import { horaDeCaracas } from "@/lib/fechas"
+import { avisarQuienEspera as avisarEsperas } from "@/lib/avisar-esperas"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { esMotivoCancelar, type MotivoCancelar } from "@/lib/motivos-cancelar"
 import { contrario } from "@/lib/viajes"
@@ -96,45 +96,8 @@ export async function publicarVuelta(sentidoIda: Sentido, puestos: number, minut
   return r
 }
 
-/**
- * R94: recién publicado un viaje al Centro, a quien pidió aviso le llega (una sola vez) "Hay un carro al Centro" en el
- * celular. La base marca los pedidos y devuelve los aparatos; el aviso sale después de responder al chofer. Si falla,
- * la publicación ya quedó igual.
- */
-async function avisarQuienEspera() {
-  try {
-    const supabase = await crearClienteServidor()
-    const { data: aparatos } = await supabase.rpc("avisar_esperas")
-    if (!aparatos?.length) return
-    const ids = [...new Set(aparatos.map((a) => a.viaje_id))]
-    const { data: viajes } = await supabase
-      .from("viajes")
-      .select("id, estado, estado_en, eta_min, hora_fija, chofer:perfiles!viajes_chofer_id_fkey(nombre, vehiculo:vehiculos(unidad))")
-      .in("id", ids)
-    for (const v of viajes ?? []) {
-      const chofer = Array.isArray(v.chofer) ? v.chofer[0] : v.chofer
-      const vehiculo = Array.isArray(chofer?.vehiculo) ? chofer?.vehiculo[0] : chofer?.vehiculo
-      const quien = `${chofer?.nombre.split(" ")[0] ?? "Un chofer"}${vehiculo?.unidad ? ` (unidad ${vehiculo.unidad})` : ""}`
-      const cuando = v.hora_fija
-        ? `a las ${hora(v.hora_fija)}`
-        : v.estado === "programado"
-          ? "después de su viaje de ahora"
-          : v.eta_min <= 1
-            ? "ya"
-            : `en unos ${v.eta_min} min`
-      const aviso = {
-        id: `aviso-centro-${v.id}`,
-        titulo: "Hay un carro al Centro",
-        texto: `${quien} va al Centro y llega a recoger ${cuando}. Aparta tu puesto.`,
-        url: "/n/al-centro",
-      }
-      const suyos = aparatos.filter((a) => a.viaje_id === v.id)
-      after(() => mandarPush(suyos, aviso).catch(() => {}))
-    }
-  } catch {
-    // El aviso es un extra: la publicación no depende de él
-  }
-}
+/** R94, con la sesión del chofer (la cookie): ver lib/avisar-esperas.ts */
+const avisarQuienEspera = async () => avisarEsperas(await crearClienteServidor())
 
 async function publicarIda(fd: FormData): Promise<Resultado> {
   const sentido = String(fd.get("sentido") ?? "")

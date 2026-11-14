@@ -3,7 +3,7 @@
 -- pasajeras Ana ...d3 y Bea ...d4
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(27);
 
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
 returns void language plpgsql as $$
@@ -89,6 +89,20 @@ select is((select (j->'opiniones'->>'cantidad')::int from j), 3, 'Todas sus opin
 select is((select (j->'opiniones'->>'cantidad_mes')::int from j), 2, 'Las del mes');
 select is((select j->'opiniones'->'etiquetas'->0->>'etiqueta' from j), 'Amable', 'Lo que más destacan, primero');
 select is((select array(select c->>'comentario' from j, jsonb_array_elements(j->'opiniones'->'comentarios') c)), array['Muy bien', 'Bien'], 'Los dos comentarios más recientes con texto, sin nombres');
+select is((select (j->'mes'->>'actual')::boolean from j), true, 'Sin mes, el actual');
+select is((select (j->>'primer_mes')::date from j), (select ini_ant from fechas), 'Puede volver hasta el mes de su primer viaje terminado');
+select is((select sum((d->>'pasajes')::int)::int from j, jsonb_array_elements(j->'mes'->'dias') d), (select 3 * diez + 1300 from t), 'Cada día trae lo cobrado en pasajes');
+
+-- El mes pasado, ya cerrado: entero, con sus opiniones hasta su último día
+create temp table ant as select public.tablero_chofer((select ini_ant from fechas)) j;
+select is((select (j->'mes'->>'actual')::boolean from ant), false, 'Un mes pasado no es el actual');
+select is((select (j->'mes'->>'viajes')::int from ant), 2, 'El mes pasado entero (también el del 28)');
+select is((select (j->'mes'->>'pasajeros')::int from ant), 3, 'Sus pasajeros del mes pasado');
+select is((select jsonb_array_length(j->'mes'->'dias') from ant),
+          (select extract(day from (ini_ant + interval '1 month' - interval '1 day'))::int from fechas), 'Todos los días de ese mes');
+select is((select (j->'opiniones'->>'cantidad')::int from ant), 1, 'Las opiniones hasta el final de ese mes');
+select is((select (j->'hoy'->>'pasajeros')::int from ant), 4, 'Hoy sigue siendo de hoy');
+select is((select (public.tablero_chofer((select hoy + 60 from fechas))->'mes'->>'actual')::boolean), true, 'Un mes futuro cae en el actual');
 
 select * from finish();
 rollback;

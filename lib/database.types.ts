@@ -2285,7 +2285,11 @@ export type Database = {
         Args: { p_entrada: string; p_viaje: string }
         Returns: string
       }
-      tablero_chofer: { Args: never; Returns: Json }
+      tablero_chofer: { Args: { p_mes?: string }; Returns: Json }
+      tablero_chofer_rango: {
+        Args: { p_desde: string; p_hasta: string }
+        Returns: Json
+      }
       usar_viaje_gratis: { Args: { p_reserva: string }; Returns: undefined }
       valorar_app: {
         Args: { p_comentario?: string; p_estrellas: number }
