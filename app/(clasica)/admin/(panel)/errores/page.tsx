@@ -86,7 +86,7 @@ export default async function PaginaErrores() {
                 <p className="text-muted-foreground">{fecha(e.cuando)}</p>
               </div>
               <p>
-                <b>{e.pantalla}</b> · {e.interfaz === "global" ? "pantalla general" : e.interfaz === "nueva" ? "nueva" : "clásica"} ·{" "}
+                <b>{e.pantalla}</b> · {e.interfaz === "global" ? "pantalla general" : e.interfaz === "nueva" ? "nueva" : e.interfaz === "app" ? "app del chofer" : "clásica"} ·{" "}
                 {TIPO[e.tipo] ?? e.tipo} · {e.enLinea === false ? "sin internet" : "con internet"} · {vuelta(e.volvioHace)}
               </p>
               <p className="font-mono break-all text-muted-foreground">{e.mensaje}</p>

@@ -3,7 +3,7 @@
 -- choferes Juan ...f1 y Luis ...f2, pasajera Ana ...f3
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(12);
+select plan(15);
 
 create function pg_temp.crear_cuenta(p_id uuid, p_telefono text, p_datos jsonb)
 returns void language plpgsql as $$
@@ -47,6 +47,19 @@ insert into public.reservas (viaje_id, pasajero_id, personas, estado) values
   ('00000000-0000-4000-b000-0000000000f3', '00000000-0000-4000-a000-0000000000f3', 3, 'subio'),
   ('00000000-0000-4000-b000-0000000000f4', '00000000-0000-4000-a000-0000000000f3', 1, 'bajo');
 
+-- Ayer a las 00:05 (siempre antes de la hora de ahora) y el mismo día de la semana hace 1 y 2 semanas
+insert into public.viajes (id, chofer_id, sentido, puestos, estado, salida_en, creado_en) values
+  ('00000000-0000-4000-b000-0000000000f5', '00000000-0000-4000-a000-0000000000f1', 'vg_a_centro', 4, 'finalizado',
+     pg_temp.a_las((select hoy from fechas) - 1, '00:05'), pg_temp.a_las((select hoy from fechas) - 1, '00:01')),
+  ('00000000-0000-4000-b000-0000000000f6', '00000000-0000-4000-a000-0000000000f1', 'vg_a_centro', 4, 'finalizado',
+     pg_temp.a_las((select hoy from fechas) - 7, '10:00'), pg_temp.a_las((select hoy from fechas) - 7, '09:30')),
+  ('00000000-0000-4000-b000-0000000000f7', '00000000-0000-4000-a000-0000000000f1', 'vg_a_centro', 4, 'finalizado',
+     pg_temp.a_las((select hoy from fechas) - 14, '10:00'), pg_temp.a_las((select hoy from fechas) - 14, '09:30'));
+insert into public.reservas (viaje_id, pasajero_id, personas, estado) values
+  ('00000000-0000-4000-b000-0000000000f5', '00000000-0000-4000-a000-0000000000f3', 2, 'subio'),
+  ('00000000-0000-4000-b000-0000000000f6', '00000000-0000-4000-a000-0000000000f3', 4, 'subio'),
+  ('00000000-0000-4000-b000-0000000000f7', '00000000-0000-4000-a000-0000000000f3', 2, 'subio');
+
 set local role authenticated;
 select pg_temp.yo('f1');
 create temp table hoy as select public.tablero_chofer_rango((select hoy from fechas), (select hoy from fechas)) d;
@@ -54,15 +67,20 @@ create temp table hoy as select public.tablero_chofer_rango((select hoy from fec
 select is((select (d->>'viajes')::int from hoy), 1, 'Hoy: solo el viaje terminado de Juan');
 select is((select (d->>'pasajeros')::int from hoy), 2, 'Hoy: sus pasajeros, con el grupo');
 select is((select (d->'cobrado'->>'pasajes')::int from hoy), 2600, 'Hoy: 2 pasajes a la tarifa especial de las 7:00 p. m.');
-select is((select (d->>'viajes_antes')::int from hoy), 1, 'El día anterior: el viaje de ayer');
-select is((select (d->>'pasajeros_antes')::int from hoy), 1, 'El día anterior: quien se bajó en el camino cuenta');
+select is((select (d->>'viajes_antes')::int from hoy), 2, 'El día anterior: el viaje de ayer');
+select is((select (d->>'pasajeros_antes')::int from hoy), 3, 'El día anterior entero: los de las 00:05 y quien se bajó en el camino');
+select is((select (d->'antes_a_esta_hora'->>'pasajeros')::int from hoy),
+  2 + case when (now() at time zone 'America/Caracas')::time >= '19:00' then 1 else 0 end,
+  'Ayer a esta hora: solo lo que salió antes de la hora de ahora');
+select is((select (d->'mismo_dia'->>'dias')::int from hoy), 2, 'Un día igual: los mismos días de la semana que trabajó');
+select is((select (d->'mismo_dia'->>'pasajeros')::numeric from hoy), 3.0, 'Un día igual: el promedio de pasajeros');
 select is((select jsonb_array_length(d->'lista') from hoy), 1, 'La lista del día: su viaje terminado');
 select is((select (d->'lista'->0->>'pasajes')::int from hoy), 2600, 'Cada viaje con lo cobrado');
 
 create temp table semana as select public.tablero_chofer_rango((select hoy from fechas) - 6, (select hoy from fechas) + 3) d;
 select is((select (d->>'hasta')::date from semana), (select hoy from fechas), 'Nunca días futuros: termina hoy');
 select is((select jsonb_array_length(d->'dias') from semana), 7, 'Un día por fila, también los de cero');
-select is((select (d->>'viajes')::int from semana), 2, 'La semana: los dos viajes terminados de Juan');
+select is((select (d->>'viajes')::int from semana), 3, 'La semana: los tres viajes terminados de Juan (hoy y dos ayer)');
 
 select throws_ok($$ select public.tablero_chofer_rango(current_date - 40, current_date) $$, 'Hasta 31 días');
 

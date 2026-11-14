@@ -486,6 +486,12 @@ chofer: la reserva la hace siempre el pasajero, así la lista justa (R17) es la 
 - **R52.** Chofer: **Mis calificaciones**, su propio espacio (no va en el carnet): ★ promedio y cantidad,
   cuántas de cada estrella, las etiquetas que más le dan y los comentarios recientes. **Sin el nombre** de quien
   calificó (solo fecha y sentido), para que el pasajero califique con libertad.
+  En la app nativa (nov. 2026) es para **ver cómo va**: se filtra por período (30 días, 3 meses o todo) y sentido; arriba el
+  promedio del período y cuánto subió o bajó contra el período anterior igual de largo; **cómo evolucionó** (el
+  promedio por semana, o por mes en "todo", tocando cada punto); cuántas de cada estrella (tocar una filtra las
+  opiniones); lo que más destacan (en qué parte de las opiniones aparece cada etiqueta y si sube o baja) y las
+  opiniones con fecha, sentido y etiquetas, filtrables por estrellas y "con comentario". Todo con sus propias
+  calificaciones (RLS), sin nombres.
 - **R53.** **Mi carnet** (pasajero y chofer): la credencial de la línea para mostrar si se la piden. Nombre,
   rol, **✓ Verificado** con la fecha de aprobación, teléfono y cédula (si la dio). Pasajero: urbanismo. Chofer:
   unidad, **placa** en grande, modelo y color, y su ★ (enlace a Mis calificaciones). Por ahora solo lectura: para
@@ -927,7 +933,7 @@ pantalla de error solo escribía en la consola del teléfono. Los registros de S
 duran una hora y no ven lo que pasa en el teléfono.)*
 
 - **R106. Cada pantalla de error queda anotada [servidor].** Cuando aparece una pantalla de error (§10: la de cada
-  interfaz o la general), la app anota en la base, sin que la persona haga nada: cuándo, quién (si tiene sesión), en
+  interfaz o la general, y la de la app nativa del chofer, interfaz `app`), la app anota en la base, sin que la persona haga nada: cuándo, quién (si tiene sesión), en
   qué pantalla, en qué interfaz, qué error (el mensaje y el código que da el servidor), de qué tipo (de versión, sin
   señal u otro), la versión de la app, el teléfono y el navegador, si tenía internet y **cuántos segundos hacía que
   había vuelto a la app** (si salió a otra app y volvió). Sin señal, la anotación espera en el teléfono y sale cuando la
@@ -999,8 +1005,13 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
     **Mis calificaciones** (R52), con el detalle.
   Un viaje cuenta si **terminó** (`finalizado`), en el día en que salió; un pasajero, si subió o se bajó en el camino,
   con su grupo.
-  - **Hoy · Semana · Mes** (escoge cómo mirar, debajo del viaje de ahora): **Hoy** (o un día anterior, con ‹ ›): lo cobrado
-    ese día, pasajeros, viajes y la lista de sus viajes del día (hora, sentido, cuántos y cuánto); **Semana** (lunes a
+  - **Hoy · Semana · Mes** (escoge cómo mirar, debajo del viaje de ahora; cada uno se desliza de lado, una página por
+    día, semana o mes): **Hoy** responde "¿está valiendo la pena?": lo cobrado, comparado con **ayer a esta misma
+    hora** (no con el día entero) y con **un día igual suyo** (el promedio de ese día de la semana en las 8 semanas
+    anteriores, de los que trabajó); **su ritmo**: de qué hora a qué hora trabajó y cuánto le rinde **por hora**, y los
+    **puestos vacíos** con que salió (por sentido); y, solo hoy, frases cortas cuando sirven: si ya recuperó la cuota del
+    día, la tarifa nocturna que viene y cuántos esperan en la lista de Gina. Un día anterior es el resumen para revisar
+    (lo mismo, comparado con el día anterior entero) y la lista de sus viajes del día (hora, sentido, cuántos y cuánto); **Semana** (lunes a
     domingo, la actual o anteriores): lo cobrado, pasajeros, viajes, días trabajados, cada día en una barra y
     cuántos más o menos que la semana anterior; **Mes**: lo de arriba. Hoy y Semana salen de
     `tablero_chofer_rango(desde, hasta)` [servidor] (hasta 31 días, nunca futuros), con las mismas cuentas que el mes.
