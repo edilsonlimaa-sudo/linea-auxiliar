@@ -11,12 +11,12 @@ import { cargarCuotasAdmin } from "@/lib/datos/cuota"
 import { diaDeHoy, fechaLarga } from "@/lib/fechas"
 import { exigirAdmin } from "@/lib/sesion"
 
-export const metadata: Metadata = { title: "Cuotas · Administración" }
+export const metadata: Metadata = { title: "Aportes · Administración" }
 
 // Un día más o menos sobre "AAAA-MM-DD" (al mediodía, para no cruzar de día por la zona horaria)
 const otroDia = (dia: string, dias: number) => new Date(new Date(`${dia}T12:00:00Z`).getTime() + dias * 86_400_000).toISOString().slice(0, 10)
 
-// Cuotas (docs/especificacion.md §5.18, R78): los avisos de pago del día para conciliar, y los datos del cobro
+// Aportes (docs/especificacion.md §5.18, R78): los avisos de aporte del día para conciliar, y los datos del aporte
 export default async function PaginaCuotas({ searchParams }: PageProps<"/admin/cuotas">) {
   await exigirAdmin()
   const { dia: d } = await searchParams
@@ -32,16 +32,16 @@ export default async function PaginaCuotas({ searchParams }: PageProps<"/admin/c
     <div className="flex flex-col gap-6">
       <EnVivo />
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">Cuotas</h1>
-        <p className="text-muted-foreground">Los choferes pagan por Pago Móvil para publicar viajes ese día. Concilia con tu banco y decide.</p>
+        <h1 className="text-2xl font-bold">Aportes</h1>
+        <p className="text-muted-foreground">Los choferes aportan por Pago Móvil, si quieren, para mantener la app. Trabajan igual sin aportar. Concilia con tu banco y decide.</p>
       </div>
 
       {(!config?.activa || config.desde > hoy) && (
         <p className="flex gap-2 rounded-2xl border-2 border-warning/50 bg-warning-muted px-4 py-3">
           <TriangleAlertIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-warning" />
           {config?.activa
-            ? `La cuota empieza el ${fechaLarga(`${config.desde}T12:00:00Z`)}: hasta entonces se publica sin pagar.`
-            : "La cuota está apagada: los choferes publican sin pagar. Actívala abajo, en Datos del cobro."}
+            ? `El aporte se pide desde el ${fechaLarga(`${config.desde}T12:00:00Z`)}: hasta entonces no se invita a los choferes.`
+            : "El aporte está apagado: no se invita a los choferes. Actívalo abajo, en Datos del aporte."}
         </p>
       )}
 
@@ -62,14 +62,14 @@ export default async function PaginaCuotas({ searchParams }: PageProps<"/admin/c
       <div className="grid grid-cols-3 gap-2">
         <Dato n={String(enRevision)} texto="en revisión" />
         <Dato n={String(aprobados.length)} texto="aprobados" />
-        <Dato n={bolivares(total)} texto="cobrado" />
+        <Dato n={bolivares(total)} texto="aportado" />
       </div>
 
       <AvisosCuota avisos={avisos} />
 
       <details open={!config?.activa} className="group rounded-2xl border-2 bg-card">
         <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 py-2 font-bold focus-visible:ring-[3px] focus-visible:ring-ring focus-visible:outline-none [&::-webkit-details-marker]:hidden">
-          Datos del cobro
+          Datos del aporte
         </summary>
         <div className="px-4 pb-4">
           <DatosCuota config={config} />

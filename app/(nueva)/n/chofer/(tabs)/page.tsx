@@ -21,7 +21,6 @@ import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import { ETAPA } from "@/lib/nueva/textos"
 import { ahoraDelPedido } from "@/lib/nueva/vistas"
 import { exigirCuentaAprobada } from "@/lib/sesion"
-import { cn } from "@/lib/utils"
 import { duracion, estadoParaChofer, libres, SENTIDOS, sumaPersonas, type Viaje } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Línea Auxiliar" }
@@ -29,7 +28,7 @@ export const metadata: Metadata = { title: "Línea Auxiliar" }
 const RESPUESTAS: Respuesta[] = ["vuelta", "pausa", "ultimo"]
 
 /**
- * Inicio del chofer en la interfaz nueva (§5.21, §8). Sin viajes: "¿Sales a trabajar?" (o la cuota del día, R76). Con
+ * Inicio del chofer en la interfaz nueva (§5.21, §8). Sin viajes: "¿Sales a trabajar?" (y el aporte del día, voluntario, R76). Con
  * viajes: una pestaña por viaje (en ruta, el que recoge, los próximos; se abre en el que recoge) con "+" al final,
  * con la acción del viaje al final, y abajo, pegada, la lista de Gina. Las reglas son las de la clásica
  * (components/chofer/inicio-chofer.tsx).
@@ -40,14 +39,13 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
   const [datos, cuota, { despues, r, terminado }] = await Promise.all([cargarInicioChofer(perfil.id, conectado), cargarCuotaChofer(perfil.id), searchParams])
   const logro = typeof terminado === "string" ? await resumenDe(perfil.id, terminado) : null
   const ahora = ahoraDelPedido()
-  const sinCuota = cuota !== null && !cuota.habilitado
   const { enRuta, recogida, proximos, listaTramo, vehiculo } = datos
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
   const hoja = logro ? <ViajeTerminadoHoja resumen={logro} /> : null
   // Como el prototipo: el nombre de la app arriba
-  const cabecera = <AppHeader title="Línea Auxiliar" action={<EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} viajesAbiertos={publicados} compartir={abiertos.length > 0} />} />
+  const cabecera = <AppHeader title="Línea Auxiliar" action={<EstadoEnCabecera conectado={conectado} viajesAbiertos={publicados} compartir={abiertos.length > 0} />} />
 
   // Sin viajes abiertos: "¿salgo ahora?"
   if (abiertos.length === 0) {
@@ -56,24 +54,24 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
         <EnVivo />
         {cabecera}
         <div className="flex flex-1 flex-col gap-4 p-4">
-          {cuota ? <CuotaAviso cuota={cuota} /> : null}
-          {!sinCuota ? (
-            <section className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
-              <div>
-                <h2 className="font-heading text-2xl font-semibold">¿Sales a trabajar?</h2>
-                <p className="text-sm text-muted-foreground">
-                  {conectado ? "Estás conectado: los pasajeros te ven disponible." : "Publicar un viaje te conecta y te muestra a los pasajeros."}
-                </p>
-              </div>
-              <Button size="lg" render={<Link href="/n/chofer/publicar?modo=primero" transitionTypes={["nav-forward"]} />} nativeButton={false}>
-                <CirclePlus className="size-5" />
-                Publicar un viaje
-              </Button>
-              {conectado ? <BotonDesconectarme /> : null}
-            </section>
-          ) : null}
-          {/* R76: sin la cuota, la lista de Gina no es para él */}
-          {!sinCuota ? <FaixaLista lista={listaTramo} /> : null}
+          {/* R76: el aporte del día es voluntario: la línea discreta (ya aportó o no apareció) arriba */}
+          {cuota ? <CuotaAviso cuota={cuota} parte="fila" /> : null}
+          <section className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
+            <div>
+              <h2 className="font-heading text-2xl font-semibold">¿Sales a trabajar?</h2>
+              <p className="text-sm text-muted-foreground">
+                {conectado ? "Estás conectado: los pasajeros te ven disponible." : "Publicar un viaje te conecta y te muestra a los pasajeros."}
+              </p>
+            </div>
+            <Button size="lg" render={<Link href="/n/chofer/publicar?modo=primero" transitionTypes={["nav-forward"]} />} nativeButton={false}>
+              <CirclePlus className="size-5" />
+              Publicar un viaje
+            </Button>
+            {conectado ? <BotonDesconectarme /> : null}
+          </section>
+          {/* La invitación a aportar, debajo de Publicar (nunca en su lugar) */}
+          {cuota ? <CuotaAviso cuota={cuota} parte="invitacion" /> : null}
+          <FaixaLista lista={listaTramo} />
         </div>
         {hoja}
       </Screen>
@@ -134,18 +132,13 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
       <EnVivo />
       {cabecera}
       {/* Sin padding abajo: la franja de la lista, pegada al fondo, queda en el mismo lugar al llegar al final */}
-      <div className={cn("flex flex-1 flex-col gap-4 px-4", sinCuota && "pb-4")}>
-        {/* Con viajes, la cuota solo si falta (pagada no dice nada aquí); el GPS va en el badge de la cabecera */}
-        {cuota && !cuota.habilitado ? (
-          <div className="pt-4">
-            <CuotaAviso cuota={cuota} />
-          </div>
-        ) : null}
+      {/* Con viajes, nada del aporte del día (R76): el GPS va en el badge de la cabecera */}
+      <div className="flex flex-1 flex-col gap-4 px-4">
         <PestanasViajes
           pestanas={pestanas}
           inicial={(recogida ?? enRuta ?? proximos[0]).id}
-          agregar={sinCuota ? null : { href: `/n/chofer/publicar?modo=${recogida ? "cadena" : "desde_ruta"}` }}
-          pie={!sinCuota ? <FaixaLista lista={listaTramo} destacada={listaDestacada} compacta /> : null}
+          agregar={{ href: `/n/chofer/publicar?modo=${recogida ? "cadena" : "desde_ruta"}` }}
+          pie={<FaixaLista lista={listaTramo} destacada={listaDestacada} compacta />}
         />
       </div>
       {despues === "1" && soloEnRuta ? <PreguntaDespues viaje={enRuta} inicial={respuesta} /> : null}

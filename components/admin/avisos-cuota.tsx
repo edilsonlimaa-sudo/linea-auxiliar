@@ -19,10 +19,10 @@ const ESTADO: Record<EstadoAviso, { texto: string; clase: string }> = {
   rechazado: { texto: "Rechazado", clase: "bg-destructive/10 text-destructive" },
 }
 
-/** Los avisos de pago de un día (R78): en revisión primero, con Aprobar / Rechazar; una decisión se puede cambiar */
+/** Los avisos de aporte de un día (R78): en revisión primero, con Aprobar / Rechazar; una decisión se puede cambiar */
 export function AvisosCuota({ avisos }: { avisos: AvisoAdmin[] }) {
   if (avisos.length === 0) {
-    return <p className="rounded-2xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">Nadie avisó un pago este día.</p>
+    return <p className="rounded-2xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">Nadie avisó un aporte este día.</p>
   }
   return (
     <ul className="grid gap-3 md:grid-cols-2">
@@ -55,7 +55,6 @@ function FilaAviso({ aviso: a }: { aviso: AvisoAdmin }) {
           <p className="truncate font-bold">{a.chofer}</p>
           <p className="text-sm text-muted-foreground">
             Avisó a las {hora(a.creadoEn)}
-            {a.estado === "revision" && (a.habilita ? " · ya puede publicar" : " · espera tu aprobación para publicar")}
           </p>
         </div>
         <span className={cn("shrink-0 rounded-full px-2.5 py-0.5 text-sm font-bold", ESTADO[a.estado].clase)}>{ESTADO[a.estado].texto}</span>
@@ -96,10 +95,10 @@ function FilaAviso({ aviso: a }: { aviso: AvisoAdmin }) {
       <Confirmar
         abierto={rechazar}
         onCambiar={setRechazar}
-        titulo={`¿Rechazar el pago de ${a.chofer.split(" ")[0]}?`}
+        titulo={`¿Rechazar el aporte de ${a.chofer.split(" ")[0]}?`}
         descripcion={
           <span className="flex flex-col gap-3">
-            <span>No podrá publicar más viajes hoy (lo ya publicado sigue). Si avisa otro pago, solo se libera cuando lo apruebes.</span>
+            <span>El chofer verá que su aporte no apareció en el banco. Sigue trabajando igual: el aporte es voluntario.</span>
             <span className="flex flex-col gap-1.5">
               <label htmlFor={idMotivo} className="font-bold text-foreground">
                 Motivo (lo ve el chofer, opcional)

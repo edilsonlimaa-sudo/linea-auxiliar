@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
 
 import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { ListaConAcciones } from "@/components/nueva/chofer/gina"
-import { cargarCuotaChofer } from "@/lib/datos/cuota"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 import { libres } from "@/lib/viajes"
@@ -20,9 +18,7 @@ const personas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
  */
 export default async function ListaGina() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva-chofer" })
-  const [datos, cuota] = await Promise.all([cargarInicioChofer(perfil.id, perfil.conectado_en !== null), cargarCuotaChofer(perfil.id)])
-  // R76: sin la cuota, la lista no es para él
-  if (cuota && !cuota.habilitado && !datos.enRuta && !datos.recogida) redirect("/n/chofer")
+  const datos = await cargarInicioChofer(perfil.id, perfil.conectado_en !== null)
   const { recogida, enRuta, listaTramo } = datos
   const enGina =
     recogida?.sentido === "centro_a_vg" && recogida.estado === "en_parada" ? { viajeId: recogida.id, plan: recogida.gina ?? [], libres: libres(recogida) } : null

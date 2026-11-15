@@ -6,7 +6,7 @@ import type { EstadoFormulario } from "@/lib/acciones/cuenta"
 import { BANCOS, leerPagoMovil } from "@/lib/bancos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 
-/** R77: el chofer avisa el Pago Móvil de la cuota del día (referencia + banco desde el que pagó) */
+/** R77: el chofer avisa el Pago Móvil de su aporte del día (voluntario) (referencia + banco desde el que pagó) */
 export async function avisarPagoCuota(anterior: EstadoFormulario, formData: FormData): Promise<EstadoFormulario> {
   const intento = (anterior.intento ?? 0) + 1
   const valores = { referencia: String(formData.get("referencia") ?? ""), banco: String(formData.get("banco") ?? "") }
@@ -20,7 +20,7 @@ export async function avisarPagoCuota(anterior: EstadoFormulario, formData: Form
   const { error } = await supabase.rpc("avisar_pago_cuota", { p_referencia: referencia, p_banco: valores.banco })
   if (error) return { error: error.message, valores, intento }
   revalidatePath("/inicio")
-  // La página muestra el aviso enviado (en revisión: "Ir a publicar")
+  // La página muestra el aviso enviado (con las gracias)
   revalidatePath("/cuota")
   revalidatePath("/n/chofer", "layout") // la interfaz nueva del chofer (§5.21)
   return { intento }
@@ -42,9 +42,9 @@ export async function guardarCuota(anterior: EstadoFormulario, formData: FormDat
   const activa = valores.activa === "si"
   const monto = Number(valores.monto.replace(/\./g, "").replace(",", "."))
   const errores: Record<string, string> = {}
-  if (!Number.isFinite(monto) || monto <= 0) errores.monto = "Escribe el monto de la cuota"
+  if (!Number.isFinite(monto) || monto <= 0) errores.monto = "Escribe el monto del aporte"
   if (!/^\d{4}-\d{2}-\d{2}$/.test(valores.desde)) errores.desde = "Escoge desde qué día se cobra"
-  // El Pago Móvil es opcional mientras la cuota está apagada; para activarla, completo
+  // El Pago Móvil es opcional mientras el aporte está apagado; para activarlo, completo
   const { datos, errores: erroresPm } = leerPagoMovil(Object.fromEntries(formData), !activa)
   Object.assign(errores, erroresPm)
   if (Object.keys(errores).length) return { errores, valores, intento }

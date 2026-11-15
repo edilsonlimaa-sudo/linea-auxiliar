@@ -1,10 +1,8 @@
 import type { Metadata } from "next"
-import { redirect } from "next/navigation"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
 import { type ModoPublicar, PublicarFormulario } from "@/components/nueva/chofer/publicar"
-import { cargarCuotaChofer } from "@/lib/datos/cuota"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 
@@ -13,9 +11,7 @@ export const metadata: Metadata = { title: "Publicar un viaje · Línea Auxiliar
 // Publicar un viaje (R10) o agregar otro a la cadena (R11). El modo sale de sus viajes abiertos, no de la dirección
 export default async function Publicar() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva-chofer" })
-  const [datos, cuota] = await Promise.all([cargarInicioChofer(perfil.id, perfil.conectado_en !== null), cargarCuotaChofer(perfil.id)])
-  // R76: sin la cuota del día no se publica
-  if (cuota && !cuota.habilitado) redirect("/n/chofer/cuota")
+  const datos = await cargarInicioChofer(perfil.id, perfil.conectado_en !== null)
   const { enRuta, recogida, proximos, ultimo } = datos
   const modo: ModoPublicar = recogida ? "cadena" : enRuta ? "desde_ruta" : "primero"
   // Los puestos sugeridos: los del último de la cadena, o los del último viaje

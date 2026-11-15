@@ -30,15 +30,12 @@ export function InicioChofer({
 }: {
   nombre: string
   datos: DatosInicioChofer
-  cuota?: CuotaChofer | null // R76: con la cuota vigente; null = sin cobro hoy
+  cuota?: CuotaChofer | null // R76: el aporte del día cuando el admin lo pide; null = no se pide hoy
   opinar?: boolean // R82: "¿Qué tal la app?" (solo sin viajes abiertos)
   preguntarVuelta?: boolean // recién salió (?vuelta=1): preguntar por la vuelta (R61)
   respuesta?: Respuesta | null // desde el foco "¿Qué haces después?" (R75): la hoja abre con esta respuesta
 }) {
   const { conectado, enRuta, recogida, proximos, companeros, viajesCompaneros, ultimo, vehiculo } = datos
-  // R76: sin el día habilitado, en lugar de publicar va el aviso de la cuota (el pago, en /cuota)
-  const sinCuota = cuota !== null && !cuota.habilitado
-  const lineaCuota = cuota && <AvisoCuota cuota={cuota} />
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
@@ -74,14 +71,14 @@ export function InicioChofer({
                 ¿Sales a trabajar?
               </h1>
             </div>
-            <EstadoEnCabecera conectado={conectado} sinCuota={sinCuota} />
-            {!sinCuota && <AgregarViaje modo="primero" ultimo={ultimo} />}
+            <EstadoEnCabecera conectado={conectado} />
+            <AgregarViaje modo="primero" ultimo={ultimo} />
           </div>
           <Companeros companeros={companeros} viajes={viajesCompaneros} chofer={nombre} enCabecera />
         </section>
-        {lineaCuota}
-        {/* R76: sin la cuota (y sin viajes) la lista hacia Valle Grande no es para él */}
-        {!sinCuota && lista}
+        {/* R76: el aporte del día, voluntario: debajo de Publicar, nunca en su lugar */}
+        {cuota && <AvisoCuota cuota={cuota} invitar />}
+        {lista}
         {opinar && <ValorarApp />}
       </div>
     )
@@ -130,12 +127,9 @@ export function InicioChofer({
         </section>
       )}
 
-      {sinCuota ? lineaCuota : (
-        <>
-          <AgregarViaje modo={modoAgregar} ultimo={sugerencia} />
-          {lineaCuota}
-        </>
-      )}
+      <AgregarViaje modo={modoAgregar} ultimo={sugerencia} />
+      {/* R76: con viajes, del aporte solo la línea discreta (sin invitación) */}
+      {cuota && <AvisoCuota cuota={cuota} />}
       {/* También trabajando: coordinarse con los compañeros, a un toque (§8) */}
       <Companeros companeros={companeros} viajes={viajesCompaneros} chofer={nombre} />
       {/* Espacio para que la barra fija de abajo no tape lo último de la página */}

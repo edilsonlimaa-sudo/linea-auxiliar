@@ -642,33 +642,37 @@ dice **dónde está** y Gina es solo el lugar más común. Valle Grande → Cent
 - **R68. A bordo, igual que hoy.** Cada **Subió** crea un pasajero a bordo del viaje: **Se bajó** (R38),
   historial (R50–R51) y calificaciones (R44–R45) funcionan como en Valle Grande → Centro.
 
-### 5.18 Cuota del día (choferes)
+### 5.18 Aporte del día (choferes, voluntario)
 
-*(Oct. 2026: primera monetización, leve. El admin no madruga y hay choferes que empiezan muy temprano: el primer aviso
-del día libera al momento y él concilia después con el estado de cuenta.)*
+*(Oct. 2026: primera monetización, leve, como "cuota del día" que bloqueaba: sin el día pagado no se publicaba, no se
+conectaba ni se veía la lista. (15/11/2026): en la práctica es un **aporte voluntario** para mantener la app en el
+aire. Quien no puede aportar trabaja igual. En el código y la base sigue llamándose `cuota`.)*
 
-- **R76. Trabajar con la línea pide el día pagado [servidor].** Desde la fecha de inicio que fija el admin, para **publicar un
-  viaje** (el primero, en cadena, la vuelta) el chofer necesita el **día habilitado** (día de Caracas). La cuota es
-  **Bs. 1.000** por día (el admin la cambia). Con la cuota apagada (o antes de la fecha de inicio) todo funciona como antes.
-  - **Sin el día habilitado tampoco se conecta ni ve la lista hacia Valle Grande** (ni nombres ni teléfonos) *(Oct.
-    2026: un chofer que no pagó buscaba a la gente preguntando "¿estás en la lista?" y parecía seguir con la línea)*.
-    En Inicio no tiene "Conectarme" ni la franja de la lista; sí entra a la app, ve su historial y paga la cuota.
-  - Quien tiene un **viaje abierto** (p. ej., le rechazaron el pago a media jornada) lo termina como siempre: sigue
-    conectado, recoge, ve la lista y sale.
-- **R77. Avisar el pago [servidor].** El chofer paga por **Pago Móvil** a la cuenta de la línea (banco, teléfono y
+- **R76. El aporte del día es voluntario [servidor].** Desde la fecha de inicio que fija el admin, la app **invita** al
+  chofer a aportar **Bs. 1.000** por día (día de Caracas; el admin cambia el monto). **No abre ni cierra nada**:
+  publicar (el primero, en cadena, la vuelta), conectarse y ver la lista hacia Valle Grande funcionan igual haya
+  aportado o no *(15/11/2026: antes, sin el día habilitado no se publicaba, no se conectaba ni se veía la lista)*. Con
+  el aporte apagado (o antes de la fecha de inicio) la app no dice nada.
+  - En **Inicio sin viajes**, debajo de Publicar (nunca encima ni en su lugar), la invitación **"¿Aportas hoy a la
+    app?"** ("Con Bs. 1.000 nos ayudas a mantener la Línea en el aire. Es voluntario: trabajas igual.") con
+    **Aportar** y **Hoy no** (no vuelve hasta el día siguiente, en ese teléfono). Con viajes abiertos no se invita.
+  - Ya aportó: una línea discreta **"Gracias por tu aporte de hoy"** (en revisión: "Tu aporte de hoy está en revisión ·
+    ¡gracias!"). Si no apareció en el banco: "Tu aporte de hoy no apareció en el banco", discreta, sin rojo. Las dos
+    abren la pantalla del aporte.
+- **R77. Avisar el aporte [servidor].** El chofer paga por **Pago Móvil** a la cuenta de la línea (banco, teléfono y
   cédula con **Copiar todo**, como R74) y avisa con la **referencia** (4 a 20 números) y el **banco desde el que
-  pagó**. En Inicio va solo el aviso ("Para publicar hoy, paga la cuota del día" · **Pagar la cuota**, en lugar de
-  Publicar); el pago y el aviso de la referencia, en su propia pantalla **Cuota del día**.
-  - **El primer aviso del día queda "En revisión" y habilita al momento.**
+  pagó**, en su pantalla **Aporte del día** ("Aporta Bs. 1.000 a la línea" · 1. Paga a la línea · 2. Avisa tu aporte ·
+  **Ya aporté: avisar**).
+  - **El primer aviso del día queda "En revisión" y ya cuenta como aportado** (las gracias).
   - Un aviso a la vez: con uno en revisión o aprobado no se avisa otro ese día.
-  - **Si el admin lo rechaza, no puede publicar más viajes ese día** (lo ya publicado sigue). Puede avisar otro pago,
-    pero ese **ya no habilita hasta que el admin lo apruebe**. Así nadie vive diciendo que pagó.
+  - Si el admin lo rechaza, el chofer lo ve ("no apareció en el banco", con el motivo) y puede avisar otro con la
+    referencia correcta; ese cuenta cuando el admin lo apruebe. Nada se bloquea.
   - Al día siguiente empieza de cero.
-- **R78. Revisión en el panel [servidor].** **Cuotas** muestra los avisos del día (se puede ir a otros días): en
+- **R78. Revisión en el panel [servidor].** **Aportes** muestra los avisos del día (se puede ir a otros días): en
   revisión primero, con chofer, referencia, banco, monto y hora. **Aprobar** o **Rechazar** (con confirmación y motivo
   opcional, que el chofer ve); una decisión se puede cambiar. El menú cuenta los que están en revisión. Ahí mismo el
-  admin carga los datos del cobro: cuota activa, desde qué día, monto y su Pago Móvil (sin esos datos no se puede
-  activar).
+  admin carga los datos del aporte: **Pedir el aporte a los choferes** (activo), desde qué día, monto y su Pago Móvil
+  (sin esos datos no se puede activar).
 
 ### 5.19 El pasaje
 
@@ -720,7 +724,7 @@ con vuelta atrás inmediata. La experiencia y las reglas son las mismas; cambia 
   es **"✨ La app se renovó"** (qué es más fácil, que su cuenta sigue igual y que active los avisos); la de los primeros
   (acceso anticipado) queda solo para quien ya la recibió.
 - **R84. La app lleva a cada uno a la suya.** La nueva vive en `/n` (pasajero) y en `/n/chofer` (chofer, con las mismas
-  pantallas de la clásica: Inicio con su viaje, Publicar, la lista de Gina, la cuota, Mis viajes, Calificaciones, Mi carnet y
+  pantallas de la clásica: Inicio con su viaje, Publicar, la lista de Gina, el aporte del día, Mis viajes, Calificaciones, Mi carnet y
   los compañeros). Pestañas del chofer en la nueva: **Inicio · Compañeros · Calificaciones · Menú**. **Compañeros**
   (como Choferes del pasajero): "Trabajando ahora" (qué hace cada uno, cuántos lleva y qué viene después; al tocar, su
   detalle con WhatsApp, Llamar y el mapa) y "Fuera de servicio" (cuándo vuelve, si avisó una pausa, R60); en Inicio ya
@@ -979,7 +983,7 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
   - **Publicar en la app [servidor],** igual que en la nueva: ¿hacia dónde vas? (nunca viene escogido, R10), ¿cuántos
     puestos? (1 a 8; los del último de la cadena o del último viaje), ¿cuándo llegas a recoger? (Ya estoy aquí, 5–20
     min, Otro o Hora fija; encadenado, cuánto tarda después de salir, R11–R12; en ruta, empieza ya en camino) e **Ida y
-    vuelta** (R61). Sin la cuota del día no se publica (R76): manda a pagarla. Las reglas son las de `publicar_viaje`.
+    vuelta** (R61). Publicar no depende del aporte del día (R76, 15/11/2026). Las reglas son las de `publicar_viaje`.
   - **Las acciones del viaje en la app [servidor],** iguales a las de la nueva y con las mismas funciones de la base:
     avanzar (Avisar que llego · Ya llegué con "Avisar también al grupo" · Salir con su confirmación · Terminar, que pide
     confirmar antes de 10 min, R12–R15, R71), ajustar la hora (R70), las opciones del viaje (puestos y cancelar con su
@@ -1000,7 +1004,7 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
     trabajado (pasajeros y pasajes), el promedio de cada día de la semana (cuál le rinde más) y su mejor día del mes.
   - **Lo que lleva cobrado (estimado):** pasajes del mes según la tarifa a la hora de salida de cada viaje (R79), por
     cada persona que viajó (`subio` o `bajo`, R57), menos los pasajes pagados con viaje gratis (R103), menos las
-    cuotas del mes que el admin aprobó (R77). Dice "estimado": la línea no ve los pagos entre pasajero y chofer.
+    aportes del día (R76–R77) del mes que el admin aprobó. Dice "estimado": la línea no ve los pagos entre pasajero y chofer.
   - **Las opiniones,** en una línea: ★ promedio, cuántas hasta el final de ese mes y lo que más destacan. Al tocarla:
     **Mis calificaciones** (R52), con el detalle.
   Un viaje cuenta si **terminó** (`finalizado`), en el día en que salió; un pasajero, si subió o se bajó en el camino,
@@ -1009,7 +1013,7 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
     día, semana o mes): **Hoy** responde "¿está valiendo la pena?": lo cobrado, comparado con **ayer a esta misma
     hora** (no con el día entero) y con **un día igual suyo** (el promedio de ese día de la semana en las 8 semanas
     anteriores, de los que trabajó); **su ritmo**: de qué hora a qué hora trabajó y cuánto le rinde **por hora**, y los
-    **puestos vacíos** con que salió (por sentido); y, solo hoy, frases cortas cuando sirven: si ya recuperó la cuota del
+    **puestos vacíos** con que salió (por sentido); y, solo hoy, frases cortas cuando sirven: si ya recuperó el aporte del
     día, la tarifa nocturna que viene y cuántos esperan en la lista de Gina. Un día anterior es el resumen para revisar
     (lo mismo, comparado con el día anterior entero) y la lista de sus viajes del día (hora, sentido, cuántos y cuánto); **Semana** (lunes a
     domingo, la actual o anteriores): lo cobrado, pasajeros, viajes, días trabajados, cada día en una barra y
@@ -1038,19 +1042,19 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
 | **Cédula** | Solo la propia persona y el admin |
 | Lugar escrito y GPS de un pasajero (reserva) | Solo el chofer del viaje. La lista pública no lo muestra |
 | Espera de un pasajero (aviso al Centro, R94) | Él y el admin. *(Con R31 apagado, los choferes y los demás que esperan ya no la ven: `esperando_para_choferes` y `esperan_conmigo` no se pueden llamar desde la app.)* |
-| Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Los pasajeros y los choferes con la cuota del día o un viaje abierto (R76). La **distancia** al avisar (R62), solo el admin |
+| Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Los pasajeros y todos los choferes (desde el 15/11/2026 ya no depende del aporte del día, R76). La **distancia** al avisar (R62), solo el admin |
 | **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |
 | Recorrido de los viajes del chofer (R92) | Solo admin (el chofer lo sube; nadie más lo lee). Se borra a los 60 días |
 | Alertas de auxilio | Solo choferes |
-| Avisos de pago de la cuota (R77) | El propio chofer y el admin |
+| Avisos del aporte del día (R77) | El propio chofer y el admin |
 | Sugerencias y opiniones (R81–R82) | Quien la escribió y el admin |
 | Interesados en una ruta nueva (R96–R97) | Solo el admin (quien lo envía no puede volver a leerlo) |
 | Viajes gratis de un pasajero (R102–R104) | Él y el admin. Que una reserva es gratis, también el chofer de ese viaje (R105) |
 | Errores de la app (R106) | Solo el admin (quien lo anota no puede volver a leerlo) |
 | Respuesta a la salida fija (R108) | Quien respondió y el admin |
 | Tablero del chofer: sus viajes, pasajeros y lo cobrado estimado (R111) | Solo el propio chofer (el admin ya tiene sus números en el panel) |
-| Pago Móvil de la línea (para la cuota) | Los choferes |
+| Pago Móvil de la línea (para el aporte del día) | Los choferes |
 | Notificaciones (R88–R89) | Su destinatario y el admin (quién la vio, solo el admin) |
 | Aparatos inscritos para avisos en el celular (R90) | La propia persona y el servidor al enviar; nadie más. Los del admin, también el servidor al avisar una cuenta nueva (R93) |
 
@@ -1078,7 +1082,7 @@ Navegación con **menú lateral** (drawer en el celular, botón "Menú" con text
 | Sin sesión | **Portada = Entrar** (teléfono + PIN; la mayoría ya tiene cuenta) · "¿Primera vez? Crear una cuenta" → **Registro**: recién ahí "¿Cómo vas a usar la app? Soy pasajero / Soy chofer" → formulario |
 | Pasajero | **Inicio** ("¿Hacia dónde vas?" → unidades de ese sentido; "¿dónde te recogemos?" recién al apartar) · **La línea** (mapa con todos los choferes y quién trabaja) · **Mi viaje** (solo con reserva activa) · **Choferes** (★, comentarios, calificar) · **Mis viajes** (R51) · **Mi carnet** (R53) |
 | Chofer | **Inicio** (demanda, publicar viaje, compañeros en la ruta; con viaje abierto: su gestión) · **Mis viajes** (R50) · **Mis calificaciones** (R52) · **Mi carnet** (R53) · **Auxilio** |
-| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros** · **Cuotas**, R78) · Análisis (**Uso de la app** · **Calificaciones** · **Sugerencias**, R81) · Aviso del día y restablecer PIN (más adelante) |
+| Admin | Menú lateral: **Resumen** · Operación (**Viajes en curso** · **Lista a Valle Grande**) · Personas (**Por aprobar** · **Choferes** · **Pasajeros** · **Aportes**, R78) · Análisis (**Uso de la app** · **Calificaciones** · **Sugerencias**, R81) · Aviso del día y restablecer PIN (más adelante) |
 
 **Entrada del admin (escondida).** La portada no muestra nada del admin a pasajeros ni choferes; esconderlo es
 solo para no confundir (la protección es la contraseña y el servidor). Dos caminos a `/admin/entrar`:
@@ -1314,8 +1318,8 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
   cancela viajes, R8) después de "¿Vuelves a trabajar hoy?" (R60). Solo si el GPS falla se vuelve un aviso amarillo con "Intentar de nuevo" (R40).
   En la interfaz nueva (*oct. 2026*) no hay línea en la pantalla: conectado es un **badge verde** en la cabecera que
   abre un popover con la ubicación (y la nota del recorrido, R92) y **Desconectarme**; si el GPS falla, el badge dice
-  "Sin GPS" en rojo y el popover trae qué hacer e "Intentar de nuevo". Con viajes, la cuota del día solo aparece si
-  falta (pagada o en revisión, nada).
+  "Sin GPS" en rojo y el popover trae qué hacer e "Intentar de nuevo". Con viajes, el aporte del día no aparece
+  (15/11/2026: es voluntario, R76).
 - **Una sola acción principal a la vez**, grande y fija abajo (zona del pulgar), que cambia con el estado:
   en camino → **Avisar que llego** (y "Ya llegué" directo) · llegando → **Ya llegué** · recogiendo → **Salir con N
   pasajeros** · en ruta → **Terminar viaje** (R71).
@@ -1325,8 +1329,8 @@ mano**. Principio: **lo normal se ve discreto, lo que pide acción se ve claro, 
   **Los viajes en pestañas** (interfaz nueva, *oct. 2026*): con viajes abiertos, en vez de apilarlos uno debajo del
   otro, una barra de pestañas pegada arriba (bajo la cabecera) con un viaje por pestaña, en orden: el que va en ruta,
   el que recoge y los siguientes (cada una dice su etapa —En ruta, Publicado, Llegando, Recogiendo, Siguiente— y su
-  sentido; las en curso con un punto que late). Al final, **"+"** publica el siguiente viaje (R11; sin la cuota del
-  día no aparece, R76). Se abre en el que recoge (si no hay, en el de ruta) y vuelve a él cuando cambia (al salir o
+  sentido; las en curso con un punto que late). Al final, **"+"** publica el siguiente viaje (R11; siempre, también sin el aporte del
+  día, R76). Se abre en el que recoge (si no hay, en el de ruta) y vuelve a él cuando cambia (al salir o
   terminar). Todos los viajes ya están en la página, uno al lado del otro: se pasa de uno a otro **deslizando de lado**
   o tocando la pestaña, sin cargar nada, y la barra sigue al que se ve. Dentro de cada pestaña, solo lo de ese viaje (tarjeta, pasajeros, opciones) y, al final, su
   acción, en la página (no pegada abajo). Abajo, pegada encima de la barra de la app, solo **la lista de Gina siempre

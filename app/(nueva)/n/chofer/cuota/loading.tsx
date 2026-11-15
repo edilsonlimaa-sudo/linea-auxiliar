@@ -2,7 +2,7 @@ import { EsqueletoPantalla, EsqueletoTarjeta } from "@/components/nueva/app/esqu
 
 export default function CargandoCuota() {
   return (
-    <EsqueletoPantalla titulo="Cuota del día" backHref="/n/chofer">
+    <EsqueletoPantalla titulo="Aporte del día" backHref="/n/chofer">
       <EsqueletoTarjeta lineas={3} />
     </EsqueletoPantalla>
   )

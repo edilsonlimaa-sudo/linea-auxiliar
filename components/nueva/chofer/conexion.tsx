@@ -15,18 +15,16 @@ import { conectarme, desconectarme } from "@/lib/acciones/chofer"
 import { cn } from "@/lib/utils"
 
 /**
- * El estado del chofer en la cabecera (R6–R8). Desconectado: tocarlo conecta (sin la cuota del día no se ofrece, R76).
+ * El estado del chofer en la cabecera (R6–R8). Desconectado: tocarlo conecta.
  * Conectado: un badge verde que abre un popover con la ubicación (R40) y "Desconectarme" ("¿Vuelves a trabajar hoy?",
  * R60). Con viajes abiertos (`compartir`) el teléfono comparte por dónde va; si el GPS falla, el badge se pone rojo.
  */
 export function EstadoEnCabecera({
   conectado,
-  sinCuota,
   viajesAbiertos,
   compartir = false,
 }: {
   conectado: boolean
-  sinCuota: boolean
   viajesAbiertos: number
   compartir?: boolean
 }) {
@@ -41,7 +39,7 @@ export function EstadoEnCabecera({
       <>
         <button
           type="button"
-          disabled={sinCuota || pendiente}
+          disabled={pendiente}
           onClick={() => ejecutar(conectarme)}
           aria-label="Desconectado. Tocar para conectarte"
           className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"

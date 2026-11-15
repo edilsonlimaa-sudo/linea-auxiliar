@@ -12,7 +12,7 @@ import type { ConfigCuota } from "@/lib/datos/cuota"
 
 const inicial: EstadoFormulario = {}
 
-/** Los datos del cobro (R78): activa, desde qué día, monto y el Pago Móvil de la línea que ven los choferes */
+/** Los datos del aporte (R78): activa, desde qué día, monto y el Pago Móvil de la línea que ven los choferes */
 export function DatosCuota({ config }: { config: ConfigCuota | null }) {
   const [estado, accion, guardando] = useActionState(guardarCuota, inicial)
   const formulario = useEnfocarError(estado.intento)
@@ -31,15 +31,15 @@ export function DatosCuota({ config }: { config: ConfigCuota | null }) {
       <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl bg-muted px-4 py-3 has-focus-visible:ring-[3px] has-focus-visible:ring-ring">
         <input type="checkbox" name="activa" value="si" defaultChecked={v.activa === "si"} className="size-6 shrink-0 accent-primary" />
         <span>
-          <span className="block font-bold">Cobrar la cuota del día</span>
-          <span className="block text-sm text-muted-foreground">Apagada, los choferes publican sin pagar.</span>
+          <span className="block font-bold">Pedir el aporte a los choferes</span>
+          <span className="block text-sm text-muted-foreground">Es voluntario: los choferes trabajan igual. Apagado, no se les invita a aportar.</span>
         </span>
       </label>
       <div className="grid gap-3 sm:grid-cols-2">
         <CampoTexto etiqueta="Desde el día" name="desde" type="date" defaultValue={v.desde} error={e.desde} />
         <CampoTexto etiqueta="Monto (Bs.)" name="monto" inputMode="decimal" defaultValue={v.monto} error={e.monto} />
       </div>
-      <p className="font-bold">Tu Pago Móvil (a donde pagan los choferes)</p>
+      <p className="font-bold">Tu Pago Móvil (a donde aportan los choferes)</p>
       <CamposPagoMovil valores={v} errores={e} />
       {estado.error && (
         <p role="alert" className="font-bold text-destructive">
@@ -53,7 +53,7 @@ export function DatosCuota({ config }: { config: ConfigCuota | null }) {
       )}
       <Button type="submit" disabled={guardando} className="self-start">
         {guardando && <Loader2Icon aria-hidden className="animate-spin" />}
-        Guardar los datos del cobro
+        Guardar los datos del aporte
       </Button>
     </form>
   )

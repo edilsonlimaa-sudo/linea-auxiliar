@@ -1,4 +1,4 @@
-// Cuota del día (docs/especificacion.md §5.18, R76–R78): lo que ve el chofer y lo que revisa el admin
+// Aporte del día, voluntario (docs/especificacion.md §5.18, R76–R78; en el código y la base se llama cuota): lo que ve el chofer y lo que revisa el admin
 import type { DatosPagoMovil } from "@/lib/bancos"
 import { diaDeHoy } from "@/lib/fechas"
 import { firmarFotos } from "@/lib/fotos"
@@ -13,7 +13,7 @@ export type AvisoCuota = {
   banco: string
   monto: number
   estado: EstadoAviso
-  habilita: boolean // el primero del día: libera mientras está en revisión (R77)
+  habilita: boolean // el primero del día: cuenta como aportado mientras está en revisión (R77)
   motivo: string | null
   creadoEn: string
 }
@@ -21,7 +21,7 @@ export type AvisoCuota = {
 export type CuotaChofer = {
   monto: number
   pagoMovil: DatosPagoMovil | null // el de la línea
-  habilitado: boolean
+  habilitado: boolean // ya aportó hoy (aprobado, o el primer aviso en revisión)
   avisos: AvisoCuota[] // los de hoy, el último primero
 }
 
@@ -36,7 +36,7 @@ const aAviso = (a: { id: string; referencia: string; banco: string; monto: numbe
   creadoEn: a.creado_en,
 })
 
-/** La cuota de hoy para el chofer (R76–R77). Sin cuota vigente, null: todo funciona como antes */
+/** El aporte de hoy para el chofer (R76–R77). Si el admin no lo pide, null */
 export async function cargarCuotaChofer(choferId: string): Promise<CuotaChofer | null> {
   const supabase = await crearClienteServidor()
   const [cuotaRes, avisosRes] = await Promise.all([
@@ -61,7 +61,7 @@ export async function cargarCuotaChofer(choferId: string): Promise<CuotaChofer |
 export type ConfigCuota = { activa: boolean; desde: string; monto: number; banco: string | null; telefono: string | null; cedula: string | null }
 export type AvisoAdmin = AvisoCuota & { choferId: string; chofer: string; fotoUrl: string | null; decididoEn: string | null }
 
-/** Panel "Cuotas" (R78): los datos del cobro y los avisos de un día, en revisión primero */
+/** Panel "Aportes" (R78): los datos del cobro y los avisos de un día, en revisión primero */
 export async function cargarCuotasAdmin(dia: string): Promise<{ config: ConfigCuota | null; avisos: AvisoAdmin[] }> {
   const supabase = await crearClienteServidor()
   const [configRes, avisosRes] = await Promise.all([

@@ -1,6 +1,6 @@
 "use client"
 
-import { CheckCircle2Icon, ClockIcon, HourglassIcon, Loader2Icon, SendIcon, XCircleIcon } from "lucide-react"
+import { CheckCircle2Icon, HourglassIcon, InfoIcon, Loader2Icon, SendIcon } from "lucide-react"
 import Link from "next/link"
 import { useActionState, useId } from "react"
 
@@ -18,20 +18,19 @@ import { cn } from "@/lib/utils"
 const inicial: EstadoFormulario = {}
 
 /**
- * La página de la cuota del día (/cuota, R76–R77). Habilitado: el aviso de hoy (en revisión o pagado) y "Ir a
- * publicar". Esperando aprobación: el aviso enviado. Sin habilitar: cómo pagar (el Pago Móvil de la línea con Copiar
- * todo) y el aviso de la referencia; rechazado, por qué y que el próximo aviso solo libera aprobado.
+ * La página del aporte del día (/cuota, R76–R77): voluntario, no abre ni cierra nada. Ya aportó (aprobado o en
+ * revisión): las gracias y el aviso de hoy. Si no: cómo aportar (el Pago Móvil de la línea con Copiar todo) y el aviso
+ * de la referencia; si no apareció en el banco, el motivo y que puede avisar otra vez.
  */
 export function CuotaDia({ cuota }: { cuota: CuotaChofer }) {
   const ultimo = cuota.avisos[0] ?? null
 
   if (cuota.habilitado || ultimo?.estado === "revision") {
     const aviso = ultimo
-    const { Icono, titulo, texto, clase } = cuota.habilitado
-      ? aviso?.estado === "revision"
-        ? { Icono: HourglassIcon, titulo: "Tu pago está en revisión", texto: "Ya puedes publicar tus viajes de hoy. El administrador lo revisa con su banco.", clase: "border-warning/50 bg-warning-muted" }
-        : { Icono: CheckCircle2Icon, titulo: "Cuota de hoy pagada", texto: "Puedes publicar todos tus viajes de hoy.", clase: "border-success/40 bg-success-muted" }
-      : { Icono: ClockIcon, titulo: "Esperando la aprobación de tu pago", texto: "Podrás publicar viajes cuando el administrador lo apruebe.", clase: "border-warning/50 bg-warning-muted" }
+    const aprobado = cuota.avisos.some((a) => a.estado === "aprobado")
+    const { Icono, titulo, texto, clase } = aprobado
+      ? { Icono: CheckCircle2Icon, titulo: "¡Gracias por tu aporte de hoy!", texto: "Nos ayudas a mantener la Línea en el aire.", clase: "border-success/40 bg-success-muted" }
+      : { Icono: HourglassIcon, titulo: "Tu aporte está en revisión", texto: "Gracias. El administrador lo confirma con su banco.", clase: "border-border bg-muted" }
     return (
       <section aria-labelledby="titulo-cuota" className={cn("flex flex-col gap-3 rounded-2xl border-2 p-4", clase)}>
         <h2 id="titulo-cuota" className="flex items-center gap-2 text-lg leading-tight font-bold">
@@ -49,11 +48,9 @@ export function CuotaDia({ cuota }: { cuota: CuotaChofer }) {
             <dd className="font-bold">a las {hora(aviso.creadoEn)} · {bolivares(aviso.monto)}</dd>
           </dl>
         )}
-        {cuota.habilitado && (
-          <Link href="/inicio" className={buttonVariants({ variant: "signal", size: "lg", className: "w-full" })}>
-            Ir a publicar
-          </Link>
-        )}
+        <Link href="/inicio" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+          Volver a Inicio
+        </Link>
       </section>
     )
   }
@@ -62,20 +59,18 @@ export function CuotaDia({ cuota }: { cuota: CuotaChofer }) {
   return (
     <section aria-labelledby="titulo-cuota" className="flex flex-col gap-4 rounded-2xl border-2 border-primary bg-card p-4 text-card-foreground">
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-bold tracking-wide text-muted-foreground uppercase">Cuota del día</p>
         <h2 id="titulo-cuota" className="text-lg leading-tight font-bold">
-          Para publicar hoy: {bolivares(cuota.monto)}
+          Aporta {bolivares(cuota.monto)} a la línea
         </h2>
-        <p className="text-muted-foreground">Págala por Pago Móvil y avisa la referencia. Vale por todos tus viajes de hoy.</p>
+        <p className="text-muted-foreground">Es voluntario y nos ayuda a mantener la app en el aire. Vale por todo el día.</p>
       </div>
 
       {rechazado && (
-        <div role="alert" className="flex gap-2 rounded-2xl bg-destructive/10 px-4 py-3 text-destructive">
-          <XCircleIcon aria-hidden className="mt-0.5 size-5 shrink-0" />
+        <div role="status" className="flex gap-2 rounded-2xl bg-muted px-4 py-3">
+          <InfoIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
           <p>
-            <strong>Tu pago de hoy fue rechazado{rechazado.motivo ? `: ${rechazado.motivo}` : ""}.</strong> No puedes publicar más
-            viajes hoy. Si fue un error, avisa otra vez con la referencia correcta: esta vez se libera cuando el administrador lo
-            apruebe.
+            Tu aporte de hoy no apareció en el banco{rechazado.motivo ? `: ${rechazado.motivo}` : ""}. Si fue un error, avisa otra vez con
+            la referencia correcta.
           </p>
         </div>
       )}
@@ -87,14 +82,14 @@ export function CuotaDia({ cuota }: { cuota: CuotaChofer }) {
         </div>
       )}
       <div className="flex flex-col gap-2">
-        <p className="font-bold">2. Avisa tu pago</p>
-        <FormAviso primero={!rechazado} />
+        <p className="font-bold">2. Avisa tu aporte</p>
+        <FormAviso />
       </div>
     </section>
   )
 }
 
-function FormAviso({ primero }: { primero: boolean }) {
+function FormAviso() {
   const [estado, accion, enviando] = useActionState(avisarPagoCuota, inicial)
   const formulario = useEnfocarError(estado.intento)
   const idBanco = useId()
@@ -139,13 +134,9 @@ function FormAviso({ primero }: { primero: boolean }) {
       )}
       <Button type="submit" variant="signal" size="lg" disabled={enviando} className="w-full">
         {enviando ? <Loader2Icon aria-hidden className="animate-spin" /> : <SendIcon aria-hidden />}
-        Ya pagué: avisar
+        Ya aporté: avisar
       </Button>
-      <p className="text-sm text-muted-foreground">
-        {primero
-          ? "Al avisar ya puedes publicar: el administrador revisa el pago después. Si no aparece en el banco, no podrás publicar más hoy."
-          : "Esta vez puedes publicar cuando el administrador apruebe el pago."}
-      </p>
+      <p className="text-sm text-muted-foreground">Gracias. El administrador lo confirma con su banco.</p>
     </form>
   )
 }

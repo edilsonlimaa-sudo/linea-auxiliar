@@ -1,4 +1,5 @@
--- §5.18 Cuota del día (R76–R78): publicar pide el día pagado; el primer aviso habilita en revisión; rechazado no.
+-- §5.18 Cuota del día (R76–R78): desde el 15/11/2026 es un aporte voluntario: sin aportar se publica, se conecta y se
+-- ve la lista. `habilitado` solo dice si aportó hoy (el primer aviso cuenta en revisión; rechazado no).
 -- Cuentas propias (se deshacen al final): admin ...04 · choferes Pedro ...49, Luisa ...50 · pasajera Ana ...77
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -50,20 +51,19 @@ select pg_temp.yo('49');
 select throws_ok($$ select public.admin_guardar_cuota(false, current_date, 1000, null, null, null) $$,
   'P0001', 'Solo el administrador cambia la cuota', 'R78: un chofer no cambia la cuota');
 
--- Sin pagar no publica
-select is((select rige and not habilitado from public.cuota_de_hoy()), true, 'R76: hoy se cobra y Pedro no está habilitado');
-select throws_ok($$ select public.publicar_viaje('vg_a_centro', 4, 10) $$,
-  'P0001', 'Para publicar hoy, paga la cuota del día y avisa la referencia del Pago Móvil', 'R76: sin pagar no publica');
+-- Sin aportar publica igual (es voluntario)
+select is((select rige and not habilitado from public.cuota_de_hoy()), true, 'R76: hoy se pide el aporte y Pedro no aportó');
+select lives_ok($$ select public.publicar_viaje('vg_a_centro', 4, 10) $$, 'R76: sin aportar publica igual');
+select public.cancelar_viaje(id) from public.viajes where chofer_id = auth.uid() and estado not in ('finalizado', 'cancelado');
 
--- Sin pagar tampoco se conecta ni ve la lista hacia Valle Grande (Ana espera en Gina)
-select throws_ok($$ select public.conectar() $$,
-  'P0001', 'Para conectarte hoy, paga la cuota del día y avisa la referencia del Pago Móvil', 'R76: sin pagar no se conecta');
+-- Sin aportar también se conecta y ve la lista hacia Valle Grande (Ana espera en Gina)
+select lives_ok($$ select public.conectar() $$, 'R76: sin aportar se conecta');
 select pg_temp.yo('77');
 select public.estoy_en_lista(true);
-select is((select count(*)::int from public.lista_de_gina()), 1, 'R76: la pasajera sigue viendo la lista');
+select is((select count(*)::int from public.lista_de_gina()), 1, 'R76: la pasajera ve la lista');
 select pg_temp.yo('49');
-select is((select count(*)::int from public.lista_para_choferes()), 0, 'R76: sin pagar, el chofer no ve la lista (ni teléfonos)');
-select is((select count(*)::int from public.lista_de_gina()), 0, 'R76: sin pagar, tampoco la lista pública');
+select is((select count(*)::int from public.lista_para_choferes()), 1, 'R76: sin aportar, el chofer ve la lista');
+select is((select count(*)::int from public.lista_de_gina()), 1, 'R76: sin aportar, también la lista pública');
 
 -- Avisa el pago: el primero del día habilita al momento
 select throws_ok($$ select public.avisar_pago_cuota('12', '0134') $$,
@@ -80,25 +80,24 @@ select throws_ok($$ select public.avisar_pago_cuota('99999999', '0134') $$,
 select pg_temp.yo('50');
 select is((select count(*)::int from public.cuota_pagos), 0, 'Privacidad: cada chofer ve solo sus avisos');
 
--- El admin rechaza: Pedro no publica más hoy, aunque lo ya publicado sigue
+-- El admin rechaza: Pedro sigue trabajando igual
 select pg_temp.yo('04');
 select public.admin_decidir_pago(pg_temp.aviso_de('49'), false, 'No aparece en el banco');
 select pg_temp.yo('49');
-select throws_ok($$ select public.publicar_viaje('centro_a_vg', 4, 30) $$,
-  'P0001', 'Para publicar hoy, paga la cuota del día y avisa la referencia del Pago Móvil', 'R77: rechazado no publica más ese día');
-select is((select count(*)::int from public.viajes where chofer_id = auth.uid() and estado not in ('finalizado', 'cancelado')), 1,
+select lives_ok($$ select public.publicar_viaje('centro_a_vg', 4, 30) $$, 'R77: con el aporte rechazado publica igual');
+select is((select count(*)::int from public.viajes where chofer_id = auth.uid() and estado not in ('finalizado', 'cancelado')), 2,
   'R77: lo ya publicado sigue');
 
 -- Otro aviso el mismo día ya no habilita hasta que el admin lo apruebe
 select public.avisar_pago_cuota('55556666', '0102');
-select is(pg_temp.habilitado(), false, 'R77: el segundo aviso del día no habilita en revisión');
+select is(pg_temp.habilitado(), false, 'R77: el segundo aviso del día no cuenta como aporte en revisión');
 select pg_temp.yo('04');
 select throws_ok(format($$ select public.admin_decidir_pago(%L, true) $$,
   (select id from public.cuota_pagos where chofer_id = '00000000-0000-4000-a000-000000000049' and estado = 'rechazado')),
   'P0001', 'Ese chofer ya tiene otro aviso ese día: decide ese', 'R78: no se aprueban dos avisos del mismo día');
 select public.admin_decidir_pago(pg_temp.aviso_de('49'), true);
 select pg_temp.yo('49');
-select is(pg_temp.habilitado(), true, 'R78: aprobado, vuelve a publicar');
+select is(pg_temp.habilitado(), true, 'R78: aprobado, cuenta como aporte');
 select lives_ok($$ select public.publicar_viaje('centro_a_vg', 4, 30) $$, 'R78: aprobado publica');
 
 select * from finish();

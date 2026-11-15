@@ -14,7 +14,7 @@ import { iniciales } from "@/lib/viajes"
 
 export const metadata: Metadata = { title: "Menú · Línea Auxiliar" }
 
-// Menú del chofer en la interfaz nueva: su carnet y su carro, Mis viajes (R50), la cuota del día, sugerencias y opinión (R81–R82),
+// Menú del chofer en la interfaz nueva: su carnet y su carro, Mis viajes (R50), el aporte del día, sugerencias y opinión (R81–R82),
 // apariencia y salir
 export default async function MenuChofer() {
   const perfil = await exigirCuentaAprobada({ interfaz: "nueva-chofer" })
@@ -50,7 +50,7 @@ export default async function MenuChofer() {
         <section className="divide-y overflow-hidden rounded-3xl border bg-card">
           <Fila href="/n/chofer/viajes" icono={<History className="size-5" />} titulo="Mis viajes"
             detalle={!terminados ? "Todavía no terminaste ningún viaje" : terminados === 1 ? "1 viaje terminado" : `${terminados} viajes terminados`} />
-          <Fila href="/n/chofer/cuota" icono={<Wallet className="size-5" />} titulo="Cuota del día" detalle="Pagar y ver el estado de tu pago" />
+          <Fila href="/n/chofer/cuota" icono={<Wallet className="size-5" />} titulo="Aporte del día" detalle="Voluntario: ayuda a mantener la app" />
         </section>
 
         <section className="divide-y overflow-hidden rounded-3xl border bg-card">

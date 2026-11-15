@@ -1,9 +1,11 @@
 "use client"
 
-import { BadgeCheck, ChevronRight, Clock, Hourglass, Loader2, Lock, Send, XCircle } from "lucide-react"
+import { BadgeCheck, ChevronRight, HandHeart, Hourglass, Info, Loader2, Send } from "lucide-react"
 import Link from "next/link"
+import type { ReactNode } from "react"
 import { useActionState } from "react"
 
+import { marcarAporteHoyNo, useAporteHoyNo } from "@/components/chofer/aporte-hoy-no"
 import { PagoMovilCard } from "@/components/nueva/pasajero/pago-movil-card"
 import { Button } from "@/components/nueva/ui/button"
 import { Input } from "@/components/nueva/ui/input"
@@ -11,77 +13,89 @@ import type { EstadoFormulario } from "@/lib/acciones/cuenta"
 import { avisarPagoCuota } from "@/lib/acciones/cuota"
 import { BANCOS, bolivares, nombreBanco } from "@/lib/bancos"
 import type { CuotaChofer } from "@/lib/datos/cuota"
-import { cn } from "@/lib/utils"
 
 /**
- * La cuota del día en Inicio (R76–R77). Habilitado: una línea discreta (pagada o en revisión). Sin habilitar: el aviso y
- * el botón, en lugar de publicar; el pago va en su pantalla.
+ * El aporte del día en Inicio (R76–R77): voluntario, nunca bloquea. Ya aportó (o en revisión): una línea discreta de
+ * gracias. Rechazado hoy: una línea discreta. Sin aporte: la invitación, debajo de Publicar (sin viajes abiertos), con
+ * "Hoy no" hasta el día siguiente. El pago va en su pantalla. `parte` dice qué se pinta en ese lugar: la línea (arriba)
+ * o la invitación (debajo de Publicar).
  */
-export function CuotaAviso({ cuota }: { cuota: CuotaChofer }) {
+export function CuotaAviso({ cuota, parte }: { cuota: CuotaChofer; parte: "fila" | "invitacion" }) {
+  const hoyNo = useAporteHoyNo()
   const ultimo = cuota.avisos[0] ?? null
+  const conFila = cuota.habilitado || ultimo !== null
 
-  if (cuota.habilitado) {
-    const enRevision = ultimo?.estado === "revision"
+  if (conFila !== (parte === "fila")) return null
+
+  if (cuota.habilitado || ultimo?.estado === "revision") {
+    const enRevision = !cuota.avisos.some((a) => a.estado === "aprobado")
     return (
-      <Link
-        href="/n/chofer/cuota"
-        transitionTypes={["nav-forward"]}
-        className="flex items-center gap-3 rounded-2xl bg-secondary px-3 py-2 text-sm transition-colors active:bg-muted"
-      >
-        {enRevision ? <Hourglass className="size-4 shrink-0 text-muted-foreground" /> : <BadgeCheck className="size-4 shrink-0 text-primary" />}
-        <span className="min-w-0 flex-1 truncate">
-          {enRevision ? "Cuota de hoy en revisión · ya puedes publicar" : "Cuota de hoy pagada"}
-        </span>
-        <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
-      </Link>
+      <Fila
+        icono={enRevision ? <Hourglass className="size-4 shrink-0 text-muted-foreground" /> : <BadgeCheck className="size-4 shrink-0 text-primary" />}
+        texto={enRevision ? "Tu aporte de hoy está en revisión · ¡gracias!" : "Gracias por tu aporte de hoy"}
+      />
     )
   }
 
-  const { icono, titulo, texto, boton } =
-    ultimo?.estado === "revision"
-      ? { icono: <Clock className="size-5" />, titulo: "Esperando la aprobación de tu pago", texto: "Podrás publicar viajes cuando el administrador lo apruebe.", boton: "Ver mi pago" }
-      : ultimo?.estado === "rechazado"
-        ? { icono: <XCircle className="size-5" />, titulo: "Tu pago de hoy fue rechazado", texto: "Mira por qué y, si fue un error, avisa otra vez.", boton: "Ver qué pasó" }
-        : {
-            icono: <Lock className="size-5" />,
-            titulo: "Cuota del día",
-            texto: `Paga ${bolivares(cuota.monto)} a la línea para publicar viajes, conectarte y ver la lista de Gina.`,
-            boton: "Pagar la cuota",
-          }
+  if (ultimo?.estado === "rechazado") {
+    return <Fila icono={<Info className="size-4 shrink-0 text-muted-foreground" />} texto="Tu aporte de hoy no apareció en el banco" />
+  }
+
+  if (hoyNo) return null
 
   return (
-    <section className="flex flex-col gap-3 rounded-3xl border border-primary/30 bg-card p-4">
+    <section className="flex flex-col gap-3 rounded-3xl border bg-card p-4">
       <div className="flex items-start gap-3">
-        <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-2xl", ultimo?.estado === "rechazado" ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
-          {icono}
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <HandHeart className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="font-heading text-lg font-semibold">{titulo}</h2>
-          <p className="text-sm text-muted-foreground">{texto}</p>
+          <h2 className="font-heading text-lg font-semibold">¿Aportas hoy a la app?</h2>
+          <p className="text-sm text-muted-foreground">
+            Con {bolivares(cuota.monto)} nos ayudas a mantener la Línea en el aire. Es voluntario: trabajas igual.
+          </p>
         </div>
       </div>
-      <Button size="lg" variant={ultimo ? "outline" : "default"} render={<Link href="/n/chofer/cuota" transitionTypes={["nav-forward"]} />} nativeButton={false}>
-        {boton}
-      </Button>
+      <div className="flex gap-2">
+        <Button className="flex-1" render={<Link href="/n/chofer/cuota" transitionTypes={["nav-forward"]} />} nativeButton={false}>
+          Aportar
+        </Button>
+        <Button type="button" variant="ghost" onClick={marcarAporteHoyNo}>
+          Hoy no
+        </Button>
+      </div>
     </section>
+  )
+}
+
+function Fila({ icono, texto }: { icono: ReactNode; texto: string }) {
+  return (
+    <Link
+      href="/n/chofer/cuota"
+      transitionTypes={["nav-forward"]}
+      className="flex items-center gap-3 rounded-2xl bg-secondary px-3 py-2 text-sm transition-colors active:bg-muted"
+    >
+      {icono}
+      <span className="min-w-0 flex-1 truncate">{texto}</span>
+      <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+    </Link>
   )
 }
 
 const inicial: EstadoFormulario = {}
 
 /**
- * La pantalla de la cuota (R76–R77). Habilitado o esperando: el aviso enviado. Sin habilitar: el Pago Móvil de la línea
- * con Copiar todo y el aviso de la referencia; si lo rechazaron, por qué y que el próximo aviso libera solo aprobado.
+ * La pantalla del aporte (R76–R77), voluntario. Ya aportó (aprobado o en revisión): las gracias y el aviso enviado. Si
+ * no: el Pago Móvil de la línea con Copiar todo y el aviso de la referencia; si no apareció en el banco, el motivo.
  */
 export function CuotaPantalla({ cuota }: { cuota: CuotaChofer }) {
   const ultimo = cuota.avisos[0] ?? null
 
   if (cuota.habilitado || ultimo?.estado === "revision") {
-    const { icono, titulo, texto } = cuota.habilitado
-      ? ultimo?.estado === "revision"
-        ? { icono: <Hourglass className="size-5" />, titulo: "Tu pago está en revisión", texto: "Ya puedes publicar tus viajes de hoy. El administrador lo revisa con su banco." }
-        : { icono: <BadgeCheck className="size-5" />, titulo: "Cuota de hoy pagada", texto: "Puedes publicar todos tus viajes de hoy." }
-      : { icono: <Clock className="size-5" />, titulo: "Esperando la aprobación de tu pago", texto: "Podrás publicar viajes cuando el administrador lo apruebe." }
+    const aprobado = cuota.avisos.some((a) => a.estado === "aprobado")
+    const { icono, titulo, texto } = aprobado
+      ? { icono: <BadgeCheck className="size-5" />, titulo: "¡Gracias por tu aporte de hoy!", texto: "Nos ayudas a mantener la Línea en el aire." }
+      : { icono: <Hourglass className="size-5" />, titulo: "Tu aporte está en revisión", texto: "Gracias. El administrador lo confirma con su banco." }
     return (
       <section className="flex flex-col gap-4 rounded-3xl border bg-card p-4">
         <div className="flex items-start gap-3">
@@ -101,11 +115,9 @@ export function CuotaPantalla({ cuota }: { cuota: CuotaChofer }) {
             <dd className="font-medium">{bolivares(ultimo.monto)}</dd>
           </dl>
         ) : null}
-        {cuota.habilitado ? (
-          <Button size="lg" render={<Link href="/n/chofer" transitionTypes={["nav-back"]} />} nativeButton={false}>
-            Ir a publicar
-          </Button>
-        ) : null}
+        <Button size="lg" variant="outline" render={<Link href="/n/chofer" transitionTypes={["nav-back"]} />} nativeButton={false}>
+          Volver a Inicio
+        </Button>
       </section>
     )
   }
@@ -114,15 +126,15 @@ export function CuotaPantalla({ cuota }: { cuota: CuotaChofer }) {
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="font-heading text-2xl font-semibold">Para publicar hoy: {bolivares(cuota.monto)}</h2>
-        <p className="text-sm text-muted-foreground">Págala por Pago Móvil y avisa la referencia. Vale por todos tus viajes de hoy.</p>
+        <h2 className="font-heading text-2xl font-semibold">Aporta {bolivares(cuota.monto)} a la línea</h2>
+        <p className="text-sm text-muted-foreground">Es voluntario y nos ayuda a mantener la app en el aire. Vale por todo el día.</p>
       </div>
       {rechazado ? (
-        <div role="alert" className="flex gap-3 rounded-3xl bg-destructive/10 p-4 text-sm text-destructive">
-          <XCircle className="mt-0.5 size-5 shrink-0" />
+        <div role="status" className="flex gap-3 rounded-3xl bg-secondary p-4 text-sm">
+          <Info className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
           <p>
-            <strong>Tu pago de hoy fue rechazado{rechazado.motivo ? `: ${rechazado.motivo}` : ""}.</strong> Si fue un error, avisa otra vez
-            con la referencia correcta: esta vez se libera cuando el administrador lo apruebe.
+            Tu aporte de hoy no apareció en el banco{rechazado.motivo ? `: ${rechazado.motivo}` : ""}. Si fue un error, avisa otra vez con la
+            referencia correcta.
           </p>
         </div>
       ) : null}
@@ -133,14 +145,14 @@ export function CuotaPantalla({ cuota }: { cuota: CuotaChofer }) {
         </div>
       ) : null}
       <div className="flex flex-col gap-2">
-        <p className="font-medium">2. Avisa tu pago</p>
-        <FormAviso primero={!rechazado} />
+        <p className="font-medium">2. Avisa tu aporte</p>
+        <FormAviso />
       </div>
     </div>
   )
 }
 
-function FormAviso({ primero }: { primero: boolean }) {
+function FormAviso() {
   const [estado, accion, enviando] = useActionState(avisarPagoCuota, inicial)
   const e = estado.errores ?? {}
   const v = estado.valores ?? {}
@@ -177,12 +189,10 @@ function FormAviso({ primero }: { primero: boolean }) {
       ) : null}
       <Button type="submit" size="lg" disabled={enviando}>
         {enviando ? <Loader2 className="animate-spin" /> : <Send />}
-        Ya pagué: avisar
+        Ya aporté: avisar
       </Button>
       <p className="text-xs text-muted-foreground">
-        {primero
-          ? "Al avisar ya puedes publicar: el administrador revisa el pago después. Si no aparece en el banco, no podrás publicar más hoy."
-          : "Esta vez puedes publicar cuando el administrador apruebe el pago."}
+        Gracias. El administrador lo confirma con su banco.
       </p>
     </form>
   )

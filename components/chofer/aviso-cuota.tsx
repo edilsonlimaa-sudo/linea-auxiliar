@@ -1,78 +1,73 @@
-import { CheckCircle2Icon, ChevronRightIcon, ClockIcon, HourglassIcon, WalletIcon, XCircleIcon } from "lucide-react"
-import Link from "next/link"
+"use client"
 
-import { buttonVariants } from "@/components/ui/button"
+import { CheckCircle2Icon, ChevronRightIcon, HandHeartIcon, HourglassIcon, InfoIcon } from "lucide-react"
+import Link from "next/link"
+import type { ReactNode } from "react"
+
+import { useAporteHoyNo, marcarAporteHoyNo } from "@/components/chofer/aporte-hoy-no"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { bolivares } from "@/lib/bancos"
 import type { CuotaChofer } from "@/lib/datos/cuota"
-import { cn } from "@/lib/utils"
 
 /**
- * La cuota del día en Inicio (R76–R77): solo el aviso y el botón; el pago y el aviso de la referencia van en /cuota.
- * Habilitado, una línea discreta; sin habilitar, en lugar de Publicar.
+ * El aporte del día en Inicio (R76–R77): voluntario, nunca bloquea. Ya aportó (o en revisión): una línea discreta de
+ * gracias. Rechazado hoy: una línea discreta. Sin aporte: la invitación (solo con `invitar`, sin viajes abiertos),
+ * con "Hoy no" hasta el día siguiente. El pago y el aviso de la referencia van en /cuota.
  */
-export function AvisoCuota({ cuota }: { cuota: CuotaChofer }) {
+export function AvisoCuota({ cuota, invitar = false }: { cuota: CuotaChofer; invitar?: boolean }) {
+  const hoyNo = useAporteHoyNo()
   const ultimo = cuota.avisos[0] ?? null
 
-  if (cuota.habilitado) {
-    const enRevision = ultimo?.estado === "revision"
+  if (cuota.habilitado || ultimo?.estado === "revision") {
+    const enRevision = !cuota.avisos.some((a) => a.estado === "aprobado")
     return (
-      <Link
-        href="/cuota"
-        className={cn(
-          "flex min-h-10 items-center gap-2 rounded-2xl px-4 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring",
-          enRevision ? "bg-warning-muted text-foreground" : "bg-success-muted text-success"
-        )}
-      >
-        {enRevision ? <HourglassIcon aria-hidden className="size-4 shrink-0 text-warning" /> : <CheckCircle2Icon aria-hidden className="size-4 shrink-0" />}
-        <span className="min-w-0 flex-1">
-          <strong>{enRevision ? "Cuota de hoy en revisión" : "Cuota de hoy pagada"}</strong>
-          {enRevision && " · ya puedes publicar"}
-        </span>
-        <ChevronRightIcon aria-hidden className="size-4 shrink-0" />
-      </Link>
+      <Fila
+        icono={enRevision ? <HourglassIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" /> : <CheckCircle2Icon aria-hidden className="size-4 shrink-0 text-success" />}
+        texto={enRevision ? "Tu aporte de hoy está en revisión · ¡gracias!" : "Gracias por tu aporte de hoy"}
+      />
     )
   }
 
-  const { Icono, titulo, texto, boton, clase } =
-    ultimo?.estado === "revision"
-      ? {
-          Icono: ClockIcon,
-          titulo: "Esperando la aprobación de tu pago",
-          texto: "Podrás publicar viajes cuando el administrador lo apruebe.",
-          boton: "Ver mi pago",
-          clase: "border-warning/50 bg-warning-muted",
-        }
-      : ultimo?.estado === "rechazado"
-        ? {
-            Icono: XCircleIcon,
-            titulo: "Tu pago de hoy fue rechazado",
-            texto: "No puedes publicar más viajes hoy. Mira por qué y, si fue un error, avisa otra vez.",
-            boton: "Ver qué pasó",
-            clase: "border-destructive/40 bg-destructive/10",
-          }
-        : {
-            Icono: WalletIcon,
-            titulo: "Para publicar hoy, paga la cuota del día",
-            texto: `${bolivares(cuota.monto)} por Pago Móvil. Vale por todos tus viajes de hoy.`,
-            boton: "Pagar la cuota",
-            clase: "border-primary bg-card",
-          }
-  const pagar = !ultimo
+  if (ultimo?.estado === "rechazado") {
+    return <Fila icono={<InfoIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />} texto="Tu aporte de hoy no apareció en el banco" />
+  }
+
+  if (!invitar || hoyNo) return null
 
   return (
-    <section aria-labelledby="titulo-aviso-cuota" className={cn("flex flex-col gap-3 rounded-2xl border-2 p-4", clase)}>
+    <section aria-labelledby="titulo-aporte" className="flex flex-col gap-3 rounded-2xl border bg-card p-4">
       <div className="flex gap-3">
-        <Icono aria-hidden className={cn("mt-0.5 size-5 shrink-0", pagar ? "text-primary" : ultimo.estado === "rechazado" ? "text-destructive" : "text-warning")} />
+        <HandHeartIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
         <div className="flex flex-col gap-1">
-          <h2 id="titulo-aviso-cuota" className="text-base leading-tight font-bold">
-            {titulo}
+          <h2 id="titulo-aporte" className="text-base leading-tight font-bold">
+            ¿Aportas hoy a la app?
           </h2>
-          <p className="text-sm text-muted-foreground">{texto}</p>
+          <p className="text-sm text-muted-foreground">
+            Con {bolivares(cuota.monto)} nos ayudas a mantener la Línea en el aire. Es voluntario: trabajas igual.
+          </p>
         </div>
       </div>
-      <Link href="/cuota" className={buttonVariants({ variant: pagar ? "signal" : "outline", size: pagar ? "lg" : "default", className: "w-full" })}>
-        {boton}
-      </Link>
+      <div className="flex gap-2">
+        <Link href="/cuota" className={buttonVariants({ variant: "default", className: "flex-1" })}>
+          Aportar
+        </Link>
+        <Button type="button" variant="ghost" onClick={marcarAporteHoyNo}>
+          Hoy no
+        </Button>
+      </div>
     </section>
+  )
+}
+
+function Fila({ icono, texto }: { icono: ReactNode; texto: string }) {
+  return (
+    <Link
+      href="/cuota"
+      className="flex min-h-10 items-center gap-2 rounded-2xl bg-muted px-4 py-2 text-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
+    >
+      {icono}
+      <span className="min-w-0 flex-1">{texto}</span>
+      <ChevronRightIcon aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+    </Link>
   )
 }

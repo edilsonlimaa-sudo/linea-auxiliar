@@ -9,9 +9,9 @@ import { buttonVariants } from "@/components/ui/button"
 import { cargarCuotaChofer } from "@/lib/datos/cuota"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 
-export const metadata: Metadata = { title: "Cuota del día · Línea Auxiliar" }
+export const metadata: Metadata = { title: "Aporte del día · Línea Auxiliar" }
 
-// Cuota del día del chofer (docs/especificacion.md §5.18, R76–R77): pagar y avisar la referencia, fuera de Inicio
+// Aporte del día del chofer, voluntario (docs/especificacion.md §5.18, R76–R77): aportar y avisar la referencia
 export default async function PaginaCuota() {
   const perfil = await exigirCuentaAprobada()
   if (perfil.rol !== "chofer") redirect("/inicio")
@@ -24,12 +24,12 @@ export default async function PaginaCuota() {
         <ArrowLeftIcon aria-hidden />
         Inicio
       </Link>
-      <h1 className="text-xl font-bold">Cuota del día</h1>
+      <h1 className="text-xl font-bold">Aporte del día</h1>
       {cuota ? (
         <CuotaDia cuota={cuota} />
       ) : (
         <p className="rounded-2xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">
-          Hoy no hay cuota que pagar: publica tus viajes como siempre.
+          Hoy no se pide aporte. ¡Buen trabajo!
         </p>
       )}
     </div>

@@ -30,7 +30,7 @@ export function PestanasViajes({
 }: {
   pestanas: PestanaViaje[]
   inicial: string
-  agregar: { href: string } | null // sin la cuota del día no se publica (R76)
+  agregar: { href: string } | null
   pie?: React.ReactNode
 }) {
   const orden = pestanas.map((p) => p.id).join()
