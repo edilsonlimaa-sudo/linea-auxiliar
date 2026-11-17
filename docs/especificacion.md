@@ -81,7 +81,7 @@ puede ocultar botones, pero nunca es la única barrera.
   **no puede apartar, publicar ni agregar a nadie** hasta que el admin la apruebe. Ve el aviso "Tu cuenta
   está en revisión". El admin puede `aprobar` o `rechazar`; rechazado no puede operar.
   Como nadie vigila la lista de pendientes todo el día, la pantalla de revisión tiene un botón principal
-  **"Avisar al administrador por WhatsApp"** que abre el chat del admin (0412-9801484) con un mensaje listo:
+  **"Avisar al administrador por WhatsApp"** que abre el chat del admin (+55 92 3190-1860) con un mensaje listo:
   nombre, rol y el pedido de aprobación. Si la cuenta fue rechazada, el mismo botón sirve para preguntar qué falta.
   **Eliminar [servidor]:** el admin puede borrar para siempre una cuenta **rechazada** (con confirmación): se van
   sus datos, sus fotos y su acceso, y el teléfono queda libre para registrarse de nuevo. Solo se puede si la cuenta
@@ -1395,7 +1395,7 @@ definitivo, con RLS y funciones, vive en `supabase/migrations/`.
 
 - Cobro o pagos dentro de la app.
 - Varias líneas o rutas distintas.
-- GPS del chofer con la pantalla apagada (requeriría app nativa).
+- GPS del chofer con la pantalla apagada (requeriría app nativa: propuesta en [app-nativo.md](app-nativo.md)).
 - Asignación automática de pasajeros a carros.
 
 ## 12. Preguntas abiertas
