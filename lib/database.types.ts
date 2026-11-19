@@ -2224,6 +2224,19 @@ export type Database = {
         }[]
       }
       pantalla_chofer: { Args: never; Returns: Json }
+      pedidos_al_centro: {
+        Args: never
+        Returns: {
+          avisado_en: string
+          foto_path: string
+          id: string
+          nombre: string
+          pedido_en: string
+          personas: number
+          telefono: string
+          vence_en: string
+        }[]
+      }
       pedir_aviso: {
         Args: {
           p_hasta: string

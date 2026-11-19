@@ -57,7 +57,8 @@ export function AvisoAlCentro({ pedido }: Props) {
         {pedido?.avisada ? "Avísame del próximo carro" : "Avísame cuando salga un carro"}
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        {pedido?.avisada ? "El carro que te avisamos ya se llenó. " : ""}Por las próximas 2 horas, una sola vez.
+        {pedido?.avisada ? "El carro que te avisamos ya se llenó. " : ""}Por las próximas 2 horas, una sola vez. Los choferes verán que
+        esperas y podrán escribirte.
       </p>
       {error ? (
         <p role="alert" className="text-center text-xs text-destructive">

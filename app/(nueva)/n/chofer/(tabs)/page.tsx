@@ -10,6 +10,7 @@ import { BotonDesconectarme, EstadoEnCabecera } from "@/components/nueva/chofer/
 import { CuotaAviso } from "@/components/nueva/chofer/cuota"
 import { DespuesTarjeta, PreguntaDespues, type Respuesta } from "@/components/nueva/chofer/despues"
 import { FaixaLista } from "@/components/nueva/chofer/gina"
+import { FaixaPedidos } from "@/components/nueva/chofer/pedidos"
 import { type PestanaViaje, PestanasViajes } from "@/components/nueva/chofer/pestanas"
 import { TarjetaProximo } from "@/components/nueva/chofer/siguiente"
 import { type Resumen, ViajeTerminadoHoja } from "@/components/nueva/chofer/terminado"
@@ -39,7 +40,7 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
   const [datos, cuota, { despues, r, terminado }] = await Promise.all([cargarInicioChofer(perfil.id, conectado), cargarCuotaChofer(perfil.id), searchParams])
   const logro = typeof terminado === "string" ? await resumenDe(perfil.id, terminado) : null
   const ahora = ahoraDelPedido()
-  const { enRuta, recogida, proximos, listaTramo, vehiculo } = datos
+  const { enRuta, recogida, proximos, listaTramo, vehiculo, pedidosCentro } = datos
   const abiertos = [enRuta, recogida, ...proximos].filter((v) => v !== null)
   const porId = new Map<string, Viaje>(abiertos.map((v) => [v.id, v]))
   const publicados = [recogida, ...proximos].filter((v) => v !== null).length
@@ -71,6 +72,7 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
           </section>
           {/* La invitación a aportar, debajo de Publicar (nunca en su lugar) */}
           {cuota ? <CuotaAviso cuota={cuota} parte="invitacion" /> : null}
+          <FaixaPedidos pedidos={pedidosCentro} />
           <FaixaLista lista={listaTramo} />
         </div>
         {hoja}
@@ -138,7 +140,12 @@ export default async function InicioChofer({ searchParams }: PageProps<"/n/chofe
           pestanas={pestanas}
           inicial={(recogida ?? enRuta ?? proximos[0]).id}
           agregar={{ href: `/n/chofer/publicar?modo=${recogida ? "cadena" : "desde_ruta"}` }}
-          pie={<FaixaLista lista={listaTramo} destacada={listaDestacada} compacta />}
+          pie={
+            <div className="flex flex-col gap-2">
+              <FaixaPedidos pedidos={pedidosCentro} compacta />
+              <FaixaLista lista={listaTramo} destacada={listaDestacada} compacta />
+            </div>
+          }
         />
       </div>
       {despues === "1" && soloEnRuta ? <PreguntaDespues viaje={enRuta} inicial={respuesta} /> : null}

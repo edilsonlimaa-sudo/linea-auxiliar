@@ -1052,6 +1052,18 @@ solo se acercan al carro los que suben.
   viaje, en ese sentido y en uno de esos pasos; R91 incluido); el push sale del servidor después de responder
   (`after()`), y si falla el viaje avanza igual. La app nativa lo pide en `POST /api/avisar-esperas` con `{ gina: viaje }`.
 
+### 5.31 Quién espera un carro al Centro
+
+Nov. 2026: los pedidos de "Avísame" (R94) solo servían para el push; los choferes no sabían que había gente esperando
+en Valle Grande ni podían coordinar con ella.
+
+- **R117. Los choferes ven quién pidió el aviso [servidor].** En el Inicio del chofer (interfaz nueva), si hay pedidos
+  vigentes de "Avísame" al Centro, una franja **"Esperando en Valle Grande · N personas"** (dice dónde esperan, como "La lista en Gina") abre la pantalla **Esperando
+  en Valle Grande**: cada uno con nombre corto, foto, cuántos van, hace cuánto pidió y si ya se le avisó, con
+  **Llamar** y **WhatsApp** (el saludo listo). El teléfono, solo con el chofer conectado (§6, como la lista de Gina).
+  Lo da `pedidos_al_centro()` (solo choferes; R91 incluido). El pasajero lo sabe al pedir: debajo de **Avísame cuando
+  salga un carro**, "Los choferes verán que esperas y podrán escribirte". Pedir sigue siendo igual (R94).
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |
@@ -1062,7 +1074,7 @@ solo se acercan al carro los que suben.
 | **Teléfono** de un chofer | Pasajeros con reserva en sus viajes, otros choferes y el admin |
 | **Cédula** | Solo la propia persona y el admin |
 | Lugar escrito y GPS de un pasajero (reserva) | Solo el chofer del viaje. La lista pública no lo muestra |
-| Espera de un pasajero (aviso al Centro, R94) | Él y el admin. *(Con R31 apagado, los choferes y los demás que esperan ya no la ven: `esperando_para_choferes` y `esperan_conmigo` no se pueden llamar desde la app.)* |
+| Espera de un pasajero (aviso al Centro, R94) | Él, el admin y los choferes (R117: nombre corto, foto, cuántos van y desde cuándo; el **teléfono**, solo los choferes conectados). *(Los demás que esperan no la ven: `esperan_conmigo` sigue sin poder llamarse.)* |
 | Lista hacia Valle Grande (R63): nombre corto, foto, cuántos van, dónde está y desde cuándo | Los pasajeros y todos los choferes (desde el 15/11/2026 ya no depende del aporte del día, R76). La **distancia** al avisar (R62), solo el admin |
 | **Teléfono** de quien está en la Lista hacia Valle Grande | Los choferes conectados mientras espera (para llamarlo, R65) y el admin |
 | Posición del chofer | Cualquier usuario con sesión (solo mientras está conectado) |

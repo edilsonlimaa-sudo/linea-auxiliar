@@ -72,8 +72,20 @@ export type ViajeChofer = Viaje & { lista: FilaChofer[]; gina: EntradaGina[] | n
 /** Un compañero en la ruta: lo de "¿Cómo está la línea?" más su teléfono (§6: los choferes se ven entre ellos) */
 export type Companero = ChoferEnServicio & { telefono: string | null }
 
+/** R117: quien pidió "Avísame" al Centro; el teléfono, solo con el chofer conectado */
+export type PedidoAlCentro = {
+  id: string
+  nombre: string
+  fotoUrl: string | null
+  personas: number
+  pedidoEn: string
+  avisado: boolean
+  telefono: string | null
+}
+
 export type DatosInicioChofer = {
   conectado: boolean
+  pedidosCentro: PedidoAlCentro[]
   enRuta: ViajeChofer | null // va hacia el destino con gente a bordo
   recogida: ViajeChofer | null // recogida actual: en camino, llegando o recogiendo
   proximos: ViajeChofer[] // encadenados (programado)
@@ -210,12 +222,25 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
       })),
     }
   }
-  const [enRutaConGina, recogidaConGina, tramoRes] = await Promise.all([
+  const [enRutaConGina, recogidaConGina, tramoRes, pedidosRes] = await Promise.all([
     conGina(enRuta ? conLista(enRuta) : null),
     conGina(recogida ? conLista(recogida) : null),
     supabase.rpc("lista_para_choferes"),
+    supabase.rpc("pedidos_al_centro"),
   ])
-  const fotosTramo = await firmarFotos((tramoRes.data ?? []).map((e) => e.foto_path))
+  const [fotosTramo, fotosPedidos] = await Promise.all([
+    firmarFotos((tramoRes.data ?? []).map((e) => e.foto_path)),
+    firmarFotos((pedidosRes.data ?? []).map((e) => e.foto_path)),
+  ])
+  const pedidosCentro: PedidoAlCentro[] = (pedidosRes.data ?? []).map((e) => ({
+    id: e.id,
+    nombre: e.nombre,
+    fotoUrl: e.foto_path ? (fotosPedidos.get(e.foto_path) ?? null) : null,
+    personas: e.personas,
+    pedidoEn: e.pedido_en,
+    avisado: e.avisado_en !== null,
+    telefono: e.telefono,
+  }))
   const listaTramo: EntradaTramo[] = (tramoRes.data ?? []).map((e) => ({
     id: e.id,
     posicion: e.posicion,
@@ -233,6 +258,7 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
 
   return {
     conectado,
+    pedidosCentro,
     companeros,
     viajesCompaneros: deLaLinea,
     listaTramo,
