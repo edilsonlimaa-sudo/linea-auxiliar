@@ -2,7 +2,7 @@ import { EsqueletoLista, EsqueletoPantalla } from "@/components/nueva/app/esquel
 
 export default function CargandoPedidos() {
   return (
-    <EsqueletoPantalla titulo="Esperando en Valle Grande" backHref="/n/chofer">
+    <EsqueletoPantalla titulo="Piden carro en Valle Grande" backHref="/n/chofer">
       <EsqueletoLista filas={3} />
     </EsqueletoPantalla>
   )

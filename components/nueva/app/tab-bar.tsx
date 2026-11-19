@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Bell, CarFront, History, House, Menu, Star, Users } from "lucide-react"
+import { Bell, CarFront, ChartColumn, History, House, Menu, Users } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -27,7 +27,7 @@ export const tabsPasajero: Tab[] = [
 export const tabsChofer: Tab[] = [
   { href: "/n/chofer", label: "Inicio", icon: House },
   { href: "/n/chofer/companeros", label: "Compañeros", icon: Users },
-  { href: "/n/chofer/calificaciones", label: "Calificaciones", icon: Star },
+  { href: "/n/chofer/numeros", label: "Mis números", icon: ChartColumn },
   { href: "/n/chofer/menu", label: "Menú", icon: Menu, fija: true },
 ]
 

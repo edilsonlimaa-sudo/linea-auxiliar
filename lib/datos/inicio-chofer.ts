@@ -4,6 +4,7 @@ import type { Database } from "@/lib/database.types"
 import { firmarFotos } from "@/lib/fotos"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import type { ChoferEnServicio } from "@/lib/datos/inicio-pasajero"
+import { type Temperatura, temperaturaDe } from "@/lib/temperatura-pedidos"
 import { ACTIVOS, actividadDeChofer, nombreCorto, puestosEnOrden, type Sentido, type Viaje } from "@/lib/viajes"
 
 type Reserva = Database["public"]["Tables"]["reservas"]["Row"]
@@ -72,14 +73,16 @@ export type ViajeChofer = Viaje & { lista: FilaChofer[]; gina: EntradaGina[] | n
 /** Un compañero en la ruta: lo de "¿Cómo está la línea?" más su teléfono (§6: los choferes se ven entre ellos) */
 export type Companero = ChoferEnServicio & { telefono: string | null }
 
-/** R117: quien pidió "Avísame" al Centro; el teléfono, solo con el chofer conectado */
+/** R117: quien pidió "Avísame" al Centro; el teléfono, solo con el chofer conectado. R119: su temperatura (con más de una hora no viene) */
 export type PedidoAlCentro = {
   id: string
   nombre: string
   fotoUrl: string | null
   personas: number
   pedidoEn: string
+  minutos: number
   avisado: boolean
+  temperatura: Temperatura
   telefono: string | null
 }
 
@@ -232,15 +235,31 @@ export async function cargarInicioChofer(choferId: string, conectado: boolean): 
     firmarFotos((tramoRes.data ?? []).map((e) => e.foto_path)),
     firmarFotos((pedidosRes.data ?? []).map((e) => e.foto_path)),
   ])
-  const pedidosCentro: PedidoAlCentro[] = (pedidosRes.data ?? []).map((e) => ({
-    id: e.id,
-    nombre: e.nombre,
-    fotoUrl: e.foto_path ? (fotosPedidos.get(e.foto_path) ?? null) : null,
-    personas: e.personas,
-    pedidoEn: e.pedido_en,
-    avisado: e.avisado_en !== null,
-    telefono: e.telefono,
-  }))
+  // R119: la temperatura con la hora del pedido (el respaldo de EnVivo la refresca cada minuto); pasada la hora, no va.
+  // Las calientes primero, y en cada una la que pidió antes
+  const ahora = Date.now()
+  const orden = { caliente: 0, tibia: 1, fria: 2 } as const
+  const pedidosCentro: PedidoAlCentro[] = (pedidosRes.data ?? [])
+    .flatMap((e): PedidoAlCentro[] => {
+      const minutos = Math.max(0, (ahora - new Date(e.pedido_en).getTime()) / 60_000)
+      const avisado = e.avisado_en !== null
+      const temperatura = temperaturaDe(minutos, avisado)
+      if (!temperatura) return []
+      return [
+        {
+          id: e.id,
+          nombre: e.nombre,
+          fotoUrl: e.foto_path ? (fotosPedidos.get(e.foto_path) ?? null) : null,
+          personas: e.personas,
+          pedidoEn: e.pedido_en,
+          minutos,
+          avisado,
+          temperatura,
+          telefono: e.telefono ?? null,
+        },
+      ]
+    })
+    .sort((a, b) => orden[a.temperatura] - orden[b.temperatura] || a.pedidoEn.localeCompare(b.pedidoEn))
   const listaTramo: EntradaTramo[] = (tramoRes.data ?? []).map((e) => ({
     id: e.id,
     posicion: e.posicion,

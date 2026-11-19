@@ -1058,11 +1058,33 @@ Nov. 2026: los pedidos de "Avísame" (R94) solo servían para el push; los chofe
 en Valle Grande ni podían coordinar con ella.
 
 - **R117. Los choferes ven quién pidió el aviso [servidor].** En el Inicio del chofer (interfaz nueva), si hay pedidos
-  vigentes de "Avísame" al Centro, una franja **"Esperando en Valle Grande · N personas"** (dice dónde esperan, como "La lista en Gina") abre la pantalla **Esperando
+  vigentes de "Avísame" al Centro, una franja **"Piden carro en Valle Grande · N personas"** (dice dónde piden carro, como "La lista en Gina"; "Esperando" se leía como "te esperan a ti") abre la pantalla **Piden carro
   en Valle Grande**: cada uno con nombre corto, foto, cuántos van, hace cuánto pidió y si ya se le avisó, con
   **Llamar** y **WhatsApp** (el saludo listo). El teléfono, solo con el chofer conectado (§6, como la lista de Gina).
   Lo da `pedidos_al_centro()` (solo choferes; R91 incluido). El pasajero lo sabe al pedir: debajo de **Avísame cuando
   salga un carro**, "Los choferes verán que esperas y podrán escribirte". Pedir sigue siendo igual (R94).
+- **R119. La temperatura del pedido.** *(Nov. 2026: el pedido vale 2 horas para el pasajero, pero la demanda real se
+  enfría en minutos. De 130 pedidos avisados, viajó el 58 % de los que tenían menos de 15 min cuando salió un carro, el
+  28 % de 15 a 30, el 11 % de 30 a 60 y nadie con más de 60.)* Para el chofer, cada pedido tiene temperatura por los
+  minutos desde que pidió: **Caliente** (menos de 15), **Tibia** (15–30), **Fría** (30–60); si ya se le avisó de un carro
+  y no apartó, una menos (tuvo su oportunidad). Con **más de 60 min el chofer ya no lo ve** (el pedido sigue valiendo
+  2 horas para el aviso del pasajero, R94: eso no cambia). La franja cuenta **las calientes** ("2 calientes de 5") con
+  una barrita roja, naranja y azul; sin calientes, gris ("pidieron hace rato · escríbeles antes de salir"). La pantalla
+  abre con **"Probablemente viajen N de M"** (personas × lo que viaja cada temperatura) y la lista va con las calientes
+  primero, cada una con su color; en las tibias y frías el WhatsApp dice **¿Sigues?** ("¿sigues esperando carro al
+  Centro? Puedo salir a buscarte"). Límites y porcentajes en `lib/temperatura-pedidos.ts`: recalcularlos cada mes.
+
+### 5.32 Mis números en la interfaz nueva del chofer
+
+- **R118. Mis números (web).** Nov. 2026: el tablero de la app nativa (R111) llega a la interfaz nueva como una
+  pestaña, **sin cambiar el Inicio** (los choferes ya están acostumbrados a trabajar ahí). La pestaña **Calificaciones**
+  pasa a ser **Mis números**: arriba **Hoy · Semana · Mes** con ‹ › para ir atrás (hasta el mes de su primer viaje) y
+  adelante (hasta hoy); el héroe azul con lo cobrado estimado (pasajes menos viajes gratis y aportes, R111) y la
+  comparación (hoy, contra ayer a la misma hora); pasajeros, viajes y un tercer número (por viaje · días trabajados ·
+  racha o días activos); en el día, **Tu ritmo** y **Tus viajes**; en la semana, sus 7 días en barras; en el mes,
+  **Tus días** y la próxima **meta**. Debajo, **Tus calificaciones** (R52, lo que era la pestaña). Datos de
+  `tablero_chofer(mes)` y `tablero_chofer_rango(desde, hasta)`; solo sus números (R112). La dirección vieja
+  `/n/chofer/calificaciones` lleva a Mis números.
 
 ## 6. Privacidad: quién ve qué [servidor]
 

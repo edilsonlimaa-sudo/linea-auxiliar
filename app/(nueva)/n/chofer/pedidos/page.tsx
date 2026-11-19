@@ -5,12 +5,12 @@ import Link from "next/link"
 import { EnVivo } from "@/components/en-vivo"
 import { AppHeader } from "@/components/nueva/app/app-header"
 import { Screen } from "@/components/nueva/app/screen"
-import { ListaPedidos } from "@/components/nueva/chofer/pedidos"
+import { ListaPedidos, ProbablesPedidos } from "@/components/nueva/chofer/pedidos"
 import { Button } from "@/components/nueva/ui/button"
 import { cargarInicioChofer } from "@/lib/datos/inicio-chofer"
 import { exigirCuentaAprobada } from "@/lib/sesion"
 
-export const metadata: Metadata = { title: "Esperando en Valle Grande · Línea Auxiliar" }
+export const metadata: Metadata = { title: "Piden carro en Valle Grande · Línea Auxiliar" }
 
 const personas = (n: number) => (n === 1 ? "1 persona" : `${n} personas`)
 
@@ -27,16 +27,17 @@ export default async function PedidosAlCentro() {
   return (
     <Screen>
       <EnVivo />
-      <AppHeader title="Esperando en Valle Grande" backHref="/n/chofer" />
+      <AppHeader title="Piden carro en Valle Grande" backHref="/n/chofer" />
       <div className="flex flex-col gap-4 p-4">
         <p className="text-sm text-muted-foreground">
           {pedidosCentro.length === 0
-            ? "Ahora nadie está esperando aviso."
+            ? "Ahora nadie pide carro en Valle Grande."
             : `${personas(total)} ${total === 1 ? "pidió" : "pidieron"} que les avisemos cuando salga un carro al Centro. Al publicar uno, les llega el aviso.`}
         </p>
         {!conectado && pedidosCentro.length > 0 ? (
           <p className="rounded-2xl bg-muted p-3 text-sm">Conéctate para ver sus teléfonos y escribirles.</p>
         ) : null}
+        <ProbablesPedidos pedidos={pedidosCentro} />
         <ListaPedidos pedidos={pedidosCentro} />
         <Button size="lg" render={<Link href="/n/chofer/publicar?modo=primero" transitionTypes={["nav-forward"]} />} nativeButton={false}>
           <CirclePlus className="size-5" />
