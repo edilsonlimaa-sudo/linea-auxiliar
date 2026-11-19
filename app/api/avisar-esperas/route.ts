@@ -6,6 +6,7 @@
 import { createClient } from "@supabase/supabase-js"
 
 import { avisarQuienEspera } from "@/lib/avisar-esperas"
+import { avisarGina } from "@/lib/avisar-gina"
 import type { Database } from "@/lib/database.types"
 
 export async function POST(request: Request) {
@@ -20,6 +21,9 @@ export async function POST(request: Request) {
   const { data } = await supabase.auth.getClaims(token)
   if (!data?.claims?.sub) return new Response(null, { status: 401 })
 
-  await avisarQuienEspera(supabase)
+  // R116: con `{ gina: <viaje> }` (después de avisar que llega o de llegar a Gina) avisa a la lista; si no, R94
+  const cuerpo = (await request.json().catch(() => null)) as { gina?: unknown } | null
+  if (typeof cuerpo?.gina === "string") await avisarGina(supabase, cuerpo.gina)
+  else await avisarQuienEspera(supabase)
   return new Response(null, { status: 204 })
 }

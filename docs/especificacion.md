@@ -1031,6 +1031,27 @@ propia pestaña, **Viajes**. Por ahora solo en la app nativa; la web sigue igual
   teléfono**: el nombre de la foto lleva la hora de subida, así que la app la guarda por ese nombre y no vuelve a
   pedirla hasta que la persona la cambie (como `/foto/…` de la web, inmutable).
 
+### 5.30 Parada Gina: esperar en la plaza
+
+Nov. 2026: la encargada del comercio Gina se quejó de la gente aglomerada frente a su fachada. Quien espera ya tiene
+su puesto guardado en la lista (R62), así que no hace falta hacer fila: se espera en la **Plaza Rómulo Gallegos** y
+solo se acercan al carro los que suben.
+
+- **R115. Antes de anotarse, el aviso de la plaza.** En la interfaz nueva, al tocar **Anotarme en la lista** se abre
+  primero, a pantalla completa, el aviso: el comercio Gina pidió no aglomerarse frente a su local; espera en la Plaza
+  Rómulo Gallegos; tu puesto lo guarda la app, no la fila; cuando llegue un carro, solo bajan los primeros de la lista
+  según los puestos libres. Ahí mismo, si el aparato no tiene los avisos activos (R90), **Avisarme cuando llegue un
+  carro** pide el permiso. "Entendido, anotarme" sigue a la hoja de siempre; "Ahora no" la cierra sin anotar. Se
+  muestra cada vez que se va a anotar.
+- **R116. Aviso al llegar un carro a Gina [servidor].** Cuando el chofer de un viaje Centro → Valle Grande toca
+  **Avisar que llego** (`llegando`) y otra vez al tocar **Ya llegué** (`en_parada`), a todos los que esperan en la
+  lista con avisos activos les llega un push, una sola vez por viaje y por paso (`avisos_gina`), según el plan del
+  carro (`_plan_gina`): a quien **le toca** (cabe en los puestos libres), "acércate al carro" con su lugar en la
+  lista; a quien espera **en el camino** y cabe, que el carro le guarda puesto y lo recoge al pasar; a los demás,
+  "esta vez no te toca, sigue en la plaza". Lo decide la base con la sesión del chofer (`avisar_gina(viaje)`: solo su
+  viaje, en ese sentido y en uno de esos pasos; R91 incluido); el push sale del servidor después de responder
+  (`after()`), y si falla el viaje avanza igual. La app nativa lo pide en `POST /api/avisar-esperas` con `{ gina: viaje }`.
+
 ## 6. Privacidad: quién ve qué [servidor]
 
 | Dato | Lo ve |

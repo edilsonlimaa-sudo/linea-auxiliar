@@ -3,6 +3,7 @@
 import { BellOff, BellRing, Loader2, Smartphone, X } from "lucide-react"
 import * as React from "react"
 
+import { PasosDesbloquear } from "@/components/nueva/pasajero/aviso-plaza"
 import { Button } from "@/components/nueva/ui/button"
 import { activarAvisos, type EstadoAvisos, posponerRecordatorio, puedeRecordar, revisarAvisos } from "@/lib/avisos-celular"
 
@@ -36,9 +37,10 @@ export function AvisosCelular({ recordatorio = false }: { recordatorio?: boolean
   const activar = () =>
     iniciar(async () => {
       setError(undefined)
+      // Bloqueados, el navegador no vuelve a preguntar: esto solo revisa si ya los permitió en los ajustes
       const r = await activarAvisos()
+      setError(r.error ?? (estado === "bloqueado" && r.estado === "bloqueado" ? "Todavía están bloqueados. Revisa los pasos de arriba." : undefined))
       setEstado(r.estado)
-      setError(r.error)
     })
 
   // Activados, la tarjeta no aparece: la app no ofrece apagarlos (quien no los quiera, los bloquea en el teléfono)
@@ -55,7 +57,7 @@ export function AvisosCelular({ recordatorio = false }: { recordatorio?: boolean
     bloqueado: {
       icono: <BellOff className="size-5" />,
       titulo: "Los avisos están bloqueados en este celular",
-      texto: "Para activarlos, abre los ajustes del navegador, busca Notificaciones y permite esta app.",
+      texto: "Permítelos en los ajustes y toca \"Ya los permití\".",
     },
     iphone: {
       icono: <Smartphone className="size-5" />,
@@ -85,10 +87,11 @@ export function AvisosCelular({ recordatorio = false }: { recordatorio?: boolean
           </Button>
         ) : null}
       </div>
-      {estado === "inactivo" ? (
-        <Button disabled={pendiente} onClick={activar}>
+      {estado === "bloqueado" ? <PasosDesbloquear /> : null}
+      {estado === "inactivo" || estado === "bloqueado" ? (
+        <Button disabled={pendiente} variant={estado === "bloqueado" ? "outline" : "default"} onClick={activar}>
           {pendiente ? <Loader2 className="animate-spin" /> : <BellRing />}
-          Avisarme en el celular
+          {estado === "bloqueado" ? "Ya los permití" : "Avisarme en el celular"}
         </Button>
       ) : null}
       {error ? (

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import type { Database } from "@/lib/database.types"
 import { horaDeCaracas } from "@/lib/fechas"
 import { avisarQuienEspera as avisarEsperas } from "@/lib/avisar-esperas"
+import { avisarGina } from "@/lib/avisar-gina"
 import { crearClienteServidor } from "@/lib/supabase/cliente-servidor"
 import { esMotivoCancelar, type MotivoCancelar } from "@/lib/motivos-cancelar"
 import { contrario } from "@/lib/viajes"
@@ -118,9 +119,11 @@ async function publicarIda(fd: FormData): Promise<Resultado> {
   return rpc((s) => s.rpc("publicar_viaje", { p_sentido: sentido, p_puestos: puestos, p_eta_min: minutos }))
 }
 
-/** Avisar que llego / Ya llegué / Salir / Terminar (R12–R14) */
+/** Avisar que llego / Ya llegué / Salir / Terminar (R12–R14). Hacia Valle Grande, avisar o llegar avisa a la lista de Gina (R116) */
 export async function avanzarViaje(viajeId: string, estado: EstadoViaje) {
-  return rpc((s) => s.rpc("avanzar_viaje", { p_viaje: viajeId, p_estado: estado }))
+  const r = await rpc((s) => s.rpc("avanzar_viaje", { p_viaje: viajeId, p_estado: estado }))
+  if (r.ok && (estado === "llegando" || estado === "en_parada")) await avisarGina(await crearClienteServidor(), viajeId)
+  return r
 }
 
 /** Cancelar con su motivo (R24, R72); el detalle solo con "otra razón" */

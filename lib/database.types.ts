@@ -152,6 +152,32 @@ export type Database = {
           },
         ]
       }
+      avisos_gina: {
+        Row: {
+          creado_en: string
+          estado: Database["public"]["Enums"]["estado_viaje"]
+          viaje_id: string
+        }
+        Insert: {
+          creado_en?: string
+          estado: Database["public"]["Enums"]["estado_viaje"]
+          viaje_id: string
+        }
+        Update: {
+          creado_en?: string
+          estado?: Database["public"]["Enums"]["estado_viaje"]
+          viaje_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "avisos_gina_viaje_id_fkey"
+            columns: ["viaje_id"]
+            isOneToOne: false
+            referencedRelation: "viajes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calificaciones: {
         Row: {
           chofer_id: string
@@ -1872,6 +1898,20 @@ export type Database = {
           endpoint: string
           p256dh: string
           viaje_id: string
+        }[]
+      }
+      avisar_gina: {
+        Args: { p_viaje: string }
+        Returns: {
+          auth: string
+          donde: string
+          en_gina: boolean
+          endpoint: string
+          estado: string
+          lugar: number
+          p256dh: string
+          persona_id: string
+          rol: string
         }[]
       }
       avisar_pago_cuota: {

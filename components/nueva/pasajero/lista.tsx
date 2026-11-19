@@ -4,6 +4,7 @@ import { ChevronRight, Map as MapIcon, Hand, Loader2, MapPin, Route, TimerReset,
 import * as React from "react"
 
 import { AppHeader } from "@/components/nueva/app/app-header"
+import { AvisoPlaza } from "@/components/nueva/pasajero/aviso-plaza"
 import { MapaCarro } from "@/components/nueva/pasajero/mapa-carro"
 import { Asientos, ChoferAvatar, libresLabel, personasLabel } from "@/components/nueva/pasajero/comunes"
 import { FraseDelDia } from "@/components/nueva/pasajero/navidad"
@@ -349,6 +350,8 @@ export function FilaLista({ filas }: { filas: FilaVista[] }) {
 /** "Anotarme en la lista" (R62): dónde está (Gina u otro punto escrito, sin GPS, R26) y cuántos van */
 export function AnotarmeCta() {
   const [open, setOpen] = React.useState(false)
+  // R115: antes de la hoja, el aviso de esperar en la plaza (cada vez que se va a anotar)
+  const [aviso, setAviso] = React.useState(false)
   const [lugar, setLugar] = React.useState<"gina" | "otro">("gina")
   const [otro, setOtro] = React.useState("")
   const [cuantos, setCuantos] = React.useState(1)
@@ -384,9 +387,10 @@ export function AnotarmeCta() {
 
   return (
     <Drawer open={open} onOpenChange={setOpen} showSwipeHandle>
-      <Button size="lg" onClick={() => setOpen(true)}>
+      <Button size="lg" onClick={() => setAviso(true)}>
         Anotarme en la lista
       </Button>
+      <AvisoPlaza abierto={aviso} onCerrar={() => setAviso(false)} onContinuar={() => (setAviso(false), setOpen(true))} />
       <DrawerContent className="sm:mx-auto sm:max-w-[430px]">
         <form onSubmit={enviar} className="flex flex-col">
           <DrawerHeader>
